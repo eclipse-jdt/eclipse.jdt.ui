@@ -674,21 +674,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					message,
 					null));
 		}
-
-		JavaModelException e= probeInputForSource(input);
-		if (e != null) {
-			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
-			IClassFile file= classFileEditorInput.getClassFile();
-			IJavaProject javaProject= file.getJavaProject();
-			if (!javaProject.exists() || !javaProject.isOnClasspath(file)) {
-				throw new CoreException(JavaUIStatus.createError(
-						IJavaModelStatusConstants.INVALID_RESOURCE,
-						JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath,
-						null));
-			}
-			throw e;
-		}
-
 		IDocumentProvider documentProvider= getDocumentProvider();
 		if (documentProvider instanceof ClassFileDocumentProvider) {
 			((ClassFileDocumentProvider) documentProvider).removeInputChangeListener(this);
@@ -779,23 +764,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		}
 	}
 
-	private JavaModelException probeInputForSource(IEditorInput input) {
-		if (input == null) {
-			return null;
-		}
-
-		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
-		IClassFile file= classFileEditorInput.getClassFile();
-
-		try {
-			file.getSourceRange();
-		} catch (JavaModelException e) {
-			return e;
-		}
-
-		return null;
-	}
-
 	/**
 	 * Checks if the class file input has no source attached. If so, a source attachment form is shown.
 	 *
@@ -816,7 +784,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		boolean wasUsingSourceCopyAction= fSourceCopyAction == getAction(ITextEditorActionConstants.COPY);
 
 		// show source attachment form if no source found
-		if (file.getSourceRange() == null) {
+		if (!hasSource(file)) {
 			// dispose old source attachment form
 			if (fSourceAttachmentForm != null) {
 				fSourceAttachmentForm.dispose();
@@ -902,6 +870,15 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			actionBars.setGlobalActionHandler(ITextEditorActionConstants.COPY, currentCopyAction);
 			actionBars.setGlobalActionHandler(ITextEditorActionConstants.SELECT_ALL, getAction(ITextEditorActionConstants.SELECT_ALL));
 			actionBars.updateActionBars();
+		}
+	}
+
+	private static boolean hasSource(IClassFile file) {
+		try {
+			return file.getSourceRange() != null;
+		} catch (JavaModelException e) {
+			//assume no source then...
+			return false;
 		}
 	}
 
