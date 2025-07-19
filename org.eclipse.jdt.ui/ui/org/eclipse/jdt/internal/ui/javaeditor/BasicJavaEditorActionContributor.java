@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
+import org.eclipse.jdt.internal.ui.actions.OpenMethod;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 
@@ -227,6 +228,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);
 		action= getAction(textEditor, IJavaEditorActionConstants.RAW_PASTE);
 		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.RAW_PASTE_ACTION_HANDLE_ID, action);
+		action= getAction(textEditor, IJavaEditorActionConstants.OPEN_METHOD);
+		actionBars.setGlobalActionHandler(OpenMethod.ACTION_HANDLER_ID, action);
 
 		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
 		actionBars.setGlobalActionHandler("org.eclipse.jdt.internal.ui.actions.OpenHyperlink", getAction(textEditor, ITextEditorActionConstants.OPEN_HYPERLINK)); //$NON-NLS-1$
