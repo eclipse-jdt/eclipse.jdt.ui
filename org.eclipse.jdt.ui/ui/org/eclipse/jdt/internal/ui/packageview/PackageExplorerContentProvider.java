@@ -163,8 +163,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 					} else {
 						fPendingUpdates.addAll(runnables);
 					}
+					postAsyncUpdate(ctrl.getDisplay());
 				}
-				postAsyncUpdate(ctrl.getDisplay());
 			}
 		}
 	}
