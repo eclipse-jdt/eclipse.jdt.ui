@@ -674,6 +674,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fMessageImageLabel.setVisible(false);
 		fMessageLabel.setText(""); //$NON-NLS-1$
 		if ((getIncludeMask() & JavaSearchScopeFactory.JRE) != 0) {
+			boolean isWorkspaceCompliance= true;
 			String[] projectNames= getContainer().getSelectedProjectNames();
 			String compliance= null;
 			if (projectNames != null) {
@@ -683,6 +684,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 					String release= project.getOption(JavaCore.COMPILER_RELEASE, true);
 					if (release.equals(JavaCore.ENABLED)) {
 						compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+						isWorkspaceCompliance= false;
 					}
 				}
 			} else {
@@ -694,7 +696,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			if (compliance != null) {
 				if (JavaRuntime.getVMInstall(JavaRuntime.newDefaultJREContainerPath()) instanceof IVMInstall2 jreInstall) {
 					if (JavaCore.compareJavaVersions(compliance, jreInstall.getJavaVersion()) < 0) {
-						fMessageLabel.setText(MessageFormat.format(SearchMessages.JavaSearchPage_release_warning_message, compliance, jreInstall.getJavaVersion()));
+						if (isWorkspaceCompliance) {
+							fMessageLabel.setText(MessageFormat.format(SearchMessages.JavaSearchPage_release_warning_workspace_message, compliance, jreInstall.getJavaVersion()));
+						} else {
+							fMessageLabel.setText(MessageFormat.format(SearchMessages.JavaSearchPage_release_warning_project_message, compliance, jreInstall.getJavaVersion()));
+						}
 						fMessageImageLabel.setVisible(true);
 						fMessageLabel.requestLayout();
 					}

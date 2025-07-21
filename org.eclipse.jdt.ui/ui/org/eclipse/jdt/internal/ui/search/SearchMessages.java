@@ -154,7 +154,8 @@ public final class SearchMessages extends NLS {
 	public static String JavaSearchPage_match_location_link_label;
 	public static String JavaSearchPage_match_location_link_label_tooltip;
 	public static String JavaSearchPage_match_locations_label;
-	public static String JavaSearchPage_release_warning_message;
+	public static String JavaSearchPage_release_warning_project_message;
+	public static String JavaSearchPage_release_warning_workspace_message;
 	public static String JavaElementAction_typeSelectionDialog_title;
 	public static String JavaElementAction_typeSelectionDialog_message;
 	public static String JavaElementAction_error_open_message;
