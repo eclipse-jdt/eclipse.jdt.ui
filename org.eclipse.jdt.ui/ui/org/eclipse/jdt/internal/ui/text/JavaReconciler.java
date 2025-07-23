@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IMarker;
@@ -49,6 +50,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -394,6 +396,11 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	@Override
 	protected void initialProcess() {
+		try {
+			Job.getJobManager().join(ClasspathContainerInitializer.class, null);
+		} catch (OperationCanceledException | InterruptedException e) {
+			// Ignore
+		}
 		synchronized (fMutex) {
 			super.initialProcess();
 		}
