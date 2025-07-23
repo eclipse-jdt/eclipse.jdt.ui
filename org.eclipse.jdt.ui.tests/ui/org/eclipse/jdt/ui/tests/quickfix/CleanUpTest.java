@@ -22620,6 +22620,47 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testSingleUsedFieldWithVolatile() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+			package test1;
+
+			public class E {
+				private volatile boolean myField = true;
+
+				public void foo() {
+					myField = false;
+					if (myField)
+					    System.out.println("myField is true");
+				}
+			}
+			""";
+
+		String expected= """
+			package test1;
+
+			public class E {
+				public void foo() {
+					boolean myField = false;
+					if (myField)
+					    System.out.println("myField is true");
+				}
+			}
+			""";
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SINGLE_USED_FIELD);
+
+		// Then
+		assertNotEquals("The class must be changed", expected, given);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.SingleUsedFieldCleanUp_description_new_local_var_declaration,
+						MultiFixMessages.SingleUsedFieldCleanUp_description_old_field_declaration, MultiFixMessages.SingleUsedFieldCleanUp_description_uses_of_the_var)));
+	}
+
+	@Test
 	public void testSingleUsedFieldWithComplexUse() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
