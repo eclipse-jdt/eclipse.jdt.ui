@@ -61,7 +61,7 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 				if (project != null) {
 					type= project.findType(type.getFullyQualifiedName());
 					if (type == null)
-						return null;
+						return new InternalClassFileEditorInput(cf);
 					element= type.getParent();
 				}
 			}
