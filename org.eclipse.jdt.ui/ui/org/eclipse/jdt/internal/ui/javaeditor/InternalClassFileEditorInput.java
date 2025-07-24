@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -45,7 +44,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 
 	private IClassFile fClassFile;
 
-	private IPath fPath;
+	private volatile IPath fPath;
 
 	public InternalClassFileEditorInput(IClassFile classFile) {
 		fClassFile= classFile;
@@ -182,10 +181,12 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 			return new Path(file.toString());
 		} catch (IOException e) {
 			JavaPlugin.log(e);
-		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
+		} catch (JavaModelException ex) {
+			if (!ex.isDoesNotExist()) {
+				JavaPlugin.log(ex.getStatus());
+			}
 		}
-		throw new IllegalArgumentException("Could not create temporary file."); //$NON-NLS-1$
+		return IPath.EMPTY;
 	}
 
 }
