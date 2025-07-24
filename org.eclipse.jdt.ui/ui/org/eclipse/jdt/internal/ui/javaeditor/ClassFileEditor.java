@@ -80,7 +80,9 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -639,7 +641,26 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @param input the editor input to be transformed if necessary
 	 * @return the transformed editor input
 	 */
-	protected IEditorInput transformEditorInput(IEditorInput input) {
+	protected IEditorInput transformEditorInput(IEditorInput input) throws CoreException{
+		if (input instanceof HandleEditorInput handle) {
+			IJavaElement element= handle.getElement();
+			if (!element.exists() && element instanceof IOrdinaryClassFile) {
+				/*
+				 * Let's try to find the class file,
+				 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=83221
+				 */
+				IOrdinaryClassFile cf= (IOrdinaryClassFile)element;
+				IType type= cf.getType();
+				IJavaProject project= element.getJavaProject();
+				if (project != null) {
+					type= project.findType(type.getFullyQualifiedName());
+					if (type == null)
+						return null;
+					element= type.getParent();
+				}
+			}
+			input= EditorUtility.getEditorInput(element);
+		}
 		if (input instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput) input).getFile();
 			IClassFileEditorInput classFileInput= new ExternalClassFileEditorInput(file);
@@ -647,7 +668,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				input= classFileInput;
 			}
 		}
-
 		return input;
 	}
 
