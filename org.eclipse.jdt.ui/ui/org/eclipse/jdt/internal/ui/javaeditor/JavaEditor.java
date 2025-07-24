@@ -1999,9 +1999,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	/**
 	 * Sets the breadcrumb input to the given element.
 	 * @param element the element to use as input for the breadcrumb
-	 * @since 3.4
 	 */
-	private void setBreadcrumbInput(ISourceReference element) {
+	protected void setBreadcrumbInput(ISourceReference element) {
 		if (fBreadcrumb == null)
 			return;
 

@@ -209,13 +209,22 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	protected boolean setDocumentContent(IDocument document, IEditorInput editorInput, String encoding) throws CoreException {
 		if (editorInput instanceof IClassFileEditorInput) {
 			IClassFile classFile= ((IClassFileEditorInput) editorInput).getClassFile();
-			String source= classFile.getSource();
+			String source= getSourceIfPresent(classFile);
 			if (source == null)
 				source= ""; //$NON-NLS-1$
 			document.set(source);
 			return true;
 		}
 		return super.setDocumentContent(document, editorInput, encoding);
+	}
+
+	private String getSourceIfPresent(IClassFile classFile) {
+		try {
+			return classFile.getSource();
+		} catch (JavaModelException e) {
+			//Assume no source...
+			return null;
+		}
 	}
 
 	/**
