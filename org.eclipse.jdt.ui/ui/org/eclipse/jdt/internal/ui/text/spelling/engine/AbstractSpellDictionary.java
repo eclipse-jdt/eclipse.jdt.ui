@@ -185,7 +185,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 			hash= hash2;
 
-			ArrayList<byte[]> candidateList= null;
+			ArrayList<byte[]> candidateList;
 			synchronized(fHashBuckets) {
 				final Object candidates= getCandidates(hash);
 				if (candidates == null)
@@ -257,7 +257,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		int minimum= Integer.MAX_VALUE;
 
 		StringBuilder buffer= new StringBuilder(BUFFER_CAPACITY);
-		ArrayList<byte[]> candidateList= null;
+		ArrayList<byte[]> candidateList;
 		synchronized(fHashBuckets) {
 			final Object candidates= getCandidates(fHashProvider.getHash(word));
 			if (candidates == null)
