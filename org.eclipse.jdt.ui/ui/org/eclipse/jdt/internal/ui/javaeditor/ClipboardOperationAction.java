@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -43,6 +44,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -484,7 +487,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 
 	private ClipboardData getClipboardData(ITypeRoot inputElement, int offset, int length) {
-		CompilationUnit astRoot= SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
+		AtomicReference<CompilationUnit> ref = new AtomicReference<>();
+
+		runUsingProgressMonitorDialog(monitor -> ref.set(SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, monitor)));
+
+		CompilationUnit astRoot= ref.get();
 		if (astRoot == null) {
 			return null;
 		}
@@ -551,6 +558,17 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		String[] typeImports= namesToImport.toArray(new String[namesToImport.size()]);
 		String[] staticImports= staticsToImport.toArray(new String[staticsToImport.size()]);
 		return new ClipboardData(inputElement, typeImports, staticImports);
+	}
+
+	private static void runUsingProgressMonitorDialog(IRunnableWithProgress runnable) {
+		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
+		try {
+			dialog.run(true, true, runnable::run);
+		} catch (InvocationTargetException | InterruptedException e) {
+			// Ignore
+		}
 	}
 
 	private void doPasteWithImportsOperation() {
