@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -59,6 +59,9 @@ public class CodeScopeBuilder extends ASTVisitor {
 			if (fNames == null)
 				fNames= new ArrayList<>(2);
 			fNames.add(name);
+		}
+		public Scope getParent() {
+			return fParent;
 		}
 		public Scope findScope(int start, int length) {
 			if (fStart <= start && start + length <= fStart + fLength) {

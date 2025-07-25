@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -400,7 +400,7 @@ public class SourceProvider {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
 		replaceParameterWithExpression(rewriter, context, importRewrite);
 		updateImplicitReceivers(rewriter, context);
-		makeNamesUnique(rewriter, context.scope);
+		makeNamesUnique(rewriter, context);
 		updateTypeReferences(rewriter, context);
 		updateStaticReferences(rewriter, context);
 		updateInnerStaticReferences(rewriter, context);
@@ -512,16 +512,27 @@ public class SourceProvider {
 		}
 	}
 
-	private void makeNamesUnique(ASTRewrite rewriter, CodeScopeBuilder.Scope scope) {
+	private void makeNamesUnique(ASTRewrite rewriter, CallContext context) {
+		CodeScopeBuilder.Scope scope= context.scope;
+		boolean addName= context.callMode != ASTNode.EXPRESSION_METHOD_REFERENCE &&
+				context.callMode != ASTNode.SUPER_METHOD_REFERENCE &&
+				context.callMode != ASTNode.CREATION_REFERENCE &&
+				context.callMode != ASTNode.TYPE_METHOD_REFERENCE;
 		Collection<NameData> usedCalleeNames= fAnalyzer.getUsedNames();
 		for (NameData nd : usedCalleeNames) {
-			if (scope.isInUse(nd.getName())) {
-				String newName= scope.createName(nd.getName(), true);
+			CodeScopeBuilder.Scope curScope= scope;
+			while (curScope != null && !curScope.isInUse(nd.getName())) {
+				curScope= curScope.getParent();
+			}
+			if (curScope != null && curScope.isInUse(nd.getName())) {
+				String newName= scope.createName(nd.getName(), addName);
 				List<SimpleName> references= nd.references();
 				for (SimpleName element : references) {
 					ASTNode newNode= rewriter.createStringPlaceholder(newName, ASTNode.SIMPLE_NAME);
 					rewriter.replace(element, newNode, null);
 				}
+			} else {
+				scope.createName(nd.getName(), true);
 			}
 		}
 	}
