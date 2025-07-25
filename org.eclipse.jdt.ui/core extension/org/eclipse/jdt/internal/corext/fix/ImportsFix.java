@@ -16,6 +16,8 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -24,10 +26,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -60,10 +62,13 @@ public class ImportsFix extends TextEditFix {
 		final ICompilationUnit unit= (ICompilationUnit)cu.getJavaElement();
 		OrganizeImportsOperation op= new OrganizeImportsOperation(unit, cu, settings.importIgnoreLowercase, false, false, query);
 
-		TextEdit edit= runUsingProgressService(op);
-		if (edit == null) {
-			// This one doesn't show any progress and it may block the UI
-			edit= op.createTextEdit(null);
+		TextEdit edit;
+
+		try {
+			edit= runUsingProgressMonitorDialog(op);
+		} catch (OperationCanceledException e) {
+			// The user canceled. No need to propagate, simply abort the "organize imports" operation
+			return null;
 		}
 
 		if (hasAmbiguity[0]) {
@@ -81,33 +86,26 @@ public class ImportsFix extends TextEditFix {
 		return new ImportsFix(edit, unit, FixMessages.ImportsFix_OrganizeImports_Description);
     }
 
-	private static TextEdit runUsingProgressService(OrganizeImportsOperation op) throws CoreException {
+	private static TextEdit runUsingProgressMonitorDialog(OrganizeImportsOperation op) throws CoreException {
 
 		final AtomicReference<TextEdit> edit= new AtomicReference<>();
-		IWorkbenchSiteProgressService progressService= null;
-		try {
-			progressService= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite().getAdapter(IWorkbenchSiteProgressService.class);
-		} catch (NullPointerException npe) {
-			// Either this has been called from a non-UI thread or something is still missing (workbench window / active page / part / site)
-			return null;
-		}
+		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 
+		ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 		try {
-			progressService.run(true, true, new IRunnableWithProgress() {
+			dialog.run(true, true, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						edit.set(op.createTextEdit(monitor));
-					} catch (OperationCanceledException | CoreException e) {
+					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
 					}
 				}
 			});
 		} catch (InvocationTargetException e) {
-			// CoreExceptions and OperationCanceledExceptions are re-thrown
+			// CoreExceptions are re-thrown
 			if (e.getCause() instanceof CoreException ce)
-				throw ce;
-			if (e.getCause() instanceof OperationCanceledException ce)
 				throw ce;
 
 			// Other kind of exceptions are packed into a CoreException
