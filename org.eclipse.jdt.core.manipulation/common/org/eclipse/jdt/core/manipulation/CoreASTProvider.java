@@ -171,9 +171,11 @@ public final class CoreASTProvider {
 				// Wait for AST
 				synchronized (fWaitLock) {
 					if (isReconciling(input)) {
+						String details= "Waiting for AST for: " + input.getElementName(); //$NON-NLS-1$
 						if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
-							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
-						fWaitLock.wait(30000); // XXX: The 30 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
+							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + details); //$NON-NLS-1$
+
+						waitForLock(progressMonitor, details);
 					}
 				}
 
@@ -215,6 +217,23 @@ public final class CoreASTProvider {
 			}
 		}
 		return ast;
+	}
+
+	private void waitForLock(IProgressMonitor progressMonitor, String details) throws InterruptedException {
+		// XXX: The 30 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
+		int timeoutInSeconds= 30;
+		if (progressMonitor != null)
+			progressMonitor.beginTask(details, timeoutInSeconds);
+
+		for (int i=timeoutInSeconds; i>0; i--) {
+			if (progressMonitor != null && progressMonitor.isCanceled())
+				break;
+
+			fWaitLock.wait(1_000);
+
+			if (progressMonitor != null)
+				progressMonitor.worked(1);
+		}
 	}
 
 	private void notifyReconciler() {
