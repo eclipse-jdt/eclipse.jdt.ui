@@ -61,10 +61,6 @@ public class ImportsFix extends TextEditFix {
 		OrganizeImportsOperation op= new OrganizeImportsOperation(unit, cu, settings.importIgnoreLowercase, false, false, query);
 
 		TextEdit edit= runUsingProgressService(op);
-		if (edit == null) {
-			// This one doesn't show any progress and it may block the UI
-			edit= op.createTextEdit(null);
-		}
 
 		if (hasAmbiguity[0]) {
 			status.addInfo(Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unresolvable, getLocationString(cu)));
@@ -89,7 +85,8 @@ public class ImportsFix extends TextEditFix {
 			progressService= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite().getAdapter(IWorkbenchSiteProgressService.class);
 		} catch (NullPointerException npe) {
 			// Either this has been called from a non-UI thread or something is still missing (workbench window / active page / part / site)
-			return null;
+			// In any case, we need to retry the old way (may block the UI thread)
+			return op.createTextEdit(null);
 		}
 
 		try {
@@ -107,8 +104,9 @@ public class ImportsFix extends TextEditFix {
 			// CoreExceptions and OperationCanceledExceptions are re-thrown
 			if (e.getCause() instanceof CoreException ce)
 				throw ce;
-			if (e.getCause() instanceof OperationCanceledException ce)
-				throw ce;
+			if (e.getCause() instanceof OperationCanceledException)
+				// The user canceled, no need to create changes.
+				return null;
 
 			// Other kind of exceptions are packed into a CoreException
 			throw new CoreException(Status.error(e.getCause().getMessage(), e.getCause()));
