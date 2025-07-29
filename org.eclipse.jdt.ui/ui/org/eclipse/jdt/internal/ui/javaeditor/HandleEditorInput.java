@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.util.Objects;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
@@ -95,4 +97,24 @@ public class HandleEditorInput implements IEditorInput, IPersistableElement {
 		return ClassFileEditorInputFactory.ID;
 	}
 
+	public String getHandleIdentifier() {
+		return handleIdentifier;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(handleIdentifier, name);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof HandleEditorInput)) {
+			return false;
+		}
+		HandleEditorInput other= (HandleEditorInput) obj;
+		return Objects.equals(handleIdentifier, other.handleIdentifier) && Objects.equals(name, other.name);
+	}
 }
