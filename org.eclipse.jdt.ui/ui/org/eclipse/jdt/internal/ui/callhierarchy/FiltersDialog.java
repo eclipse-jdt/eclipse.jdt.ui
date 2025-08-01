@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,7 +91,7 @@ class FiltersDialog extends StatusDialog {
         fMaxCallDepth.addModifyListener(e -> validateInput());
 
         GridData gridData = new GridData();
-        gridData.widthHint = convertWidthInCharsToPixels(10);
+        gridData.widthHint = convertWidthInCharsToPixels(12);
         fMaxCallDepth.setLayoutData(gridData);
     }
 
@@ -130,6 +130,8 @@ class FiltersDialog extends StatusDialog {
 
 		GridData gridData= new GridData();
 		gridData.horizontalIndent= 0;
+		gridData.horizontalSpan= 1;
+		gridData.grabExcessHorizontalSpace= true;
 		fShowAll.setLayoutData(gridData);
 		fHideTest.setLayoutData(gridData);
 		fShowTest.setLayoutData(gridData);
@@ -205,7 +207,7 @@ class FiltersDialog extends StatusDialog {
 		fFilterOnNames.setSelection(CallHierarchy.getDefault().isFilterEnabled());
 
 		setSelection();
-		
+
 		updateEnabledState();
 	}
 
