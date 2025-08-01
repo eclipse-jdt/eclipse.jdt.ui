@@ -17,6 +17,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -1171,11 +1172,17 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 		return resolveMap.get(fieldName);
 	}
 
-	public void getMissingEnumConstantCaseProposalsBase(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
+	public void getMissingEnumConstantCaseProposalsBase(IInvocationContext context, IProblemLocation problem, Collection<T> proposals, boolean preserveOrder) {
 		for (T proposal : proposals) {
 			if (proposal instanceof ChangeCorrectionProposalCore) {
-				if (CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description.equals(((ChangeCorrectionProposalCore) proposal).getName())) {
-					return;
+				if (preserveOrder) {
+					if (CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description_declaration.equals(((ChangeCorrectionProposalCore) proposal).getName())) {
+						return;
+					}
+				} else {
+					if (CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description_alphabetical.equals(((ChangeCorrectionProposalCore) proposal).getName())) {
+						return;
+					}
 				}
 			}
 		}
@@ -1204,17 +1211,27 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 			}
 
 			ArrayList<String> missingEnumCases= new ArrayList<>();
-			boolean hasDefault= evaluateMissingSwitchCasesBase(binding, statements, missingEnumCases);
+			boolean hasDefault= evaluateMissingSwitchCasesBase(binding, statements, missingEnumCases, preserveOrder);
 			if (missingEnumCases.size() == 0 && hasDefault)
 				return;
 
-			createMissingCaseProposalsBase(context, parent, missingEnumCases, proposals);
+			createMissingCaseProposalsBase(context, parent, missingEnumCases, proposals, preserveOrder);
 		}
 	}
 
 	@SuppressWarnings("deprecation")
-	public boolean evaluateMissingSwitchCasesBase(ITypeBinding enumBindings, List<Statement> switchStatements, ArrayList<String> enumConstNames) {
-		for (IVariableBinding field : enumBindings.getDeclaredFields()) {
+	public boolean evaluateMissingSwitchCasesBase(ITypeBinding enumBindings, List<Statement> switchStatements, ArrayList<String> enumConstNames, boolean preserveOrder) {
+		IVariableBinding[] declaredFields= Arrays.copyOf(enumBindings.getDeclaredFields(), enumBindings.getDeclaredFields().length);
+		if (preserveOrder) {
+			Arrays.sort(declaredFields, new Comparator<IVariableBinding>() {
+				@Override
+				public int compare(IVariableBinding o1, IVariableBinding o2) {
+					return o1.getVariableId() - o2.getVariableId();
+				}
+			});
+		}
+
+		for (IVariableBinding field : declaredFields) {
 			if (field.isEnumConstant()) {
 				enumConstNames.add(field.getName());
 			}
@@ -1249,7 +1266,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void createMissingCaseProposalsBase(IInvocationContext context, ASTNode parent, ArrayList<String> enumConstNames, Collection<T> proposals) {
+	public void createMissingCaseProposalsBase(IInvocationContext context, ASTNode parent, ArrayList<String> enumConstNames, Collection<T> proposals, boolean preserveOrder) {
 		List<Statement> statements;
 		Expression expression;
 		if (parent instanceof SwitchStatement) {
@@ -1292,7 +1309,9 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 				listRewrite= astRewrite.getListRewrite(parent, SwitchExpression.STATEMENTS_PROPERTY);
 			}
 
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
+			String label= preserveOrder ?
+					CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description_declaration :
+						CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description_alphabetical;
 			LinkedCorrectionProposalCore proposal= new LinkedCorrectionProposalCore(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_CASE_STATEMENTS);
 
 			for (String enumConstName : enumConstNames) {
@@ -1357,7 +1376,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 			}
 			proposals.add(linkedCorrectionProposalToT(proposal, ADD_MISSING_CASE));
 		}
-		if (!hasDefault) {
+		if (!hasDefault && !preserveOrder) {
 			createMissingDefaultProposal(context, parent, proposals);
 		}
 	}

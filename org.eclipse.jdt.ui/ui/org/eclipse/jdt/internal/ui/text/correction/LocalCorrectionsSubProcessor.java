@@ -1148,16 +1148,16 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 		new LocalCorrectionsSubProcessor().getDeprecatedFieldsToMethodsProposals(context, problem, proposals);
 	}
 
-	public static void getMissingEnumConstantCaseProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		new LocalCorrectionsSubProcessor().getMissingEnumConstantCaseProposalsBase(context, problem, proposals);
+	public static void getMissingEnumConstantCaseProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, boolean preserveOrder) {
+		new LocalCorrectionsSubProcessor().getMissingEnumConstantCaseProposalsBase(context, problem, proposals, preserveOrder);
 	}
 
-	public static boolean evaluateMissingSwitchCases(ITypeBinding enumBindings, List<Statement> switchStatements, ArrayList<String> enumConstNames) {
-		return new LocalCorrectionsSubProcessor().evaluateMissingSwitchCasesBase(enumBindings, switchStatements, enumConstNames);
+	public static boolean evaluateMissingSwitchCases(ITypeBinding enumBindings, List<Statement> switchStatements, ArrayList<String> enumConstNames, boolean preserveOrder) {
+		return new LocalCorrectionsSubProcessor().evaluateMissingSwitchCasesBase(enumBindings, switchStatements, enumConstNames, preserveOrder);
 	}
 
-	public static void createMissingCaseProposals(IInvocationContext context, ASTNode parent, ArrayList<String> enumConstNames, Collection<ICommandAccess> proposals) {
-		new LocalCorrectionsSubProcessor().createMissingCaseProposalsBase(context, parent, enumConstNames, proposals);
+	public static void createMissingCaseProposals(IInvocationContext context, ASTNode parent, ArrayList<String> enumConstNames, Collection<ICommandAccess> proposals, boolean preserveOrder) {
+		new LocalCorrectionsSubProcessor().createMissingCaseProposalsBase(context, parent, enumConstNames, proposals, preserveOrder);
 	}
 
 	public static void removeDefaultCaseProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
