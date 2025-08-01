@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -43,6 +44,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -484,7 +486,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 
 	private ClipboardData getClipboardData(ITypeRoot inputElement, int offset, int length) {
-		CompilationUnit astRoot= SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
+		AtomicReference<CompilationUnit> ref = new AtomicReference<>();
+
+		runUsingProgressService(monitor -> ref.set(SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, monitor)));
+
+		CompilationUnit astRoot= ref.get();
 		if (astRoot == null) {
 			return null;
 		}
@@ -551,6 +557,23 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		String[] typeImports= namesToImport.toArray(new String[namesToImport.size()]);
 		String[] staticImports= staticsToImport.toArray(new String[staticsToImport.size()]);
 		return new ClipboardData(inputElement, typeImports, staticImports);
+	}
+
+	private static void runUsingProgressService(IRunnableWithProgress runnable) {
+		try {
+			PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
+		} catch (InvocationTargetException e) {
+			if (e instanceof InvocationTargetException ite && ite.getCause() instanceof RuntimeException rte)
+				// Something happened inside the call, re-throw
+				throw rte;
+
+			// Other kind of exceptions are simply logged
+			JavaPlugin.log(e);
+		} catch (InterruptedException e) {
+			// This currently doesn't happen since canceling the monitor does not throw an OperationCanceledException.
+			// ... but better safe than sorry, so log it.
+			JavaPlugin.log(e);
+		}
 	}
 
 	private void doPasteWithImportsOperation() {
