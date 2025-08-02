@@ -809,10 +809,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedWarningToken:
 				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
 				break;
-			case IProblem.MissingEnumConstantCase:
 			case IProblem.MissingEnumDefaultCase:
+				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals, false);
+				break;
+			case IProblem.MissingEnumConstantCase:
 			case IProblem.SwitchExpressionsYieldMissingEnumConstantCase:
-				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
+				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals, true);
+				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals, false);
 				break;
 			case IProblem.EnhancedSwitchMissingDefault:
 			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
@@ -828,7 +831,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addFallThroughProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingEnumConstantCaseDespiteDefault:
-				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
+				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals, true);
+				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals, false);
 				LocalCorrectionsSubProcessor.addCasesOmittedProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingSynchronizedModifierInInheritedMethod:
