@@ -484,7 +484,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 
 	private ClipboardData getClipboardData(ITypeRoot inputElement, int offset, int length) {
-		CompilationUnit astRoot= SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
+		// Since this call happens in the UI thread, pass WAIT_NO as parameter
+		// so that the call can not reach the wait call that causes UI freezes.
+		// The cost of doing so is that the method could return null from time
+		// to time and therefore the imports may not be copied to the clipboard
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_NO, null);
 		if (astRoot == null) {
 			return null;
 		}
