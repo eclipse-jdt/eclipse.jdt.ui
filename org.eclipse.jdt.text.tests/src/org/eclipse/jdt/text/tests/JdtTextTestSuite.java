@@ -21,6 +21,7 @@ import org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest;
 import org.eclipse.jdt.text.tests.codemining.ParameterNamesCodeMiningTest;
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.folding.FoldingTestSuite;
+import org.eclipse.jdt.text.tests.semantictokens.SemanticTokensProviderErrorTest;
 import org.eclipse.jdt.text.tests.semantictokens.SemanticTokensProviderTest;
 import org.eclipse.jdt.text.tests.spelling.SpellCheckEngineTestCase;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	SpellCheckEngineTestCase.class,
 	SemanticHighlightingTest.class,
 	SemanticTokensProviderTest.class,
+	SemanticTokensProviderErrorTest.class,
 	AutoboxingSemanticHighlightingTest.class,
 	Java25SemanticHighlightingTest.class,
 	NewForLoopJavaContextTest.class,
