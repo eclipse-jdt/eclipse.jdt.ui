@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.text.java.ISemanticTokensProvider;
  * <li>Words starting from capital are CLASS</li>
  * <li>Numbers are NUMBER</li>
  * <li>all other lower case starting words are LOCAL_VARIABLE</li>
+ * <li>words starting with underscore have {@code null} token type (for testing error handling)</li>
  * </ul>
  */
 public class SampleSqlSemanticTokensProvider implements ISemanticTokensProvider {
@@ -98,6 +99,9 @@ public class SampleSqlSemanticTokensProvider implements ISemanticTokensProvider 
 	}
 
 	private TokenType getTokenType(String token) {
+		if (token.startsWith("_")) { //$NON-NLS-1$
+			return null;
+		}
 		try {
 			NumberFormat.getInstance().parse(token);
 			return TokenType.NUMBER;
