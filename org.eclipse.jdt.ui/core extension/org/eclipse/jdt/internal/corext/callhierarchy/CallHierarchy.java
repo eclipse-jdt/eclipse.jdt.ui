@@ -18,9 +18,6 @@
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_FILTERS_LIST;
-import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_HIDE_TEST_CODE;
-import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_SHOW_ALL_CODE;
-import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_SHOW_TEST_CODE_ONLY;
 import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_USE_FILTERS;
 import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_USE_IMPLEMENTORS;
 
@@ -36,6 +33,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -60,20 +58,14 @@ public class CallHierarchy {
         return fgInstance;
     }
 
-    public void setShowAll(boolean value) {
-        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
-        settings.setValue(PREF_SHOW_ALL_CODE, value);
+    public void setActiveFilter(CallHierarchyFilterOptions filter) {
+    	IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+
+    	for(CallHierarchyFilterOptions option : CallHierarchyFilterOptions.values()) {
+    		settings.setValue(option.getId(), option == filter);
+    	}
     }
 
-    public void setHideTestCode(boolean value) {
-        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
-        settings.setValue(PREF_HIDE_TEST_CODE, value);
-    }
-
-    public void setShowTestCode(boolean value) {
-        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
-        settings.setValue(PREF_SHOW_TEST_CODE_ONLY, value);
-    }
 
     public boolean isSearchUsingImplementorsEnabled() {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
@@ -139,21 +131,14 @@ public class CallHierarchy {
         return settings.getBoolean(PREF_USE_FILTERS);
     }
 
-    public boolean isShowAll() {
-        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
-        return settings.getBoolean(PREF_SHOW_ALL_CODE);
-    }
-
-    public boolean isHideTestCode() {
-    	IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
-        return settings.getBoolean(PREF_HIDE_TEST_CODE);
-    }
-
-    public boolean isShowTestCode() {
-    	IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
-        return settings.getBoolean(PREF_SHOW_TEST_CODE_ONLY);
-    }
-
+	public CallHierarchyFilterOptions getActiveFilter() {
+		for (CallHierarchyFilterOptions option: CallHierarchyFilterOptions.values()) {
+			if(Boolean.parseBoolean(JavaManipulation.getPreference(option.getId(), null))) {
+				return option;
+			}
+		}
+		return null;
+	}
 
     public void setFilterEnabled(boolean filterEnabled) {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();

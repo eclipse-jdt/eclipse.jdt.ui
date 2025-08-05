@@ -45,11 +45,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class CallHierarchyCore {
-
-	public static final String PREF_SHOW_ALL_CODE = "PREF_SHOW_ALL_CODE";	//$NON-NLS-1$
-	public static final String PREF_HIDE_TEST_CODE = "PREF_HIDE_TEST_CODE";	//$NON-NLS-1$
-	public static final String PREF_SHOW_TEST_CODE_ONLY = "PREF_SHOW_TEST_CODE_ONLY";	//$NON-NLS-1$
-
     public static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
     public static final String PREF_USE_FILTERS= "PREF_USE_FILTERS"; //$NON-NLS-1$
     public static final String PREF_FILTERS_LIST= "PREF_FILTERS_LIST"; //$NON-NLS-1$
@@ -72,15 +67,23 @@ public class CallHierarchyCore {
     }
 
     public boolean isShowTestCode() {
-        return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_SHOW_TEST_CODE_ONLY, null));
+        return Boolean.parseBoolean(JavaManipulation.getPreference(CallHierarchyFilterOptions.SHOW_TEST_CODE_ONLY.getId(), null));
     }
 
     public boolean isShowAll() {
-		return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_SHOW_ALL_CODE, null));
+		return Boolean.parseBoolean(JavaManipulation.getPreference(CallHierarchyFilterOptions.SHOW_ALL_CODE.getId(), null));
     }
 
 	public boolean isHideTestCode() {
-		return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_HIDE_TEST_CODE, null));
+		return Boolean.parseBoolean(JavaManipulation.getPreference(CallHierarchyFilterOptions.HIDE_TEST_CODE.getId(), null));
+	}
+
+	public String getActiveFilter() {
+		for (CallHierarchyFilterOptions option: CallHierarchyFilterOptions.values()) { //must be one of the threee
+			if(Boolean.parseBoolean(JavaManipulation.getPreference(option.getId(), null))) {
+				return option.getId();
+			}
+		} return null;
 	}
 
     public Collection<IJavaElement> getImplementingMethods(IMethod method) {
