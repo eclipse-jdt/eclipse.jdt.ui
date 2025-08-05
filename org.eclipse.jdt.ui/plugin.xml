@@ -201,6 +201,9 @@
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.TestAttributeConfiguration">
       </classpathAttributeConfiguration>
       <classpathAttributeConfiguration
+            attributeName="release"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ReleaseAttributeConfiguration" />
+      <classpathAttributeConfiguration
             attributeName="without_test_code"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.WithoutTestCodeAttributeConfiguration">
       </classpathAttributeConfiguration>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2018 IBM Corporation and others.
+ * Copyright (c) 2009, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperat
  */
 public class DelegateEntryComparator implements Comparator<DelegateEntry> {
 
+	@SuppressWarnings("null")
 	@Override
 	public int compare(DelegateEntry firstEntry, DelegateEntry secondEntry) {
 		IVariableBinding firstVariable= firstEntry.field;
@@ -54,10 +55,10 @@ public class DelegateEntryComparator implements Comparator<DelegateEntry> {
 			try {
 				IMethod firstMethod= (IMethod)firstEntry.delegateMethod.getJavaElement();
 				IMethod secondMethod= (IMethod)secondEntry.delegateMethod.getJavaElement();
-				ISourceRange firstSourceRange= firstMethod.getSourceRange();
-				ISourceRange secondSourceRange= secondMethod.getSourceRange();
+				ISourceRange firstSourceRange= firstMethod != null ? firstMethod.getSourceRange() : null;
+				ISourceRange secondSourceRange= secondMethod != null ? secondMethod.getSourceRange() : null;
 				if (!SourceRange.isAvailable(firstSourceRange) || !SourceRange.isAvailable(secondSourceRange)) {
-					return firstMethod.getElementName().compareTo(secondMethod.getElementName());
+					return firstEntry.delegateMethod.getName().compareTo(secondEntry.delegateMethod.getName());
 				} else {
 					return firstSourceRange.getOffset() - secondSourceRange.getOffset();
 				}

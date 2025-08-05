@@ -412,7 +412,6 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 			try {
 				TextEdit t = rewrite.rewriteAST(document, null);
 				t.apply(document);
-				System.out.println(document.get(0, document.getLength()));
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

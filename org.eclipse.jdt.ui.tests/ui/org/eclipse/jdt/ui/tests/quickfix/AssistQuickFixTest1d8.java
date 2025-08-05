@@ -1654,6 +1654,94 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	// Bug 421479
+	@Test
+	public void testConvertToLambda31() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			@FunctionalInterface
+			interface Func2 {
+			    enum En {
+			        A, B;
+			        enum COLOR {
+			            D, E
+			        }
+			    }
+
+			    void foo();
+
+			    String NAME = "";
+
+			    static String staticName() {
+			        return NAME;
+			    }
+			}
+
+			class Test2 {
+			    void bar() {
+			        Func2 f = new Func2() {
+			            @Override
+			            public void foo() {
+			                System.out.println(NAME);
+			                System.out.println(Func2.NAME);
+			                System.out.println(En.A);
+			                System.out.println(Func2.En.A);
+			                System.out.println(En.COLOR.D);
+			                System.out.println(Func2.En.COLOR.D);
+			                System.out.println(Test2.this);
+			                bar();
+			            }
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Func2.java", str, false, null);
+		int offset= str.indexOf("public void");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		String expected1= """
+			package test1;
+			@FunctionalInterface
+			interface Func2 {
+			    enum En {
+			        A, B;
+			        enum COLOR {
+			            D, E
+			        }
+			    }
+
+			    void foo();
+
+			    String NAME = "";
+
+			    static String staticName() {
+			        return NAME;
+			    }
+			}
+
+			class Test2 {
+			    void bar() {
+			        Func2 f = () -> {
+			            System.out.println(Func2.NAME);
+			            System.out.println(Func2.NAME);
+			            System.out.println(Func2.En.A);
+			            System.out.println(Func2.En.A);
+			            System.out.println(Func2.En.COLOR.D);
+			            System.out.println(Func2.En.COLOR.D);
+			            System.out.println(Test2.this);
+			            bar();
+			        };
+			    }
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
 	@Test
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

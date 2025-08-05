@@ -838,6 +838,59 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 
 							return true;
 						}
+
+						private boolean isMemberClass(ITypeBinding declaringClass) {
+							ITypeBinding cicBinding= classInstanceCreation.getType().resolveBinding();
+							if (cicBinding != null) {
+								while (declaringClass != null) {
+									if (cicBinding.isEqualTo(declaringClass)) {
+										return true;
+									}
+									declaringClass= declaringClass.getDeclaringClass();
+								}
+							}
+							return false;
+						}
+
+						@Override
+						public boolean visit(final QualifiedName node) {
+							IBinding binding= node.resolveBinding();
+							if (binding != null
+									&& binding instanceof IVariableBinding variableBinding
+									&& (variableBinding.getModifiers() & Modifier.STATIC) != 0
+									&& (variableBinding.isField() || variableBinding.isEnumConstant())
+									&& (inheritedTypes.contains(variableBinding.getDeclaringClass())
+											|| isMemberClass(variableBinding.getDeclaringClass()))) {
+								ITypeBinding cicBinding= classInstanceCreation.getType().resolveBinding();
+								if (cicBinding != null && !node.getFullyQualifiedName().startsWith(cicBinding.getName() + ".")) { //$NON-NLS-1$
+									Name replacement= ast.newName(cicBinding.getName() + "." + node.getFullyQualifiedName()); //$NON-NLS-1$
+									rewrite.replace(node, replacement, group);
+								}
+								return false;
+							}
+
+							return false;
+						}
+						@Override
+						public boolean visit(final FieldAccess node) {
+							IVariableBinding variableBinding= node.resolveFieldBinding();
+
+							if (variableBinding != null
+									&& (variableBinding.getModifiers() & Modifier.STATIC) != 0
+									&& variableBinding.isField()
+									&& node.getExpression() instanceof Name nodeName
+									&& (inheritedTypes.contains(variableBinding.getDeclaringClass())
+											|| isMemberClass(variableBinding.getDeclaringClass()))) {
+								ITypeBinding cicBinding= classInstanceCreation.getType().resolveBinding();
+								if (cicBinding != null && !nodeName.getFullyQualifiedName().startsWith(cicBinding.getName() + ".")) { //$NON-NLS-1$
+									Name replacement= ast.newName(cicBinding.getName() + "." + nodeName.getFullyQualifiedName() + "." + node.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+									rewrite.replace(node, replacement, group);
+								}
+								return false;
+							}
+
+							return false;
+						}
 					};
 					lambdaBody.accept(inheritedFieldsVisitor);
 

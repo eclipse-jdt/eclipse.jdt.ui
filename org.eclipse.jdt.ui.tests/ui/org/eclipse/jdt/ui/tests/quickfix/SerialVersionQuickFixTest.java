@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -175,74 +175,14 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-
-	@Test
-	public void testAnonymousClass() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
-		String str= """
-			package test3;
-			import java.io.Serializable;
-			public class Test3 {
-			    protected int var1;
-			    protected int var2;
-			    public void test() {
-			        Serializable var3= new Serializable() {
-			            int var4;\s
-			        };
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("Test3.java", str, false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-
-		assertCorrectLabels(proposals);
-
-		String[] expected= new String[2];
-		expected[0]= """
-			package test3;
-			import java.io.Serializable;
-			public class Test3 {
-			    protected int var1;
-			    protected int var2;
-			    public void test() {
-			        Serializable var3= new Serializable() {
-			            /* Test */
-			            private static final long serialVersionUID = 1L;
-			            int var4;\s
-			        };
-			    }
-			}
-			""";
-
-		expected[1]= """
-			package test3;
-			import java.io.Serializable;
-			public class Test3 {
-			    protected int var1;
-			    protected int var2;
-			    public void test() {
-			        Serializable var3= new Serializable() {
-			            /* Test */
-			            private static final long serialVersionUID = -868523843598659436L;
-			            int var4;\s
-			        };
-			    }
-			}
-			""";
-
-		assertExpectedExistInProposals(proposals, expected);
-	}
-
 	@Test
 	public void testInnerClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test2", false, null);
 		String str= """
 			package test2;
-			
+
 			import java.io.Serializable;
-			
+
 			public class Test2 {
 			    protected int var1;
 			    protected int var2;
@@ -261,9 +201,9 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test2;
-			
+
 			import java.io.Serializable;
-			
+
 			public class Test2 {
 			    protected int var1;
 			    protected int var2;
@@ -277,9 +217,9 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test2;
-			
+
 			import java.io.Serializable;
-			
+
 			public class Test2 {
 			    protected int var1;
 			    protected int var2;

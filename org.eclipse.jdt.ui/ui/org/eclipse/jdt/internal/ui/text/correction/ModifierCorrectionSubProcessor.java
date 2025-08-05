@@ -25,16 +25,10 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
@@ -52,6 +46,8 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposalCore;
 
 public class ModifierCorrectionSubProcessor extends ModifierCorrectionSubProcessorCore<ICommandAccess> {
 
@@ -121,24 +117,7 @@ public class ModifierCorrectionSubProcessor extends ModifierCorrectionSubProcess
 	}
 
 	public static void removeOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
-		ICompilationUnit cu= context.getCompilationUnit();
-
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (!(selectedNode instanceof MethodDeclaration)) {
-			return;
-		}
-		MethodDeclaration methodDecl= (MethodDeclaration) selectedNode;
-		Annotation annot= StubUtility2Core.findAnnotation("java.lang.Override", methodDecl.modifiers()); //$NON-NLS-1$
-		if (annot != null) {
-			ASTRewrite rewrite= ASTRewrite.create(annot.getAST());
-			rewrite.remove(annot, null);
-			String label= CorrectionMessages.ModifierCorrectionSubProcessor_remove_override;
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.REMOVE_OVERRIDE, image);
-			proposals.add(proposal);
-
-			QuickAssistProcessor.getCreateInSuperClassProposals(context, methodDecl.getName(), proposals, false);
-		}
+		new ModifierCorrectionSubProcessor().getRemoveOverrideAnnotationProposal(context, problem, proposals);
 	}
 
 	public static void addSynchronizedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -186,6 +165,11 @@ public class ModifierCorrectionSubProcessor extends ModifierCorrectionSubProcess
 			new UnresolvedElementsSubProcessor().collectVariableProposals(context, problem, bindingDecl, proposals);
 		} catch (CoreException e) {
 		}
+	}
+
+	@Override
+	protected ICommandAccess newDefiningMethodProposalCoreToT(NewDefiningMethodProposalCore core, int uid) {
+		return new NewDefiningMethodProposal(core.getName(), core.getCompilationUnit(), core.getInvocationNode(), core.getSenderBinding(), core.getMethodBinding(), core.getParameterNames(), false, core.getRelevance());
 	}
 
 }

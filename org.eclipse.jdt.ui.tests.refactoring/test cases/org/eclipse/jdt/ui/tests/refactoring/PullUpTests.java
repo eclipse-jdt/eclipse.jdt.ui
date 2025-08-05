@@ -1944,6 +1944,12 @@ public class PullUpTests extends GenericRefactoringTest {
 	public void testFail38() throws Exception {
 		helper2(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
+
+	@Test
+	public void testFail39() throws Exception {
+		helper2(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
+	}
+
 	//----------------------------------------------------------
 	@Test
 	public void testField0() throws Exception {

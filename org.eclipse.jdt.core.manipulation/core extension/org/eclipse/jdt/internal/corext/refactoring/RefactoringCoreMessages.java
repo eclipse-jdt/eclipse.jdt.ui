@@ -1611,6 +1611,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PullUpRefactoring_Type_declared_in_class;
 
+	public static String PullUpRefactoring_target_is_annotation;
+
 	public static String PullUpRefactoring_type_not_accessible;
 
 	public static String PullUpRefactoring_Type_variable_not_available;

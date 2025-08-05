@@ -1185,7 +1185,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	@Override
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		try {
-			SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 15);
+			SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 16);
 			clearCaches();
 
 			final RefactoringStatus result= new RefactoringStatus();
@@ -1204,6 +1204,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			result.merge(checkIfSkippingOverElements(subMonitor.newChild(1)));
 			result.merge(checkIfOverridingSuperClass(subMonitor.newChild(1)));
 			result.merge(checkIfHidingMethod(subMonitor.newChild(1)));
+			result.merge(checkIfTargetIsAnnotation());
 			if (monitor.isCanceled())
 				throw new OperationCanceledException();
 			if (!JdtFlags.isAbstract(getDestinationType()) && getAbstractMethods().length > 0)
@@ -1222,6 +1223,17 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private RefactoringStatus checkIfTargetIsAnnotation() throws JavaModelException {
+		if (fDestinationType.isAnnotation()) {
+			if (!fCachedDeclaringType.isAnnotation()) {
+				final String msg= Messages.format(RefactoringCoreMessages.PullUpRefactoring_target_is_annotation, new Object[] { fDestinationType.getElementName() });
+				final RefactoringStatusContext context= JavaStatusContext.create(fDestinationType);
+				return RefactoringStatus.createErrorStatus(msg, context);
+			}
+		}
+		return null;
 	}
 
 	private RefactoringStatus checkIfHidingMethod(SubMonitor newChild) throws JavaModelException {

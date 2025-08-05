@@ -532,6 +532,31 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 		performBugTest();
 	}
 
+	@Test
+	public void test_issue_2314_1() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_2314_2() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_2356_1() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_2356_2() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_2376() throws Exception {
+		performBugTest();
+	}
+
 	/* *********************** Argument Tests ******************************* */
 
 	private void performArgumentTest() throws Exception {
