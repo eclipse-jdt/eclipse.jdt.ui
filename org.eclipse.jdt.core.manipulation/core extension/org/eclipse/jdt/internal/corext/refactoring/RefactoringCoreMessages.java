@@ -1657,6 +1657,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PushDownRefactoring_referenced;
 
+	public static String PushDownRefactoring_referenced_field;
+
 	public static String PushDownRefactoring_type_not_accessible;
 
 	public static String QualifiedNameFinder_qualifiedNames_description;

@@ -1304,6 +1304,44 @@ public class PushDownTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void testFail17() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2417
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"f"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		failInputHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+				RefactoringStatus.ERROR);
+	}
+
+	@Test
+	public void testFail18() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2417
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"f"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		failInputHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+				RefactoringStatus.ERROR);
+	}
+
+	@Test
 	public void testVisibility0() throws Exception {
 		String[] selectedMethodNames= {"foo"};
 		String[][] selectedMethodSignatures= {new String[0]};

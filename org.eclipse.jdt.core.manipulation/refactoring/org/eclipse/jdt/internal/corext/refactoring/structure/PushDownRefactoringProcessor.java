@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -94,6 +95,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.PushDownDescriptor;
+import org.eclipse.jdt.core.search.FieldReferenceMatch;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -401,8 +403,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					}
 					if (cuRoot != null) {
 						ASTNode node= NodeFinder.perform(cuRoot, searchResult.getOffset(), searchResult.getLength());
-						if (node != null && node instanceof MethodInvocation) {
-							MethodInvocation methodInvocation= (MethodInvocation)node;
+						if (node instanceof MethodInvocation methodInvocation) {
 							TypeDeclaration nodeTypeDecl= ASTNodes.getFirstAncestorOrNull(node, TypeDeclaration.class);
 							if (nodeTypeDecl == null) {
 								continue;
@@ -433,6 +434,28 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 								}
 							}
 							result.add(SearchUtils.getEnclosingJavaElement(searchResult));
+						} else if (searchResult instanceof FieldReferenceMatch) {
+							ASTNode ancestor= ASTNodes.getFirstAncestorOrNull(node, FieldAccess.class, QualifiedName.class);
+							if (ancestor instanceof FieldAccess fieldAccess) {
+								if (fieldAccess.getExpression() != null) {
+									ITypeBinding t= fieldAccess.getExpression().resolveTypeBinding();
+									if (t.getQualifiedName().equals(declaringType.getFullyQualifiedName())) {
+										result.add(SearchUtils.getEnclosingJavaElement(searchResult));
+									}
+								}
+							} else if (ancestor instanceof QualifiedName qualifiedName) {
+								Name qualifier= qualifiedName.getQualifier();
+								IBinding binding= qualifier.resolveBinding();
+								if (binding instanceof ITypeBinding typeBinding) {
+									if (typeBinding.getQualifiedName().equals(declaringType.getFullyQualifiedName())) {
+										result.add(SearchUtils.getEnclosingJavaElement(searchResult));
+									}
+								} else if (binding instanceof IVariableBinding varBinding) {
+									if (varBinding.getType().getQualifiedName().equals(declaringType.getFullyQualifiedName())) {
+										result.add(SearchUtils.getEnclosingJavaElement(searchResult));
+									}
+								}
+							}
 						}
 					}
 				}
@@ -694,7 +717,9 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			for (IJavaElement element : getReferencingElementsFromProject(member, subMon.newChild(1), result)) {
 				IMember referencingMember= (IMember) element;
 				Object[] keys= { label, createLabel(referencingMember) };
-				String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_referenced, keys);
+				String msg= member instanceof IField
+						? Messages.format(RefactoringCoreMessages.PushDownRefactoring_referenced_field, keys)
+						: Messages.format(RefactoringCoreMessages.PushDownRefactoring_referenced, keys);
 				result.addError(msg, JavaStatusContext.create(referencingMember));
 			}
 			for (IJavaElement element : getReferencingElementsFromSameClass(member, subMon.newChild(1), result)) {
