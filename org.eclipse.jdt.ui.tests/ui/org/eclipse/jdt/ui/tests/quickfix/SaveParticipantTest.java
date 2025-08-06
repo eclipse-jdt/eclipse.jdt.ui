@@ -15,8 +15,12 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -26,17 +30,39 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.operations.IAdvancedUndoableOperation;
+import org.eclipse.core.commands.operations.IUndoableOperation;
+import org.eclipse.core.commands.operations.OperationHistoryFactory;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.CopyOnWriteTextStore;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.ui.internal.editors.quickdiff.LastSaveReferenceProvider;
 import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
+
+import org.eclipse.ui.texteditor.IDocumentProvider;
+
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -49,6 +75,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -114,6 +141,49 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		cu.getBuffer().setContents(newContent);
 		editor.doSave(null);
+	}
+
+	/**
+	 * Sets the given content and saves the compilation unit through the Java document provider from a
+	 * thread other than the UI thread, without opening an editor.
+	 */
+	private static void saveCUInBackgroundThread(ICompilationUnit cu, String newContent) throws Exception {
+		IDocumentProvider provider= JavaUI.getDocumentProvider();
+		IEditorInput input= new FileEditorInput((IFile) cu.getResource());
+		provider.connect(input);
+		try {
+			IDocument document= provider.getDocument(input);
+			document.set(newContent);
+
+			CompletableFuture<Void> save= CompletableFuture.runAsync(() -> {
+				try {
+					provider.saveDocument(new NullProgressMonitor(), input, document, true);
+				} catch (CoreException e) {
+					throw new CompletionException(e);
+				}
+			});
+
+			// Keep the UI thread responsive in case the save needs it
+			Display display= Display.getCurrent();
+			while (!save.isDone()) {
+				if (!display.readAndDispatch()) {
+					Thread.sleep(10);
+				}
+			}
+			save.join();
+		} finally {
+			provider.disconnect(input);
+		}
+	}
+
+	/**
+	 * Returns whether the last save actions can be undone, without undoing them.
+	 */
+	private static IStatus computeUndoableStatusOfSaveActions() throws ExecutionException {
+		IUndoableOperation operation= OperationHistoryFactory.getOperationHistory().getUndoOperation(PlatformUI.getWorkbench().getOperationSupport().getUndoContext());
+		assertNotNull(operation);
+		assertEquals(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName, operation.getLabel());
+		return ((IAdvancedUndoableOperation) operation).computeUndoableStatus(new NullProgressMonitor());
 	}
 
 	@Test
@@ -1277,6 +1347,275 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		editCUInEditor(cu1, fileOnEditor);
 
 		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
+	}
+
+	@Test
+	public void testSaveInBackgroundThread() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class E1 {
+			    private void m1() {
+			    }
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class E1 {
+			    private void m1() {
+			        List<String> myList = new ArrayList<String>();
+			    }
+			}
+			"""; //
+
+		String expected1= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class E1 {
+			    private void m1() {
+			        List<String> myList = new ArrayList<>();
+			    }
+			}
+			"""; //
+
+		// This clean up requires an AST
+		enable(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS);
+
+		// When
+		saveCUInBackgroundThread(cu1, fileOnEditor);
+
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
+	}
+
+	@Test
+	public void testEditDocumentWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+			package test1;
+			public class E1 {
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+			package test1;
+			public class E1 {
+			    int toReplace;
+			}
+			"""; //
+
+		String userEdit= "// edited while saving\n";
+
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+
+			// The user edits the document after the clean up calculated its offsets
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.arm("toReplace", "replaced", () -> {
+				try {
+					document.replace(0, 0, userEdit);
+				} catch (BadLocationException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+
+			// When
+			editor.doSave(null);
+
+			// Then: the outdated clean up is not applied
+			assertEquals(userEdit + fileOnEditor, document.get());
+		} finally {
+			PausingCleanUp.disarm();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testShortenDocumentWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+			package test1;
+			public class E1 {
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+			package test1;
+			public class E1 {
+			    int toReplace;
+			}
+			"""; //
+
+		String afterUserEdit= """
+			package test1;
+			"""; //
+
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+
+			// The user deletes the text at the offsets of the clean up, so reading it fails
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.arm("toReplace", "replaced", () -> document.set(afterUserEdit));
+
+			// When
+			editor.doSave(null);
+
+			// Then: the user's edit is not reverted
+			assertEquals(afterUserEdit, document.get());
+		} finally {
+			PausingCleanUp.disarm();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testEditDocumentWhileCalculatingChangesOfSecondPass() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+			package test1;
+			public class E1 {
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+			package test1;
+			public class E1 {
+			    int first;
+			    int second;
+			}
+			"""; //
+
+		String userEdit= "// edited while saving\n";
+
+		String expected= userEdit + """
+			package test1;
+			public class E1 {
+			    int replacedInFirstPass;
+			    int second;
+			}
+			"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			// The user edits the document after the second pass calculated its offsets
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.armInSeparatePasses(
+					new PausingCleanUp.Replacement("first", "replacedInFirstPass", null),
+					new PausingCleanUp.Replacement("second", "replacedInSecondPass", () -> {
+						try {
+							document.replace(0, 0, userEdit);
+						} catch (BadLocationException e) {
+							throw new IllegalStateException(e);
+						}
+					}));
+
+			// When
+			editor.doSave(null);
+
+			// Then: the first pass is kept, the outdated second pass is not applied
+			assertEquals(expected, document.get());
+
+			// Then: the first pass is registered for undo, but undoing it is rejected since its undo edits are outdated
+			assertEquals(IStatus.ERROR, computeUndoableStatusOfSaveActions().getSeverity());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testUndoSeveralPasses() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+			package test1;
+			public class E1 {
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+			package test1;
+			public class E1 {
+			    int first;
+			    int second;
+			}
+			"""; //
+
+		String expected= """
+			package test1;
+			public class E1 {
+			    int replacedInFirstPass;
+			    int replacedInSecondPass;
+			}
+			"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.armInSeparatePasses(
+					new PausingCleanUp.Replacement("first", "replacedInFirstPass", null),
+					new PausingCleanUp.Replacement("second", "replacedInSecondPass", null));
+
+			// When
+			editor.doSave(null);
+
+			// Then
+			assertEquals(expected, document.get());
+			assertTrue(computeUndoableStatusOfSaveActions().isOK());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			editor.close(false);
+		}
 	}
 
 	@Test

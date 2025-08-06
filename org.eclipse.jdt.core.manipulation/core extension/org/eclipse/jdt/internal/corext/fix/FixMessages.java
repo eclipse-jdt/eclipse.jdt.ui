@@ -27,6 +27,8 @@ public final class FixMessages extends NLS {
 	}
 
 	public static String CleanUpPostSaveListener_name;
+	public static String CleanUpPostSaveListener_CalculatingChanges_taskName;
+	public static String CleanUpPostSaveListener_CreatingAST_taskName;
 	public static String CleanUpPostSaveListener_SaveAction_ChangeName;
 	public static String CleanUpPostSaveListener_SlowCleanUpDialog_link;
 	public static String CleanUpPostSaveListener_SlowCleanUpDialog_title;
