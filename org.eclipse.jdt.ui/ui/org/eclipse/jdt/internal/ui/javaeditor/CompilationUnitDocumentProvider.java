@@ -1407,6 +1407,11 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					subMonitor.done();
 			}
 
+			// The post save listeners can dispatch UI events, so the editor may have been closed meanwhile
+			if (getFileInfo(element) != info) {
+				return;
+			}
+
 			// If here, the dirty state of the editor will change to "not dirty".
 			// Thus, the state changing flag will be reset.
 			if (info.fModel instanceof AbstractMarkerAnnotationModel) {
