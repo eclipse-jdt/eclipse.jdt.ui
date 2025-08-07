@@ -56,7 +56,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
 		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
-		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
+		return new CleanUpRequirements(requireAST, requireAST, false, requiredOptions);
 	}
 
 	private boolean requireAST() {

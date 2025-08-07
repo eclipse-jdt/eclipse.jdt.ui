@@ -6579,6 +6579,57 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDeprecatedCleanup3() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/722
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample1= """
+			package test;
+			public class E {
+
+				private int foo1() {
+					return 4;
+				}
+
+				/**
+				 * @deprecated use {@link #foo1()} instead
+				 * @return
+				 */
+				@Deprecated
+				private int foo2() {
+					return foo1();
+				}
+
+				public int foo3() {
+					return foo2();
+				}
+
+			}
+			"""; //
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample1, false, null);
+
+		enable(CleanUpConstants.REPLACE_DEPRECATED_CALLS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS);
+
+		String expected= """
+			package test;
+			public class E {
+
+				private int foo1() {
+					return 4;
+				}
+
+				public int foo3() {
+					return foo1();
+				}
+
+			}
+			""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected},
+				new HashSet<>(Arrays.asList(FixMessages.InlineDeprecatedMethod_msg)));
+	}
+
+	@Test
 	public void testDeprecatedFieldCleanup1() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		String sample2= """

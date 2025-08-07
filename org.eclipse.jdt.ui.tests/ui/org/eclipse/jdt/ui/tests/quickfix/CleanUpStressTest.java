@@ -4238,7 +4238,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        final Process p = Runtime.getRuntime().exec(cmd);
 			        final InputStream i = p.getInputStream();
 			        while ((i.read()) != -1) {
-			            ; // System.out.write(b);
+			            // System.out.write(b);
 			        }
 			        Assert.assertTrue((p.waitFor() == 0) == success);
 			        if (success) {

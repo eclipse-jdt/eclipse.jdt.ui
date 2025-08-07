@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -429,7 +429,7 @@ public class SingleUsedFieldCleanUp extends AbstractMultiFix {
 			for (IExtendedModifier iExtendedModifier : modifiers) {
 				Modifier modifier= (Modifier) iExtendedModifier;
 
-				if (!modifier.isPrivate() && !modifier.isStatic() && !modifier.isTransient()) {
+				if (!modifier.isPrivate() && !modifier.isStatic() && !modifier.isTransient() && !modifier.isVolatile()) {
 					newModifiers.add((Modifier) rewrite.createCopyTarget(modifier));
 				}
 			}

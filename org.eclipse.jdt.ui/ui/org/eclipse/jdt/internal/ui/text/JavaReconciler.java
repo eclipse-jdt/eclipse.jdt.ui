@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IMarker;
@@ -41,14 +42,15 @@ import org.eclipse.jface.text.reconciler.MonoReconciler;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -69,50 +71,22 @@ public class JavaReconciler extends MonoReconciler {
 	/**
 	 * Internal part listener for activating the reconciler.
 	 */
-	private class PartListener implements IPartListener {
-
-		/*
-		 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
-		 */
+	private class PartListener implements IPartListener2 {
 		@Override
-		public void partActivated(IWorkbenchPart part) {
-			if (part == fTextEditor) {
+		public void partVisible(IWorkbenchPartReference partRef) {
+			if (partRef.getPart(false) == fTextEditor) {
 				if (hasJavaModelChanged())
 					JavaReconciler.this.forceReconciling();
 				setEditorActive(true);
 			}
 		}
 
-		/*
-		 * @see org.eclipse.ui.IPartListener#partBroughtToTop(org.eclipse.ui.IWorkbenchPart)
-		 */
 		@Override
-		public void partBroughtToTop(IWorkbenchPart part) {
-		}
-
-		/*
-		 * @see org.eclipse.ui.IPartListener#partClosed(org.eclipse.ui.IWorkbenchPart)
-		 */
-		@Override
-		public void partClosed(IWorkbenchPart part) {
-		}
-
-		/*
-		 * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
-		 */
-		@Override
-		public void partDeactivated(IWorkbenchPart part) {
-			if (part == fTextEditor) {
+		public void partHidden(IWorkbenchPartReference partRef) {
+			if (partRef.getPart(false)  == fTextEditor) {
 				setJavaModelChanged(false);
 				setEditorActive(false);
 			}
-		}
-
-		/*
-		 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
-		 */
-		@Override
-		public void partOpened(IWorkbenchPart part) {
 		}
 	}
 
@@ -141,10 +115,11 @@ public class JavaReconciler extends MonoReconciler {
 		}
 
 		/*
-		 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
+		 * @see org.eclipse.swt.events.ShellListener#shellIconified(org.eclipse.swt.events.ShellEvent)
 		 */
 		@Override
-		public void shellDeactivated(ShellEvent e) {
+		public void shellIconified(ShellEvent e) {
+			// If we iconify the shell, we can't see the content anymore.
 			if (!fControl.isDisposed() && fControl.getShell() == e.getSource()) {
 				setJavaModelChanged(false);
 				setEditorActive(false);
@@ -250,7 +225,7 @@ public class JavaReconciler extends MonoReconciler {
 	/** The reconciler's editor */
 	private ITextEditor fTextEditor;
 	/** The part listener */
-	private IPartListener fPartListener;
+	private IPartListener2 fPartListener;
 	/** The shell listener */
 	private ShellListener fActivationListener;
 	/**
@@ -421,6 +396,11 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	@Override
 	protected void initialProcess() {
+		try {
+			Job.getJobManager().join(ClasspathContainerInitializer.class, null);
+		} catch (OperationCanceledException | InterruptedException e) {
+			// Ignore
+		}
 		synchronized (fMutex) {
 			super.initialProcess();
 		}

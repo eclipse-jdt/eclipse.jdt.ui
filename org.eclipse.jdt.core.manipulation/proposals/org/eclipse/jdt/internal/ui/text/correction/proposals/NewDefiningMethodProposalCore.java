@@ -56,6 +56,14 @@ public class NewDefiningMethodProposalCore extends AbstractMethodCorrectionPropo
 		return fMethod.isConstructor();
 	}
 
+	public IMethodBinding getMethodBinding () {
+		return fMethod;
+	}
+
+	public String[] getParameterNames () {
+		return fParamNames;
+	}
+
 	@Override
 	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException {
 		AST ast= rewrite.getAST();
