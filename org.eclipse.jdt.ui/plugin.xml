@@ -1078,6 +1078,17 @@
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.classpathcontainer" />
       </page>
+      <page
+            name="%miscellaneousPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.MiscellaneousPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.MiscellaneousPreferencePage">
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>
+         </enabledWhen>
+         <keywordReference id="org.eclipse.jdt.ui.miscellaneous"/>
+      </page>
    </extension>
 
    <extension
@@ -1762,6 +1773,13 @@
             <keywordReference id="org.eclipse.jdt.ui.todo"/>
       </page>
       <page
+            name="%miscellaneousPrefName"
+            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.MiscellaneousPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.MiscellaneousPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.miscellaneous"/>
+      </page>
+      <page
             name="%templatePageName"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavaTemplatePreferencePage"
@@ -1911,6 +1929,9 @@
       <keyword
             label="%preferenceKeywords.todo"
             id="org.eclipse.jdt.ui.todo"/>
+      <keyword
+            label="%preferenceKeywords.miscellaneous"
+            id="org.eclipse.jdt.ui.miscellaneous"/>
       <keyword
             label="%preferenceKeywords.javaeditor"
             id="org.eclipse.jdt.ui.javaeditor"/>

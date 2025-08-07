@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -104,6 +104,7 @@ import org.eclipse.jdt.launching.LibraryLocation;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoImageProvider;
 import org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent;
@@ -439,6 +440,25 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 		}
 		return super.open();
+	}
+
+	@Override
+	protected String getPatternText() {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.OPEN_TYPE_DEFAULT_WILDCARD_BETWEEN_CAMEL_CASE_PARTS)) {
+			String text= super.getPatternText();
+			StringBuilder builder= new StringBuilder();
+			boolean lastCharIsUpperCase= true;
+			for (int i= 0; i < text.length(); ++i) {
+				char ch= text.charAt(i);
+				if (!lastCharIsUpperCase && Character.isUpperCase(ch)) {
+					builder.append('*');
+				}
+				builder.append(ch);
+				lastCharIsUpperCase= Character.isUpperCase(ch);
+			}
+			return builder.toString();
+		}
+		return super.getPatternText();
 	}
 
 	/**

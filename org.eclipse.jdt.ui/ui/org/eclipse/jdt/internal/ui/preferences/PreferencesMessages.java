@@ -926,4 +926,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaLaunchingConfigurationBlock_applet_name_fully_qualified_label;
 	public static String JavaLaunchingConfigurationBlock_junit_name_fully_qualified_label;
 	public static String JavaLaunchingConfigurationBlock_name_description;
+
+	public static String MiscellaneousConfigurationBlock_open_type_name;
+	public static String MiscellaneousConfigurationBlock_default_wildcard_between_camel_case_parts_label;
 }
