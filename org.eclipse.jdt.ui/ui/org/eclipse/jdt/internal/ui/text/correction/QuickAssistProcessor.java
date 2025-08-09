@@ -338,7 +338,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getFixParenthesesInLambdaExpression(context, coveringNode, null)
 					|| getRemoveBlockProposals(context, coveringNode, null)
 					|| getMakeVariableDeclarationFinalProposals(context, null)
-					|| getMissingCaseStatementProposals(context, coveringNode, null)
+					|| getMissingCaseStatementProposals(context, coveringNode, null, true)
+					|| getMissingCaseStatementProposals(context, coveringNode, null, false)
 					|| ConvertStringConcatenationProposals.getProposals(context, null)
 					|| getInferDiamondArgumentsProposal(context, coveringNode, null, null)
 					|| getJUnitTestCaseProposal(context, coveringNode, null)
@@ -422,7 +423,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
 				ConvertStringConcatenationProposals.getProposals(context, resultingCollections);
-				getMissingCaseStatementProposals(context, coveringNode, resultingCollections);
+				getMissingCaseStatementProposals(context, coveringNode, resultingCollections, true);
+				getMissingCaseStatementProposals(context, coveringNode, resultingCollections, false);
 				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, resultingCollections);
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
@@ -3218,7 +3220,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getMissingCaseStatementProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
+	private static boolean getMissingCaseStatementProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals, boolean preserveOrder) {
 		if (node instanceof SwitchCase) {
 			node= node.getParent();
 		}
@@ -3231,14 +3233,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 
 		ArrayList<String> missingEnumCases= new ArrayList<>();
-		boolean hasDefault= LocalCorrectionsSubProcessor.evaluateMissingSwitchCases(expressionBinding, switchStatement.statements(), missingEnumCases);
+		boolean hasDefault= LocalCorrectionsSubProcessor.evaluateMissingSwitchCases(expressionBinding, switchStatement.statements(), missingEnumCases, preserveOrder);
 		if (missingEnumCases.isEmpty() && hasDefault)
 			return false;
 
 		if (proposals == null)
 			return true;
 
-		LocalCorrectionsSubProcessor.createMissingCaseProposals(context, switchStatement, missingEnumCases, proposals);
+		LocalCorrectionsSubProcessor.createMissingCaseProposals(context, switchStatement, missingEnumCases, proposals, preserveOrder);
 		return true;
 	}
 
