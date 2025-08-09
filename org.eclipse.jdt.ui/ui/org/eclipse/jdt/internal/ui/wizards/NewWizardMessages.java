@@ -186,7 +186,8 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message;
 	public static String NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message;
 	public static String NewTypeWizardPage_error_SealedFinalNonSealedInterface_extend_superinterface_notSelected_message;
-
+	public static String NewTypeWizardPage_info_CreateMultipleTypes;
+  
 	public static String OutputLocation_DotAsLocation;
 	public static String OutputLocation_SettingsAsLocation;
 	public static String OutputLocationDialog_removeProjectFromBP;
