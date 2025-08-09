@@ -93,6 +93,7 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		return result.toArray(new String[result.size()]);
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int problemId= problem.getProblemId();
@@ -106,6 +107,7 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		return false;
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		if (fOptions == null)
