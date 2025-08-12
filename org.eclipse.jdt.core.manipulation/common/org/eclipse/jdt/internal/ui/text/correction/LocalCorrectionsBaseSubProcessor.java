@@ -1176,7 +1176,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 		for (T proposal : proposals) {
 			if (proposal instanceof ChangeCorrectionProposalCore) {
 				if (preserveOrder) {
-					if (CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description_declaration.equals(((ChangeCorrectionProposalCore) proposal).getName())) {
+					if (CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description.equals(((ChangeCorrectionProposalCore) proposal).getName())) {
 						return;
 					}
 				} else {
@@ -1310,7 +1310,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 			}
 
 			String label= preserveOrder ?
-					CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description_declaration :
+					CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description :
 						CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description_alphabetical;
 			LinkedCorrectionProposalCore proposal= new LinkedCorrectionProposalCore(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_CASE_STATEMENTS);
 
