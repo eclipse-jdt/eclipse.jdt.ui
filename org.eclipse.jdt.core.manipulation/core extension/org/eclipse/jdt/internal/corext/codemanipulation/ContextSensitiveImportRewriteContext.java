@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,9 +35,9 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.manipulation.ImportReferencesCollector;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -133,6 +133,15 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 							return RES_NAME_CONFLICT;
 						decl= decl.getDeclaringClass();
 					}
+				}
+			}
+		}
+
+		// check if qualifier matches a package provided by an import module statement
+		for (String moduleName : fImportRewrite.getAddedModuleImports()) {
+			for (String packageName : fImportRewrite.getAddedModuleExportedPackages(moduleName)) {
+				if (qualifier.equals(packageName)) {
+					return RES_NAME_FOUND;
 				}
 			}
 		}
