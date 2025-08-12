@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,6 +50,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IModuleBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -220,6 +222,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		private Set<String> fOldSingleImports;
 		private Set<String> fOldDemandImports;
+		private Map<String, Set<String>> fOldModuleImports;
 
 		private Set<String> fImplicitImports;
 
@@ -235,13 +238,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		private Map<String, UnresolvedTypeData> fUnresolvedTypes;
 		private Set<String> fImportsAdded;
+		private Set<String> fModuleImportsAdded;
 		private TypeNameMatch[][] fOpenChoices;
 		private SourceRange[] fSourceRanges;
 
 
-		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher) {
+		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, Map<String, Set<String>> oldModuleImports,
+				CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
+			fOldModuleImports= oldModuleImports;
 			fImpStructure= impStructure;
 			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
 			fUnresolvableImportMatcher= unresolvableImportMatcher;
@@ -258,6 +264,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fCurrPackage= (IPackageFragment) cu.getParent();
 
 			fImportsAdded= new HashSet<>();
+			fModuleImportsAdded= new HashSet<>();
 			fUnresolvedTypes= new HashMap<>();
 		}
 
@@ -323,7 +330,21 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				typeBinding= typeBinding.getTypeDeclaration();
 				if (!typeBinding.isRecovered()) {
-					if (needsImport(typeBinding, ref)) {
+					String qualifiedTypeName= typeBinding.getQualifiedName();
+					String qualifier= qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf('.'));
+					if (moduleImportsContains(qualifier)) {
+						for (Entry<String, Set<String>> entry : fOldModuleImports.entrySet()) {
+							if (entry.getValue().contains(qualifier)) {
+								fImportsAdded.add(typeName);
+								if (fModuleImportsAdded.contains(entry.getKey())) {
+									return;
+								}
+								fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
+								fModuleImportsAdded.add(entry.getKey());
+								break;
+							}
+						}
+					} else if (needsImport(typeBinding, ref)) {
 						fImpStructure.addImport(typeBinding);
 						fImportsAdded.add(typeName);
 					}
@@ -408,7 +429,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return null;
 			} else if (nFound == 1) {
 				TypeNameMatch typeRef= typeRefsFound.get(0);
-				fImpStructure.addImport(typeRef.getFullyQualifiedName());
+				if (!moduleImportsContains(typeRef.getTypeContainerName())) {
+					fImpStructure.addImport(typeRef.getFullyQualifiedName());
+				}
 				return null;
 			} else {
 				String typeToImport= null;
@@ -429,6 +452,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						} else {  // more than one import-on-demand
 							ambiguousImports= true;
 						}
+					} else if (moduleImportsContains(containerName)) {
+						return null; // we don't reimport
 					}
 				}
 
@@ -439,6 +464,15 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				// return the open choices
 				return typeRefsFound.toArray(new TypeNameMatch[nFound]);
 			}
+		}
+
+		private boolean moduleImportsContains(String typeContainerName) {
+			for (Set<String> packageNames : fOldModuleImports.values()) {
+				if (packageNames.contains(typeContainerName)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private boolean isOfKind(TypeNameMatch curr, int typeKinds) {
@@ -587,10 +621,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		Set<String> oldSingleImports= new HashSet<>();
 		Set<String> oldDemandImports= new HashSet<>();
+		Map<String, Set<String>> oldModulePackages= new HashMap<>();
 		List<SimpleName> typeReferences= new ArrayList<>();
 		List<SimpleName> staticReferences= new ArrayList<>();
 
-		if (!collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports))
+		if (!collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports, oldModulePackages))
 			return null;
 
 		subMonitor.split(1);
@@ -600,6 +635,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		TypeReferenceProcessor processor= new TypeReferenceProcessor(
 				oldSingleImports,
 				oldDemandImports,
+				oldModulePackages,
 				astRoot,
 				importsRewrite,
 				fIgnoreLowerCaseNames,
@@ -650,6 +686,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		List<String> importsAdded= new ArrayList<>(importsStructure.getCreatedImports().length + importsStructure.getCreatedStaticImports().length);
 		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedImports()));
 		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedStaticImports()));
+		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedModuleImports()));
 
 		for (Object element : oldSingleImports.toArray()) {
 			String importName= (String) element;
@@ -734,7 +771,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 
 	// find type references in a compilation unit
-	private boolean collectReferences(CompilationUnit astRoot, List<SimpleName> typeReferences, List<SimpleName> staticReferences, Set<String> oldSingleImports, Set<String> oldDemandImports) {
+	private boolean collectReferences(CompilationUnit astRoot, List<SimpleName> typeReferences, List<SimpleName> staticReferences, Set<String> oldSingleImports,
+			Set<String> oldDemandImports, Map<String, Set<String>> oldModuleImports) {
 		if (!fAllowSyntaxErrors) {
 			for (IProblem curr : astRoot.getProblems()) {
 				if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0) {
@@ -746,7 +784,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		List<ImportDeclaration> imports= astRoot.imports();
 		for (ImportDeclaration curr : imports) {
 			String id= ASTResolving.getFullName(curr.getName());
-			if (curr.isOnDemand()) {
+			if (Modifier.isModule(curr.getModifiers())) {
+				Set<String> oldModulePackages= new HashSet<>();
+				oldModuleImports.put(id, oldModulePackages);
+				if (curr.resolveBinding() instanceof IModuleBinding binding) {
+					IPackageBinding[] packageBindings= binding.getExportedPackages();
+					for (IPackageBinding packageBinding : packageBindings) {
+						oldModulePackages.add(packageBinding.getName());
+					}
+				}
+			} else if (curr.isOnDemand()) {
 				oldDemandImports.add(id);
 			} else {
 				oldSingleImports.add(id);
