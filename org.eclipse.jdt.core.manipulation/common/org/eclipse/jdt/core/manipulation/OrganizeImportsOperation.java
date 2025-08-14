@@ -42,11 +42,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -74,7 +78,9 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
@@ -259,6 +265,40 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fImplicitImports.add("java.lang"); //$NON-NLS-1$
 			fImplicitImports.add(cu.getParent().getElementName());
 
+			if (root.getAST().apiLevel() >= AST.JLS24) {
+				try {
+					IType[] types= cu.getAllTypes();
+					if (types.length > 0 && types[0].isImplicitlyDeclared()) {
+						ASTParser parser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+						Map<String, String> compilerOptions= RefactoringASTParser.getCompilerOptions(cu);
+						if (root.getAST().isPreviewEnabled()) {
+							compilerOptions.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+							JavaCore.setComplianceOptions(Integer.toString(root.getAST().apiLevel()), compilerOptions);
+						}
+						parser.setCompilerOptions(compilerOptions);
+						parser.setEnvironment(null, null, null, true);
+						parser.setUnitName("A.java"); //$NON-NLS-1$
+						parser.setKind(ASTParser.K_COMPILATION_UNIT);
+						parser.setSource("import module java.base; class A { BigDecimal a; }".toCharArray()); //$NON-NLS-1$
+						parser.setResolveBindings(true);
+						CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
+						List<ImportDeclaration> importDecls= astRoot.imports();
+						if (!importDecls.isEmpty()) {
+							ImportDeclaration importDecl= importDecls.get(0);
+							if (importDecl.resolveBinding() instanceof IModuleBinding moduleBinding) {
+								IPackageBinding[] packageBindings= moduleBinding.getExportedPackages();
+								for (IPackageBinding packageBinding : packageBindings) {
+									fImplicitImports.add(packageBinding.getName());
+								}
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
+			}
+
+
 			fAnalyzer= new ScopeAnalyzer(root);
 
 			fCurrPackage= (IPackageFragment) cu.getParent();
@@ -331,20 +371,27 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				typeBinding= typeBinding.getTypeDeclaration();
 				if (!typeBinding.isRecovered()) {
 					String qualifiedTypeName= typeBinding.getQualifiedName();
-					String qualifier= qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf('.'));
-					if (moduleImportsContains(qualifier)) {
-						for (Entry<String, Set<String>> entry : fOldModuleImports.entrySet()) {
-							if (entry.getValue().contains(qualifier)) {
-								fImportsAdded.add(typeName);
-								if (fModuleImportsAdded.contains(entry.getKey())) {
-									return;
+					if (qualifiedTypeName.indexOf('.') > 0) {
+						String qualifier= qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf('.'));
+						if (moduleImportsContains(qualifier)) {
+							for (Entry<String, Set<String>> entry : fOldModuleImports.entrySet()) {
+								if (entry.getValue().contains(qualifier)) {
+									fImportsAdded.add(typeName);
+									if (fModuleImportsAdded.contains(entry.getKey())) {
+										return;
+									}
+									fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
+									fModuleImportsAdded.add(entry.getKey());
+									break;
 								}
-								fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
-								fModuleImportsAdded.add(entry.getKey());
-								break;
 							}
+							return;
 						}
-					} else if (needsImport(typeBinding, ref)) {
+						if (fImplicitImports.contains(qualifier)) {
+							return;
+						}
+					}
+					if (needsImport(typeBinding, ref)) {
 						fImpStructure.addImport(typeBinding);
 						fImportsAdded.add(typeName);
 					}
