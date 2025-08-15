@@ -14,44 +14,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.jface.viewers.ContentViewer;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
-
-import org.eclipse.ui.model.IWorkbenchAdapter;
-
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IInitializer;
-import org.eclipse.jdt.core.IJarEntryResource;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jface.viewers.*;
+import org.eclipse.ui.model.IWorkbenchAdapter;
+
+import java.util.Comparator;
 
 
 /**
@@ -89,6 +65,8 @@ public class JavaElementComparator extends ViewerComparator {
 	private static final int JAVAELEMENTS= 50;
 	private static final int OTHERS= 51;
 
+	private static final Comparator<String> NATURAL_ORDER = new NaturalOrderComparator();
+
 	private final MembersOrderPreferenceCache fMemberOrderCache;
 	private final boolean fSortPFRByName;
 
@@ -121,36 +99,36 @@ public class JavaElementComparator extends ViewerComparator {
 
 				switch (je.getElementType()) {
 					case IJavaElement.METHOD:
-						{
-							IMethod method= (IMethod) je;
-							if (method.isConstructor()) {
-								return getMemberCategory(MembersOrderPreferenceCacheCommon.CONSTRUCTORS_INDEX);
-							}
-							int flags= method.getFlags();
-							if (Flags.isStatic(flags))
-								return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_METHODS_INDEX);
-							else
-								return getMemberCategory(MembersOrderPreferenceCacheCommon.METHOD_INDEX);
+					{
+						IMethod method= (IMethod) je;
+						if (method.isConstructor()) {
+							return getMemberCategory(MembersOrderPreferenceCacheCommon.CONSTRUCTORS_INDEX);
 						}
+						int flags= method.getFlags();
+						if (Flags.isStatic(flags))
+							return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_METHODS_INDEX);
+						else
+							return getMemberCategory(MembersOrderPreferenceCacheCommon.METHOD_INDEX);
+					}
 					case IJavaElement.FIELD :
-						{
-							int flags= ((IField) je).getFlags();
-							if (Flags.isEnum(flags)) {
-								return getMemberCategory(MembersOrderPreferenceCacheCommon.ENUM_CONSTANTS_INDEX);
-							}
-							if (Flags.isStatic(flags))
-								return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_FIELDS_INDEX);
-							else
-								return getMemberCategory(MembersOrderPreferenceCacheCommon.FIELDS_INDEX);
+					{
+						int flags= ((IField) je).getFlags();
+						if (Flags.isEnum(flags)) {
+							return getMemberCategory(MembersOrderPreferenceCacheCommon.ENUM_CONSTANTS_INDEX);
 						}
+						if (Flags.isStatic(flags))
+							return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_FIELDS_INDEX);
+						else
+							return getMemberCategory(MembersOrderPreferenceCacheCommon.FIELDS_INDEX);
+					}
 					case IJavaElement.INITIALIZER :
-						{
-							int flags= ((IInitializer) je).getFlags();
-							if (Flags.isStatic(flags))
-								return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_INIT_INDEX);
-							else
-								return getMemberCategory(MembersOrderPreferenceCacheCommon.INIT_INDEX);
-						}
+					{
+						int flags= ((IInitializer) je).getFlags();
+						if (Flags.isStatic(flags))
+							return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_INIT_INDEX);
+						else
+							return getMemberCategory(MembersOrderPreferenceCacheCommon.INIT_INDEX);
+					}
 					case IJavaElement.TYPE :
 						return getMemberCategory(MembersOrderPreferenceCacheCommon.TYPE_INDEX);
 					case IJavaElement.PACKAGE_DECLARATION :
@@ -232,7 +210,7 @@ public class JavaElementComparator extends ViewerComparator {
 			String name1= getNonJavaElementLabel(viewer, e1);
 			String name2= getNonJavaElementLabel(viewer, e2);
 			if (name1 != null && name2 != null) {
-				return getComparator().compare(name1, name2);
+				return NATURAL_ORDER.compare(name1, name2);
 			}
 			return 0; // can't compare
 		}
@@ -259,7 +237,7 @@ public class JavaElementComparator extends ViewerComparator {
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
 					try {
-						return getComparator().compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
+						return NATURAL_ORDER.compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
 					} catch (JavaModelException e) {
 						return 0;
 					}
@@ -271,7 +249,7 @@ public class JavaElementComparator extends ViewerComparator {
 			}
 		}
 
-		int cmp= getComparator().compare(name1, name2);
+		int cmp= NATURAL_ORDER.compare(name1, name2);
 		if (cmp != 0) {
 			return cmp;
 		}
@@ -281,7 +259,7 @@ public class JavaElementComparator extends ViewerComparator {
 			String[] params2= ((IMethod) e2).getParameterTypes();
 			int len= Math.min(params1.length, params2.length);
 			for (int i = 0; i < len; i++) {
-				cmp= getComparator().compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
+				cmp= NATURAL_ORDER.compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
 				if (cmp != 0) {
 					return cmp;
 				}
@@ -344,12 +322,12 @@ public class JavaElementComparator extends ViewerComparator {
 
 	private boolean needsClasspathComparison(Object e1, int cat1, Object e2, int cat2) {
 		if ((cat1 == PACKAGEFRAGMENTROOTS && cat2 == PACKAGEFRAGMENTROOTS) ||
-			(cat1 == PACKAGEFRAGMENT &&
-				((IPackageFragment)e1).getParent().getResource() instanceof IProject &&
-				cat2 == PACKAGEFRAGMENTROOTS) ||
-			(cat1 == PACKAGEFRAGMENTROOTS &&
-				cat2 == PACKAGEFRAGMENT &&
-				((IPackageFragment)e2).getParent().getResource() instanceof IProject)) {
+						(cat1 == PACKAGEFRAGMENT &&
+										((IPackageFragment)e1).getParent().getResource() instanceof IProject &&
+										cat2 == PACKAGEFRAGMENTROOTS) ||
+						(cat1 == PACKAGEFRAGMENTROOTS &&
+										cat2 == PACKAGEFRAGMENT &&
+										((IPackageFragment)e2).getParent().getResource() instanceof IProject)) {
 			// when PFRs should be sorted by name, they do not need classpath comparison
 			if (fSortPFRByName && cat1 == PACKAGEFRAGMENTROOTS && cat2 == PACKAGEFRAGMENTROOTS) {
 				boolean areBinPFRs = false;
@@ -358,7 +336,7 @@ public class JavaElementComparator extends ViewerComparator {
 					if ((e1 instanceof IPackageFragmentRoot) && (e2 instanceof IPackageFragmentRoot)) {
 						// continue sorting source roots by classpath order
 						areBinPFRs = ((IPackageFragmentRoot)e1).getKind() == IPackageFragmentRoot.K_BINARY
-								&& ((IPackageFragmentRoot)e2).getKind() == IPackageFragmentRoot.K_BINARY;
+										&& ((IPackageFragmentRoot)e2).getKind() == IPackageFragmentRoot.K_BINARY;
 					}
 				} catch (JavaModelException e) {
 					// areJarPFRs remains false
