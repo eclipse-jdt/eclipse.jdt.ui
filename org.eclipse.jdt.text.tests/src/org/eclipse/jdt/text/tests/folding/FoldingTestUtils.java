@@ -45,6 +45,12 @@ public final class FoldingTestUtils {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
 		ProjectionAnnotationModel model= editor.getAdapter(ProjectionAnnotationModel.class);
 
+		List<IRegion> regions= extractRegions(model);
+		editor.close(false);
+		return regions;
+	}
+
+	public static List<IRegion> extractRegions(ProjectionAnnotationModel model) {
 		List<IRegion> regions= new ArrayList<>();
 		Iterator<Annotation> it= model.getAnnotationIterator();
 		while (it.hasNext()) {
