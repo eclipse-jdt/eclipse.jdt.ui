@@ -368,10 +368,14 @@ final class CompletionProposalComputerDescriptor {
 		} catch (CoreException x) {
 			status= createExceptionStatus(x);
 		} catch (RuntimeException x) {
-			// log error and keep going with other providers
-			String title= (context instanceof JavaContentAssistInvocationContext ctx) && (ctx.getCompilationUnit() instanceof ICompilationUnit cu) ? cu.getElementName() : null;
-			SelectionUtil.logException("computing completion proposal", x, title, context.getDocument(), context.getInvocationOffset()); //$NON-NLS-1$
-			status= createExceptionStatus(x);
+			//No need to log an exception if the user canceled the operation
+			if (!(x.getCause() instanceof InterruptedException)) {
+				// log error and keep going with other providers
+				String title= (context instanceof JavaContentAssistInvocationContext ctx) && (ctx.getCompilationUnit() instanceof ICompilationUnit cu) ? cu.getElementName() : null;
+				SelectionUtil.logException("computing completion proposal", x, title, context.getDocument(), context.getInvocationOffset()); //$NON-NLS-1$
+				status= createExceptionStatus(x);
+			}
+
 			return Collections.emptyList();
 		} finally {
 			monitor.done();
