@@ -118,7 +118,9 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 			if (proposals==null) {
 				IClassFile classFile= ((IClassFileEditorInput) javaEditor.getEditorInput()).getClassFile();
 				ICompilationUnit cu= classFile.getWorkingCopy((WorkingCopyOwner) null, null);
-				Assert.assertNotNull("cu=" + cu + " source=" + classFile.getSource(), proposals);
+				String cuString = cu.toString();
+				cu.discardWorkingCopy();
+				Assert.assertNotNull("cu=" + cuString + " source=" + classFile.getSource(), proposals);
 			}
 			List<ICompletionProposal> list= Arrays.asList(proposals);
 			return list;

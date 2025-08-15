@@ -19,6 +19,9 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -58,16 +61,25 @@ public class JavadocHoverTests extends CoreTests {
 
 	private IJavaProject fJProject1;
 
+	private List<ICompilationUnit> workingCopies;
+
 	@Before
 	public void setUp() throws Exception {
 		fJProject1= pts.getProject();
 		JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		assertNotNull(JavaProjectHelper.addRTJar_16(fJProject1, false));
+		workingCopies = new ArrayList<>();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
+		try {
+			for (ICompilationUnit workingCopy : workingCopies) {
+				workingCopy.discardWorkingCopy();
+			}
+		} finally {
+			JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
+		}
 	}
 
 	protected ICompilationUnit getWorkingCopy(String path, String source, WorkingCopyOwner owner) throws JavaModelException {
@@ -78,6 +90,7 @@ public class JavadocHoverTests extends CoreTests {
 			workingCopy.becomeWorkingCopy(null/*no progress monitor*/);
 		workingCopy.getBuffer().setContents(source);
 		workingCopy.makeConsistent(null/*no progress monitor*/);
+		workingCopies.add(workingCopy);
 		return workingCopy;
 	}
 
