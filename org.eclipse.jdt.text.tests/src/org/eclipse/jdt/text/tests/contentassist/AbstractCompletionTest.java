@@ -28,6 +28,7 @@ import org.junit.rules.TestName;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -56,7 +57,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.tests.util.DisplayHelper;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
