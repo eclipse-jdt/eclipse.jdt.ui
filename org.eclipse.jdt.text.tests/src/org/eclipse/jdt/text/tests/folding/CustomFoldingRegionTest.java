@@ -16,6 +16,8 @@ package org.eclipse.jdt.text.tests.folding;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.After;
@@ -34,7 +36,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -43,6 +50,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 @RunWith(Parameterized.class)
 public class CustomFoldingRegionTest {
@@ -672,6 +681,58 @@ public class CustomFoldingRegionTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 11);//custom region
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 6, 10);//test
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 7, 8);//if
+	}
+
+	@Test
+	public void testFoldingUpdateWithMultipleCustomRegionsDoesNotSwitchRegions() throws Exception {
+		String code= """
+				package org.example.test;
+
+				// region outer
+
+				public class Test {
+					// region inner
+					void someMethod() {
+						// content
+					}
+					// endregion
+				}
+
+				// endregion outer
+				""";
+		ICompilationUnit cu= fPackageFragment.createCompilationUnit("Test.java", code, true, null);
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+		try {
+			ProjectionAnnotationModel model= editor.getAdapter(ProjectionAnnotationModel.class);
+
+			List<IRegion> initialRegions= FoldingTestUtils.extractRegions(model);
+
+			assertEquals(3, initialRegions.size());
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 2, 12);//outer
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 5, 9);//inner
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 6, 7);//someMethod
+
+			List<Position> positions= new ArrayList<>();
+			Iterator<Annotation> it= model.getAnnotationIterator();
+			while (it.hasNext()) {
+				Annotation a= it.next();
+				if (a instanceof ProjectionAnnotation) {
+					Position p= model.getPosition(a);
+					positions.add(p);
+				}
+			}
+			assertEquals(initialRegions.size(), positions.size());
+
+			String additionalText= "more ";
+			editor.getViewer().getDocument().replace(code.indexOf("content"), 0, additionalText);
+
+			for(int i= 0; i < positions.size(); i++) {
+				assertEquals(initialRegions.get(i).getOffset(), positions.get(i).getOffset());
+				assertEquals(initialRegions.get(i).getLength() + additionalText.length(), positions.get(i).getLength());
+			}
+		} finally {
+			editor.close(false);
+		}
 	}
 
 	private List<IRegion> getProjectionRangesOfFile(String str) throws Exception {

@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -74,15 +76,24 @@ public class MarkdownCommentTests extends CoreTests {
 	static final char JEM_COMPILATIONUNIT= '{';
 	static final char JEM_TYPE= LINK_BRACKET_REPLACEMENT; // replacement for '['
 
+	private List<ICompilationUnit> workingCopies;
+
 	@Before
 	public void setUp() throws Exception {
 		fJProject1= pts.getProject();
 		JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		workingCopies = new ArrayList<>();
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
+		try {
+			for (ICompilationUnit workingCopy : workingCopies) {
+				workingCopy.discardWorkingCopy();
+			}
+		} finally {
+			JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
+		}
 	}
 
 	protected ICompilationUnit getWorkingCopy(String path, String source, WorkingCopyOwner owner) throws JavaModelException {
@@ -93,6 +104,7 @@ public class MarkdownCommentTests extends CoreTests {
 			workingCopy.becomeWorkingCopy(null/*no progress monitor*/);
 		workingCopy.getBuffer().setContents(source);
 		workingCopy.makeConsistent(null/*no progress monitor*/);
+		workingCopies.add(workingCopy);
 		return workingCopy;
 	}
 

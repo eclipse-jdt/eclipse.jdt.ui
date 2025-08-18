@@ -29,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
 import org.eclipse.swt.custom.StyledText;
 
@@ -41,7 +42,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.codemining.ICodeMiningProvider;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
-import org.eclipse.jface.text.tests.util.DisplayHelper;
 
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
