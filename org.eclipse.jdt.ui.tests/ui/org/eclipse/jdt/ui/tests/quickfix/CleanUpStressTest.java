@@ -779,8 +779,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			public class ExceptionTestCaseTest extends junit.framework.TestCase {
 
 			    static public class ThrowExceptionTestCase extends ExceptionTestCase {
-			        public ThrowExceptionTestCase(final String name,
-			                final Class exception) {
+			        public ThrowExceptionTestCase(final String name, final Class exception) {
 			            super(name, exception);
 			        }
 			        public void test() {
@@ -789,8 +788,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    }
 
 			    static public class ThrowNoExceptionTestCase extends ExceptionTestCase {
-			        public ThrowNoExceptionTestCase(final String name,
-			                final Class exception) {
+			        public ThrowNoExceptionTestCase(final String name, final Class exception) {
 			            super(name, exception);
 			        }
 			        public void test() {
@@ -800,8 +798,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    static public class ThrowRuntimeExceptionTestCase
 			            extends
 			                ExceptionTestCase {
-			        public ThrowRuntimeExceptionTestCase(final String name,
-			                final Class exception) {
+			        public ThrowRuntimeExceptionTestCase(final String name, final Class exception) {
 			            super(name, exception);
 			        }
 			        public void test() {
@@ -1133,8 +1130,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Adds a failure to the list of failures. The passed in exception caused
 			     * the failure.
 			     */
-			    public synchronized void addFailure(final Test test,
-			            final AssertionFailedError t) {
+			    public synchronized void addFailure(final Test test, final AssertionFailedError t) {
 			        this.fFailures.addElement(new TestFailure(test, t));
 			        for (final Object element : this.cloneListeners()) {
 			            ((TestListener) element).addFailure(test, t);
@@ -1532,8 +1528,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.fLoader = new TestCaseClassLoader();
 			    }
 
-			    Class classFromFile(final String classFileName)
-			            throws ClassNotFoundException {
+			    Class classFromFile(final String classFileName) throws ClassNotFoundException {
 			        final String className = this.classNameFromFile(classFileName);
 			        if (!this.fLoader.isExcluded(className)) {
 			            return this.fLoader.loadClass(className, false);
@@ -1688,8 +1683,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    }
 
 			    @Override
-			    public synchronized Class loadClass(final String name,
-			            final boolean resolve) throws ClassNotFoundException {
+			    public synchronized Class loadClass(final String name, final boolean resolve)
+			            throws ClassNotFoundException {
 
 			        Class c = this.findLoadedClass(name);
 			        if (c != null) {
@@ -1956,8 +1951,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 
 			        @Override
-			        public void testFailed(final int status, final Test test,
-			                final Throwable t) {
+			        public void testFailed(final int status, final Test test, final Throwable t) {
 			        }
 
 			        @Override
@@ -2178,8 +2172,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.fTests.addElement(test);
 			    }
 
-			    private void addTestMethod(final Method m, final Vector names,
-			            final Class theClass) {
+			    private void addTestMethod(final Method m, final Vector names, final Class theClass) {
 			        final String name = m.getName();
 			        if (names.contains(name)) {
 			            return;
@@ -2356,8 +2349,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    /**
 			     * Asserts that two booleans are equal.
 			     */
-			    static public void assertEquals(final boolean expected,
-			            final boolean actual) {
+			    static public void assertEquals(final boolean expected, final boolean actual) {
 			        Assert.assertEquals(null, expected, actual);
 			    }
 
@@ -2385,8 +2377,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Asserts that two floats are equal concerning a delta. If the expected
 			     * value is infinity then the delta value is ignored.
 			     */
-			    static public void assertEquals(final float expected, final float actual,
-			            final float delta) {
+			    static public void assertEquals(final float expected, final float actual, final float delta) {
 			        Assert.assertEquals(null, expected, actual, delta);
 			    }
 			    /**
@@ -2405,8 +2396,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Asserts that two objects are equal. If they are not an
 			     * AssertionFailedError is thrown.
 			     */
-			    static public void assertEquals(final Object expected,
-			            final Object actual) {
+			    static public void assertEquals(final Object expected, final Object actual) {
 			        Assert.assertEquals(null, expected, actual);
 			    }
 			    /**
@@ -2419,8 +2409,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Asserts that two booleans are equal. If they are not an
 			     * AssertionFailedError is thrown with the given message.
 			     */
-			    static public void assertEquals(final String message,
-			            final boolean expected, final boolean actual) {
+			    static public void assertEquals(final String message, final boolean expected,
+			            final boolean actual) {
 			        Assert.assertEquals(message, new Boolean(expected),
 			                new Boolean(actual));
 			    }
@@ -2488,8 +2478,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Asserts that two ints are equal. If they are not an AssertionFailedError
 			     * is thrown with the given message.
 			     */
-			    static public void assertEquals(final String message, final int expected,
-			            final int actual) {
+			    static public void assertEquals(final String message, final int expected, final int actual) {
 			        Assert.assertEquals(message, new Integer(expected),
 			                new Integer(actual));
 			    }
@@ -2526,8 +2515,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    /**
 			     * Asserts that two Strings are equal.
 			     */
-			    static public void assertEquals(final String expected,
-			            final String actual) {
+			    static public void assertEquals(final String expected, final String actual) {
 			        Assert.assertEquals(null, expected, actual);
 			    }
 			    /**
@@ -2554,8 +2542,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Asserts that a condition is false. If it isn't it throws an
 			     * AssertionFailedError with the given message.
 			     */
-			    static public void assertFalse(final String message,
-			            final boolean condition) {
+			    static public void assertFalse(final String message, final boolean condition) {
 			        Assert.assertTrue(message, !condition);
 			    }
 			    /**
@@ -2568,24 +2555,22 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Asserts that an object isn't null. If it is an AssertionFailedError is
 			     * thrown with the given message.
 			     */
-			    static public void assertNotNull(final String message,
-			            final Object object) {
+			    static public void assertNotNull(final String message, final Object object) {
 			        Assert.assertTrue(message, object != null);
 			    }
 			    /**
 			     * Asserts that two objects refer to the same object. If they are not the
 			     * same an AssertionFailedError is thrown.
 			     */
-			    static public void assertNotSame(final Object expected,
-			            final Object actual) {
+			    static public void assertNotSame(final Object expected, final Object actual) {
 			        Assert.assertNotSame(null, expected, actual);
 			    }
 			    /**
 			     * Asserts that two objects refer to the same object. If they are not an
 			     * AssertionFailedError is thrown with the given message.
 			     */
-			    static public void assertNotSame(final String message,
-			            final Object expected, final Object actual) {
+			    static public void assertNotSame(final String message, final Object expected,
+			            final Object actual) {
 			        if (expected == actual) {
 			            Assert.failSame(message);
 			        }
@@ -2632,8 +2617,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Asserts that a condition is true. If it isn't it throws an
 			     * AssertionFailedError with the given message.
 			     */
-			    static public void assertTrue(final String message,
-			            final boolean condition) {
+			    static public void assertTrue(final String message, final boolean condition) {
 			        if (!condition) {
 			            Assert.fail(message);
 			        }
@@ -2650,8 +2634,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    static public void fail(final String message) {
 			        throw new AssertionFailedError(message);
 			    }
-			    static private void failNotEquals(final String message,
-			            final Object expected, final Object actual) {
+			    static private void failNotEquals(final String message, final Object expected,
+			            final Object actual) {
 			        Assert.fail(Assert.format(message, expected, actual));
 			    }
 
@@ -2673,8 +2657,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.fail(formatted + "expected not same"); //$NON-NLS-1$
 			    }
 
-			    static String format(final String message, final Object expected,
-			            final Object actual) {
+			    static String format(final String message, final Object expected, final Object actual) {
 			        String formatted = ""; //$NON-NLS-1$
 			        if (message != null) {
 			            formatted = message + " "; //$NON-NLS-1$
@@ -2746,8 +2729,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        return result.elements();
 			    }
 
-			    void gatherFiles(final File classRoot, final String classFileName,
-			            final Hashtable result) {
+			    void gatherFiles(final File classRoot, final String classFileName, final Hashtable result) {
 			        final File thisRoot = new File(classRoot, classFileName);
 			        if (thisRoot.isFile()) {
 			            if (this.isTestClass(classFileName)) {
@@ -2774,8 +2756,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    Vector splitClassPath(final String classPath) {
 			        final Vector result = new Vector();
 			        final String separator = System.getProperty("path.separator"); //$NON-NLS-1$
-			        final StringTokenizer tokenizer = new StringTokenizer(classPath,
-			                separator);
+			        final StringTokenizer tokenizer = new StringTokenizer(classPath, separator);
 			        while (tokenizer.hasMoreTokens()) {
 			            result.addElement(tokenizer.nextToken());
 			        }
@@ -3132,8 +3113,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    }
 
 			    @Override
-			    public void testFailed(final int status, final Test test,
-			            final Throwable t) {
+			    public void testFailed(final int status, final Test test, final Throwable t) {
 			    }
 
 			    @Override
@@ -3494,15 +3474,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			public class ComparisonFailureTest extends TestCase {
 
 			    public void testComparisonErrorEndSame() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
-			                "cb"); //$NON-NLS-1$
+			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", "cb"); //$NON-NLS-1$ //$NON-NLS-2$
 			        Assert.assertEquals("expected:<a...> but was:<c...>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
 
 			    public void testComparisonErrorEndSameComplete() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, "bc", //$NON-NLS-1$
-			                "abc"); //$NON-NLS-1$
+			        final ComparisonFailure failure = new ComparisonFailure(null, "bc", "abc"); //$NON-NLS-1$ //$NON-NLS-2$
 			        Assert.assertEquals("expected:<...> but was:<a...>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
@@ -3513,8 +3491,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    }
 
 			    public void testComparisonErrorOverlapingMatches() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, "abc", //$NON-NLS-1$
-			                "abbc"); //$NON-NLS-1$
+			        final ComparisonFailure failure = new ComparisonFailure(null, "abc", "abbc"); //$NON-NLS-1$ //$NON-NLS-2$
 			        Assert.assertEquals("expected:<......> but was:<...b...>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
@@ -3527,42 +3504,36 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    }
 
 			    public void testComparisonErrorSame() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
-			                "ab"); //$NON-NLS-1$
+			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", "ab"); //$NON-NLS-1$ //$NON-NLS-2$
 			        Assert.assertEquals("expected:<ab> but was:<ab>", failure.getMessage()); //$NON-NLS-1$
 			    }
 
 			    public void testComparisonErrorStartAndEndSame() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, "abc", //$NON-NLS-1$
-			                "adc"); //$NON-NLS-1$
+			        final ComparisonFailure failure = new ComparisonFailure(null, "abc", "adc"); //$NON-NLS-1$ //$NON-NLS-2$
 			        Assert.assertEquals("expected:<...b...> but was:<...d...>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
 
 			    public void testComparisonErrorStartSame() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, "ba", //$NON-NLS-1$
-			                "bc"); //$NON-NLS-1$
+			        final ComparisonFailure failure = new ComparisonFailure(null, "ba", "bc"); //$NON-NLS-1$ //$NON-NLS-2$
 			        Assert.assertEquals("expected:<...a> but was:<...c>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
 
 			    public void testComparisonErrorStartSameComplete() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
-			                "abc"); //$NON-NLS-1$
+			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", "abc"); //$NON-NLS-1$ //$NON-NLS-2$
 			        Assert.assertEquals("expected:<...> but was:<...c>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
 
 			    public void testComparisonErrorWithActualNull() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, "a", //$NON-NLS-1$
-			                null);
+			        final ComparisonFailure failure = new ComparisonFailure(null, "a", null); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<a> but was:<null>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
 
 			    public void testComparisonErrorWithExpectedNull() {
-			        final ComparisonFailure failure = new ComparisonFailure(null, null,
-			                "a"); //$NON-NLS-1$
+			        final ComparisonFailure failure = new ComparisonFailure(null, null, "a"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<null> but was:<a>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
@@ -3642,25 +3613,20 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.printFooter(result);
 			    }
 
-			    public void printDefect(final TestFailure booBoo, final int count) { // only
-			                                                                         // public
-			                                                                         // for
-			                                                                         // testing
-			                                                                         // purposes
+			    public void printDefect(final TestFailure booBoo, final int count) { // only public for
+			                                                             // testing purposes
 			        this.printDefectHeader(booBoo, count);
 			        this.printDefectTrace(booBoo);
 			    }
 
-			    protected void printDefectHeader(final TestFailure booBoo,
-			            final int count) {
+			    protected void printDefectHeader(final TestFailure booBoo, final int count) {
 			        // I feel like making this a println, then adding a line giving the
 			        // throwable a chance to print something
 			        // before we get to the stack trace.
 			        this.getWriter().print(count + ") " + booBoo.failedTest()); //$NON-NLS-1$
 			    }
 
-			    protected void printDefects(final Enumeration booBoos, final int count,
-			            final String type) {
+			    protected void printDefects(final Enumeration booBoos, final int count, final String type) {
 			        if (count == 0) {
 			            return;
 			        }
@@ -3819,8 +3785,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * @param expected the expected string value
 			     * @param actual   the actual string value
 			     */
-			    public ComparisonFailure(final String message, final String expected,
-			            final String actual) {
+			    public ComparisonFailure(final String message, final String expected, final String actual) {
 			        super(message);
 			        this.fExpected = expected;
 			        this.fActual = actual;
@@ -3839,8 +3804,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                    this.fActual);
 			        }
 
-			        final int end = Math.min(this.fExpected.length(),
-			                this.fActual.length());
+			        final int end = Math.min(this.fExpected.length(), this.fActual.length());
 
 			        int i = 0;
 			        for (; i < end; i++) {
@@ -4134,8 +4098,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    }
 
 			    @Override
-			    public Class load(final String suiteClassName)
-			            throws ClassNotFoundException {
+			    public Class load(final String suiteClassName) throws ClassNotFoundException {
 			        return this.createLoader().loadClass(suiteClassName, true);
 			    }
 
@@ -4156,8 +4119,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Uses the system class loader to load the test class
 			     */
 			    @Override
-			    public Class load(final String suiteClassName)
-			            throws ClassNotFoundException {
+			    public Class load(final String suiteClassName) throws ClassNotFoundException {
 			        return Class.forName(suiteClassName);
 			    }
 			    /**
@@ -4227,10 +4189,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
 
 			public class TextRunnerTest extends TestCase {
 
-			    void execTest(final String testClass, final boolean success)
-			            throws Exception {
-			        final String java = System.getProperty("java.home") + File.separator //$NON-NLS-1$
-			                + "bin" + File.separator + "java"; //$NON-NLS-1$ //$NON-NLS-2$
+			    void execTest(final String testClass, final boolean success) throws Exception {
+			        final String java = System.getProperty("java.home") + File.separator + "bin" //$NON-NLS-1$ //$NON-NLS-2$
+			                + File.separator + "java"; //$NON-NLS-1$
 			        final String cp = System.getProperty("java.class.path"); //$NON-NLS-1$
 			        // use -classpath for JDK 1.1.7 compatibility
 			        final String[] cmd = {java, "-classpath", cp, "junit.textui.TestRunner", //$NON-NLS-1$ //$NON-NLS-2$
@@ -4266,8 +4227,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            }
 			        }));
 			        try {
-			            final TestResult result = junit.textui.TestRunner
-			                    .run(new TestSuite());
+			            final TestResult result = junit.textui.TestRunner.run(new TestSuite());
 			            Assert.assertTrue(result.wasSuccessful());
 			        } finally {
 			            System.setOut(oldOut);
@@ -4662,7 +4622,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    @Override
 			    public int hashCode() {
 			        int hash = 0;
-			        for (Object m : this.fMonies) {
+			        for (final Object m : this.fMonies) {
 			            hash ^= m.hashCode();
 			        }
 			        return hash;
@@ -5055,15 +5015,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    }
 			    public void testNormalize3() {
 			        // {[12 CHF][7 USD]} - {[12 CHF][3 USD]} == [4 USD]
-			        final IMoney ms1 = MoneyBag.create(new Money(12, "CHF"), //$NON-NLS-1$
-			                new Money(3, "USD")); //$NON-NLS-1$
+			        final IMoney ms1 = MoneyBag.create(new Money(12, "CHF"), new Money(3, "USD")); //$NON-NLS-1$ //$NON-NLS-2$
 			        final Money expected = new Money(4, "USD"); //$NON-NLS-1$
 			        Assert.assertEquals(expected, this.fMB1.subtract(ms1));
 			    }
 			    public void testNormalize4() {
 			        // [12 CHF] - {[12 CHF][3 USD]} == [-3 USD]
-			        final IMoney ms1 = MoneyBag.create(new Money(12, "CHF"), //$NON-NLS-1$
-			                new Money(3, "USD")); //$NON-NLS-1$
+			        final IMoney ms1 = MoneyBag.create(new Money(12, "CHF"), new Money(3, "USD")); //$NON-NLS-1$ //$NON-NLS-2$
 			        final Money expected = new Money(-3, "USD"); //$NON-NLS-1$
 			        Assert.assertEquals(expected, this.f12CHF.subtract(ms1));
 			    }
@@ -5170,8 +5128,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        // another class loader and we can't do a successfull downcast to
 			        // ClassLoaderTestCase.
 			        //
-			        final Method method = loadedClass.getDeclaredMethod("verify", //$NON-NLS-1$
-			                new Class[0]);
+			        final Method method = loadedClass.getDeclaredMethod("verify", new Class[0]); //$NON-NLS-1$
 			        method.invoke(o, new Class[0]);
 			    }
 
@@ -5180,8 +5137,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.assertNotNull("Cannot find test.jar", url); //$NON-NLS-1$
 			        final String path = url.getFile();
 			        final TestCaseClassLoader loader = new TestCaseClassLoader(path);
-			        final Class loadedClass = loader
-			                .loadClass("junit.tests.runner.LoadedFromJar", true); //$NON-NLS-1$
+			        final Class loadedClass = loader.loadClass("junit.tests.runner.LoadedFromJar", //$NON-NLS-1$
+			                true);
 			        final Object o = loadedClass.newInstance();
 			        //
 			        // Invoke the assertClassLoaders method via reflection.
@@ -5189,8 +5146,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        // another class loader and we can't do a successfull downcast to
 			        // ClassLoaderTestCase.
 			        //
-			        final Method method = loadedClass.getDeclaredMethod("verify", //$NON-NLS-1$
-			                new Class[0]);
+			        final Method method = loadedClass.getDeclaredMethod("verify", new Class[0]); //$NON-NLS-1$
 			        method.invoke(o, new Class[0]);
 			    }
 			}""";
