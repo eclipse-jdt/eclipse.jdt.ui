@@ -53,6 +53,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
+import java.util.Comparator;
+
 
 /**
  * Viewer comparator for Java elements. Ordered by element category, then by element name.
@@ -88,6 +90,8 @@ public class JavaElementComparator extends ViewerComparator {
 
 	private static final int JAVAELEMENTS= 50;
 	private static final int OTHERS= 51;
+
+	private static final Comparator<String> NATURAL_ORDER = new NaturalOrderComparator();
 
 	private final MembersOrderPreferenceCache fMemberOrderCache;
 	private final boolean fSortPFRByName;
@@ -232,7 +236,7 @@ public class JavaElementComparator extends ViewerComparator {
 			String name1= getNonJavaElementLabel(viewer, e1);
 			String name2= getNonJavaElementLabel(viewer, e2);
 			if (name1 != null && name2 != null) {
-				return getComparator().compare(name1, name2);
+				return NATURAL_ORDER.compare(name1, name2);
 			}
 			return 0; // can't compare
 		}
@@ -259,7 +263,7 @@ public class JavaElementComparator extends ViewerComparator {
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
 					try {
-						return getComparator().compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
+						return NATURAL_ORDER.compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
 					} catch (JavaModelException e) {
 						return 0;
 					}
@@ -271,7 +275,7 @@ public class JavaElementComparator extends ViewerComparator {
 			}
 		}
 
-		int cmp= getComparator().compare(name1, name2);
+		int cmp= NATURAL_ORDER.compare(name1, name2);
 		if (cmp != 0) {
 			return cmp;
 		}
@@ -281,7 +285,7 @@ public class JavaElementComparator extends ViewerComparator {
 			String[] params2= ((IMethod) e2).getParameterTypes();
 			int len= Math.min(params1.length, params2.length);
 			for (int i = 0; i < len; i++) {
-				cmp= getComparator().compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
+				cmp= NATURAL_ORDER.compare(Signature.toString(params1[i]), Signature.toString(params2[i]));
 				if (cmp != 0) {
 					return cmp;
 				}
