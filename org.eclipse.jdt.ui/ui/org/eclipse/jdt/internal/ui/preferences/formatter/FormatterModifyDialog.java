@@ -1578,6 +1578,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.gap()
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_enable_javadoc, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT)
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_enable_block, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT)
+				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_enable_markdown, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_MARKDOWN_COMMENT)
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_enable_line, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, pref -> {
 					CheckboxPreference child= fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_comments_pref_format_line_comments_on_first_column,
 							DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT_STARTING_ON_FIRST_COLUMN, CheckboxPreference.FALSE_TRUE);
