@@ -83,6 +83,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_comments_pref_enable_block;
 	public static String FormatterModifyDialog_comments_pref_enable_javadoc;
 	public static String FormatterModifyDialog_comments_pref_enable_line;
+	public static String FormatterModifyDialog_comments_pref_enable_markdown;
 	public static String FormatterModifyDialog_comments_pref_format_code_snippets;
 	public static String FormatterModifyDialog_comments_pref_format_header;
 	public static String FormatterModifyDialog_comments_pref_format_html;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ public class JavaFormattingContext extends FormattingContext {
 		return new String[] {
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT,
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_MARKDOWN_COMMENT,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE,
@@ -49,7 +50,7 @@ public class JavaFormattingContext extends FormattingContext {
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT,
-			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML };	}
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML};}
 
 
 	/*

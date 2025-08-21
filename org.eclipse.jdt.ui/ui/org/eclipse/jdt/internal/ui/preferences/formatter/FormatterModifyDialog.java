@@ -1576,6 +1576,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 							DefaultCodeFormatterConstants.FORMATTER_COMMENT_COUNT_LINE_LENGTH_FROM_STARTING_POSITION, CheckboxPreference.FALSE_TRUE);
 				})
 				.gap()
+				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_enable_markdown, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_MARKDOWN_COMMENT)
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_enable_javadoc, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT)
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_enable_block, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT)
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_enable_line, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, pref -> {
