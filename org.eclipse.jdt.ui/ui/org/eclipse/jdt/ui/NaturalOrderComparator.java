@@ -5,6 +5,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
+ * Comparator for natural ordering of strings.
+ *
+ * Natural ordering means that "File2.java" comes before "File10.java",
+ * taking into account numeric values within strings instead of using
+ * pure lexicographical order.
+ *
  * @since 3.36
  */
 public class NaturalOrderComparator implements Comparator<String> {
@@ -44,6 +50,9 @@ public class NaturalOrderComparator implements Comparator<String> {
         return s1.compareTo(s2);
     }
 
+    /**
+     * Compare two string parts, either both numeric or both non-numeric.
+     */
     private int compareParts(String part1, String part2) {
         boolean numeric1 = Character.isDigit(part1.charAt(0));
         boolean numeric2 = Character.isDigit(part2.charAt(0));
@@ -61,6 +70,9 @@ public class NaturalOrderComparator implements Comparator<String> {
         return part1.compareToIgnoreCase(part2);
     }
 
+    /**
+     * Splits a string into alternating sequences of digits and non-digits.
+     */
     private LinkedList<String> splitIntoDigitAndNonDigitParts(String input) {
         LinkedList<String> parts = new LinkedList<>();
         int partStart = 0;
@@ -78,6 +90,10 @@ public class NaturalOrderComparator implements Comparator<String> {
         return parts;
     }
 
+    /**
+     * Removes leading zeros from a numeric string.
+     * Returns an empty string if the number is all zeros.
+     */
     private String stripLeadingZeros(String input) {
         for (int i = 0; i < input.length(); i++) {
             if (input.charAt(i) != '0') {
