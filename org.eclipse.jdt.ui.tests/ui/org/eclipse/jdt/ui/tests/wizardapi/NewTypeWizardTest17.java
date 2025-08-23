@@ -14,8 +14,8 @@
 
 package org.eclipse.jdt.ui.tests.wizardapi;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -362,7 +362,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -426,7 +426,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -491,7 +491,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -555,7 +555,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -618,7 +618,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -773,7 +773,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -844,7 +844,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -916,7 +916,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -987,7 +987,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -1057,7 +1057,7 @@ public class NewTypeWizardTest17 {
 		assertNotNull(status);
 		assertEquals(IStatus.OK, status.getSeverity());
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -1233,7 +1233,7 @@ public class NewTypeWizardTest17 {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -1297,7 +1297,7 @@ public class NewTypeWizardTest17 {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -1337,7 +1337,7 @@ public class NewTypeWizardTest17 {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -1384,7 +1384,7 @@ public class NewTypeWizardTest17 {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		wizardPage.createTypes(null);
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
