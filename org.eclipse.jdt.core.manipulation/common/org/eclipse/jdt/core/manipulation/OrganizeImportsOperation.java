@@ -835,10 +835,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				Set<String> oldModulePackages= new HashSet<>();
 				oldModuleImports.put(id, oldModulePackages);
 				if (curr.resolveBinding() instanceof IModuleBinding binding) {
-					IPackageBinding[] packageBindings= binding.getExportedPackages();
-					for (IPackageBinding packageBinding : packageBindings) {
-						oldModulePackages.add(packageBinding.getName());
-					}
+					List<String> exportedPackageNames= ImportRewrite.getPackageNamesForModule(binding);
+					oldModulePackages.addAll(exportedPackageNames);
 				}
 			} else if (curr.isOnDemand()) {
 				oldDemandImports.add(id);
