@@ -67,15 +67,11 @@ public class NecessaryParenthesesChecker {
 				|| type == ASTNode.PATTERN_INSTANCEOF_EXPRESSION
 				|| type == ASTNode.ARRAY_CREATION
 				|| type == ASTNode.ASSIGNMENT
-				|| (type == ASTNode.SWITCH_EXPRESSION && switchExpressionNeedsParentheses(expression));
+				|| (type == ASTNode.SWITCH_EXPRESSION);
 	}
 
-	private static boolean switchExpressionNeedsParentheses(Expression expression) {
-		ASTNode parent= expression.getParent();
-		while (parent instanceof ParenthesizedExpression) {
-			parent= parent.getParent();
-		}
-		int type= parent.getNodeType();
+	private static boolean needsParenthesesForSwitchExpression(Expression expression) {
+		int type= expression.getNodeType();
 		return type == ASTNode.INFIX_EXPRESSION
 				|| type == ASTNode.CONDITIONAL_EXPRESSION
 				|| type == ASTNode.PREFIX_EXPRESSION
@@ -373,7 +369,7 @@ public class NecessaryParenthesesChecker {
 			Expression parentExpression= (Expression)parent;
 
 			if (expression instanceof SwitchExpression) {
-				return true;
+				return needsParenthesesForSwitchExpression(parentExpression);
 			}
 
 			if ((expression instanceof PrefixExpression || expression instanceof PostfixExpression) && locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {

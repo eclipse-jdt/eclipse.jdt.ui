@@ -1190,7 +1190,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testDoNotReturnParenthesesIssue2451_1() throws Exception {
+	public void testDoNotRemoveParenthesesIssue2451_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
@@ -1215,7 +1215,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testDoNotReturnParenthesesIssue2451_2() throws Exception {
+	public void testDoNotRemoveParenthesesIssue2451_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
@@ -1240,7 +1240,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testDoNotReturnParenthesesIssue2451_3() throws Exception {
+	public void testRemoveParenthesesIssue2451_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
