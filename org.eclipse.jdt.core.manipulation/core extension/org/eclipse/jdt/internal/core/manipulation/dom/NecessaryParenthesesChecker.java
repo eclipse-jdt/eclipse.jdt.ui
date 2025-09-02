@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 IBM Corporation and others.
+ * Copyright (c) 2011, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
@@ -65,7 +66,23 @@ public class NecessaryParenthesesChecker {
 				|| type == ASTNode.INSTANCEOF_EXPRESSION
 				|| type == ASTNode.PATTERN_INSTANCEOF_EXPRESSION
 				|| type == ASTNode.ARRAY_CREATION
-				|| type == ASTNode.ASSIGNMENT;
+				|| type == ASTNode.ASSIGNMENT
+				|| (type == ASTNode.SWITCH_EXPRESSION);
+	}
+
+	private static boolean needsParenthesesForSwitchExpression(Expression expression) {
+		int type= expression.getNodeType();
+		return type == ASTNode.INFIX_EXPRESSION
+				|| type == ASTNode.CONDITIONAL_EXPRESSION
+				|| type == ASTNode.PREFIX_EXPRESSION
+				|| type == ASTNode.POSTFIX_EXPRESSION
+				|| type == ASTNode.CAST_EXPRESSION
+				|| type == ASTNode.INSTANCEOF_EXPRESSION
+				|| type == ASTNode.PATTERN_INSTANCEOF_EXPRESSION
+				|| type == ASTNode.ARRAY_CREATION
+				|| type == ASTNode.ASSIGNMENT
+				|| type == ASTNode.FIELD_ACCESS
+				|| type == ASTNode.METHOD_INVOCATION;
 	}
 
 	private static boolean locationNeedsParentheses(StructuralPropertyDescriptor locationInParent) {
@@ -350,6 +367,10 @@ public class NecessaryParenthesesChecker {
 
 		if (parent instanceof Expression) {
 			Expression parentExpression= (Expression)parent;
+
+			if (expression instanceof SwitchExpression) {
+				return needsParenthesesForSwitchExpression(parentExpression);
+			}
 
 			if ((expression instanceof PrefixExpression || expression instanceof PostfixExpression) && locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
 				return true;

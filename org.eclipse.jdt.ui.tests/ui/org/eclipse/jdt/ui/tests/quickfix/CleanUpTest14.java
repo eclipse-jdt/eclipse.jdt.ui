@@ -1189,4 +1189,101 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
+	public void testDoNotRemoveParenthesesIssue2451_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+				public Integer getInteger(int i) {
+					return (switch (i) {
+						case 0 -> Integer.valueOf(4);
+						case 1 -> Integer.valueOf(5);
+						default -> Integer.valueOf(0);
+					}).intValue();
+				}
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotRemoveParenthesesIssue2451_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+				public int getInteger(int i) {
+					return (switch (i) {
+						case 0 -> Integer.valueOf(4);
+						case 1 -> Integer.valueOf(5);
+						default -> Integer.valueOf(0);
+					}).MAX_VALUE;
+				}
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testRemoveParenthesesIssue2451_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+
+				public int getInt(Integer i) {
+					return i.intValue();
+				}
+
+				public int getInteger(int i) {
+					return getInt((switch (i) {
+						case 0 -> Integer.valueOf(4);
+						case 1 -> Integer.valueOf(5);
+						default -> Integer.valueOf(0);
+					}));
+				}
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		String expected= """
+				package test1;
+
+				public class E1 {
+
+					public int getInt(Integer i) {
+						return i.intValue();
+					}
+
+					public int getInteger(int i) {
+						return getInt(switch (i) {
+							case 0 -> Integer.valueOf(4);
+							case 1 -> Integer.valueOf(5);
+							default -> Integer.valueOf(0);
+						});
+					}
+				}
+				"""; //
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
 }
