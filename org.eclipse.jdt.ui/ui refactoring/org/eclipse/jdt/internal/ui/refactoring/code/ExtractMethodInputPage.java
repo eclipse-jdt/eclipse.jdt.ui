@@ -178,24 +178,26 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		}
 
 		Button finalButton= new Button(accessModifiersGroup, SWT.CHECK);
-		finalButton.setSelection(fSettings.getBoolean(MAKE_FINAL));
-		finalButton.setText(RefactoringMessages.ExtractMethodInputPage_final);
 		finalButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				setFinal(((Button)event.widget).getSelection());
 			}
 		});
+		finalButton.setSelection(fSettings.getBoolean(MAKE_FINAL));
+		setFinal(fSettings.getBoolean(MAKE_FINAL));
+		finalButton.setText(RefactoringMessages.ExtractMethodInputPage_final);
 
 		Button synchronizedButton= new Button(accessModifiersGroup, SWT.CHECK);
-		synchronizedButton.setSelection(fSettings.getBoolean(MAKE_SYNCHRONIZED));
-		synchronizedButton.setText(RefactoringMessages.ExtractMethodInputPage_synchronized);
 		synchronizedButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				setSynchronized(((Button)event.widget).getSelection());
 			}
 		});
+		synchronizedButton.setSelection(fSettings.getBoolean(MAKE_SYNCHRONIZED));
+		setSynchronized(fSettings.getBoolean(MAKE_SYNCHRONIZED));
+		synchronizedButton.setText(RefactoringMessages.ExtractMethodInputPage_synchronized);
 
 		updateAccessModifiers();
 		layouter.perform(label, accessModifiersGroup, 1);
