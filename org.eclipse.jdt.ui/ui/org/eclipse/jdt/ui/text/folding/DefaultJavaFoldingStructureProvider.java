@@ -77,7 +77,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
@@ -360,7 +359,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		private FoldingStructureComputationContext ctx;
 		private List<Position> topLevelTypes = new ArrayList<>();
 		private ICompilationUnit topLevelCompilationUnit;
-		private Deque<IRegion> currentSurroundingElemenPositions = new ArrayDeque<>();
 
 		public FoldingVisitor(FoldingStructureComputationContext ctx, ICompilationUnit compilationUnit) {
 			this.ctx= ctx;
@@ -390,7 +388,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			} else {
 				topLevelTypes.add(new Position(node.getStartPosition(), node.getLength()-1));
 			}
-			addToCurrentSurroundingPositions(node, name);
 			return true;
 		}
 
@@ -399,12 +396,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			int start= node.getName().getStartPosition();
 			int end= node.getStartPosition() + node.getLength();
 			createFoldingRegion(start, end - start, ctx.collapseMembers());
-			addToCurrentSurroundingPositions(node, node.getName());
 			return true;
-		}
-
-		private void addToCurrentSurroundingPositions(BodyDeclaration node, SimpleName name) {
-			currentSurroundingElemenPositions.add(new Region(name.getStartPosition(), node.getLength() + name.getStartPosition() - node.getStartPosition()));
 		}
 
 		@Override
@@ -576,30 +568,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 
 		private void createFoldingRegion(int start, int length, boolean collapse, boolean isComment) {
-			createFoldingRegion(start, length, collapse, resolveJavaElementAt(start, true), isComment);
+			createFoldingRegion(start, length, collapse, resolveJavaElementAt(start), isComment);
 		}
 
 
-		private IJavaElement resolveJavaElementAt(int offset, boolean checkSurrounding) {
-			IJavaElement[] elements;
+		private IJavaElement resolveJavaElementAt(int offset) {
 			try {
-				elements= topLevelCompilationUnit.codeSelect(offset, 0);
+				IJavaElement element= topLevelCompilationUnit.getElementAt(offset - 1);
+				if (element != null) {
+					return element;
+				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-				return null;
-			}
-			if (elements.length > 0) {
-				return elements[0];
-			}
-			if (checkSurrounding) {
-				for (Iterator<IRegion> it= currentSurroundingElemenPositions.reversed().iterator(); it.hasNext();) {
- 					IRegion outer= it.next();
-					if (outer.getOffset() + outer.getLength() < offset) {
-						it.remove();
-					} else if(outer.getOffset() <= offset) {
-						return resolveJavaElementAt(outer.getOffset(), false);
-					}
-				}
 			}
 			return null;
 		}
