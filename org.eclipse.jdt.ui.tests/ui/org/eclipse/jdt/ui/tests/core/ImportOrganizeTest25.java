@@ -47,11 +47,11 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java24ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java25ProjectTestSetup;
 
-public class ImportOrganizeTest24 extends CoreTests {
+public class ImportOrganizeTest25 extends CoreTests {
 	@Rule
-	public Java24ProjectTestSetup proj= new Java24ProjectTestSetup(true);
+	public Java25ProjectTestSetup proj= new Java25ProjectTestSetup(true);
 
 	private IJavaProject fJProject1;
 
@@ -64,11 +64,9 @@ public class ImportOrganizeTest24 extends CoreTests {
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
-		options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
-		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_24);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_25);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_25);
+		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_25);
 		JavaCore.setOptions(options);
 	}
 
@@ -156,9 +154,8 @@ public class ImportOrganizeTest24 extends CoreTests {
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 		Map<String, String> options= new HashMap<>();
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_25);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_25);
 		cu.setOptions(options);
 
 		String[] order= new String[0];
@@ -187,9 +184,8 @@ public class ImportOrganizeTest24 extends CoreTests {
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 		Map<String, String> options= new HashMap<>();
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_25);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_25);
 		cu.setOptions(options);
 
 		String[] order= new String[0];
@@ -226,9 +222,8 @@ public class ImportOrganizeTest24 extends CoreTests {
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 		Map<String, String> options= new HashMap<>();
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_25);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_25);
 		cu.setOptions(options);
 
 		String[] order= new String[0];
@@ -255,9 +250,8 @@ public class ImportOrganizeTest24 extends CoreTests {
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 		Map<String, String> options= new HashMap<>();
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_24);
-		options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_25);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_25);
 		cu.setOptions(options);
 
 		String[] order= new String[0];
