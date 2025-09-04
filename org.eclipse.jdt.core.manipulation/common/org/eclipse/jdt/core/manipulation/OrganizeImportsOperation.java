@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
@@ -265,16 +264,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fImplicitImports.add("java.lang"); //$NON-NLS-1$
 			fImplicitImports.add(cu.getParent().getElementName());
 
-			if (root.getAST().apiLevel() >= AST.JLS24) {
+			if (root.getAST().apiLevel() >= AST.JLS25) {
 				try {
 					IType[] types= cu.getAllTypes();
 					if (types.length > 0 && types[0].isImplicitlyDeclared()) {
 						ASTParser parser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 						Map<String, String> compilerOptions= RefactoringASTParser.getCompilerOptions(cu);
-						if (root.getAST().isPreviewEnabled()) {
-							compilerOptions.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
-							JavaCore.setComplianceOptions(Integer.toString(root.getAST().apiLevel()), compilerOptions);
-						}
 						parser.setCompilerOptions(compilerOptions);
 						parser.setEnvironment(null, null, null, true);
 						parser.setUnitName("A.java"); //$NON-NLS-1$
@@ -373,18 +368,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					String qualifiedTypeName= typeBinding.getQualifiedName();
 					if (qualifiedTypeName.indexOf('.') > 0) {
 						String qualifier= qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf('.'));
-						if (moduleImportsContains(qualifier)) {
-							for (Entry<String, Set<String>> entry : fOldModuleImports.entrySet()) {
-								if (entry.getValue().contains(qualifier)) {
-									fImportsAdded.add(typeName);
-									if (fModuleImportsAdded.contains(entry.getKey())) {
-										return;
-									}
-									fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
-									fModuleImportsAdded.add(entry.getKey());
-									break;
-								}
+						Entry<String, Set<String>> entry= getModuleImportsEntryForQualifier(qualifier);
+						if (entry != null) {
+							fImportsAdded.add(typeName);
+							if (fModuleImportsAdded.contains(entry.getKey())) {
+								return;
 							}
+							fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
+							fModuleImportsAdded.add(entry.getKey());
 							return;
 						}
 						if (fImplicitImports.contains(qualifier)) {
@@ -476,7 +467,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return null;
 			} else if (nFound == 1) {
 				TypeNameMatch typeRef= typeRefsFound.get(0);
-				if (!moduleImportsContains(typeRef.getTypeContainerName())) {
+				if (getModuleImportsEntryForQualifier(typeRef.getTypeContainerName()) == null) {
 					fImpStructure.addImport(typeRef.getFullyQualifiedName());
 				}
 				return null;
@@ -499,7 +490,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						} else {  // more than one import-on-demand
 							ambiguousImports= true;
 						}
-					} else if (moduleImportsContains(containerName)) {
+					} else if (getModuleImportsEntryForQualifier(containerName) == null) {
 						return null; // we don't reimport
 					}
 				}
@@ -513,14 +504,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 
-		private boolean moduleImportsContains(String typeContainerName) {
-			for (Set<String> packageNames : fOldModuleImports.values()) {
-				if (packageNames.contains(typeContainerName)) {
-					return true;
+		private Entry<String, Set<String>> getModuleImportsEntryForQualifier(String qualifier) {
+			for (Entry<String, Set<String>> entry : fOldModuleImports.entrySet()) {
+				Set<String> packageNames= entry.getValue();
+				if (packageNames.contains(qualifier)) {
+					return entry;
 				}
 			}
-			return false;
+			return null;
 		}
+
 
 		private boolean isOfKind(TypeNameMatch curr, int typeKinds) {
 			int flags= curr.getModifiers();
