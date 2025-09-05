@@ -53,35 +53,34 @@ public class ActualTypeResolver extends TypeResolver {
 				jc.addDependency(refVar, mv);
 
 				param= refVar.getParamType();
-				if (param != null && EMPTY.equals(param) == false) {
-					param= param.replace("? extends ", EMPTY); //$NON-NLS-1$
-					if (param.endsWith(ARRAY_BRACKETS)) { // In case of List<Integer[]> we must not remove []
-						// Variable is an array, i.e. String[] or List<String>[]
-						// Actual type is supposed to be:
-						// String[]							=> String
-						// List<String>[]					=> List<String>
-						// String[][]						=> String[]
-						param= param.substring(0, param.length() - 2);
-					} else if (param.endsWith(">")) { // Generic //$NON-NLS-1$
-						// Actual type of a generic is supposed to be:
-						// List<Integer>					=> Integer
-						// List<List<Integer>>				=> List<Integer>
-						// List<Map<Integer,String>>		=> Map<Integer,String>
-						// Map<Integer,String>>				=> Integer
-						// Something<Integer,Float,String>	=> Integer
-						param= param.substring(param.indexOf(GENERIC_CLASS_OPEN_DIAMOND) + 1,
-								param.lastIndexOf(GENERIC_CLASS_CLOSE_DIAMOND));
-						if (!param.contains(GENERIC_CLASS_OPEN_DIAMOND) && param.contains(GENERIC_CLASS_SERPATOR)) {
-							param= param.substring(0, param.indexOf(GENERIC_CLASS_SERPATOR));
-						}
-					} else {
-						// The given parameter is already an actual type
+				if (param != null && !param.isEmpty()) {
+					param = param.replace("? extends ", EMPTY); //$NON-NLS-1$
+
+					// Handle arrays
+					if (param.endsWith(ARRAY_BRACKETS)) {
+						param = param.substring(0, param.length() - 2);
 					}
 
-					String reference= jc.addImportGenericClass(param);
+					// Handle generic types
+					if (param.contains(GENERIC_CLASS_OPEN_DIAMOND) && param.endsWith(GENERIC_CLASS_CLOSE_DIAMOND)) {
+						// Extract content inside outermost <>
+						String inner = param.substring(param.indexOf(GENERIC_CLASS_OPEN_DIAMOND) + 1,
+								param.lastIndexOf(GENERIC_CLASS_CLOSE_DIAMOND));
+						
+						if (inner.contains(GENERIC_CLASS_SERPATOR)) {
+							inner = inner.substring(0, inner.indexOf(GENERIC_CLASS_SERPATOR)).trim();
+						}
+						param = inner;
+					}
+
+					// Remove any trailing '>' that might have been left over
+					if (param.endsWith(GENERIC_CLASS_CLOSE_DIAMOND)) {
+						param = param.substring(0, param.length() - 1);
+					}
+
+					String reference = jc.addImportGenericClass(param);
 					mv.setValue(reference);
 					mv.setUnambiguous(true);
-
 					mv.setResolved(true);
 					return;
 				}
