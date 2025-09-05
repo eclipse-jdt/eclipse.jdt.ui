@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ModuleDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
@@ -822,13 +823,15 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 		List<ImportDeclaration> imports= astRoot.imports();
+		ModuleDeclaration modDecl= astRoot.getModule();
 		for (ImportDeclaration curr : imports) {
 			String id= ASTResolving.getFullName(curr.getName());
 			if (Modifier.isModule(curr.getModifiers())) {
 				Set<String> oldModulePackages= new HashSet<>();
 				oldModuleImports.put(id, oldModulePackages);
 				if (curr.resolveBinding() instanceof IModuleBinding binding) {
-					List<String> exportedPackageNames= ImportRewrite.getPackageNamesForModule(binding);
+					List<String> exportedPackageNames=
+							ImportRewrite.getPackageNamesForModule(binding, modDecl != null ? modDecl.getName().getFullyQualifiedName() : null);
 					oldModulePackages.addAll(exportedPackageNames);
 				}
 			} else if (curr.isOnDemand()) {
