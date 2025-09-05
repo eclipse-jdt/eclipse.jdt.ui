@@ -1802,6 +1802,16 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {
 			        return instant -> java.sql.Date.from(instant);
 			    }
+
+				private interface X {
+					void k(Integer i);
+				}
+
+				public static void useInterfaceX() {
+					X x = i -> {
+						return;
+					};
+				}
 			}
 			""";
 
@@ -1908,6 +1918,15 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {
 			        return java.sql.Date::from;
 			    }
+
+				private interface X {
+					void k(Integer i);
+				}
+
+				public static void useInterfaceX() {
+					X x = i -> {
+			        };
+				}
 			}
 			""";
 

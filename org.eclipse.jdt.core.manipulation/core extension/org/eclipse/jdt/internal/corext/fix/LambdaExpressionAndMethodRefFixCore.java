@@ -393,7 +393,9 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 						copyOfLambdaExpression2.setParentheses(false);
 					}
 
-					copyOfLambdaExpression2.setBody(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, bodyExpression)));
+					if (bodyExpression != null) {
+						copyOfLambdaExpression2.setBody(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, bodyExpression)));
+					}
 					ASTNodes.replaceButKeepComment(rewrite, visited, copyOfLambdaExpression2, group);
 					break;
 
