@@ -259,6 +259,7 @@ public class JavaElementComparator extends ViewerComparator {
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
 					try {
+
 						return getComparator().compare(((IType) e1).getSuperclassName(), ((IType) e2).getSuperclassName());
 					} catch (JavaModelException e) {
 						return 0;
@@ -271,7 +272,9 @@ public class JavaElementComparator extends ViewerComparator {
 			}
 		}
 
-		int cmp= getComparator().compare(name1, name2);
+		// allow for sorting by numerical portions when strings are otherwise equal (ignoring file extensions)
+		NumericalStringComparator comp = new NumericalStringComparator();
+		int cmp= comp.compare(name1, name2);
 		if (cmp != 0) {
 			return cmp;
 		}
