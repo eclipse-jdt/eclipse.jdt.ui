@@ -752,11 +752,13 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 				int childStart= child.getStartPosition();
 				if (previousEnd > childStart) {
 					// should never happen, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304826
-					Exception exception= new Exception("Illegal ASTNode positions: previousEnd=" + previousEnd //$NON-NLS-1$
-							+ ", childStart=" + childStart //$NON-NLS-1$
-							+ ", element=" + fElement.getHandleIdentifier() //$NON-NLS-1$
-							+ ", Javadoc:\n" + fSource); //$NON-NLS-1$
-					JavaManipulationPlugin.log(exception);
+					if ((child.getFlags() & ASTNode.MALFORMED) == 0) {
+						Exception exception= new Exception("Illegal ASTNode positions: previousEnd=" + previousEnd //$NON-NLS-1$
+								+ ", childStart=" + childStart //$NON-NLS-1$
+								+ ", element=" + fElement.getHandleIdentifier() //$NON-NLS-1$
+								+ ", Javadoc:\n" + fSource); //$NON-NLS-1$
+						JavaManipulationPlugin.log(exception);
+					}
 				} else if (previousEnd != childStart) {
 					// Need to preserve whitespace before a node that's not
 					// directly following the previous node (e.g. on a new line)
