@@ -11927,7 +11927,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -11943,15 +11943,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 
-		String[] expected= new String[3];
+		String[] expected= new String[4];
 		expected[0]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -11969,7 +11969,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 				public class E {
 				    enum MyEnum {
-				        X1, X2, X3
+				        X3, X2, X1
 				    }
 				   \s
 				    public void foo(MyEnum x) {
@@ -11986,7 +11986,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -12021,7 +12021,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -12038,15 +12038,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
 		expected[0]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -12065,7 +12065,30 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
+			    }
+			   \s
+			    public void foo(MyEnum x) {
+			        switch (x) {
+			            case X1 :
+			                break;
+			            case X3 :
+			                break;
+			            case X2 :
+			                break;
+			            default :
+			                break;
+			        }
+			    }
+			}
+			""";
+
+		expected[2]= """
+			package p;
+
+			public class E {
+			    enum MyEnum {
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -12101,7 +12124,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -12130,7 +12153,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -12166,7 +12189,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo() {
@@ -12185,15 +12208,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 
-		String[] expected= new String[3];
+		String[] expected= new String[4];
 		expected[0]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo() {
@@ -12214,7 +12237,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 				public class E {
 				    enum MyEnum {
-				        X1, X2, X3
+				        X3, X2, X1
 				    }
 				   \s
 				    public void foo() {
@@ -12234,7 +12257,34 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
+			    }
+			   \s
+			    public void foo() {
+			        switch (bar()) {
+			            case X3 :
+			                break;
+			            case X2 :
+			                break;
+			            case X1 :
+			                break;
+			            default :
+			                break;
+			       \s
+			        }
+			    }
+			    public MyEnum bar() {
+			        return null;
+			    }
+			}
+			""";
+
+		expected[3]= """
+			package p;
+
+			public class E {
+			    enum MyEnum {
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo() {

@@ -71,10 +71,10 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview= getPreviewContent(proposal);
 
 		String expected= """
@@ -127,10 +127,10 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview= getPreviewContent(proposal);
 
 		String expected= """
@@ -182,10 +182,10 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 7);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview= getPreviewContent(proposal);
 
 		String expected= """
@@ -219,7 +219,7 @@ public class QuickFixTest14 extends QuickFixTest {
 				    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 				}
 				""";
-		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(2);
+		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(3);
 		String preview2= getPreviewContent(proposal2);
 		assertEqualStringsIgnoreOrder(new String[] { preview2 }, new String[] { expected2 });
 
@@ -255,10 +255,10 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
 		String expected= """
@@ -480,10 +480,10 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
 		String expected= """
