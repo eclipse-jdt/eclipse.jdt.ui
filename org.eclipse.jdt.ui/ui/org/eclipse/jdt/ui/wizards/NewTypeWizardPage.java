@@ -1177,7 +1177,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		});
 		GridData gd= (GridData) fSuperInterfacesDialogField.getListControl(null).getLayoutData();
 		if (fTypeKind == CLASS_TYPE) {
-			gd.heightHint= convertHeightInCharsToPixels(3);
+			gd.heightHint= convertHeightInCharsToPixels(4);
 		} else {
 			gd.heightHint= convertHeightInCharsToPixels(6);
 		}
