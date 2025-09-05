@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +31,10 @@ import org.junit.jupiter.api.Test;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -54,6 +59,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 
@@ -212,9 +218,25 @@ public class ContentProviderTests3{
 	protected void sendEvent(IJavaElementDelta delta) {
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+		CountDownLatch latch = new CountDownLatch(1);
+		new Thread(new Runnable() {
 
-		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+			@Override
+			public void run() {
+				try {
+					Job.getJobManager().join(PackageExplorerContentProvider.class, new NullProgressMonitor());
+				} catch (OperationCanceledException | InterruptedException e) {
+				}
+				latch.countDown();
+			}
+		}).start();
+		//force events from display
+		try {
+			while(!latch.await(10, TimeUnit.MILLISECONDS)) {
+				while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+				}
+			}
+		} catch (InterruptedException e) {
 		}
 	}
 
