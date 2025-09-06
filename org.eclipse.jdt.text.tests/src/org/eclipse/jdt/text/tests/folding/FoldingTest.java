@@ -16,6 +16,7 @@ package org.eclipse.jdt.text.tests.folding;
 import static org.junit.Assume.assumeTrue;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,6 +38,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
@@ -75,8 +77,7 @@ public class FoldingTest {
 	}
 
 	@After
-	public void tearDown() throws CoreException {
-		JavaProjectHelper.delete(jProject);
+	public void tearDown() {
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
 	}
 
@@ -104,6 +105,36 @@ public class FoldingTest {
 
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 3); // Javadoc
+	}
+
+	@Test
+	public void testClassWithMarkdownJavadocAsHeaderComment() throws Exception {
+		useJDKCompilanceWithMarkdownJavadocs();
+		String str= """
+				package org.example.test;
+				/// Javadoc							//here should be an annotation
+				/// comment
+				/// here
+				public class HeaderCommentTest {
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 1);
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 3); // Javadoc
+	}
+
+	@Test
+	public void testClassWithMarkdownJavadocAsHeaderCommentJDKTooLow() throws Exception {
+		useJDKCompilanceWithoutMarkdownJavadocs();
+		String str= """
+				package org.example.test;
+				/// Javadoc							//here should be an annotation
+				/// comment
+				/// here
+				public class HeaderCommentTest {
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 0);
 	}
 
 	@Test
@@ -141,6 +172,47 @@ public class FoldingTest {
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // Javadoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // foo Methode
+	}
+
+	@Test
+	public void testSingleMethodWithMarkdownJavadoc() throws Exception {
+		useJDKCompilanceWithMarkdownJavadocs();
+		String str= """
+				package org.example.test;
+				public class SingleMethodTest {
+				    /// Javadoc							//here should be an annotation
+				    /// comment
+				    /// here
+				    public void foo() {					//here should be an annotation
+				        System.out.println("Hello");
+				    }
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
+
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // Javadoc
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // foo method
+	}
+
+	@Test
+	public void testSingleMethodWithMarkdownJavadocJDKVersionTooLow() throws Exception {
+		useJDKCompilanceWithoutMarkdownJavadocs();
+		String str= """
+				package org.example.test;
+				public class SingleMethodTest {
+				    /// Javadoc							//here should be an annotation
+				    /// comment
+				    /// here
+				    public void foo() {					//here should be an annotation
+				        System.out.println("Hello");
+				    }
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 1);
+
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // foo method
 	}
 
 	@Test
@@ -664,5 +736,17 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 14); // switch
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // case
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 12, 13); // default
+	}
+
+	private void useJDKCompilanceWithMarkdownJavadocs() {
+		Map<String,String> options= jProject.getOptions(false);
+		JavaCore.setComplianceOptions("23", options);
+		jProject.setOptions(options);
+	}
+
+	private void useJDKCompilanceWithoutMarkdownJavadocs() {
+		Map<String,String> options= jProject.getOptions(false);
+		JavaCore.setComplianceOptions("22", options);
+		jProject.setOptions(options);
 	}
 }
