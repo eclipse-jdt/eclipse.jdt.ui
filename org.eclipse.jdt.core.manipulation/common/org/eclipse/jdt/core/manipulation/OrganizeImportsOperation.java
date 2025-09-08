@@ -830,7 +830,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				oldModuleImports.put(id, oldModulePackages);
 				if (curr.resolveBinding() instanceof IModuleBinding binding) {
 					List<String> exportedPackageNames=
-							ImportRewrite.getPackageNamesForModule(binding, astRoot);
+							ImportRewrite.getPackageNamesForModule(binding, project);
 					oldModulePackages.addAll(exportedPackageNames);
 				}
 			} else if (curr.isOnDemand()) {
