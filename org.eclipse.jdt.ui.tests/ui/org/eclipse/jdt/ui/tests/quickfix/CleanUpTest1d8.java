@@ -1812,6 +1812,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 						return;
 					};
 				}
+
+				public static void useInterfaceX2() {
+					X x = i -> {
+						return; // do nothing
+					};
+				}
 			}
 			""";
 
@@ -1926,6 +1932,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				public static void useInterfaceX() {
 					X x = i -> {
 			        };
+				}
+
+				public static void useInterfaceX2() {
+					X x = i -> {
+						return; // do nothing
+					};
 				}
 			}
 			""";

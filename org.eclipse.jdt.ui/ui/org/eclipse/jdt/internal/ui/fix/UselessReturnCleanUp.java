@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -124,6 +124,14 @@ public class UselessReturnCleanUp extends AbstractMultiFix {
 				@Override
 				public boolean visit(final ReturnStatement node) {
 					if (result && node.getExpression() == null && isLastStatement(node)) {
+						// do not remove a single return statement in a lambda body if it has a commmeht
+						if (node.getParent().getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+							if (ASTNodes.getPreviousStatement(node) == null &&
+									(unit.getExtendedStartPosition(node) < node.getStartPosition() ||
+											unit.getExtendedLength(node) > node.getLength())) {
+								return true;
+							}
+						}
 						rewriteOperations.add(new UselessReturnOperation(node, startNode));
 
 						result= false;
