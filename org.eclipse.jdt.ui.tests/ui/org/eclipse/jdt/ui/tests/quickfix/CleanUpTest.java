@@ -17080,6 +17080,18 @@ public class CleanUpTest extends CleanUpTestCase {
 			            return;
 			        }
 			    }
+
+				private interface I1 {
+					void run(int i);
+				}
+
+				public void doNotRemoveCommentLambdaReturn() {
+					I1 i1= i -> {
+						return; // do nothing
+					};
+					i1.run(3);
+				}
+
 			}
 			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
