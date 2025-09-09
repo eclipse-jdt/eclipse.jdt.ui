@@ -605,17 +605,6 @@ public class PreferenceConstants {
 	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether a wildcard should be defaulted between camel case
-	 * names in the Open Type view.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * @since 3.36
-	 *
-	 */
-	public static final String OPEN_TYPE_DEFAULT_WILDCARD_BETWEEN_CAMEL_CASE_PARTS= "openType.default.wildcard.for.camel.case"; //$NON-NLS-1$
-
-	/**
 	 * A named preference that controls the behavior when double clicking on a container in the packages view.
 	 * <p>
 	 * Value is of type <code>String</code>: possible values are <code>
@@ -4132,9 +4121,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
 		store.setDefault(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, 99);
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
-
-		// MiscellaneousPreferencePage
-		store.setDefault(PreferenceConstants.OPEN_TYPE_DEFAULT_WILDCARD_BETWEEN_CAMEL_CASE_PARTS, false);
 
 		// TypeFilterPreferencePage
 		store.setDefault(PreferenceConstants.TYPEFILTER_ENABLED, ""); //$NON-NLS-1$

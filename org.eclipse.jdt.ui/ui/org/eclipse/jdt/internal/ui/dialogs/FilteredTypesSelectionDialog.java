@@ -104,7 +104,6 @@ import org.eclipse.jdt.launching.LibraryLocation;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoImageProvider;
 import org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent;
@@ -444,21 +443,19 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	@Override
 	protected String getPatternText() {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.OPEN_TYPE_DEFAULT_WILDCARD_BETWEEN_CAMEL_CASE_PARTS)) {
-			String text= super.getPatternText();
-			StringBuilder builder= new StringBuilder();
-			boolean lastCharIsUpperCase= true;
-			for (int i= 0; i < text.length(); ++i) {
-				char ch= text.charAt(i);
-				if (!lastCharIsUpperCase && Character.isUpperCase(ch)) {
-					builder.append('*');
-				}
-				builder.append(ch);
-				lastCharIsUpperCase= Character.isUpperCase(ch);
+		String text= super.getPatternText();
+		fTypeItemsComparator.setOriginalPattern(text);
+		StringBuilder builder= new StringBuilder();
+		boolean lastCharIsUpperCase= true;
+		for (int i= 0; i < text.length(); ++i) {
+			char ch= text.charAt(i);
+			if (!lastCharIsUpperCase && Character.isUpperCase(ch)) {
+				builder.append('*');
 			}
-			return builder.toString();
+			builder.append(ch);
+			lastCharIsUpperCase= Character.isUpperCase(ch);
 		}
-		return super.getPatternText();
+		return builder.toString();
 	}
 
 	/**
@@ -1121,6 +1118,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private final String[] fVMNames;
 
+		private String fOriginalPattern;
+
 		/**
 		 * Creates new instance of TypeItemsComparator
 		 */
@@ -1132,6 +1131,23 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 			fInstallLocations= locations.toArray(new String[locations.size()]);
 			fVMNames= labels.toArray(new String[labels.size()]);
+			fOriginalPattern= ""; //$NON-NLS-1$
+		}
+
+		public void setOriginalPattern(String originalPattern) {
+			int index= -1;
+			for (int i= 0; i < originalPattern.length(); ++i) {
+				char c= originalPattern.charAt(i);
+				if (c == '*' || c == '?') {
+					index= i;
+					break;
+				}
+			}
+			if (index >= 0) {
+				fOriginalPattern= originalPattern.substring(0, index);
+			} else {
+				fOriginalPattern= originalPattern;
+			}
 		}
 
 		private void processVMInstallType(IVMInstallType installType, List<String> locations, List<String> labels) {
@@ -1168,7 +1184,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		@Override
 		public int compare(TypeNameMatch leftInfo, TypeNameMatch rightInfo) {
-			int result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
+			int result= compareOriginalTextMatchLength(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
+			if (result != 0)
+				return result;
+			result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
 			if (result != 0)
 				return result;
 
@@ -1190,6 +1209,20 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return compareContainerName(leftInfo, rightInfo);
 		}
 
+		private int compareOriginalTextMatchLength(String leftString, String rightString) {
+			if (fOriginalPattern != null && !fOriginalPattern.isEmpty()) {
+				int iLeft= 0;
+				while (iLeft < fOriginalPattern.length() && iLeft < leftString.length() && leftString.charAt(iLeft) == fOriginalPattern.charAt(iLeft)) {
+					++iLeft;
+				}
+				int iRight= 0;
+				while (iRight < fOriginalPattern.length() && iRight < rightString.length() && rightString.charAt(iRight) == fOriginalPattern.charAt(iRight)) {
+					++iRight;
+				}
+				return iRight - iLeft;
+			}
+			return 0;
+		}
 		private int compareName(String leftString, String rightString) {
 			int result= leftString.compareToIgnoreCase(rightString);
 			if (result != 0 || rightString.length() == 0) {
