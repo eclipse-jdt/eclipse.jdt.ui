@@ -41,7 +41,7 @@ public class VariableDeclarationCleanUpCore extends AbstractCleanUp {
 
 	@Override
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(requireAST(), false, false, null);
+		return new CleanUpRequirements(requireAST(), requireAST(), false, null);
 	}
 
 	private boolean requireAST() {
