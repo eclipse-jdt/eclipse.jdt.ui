@@ -8324,7 +8324,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8340,15 +8340,15 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 
-		String[] expected= new String[4];
+		String[] expected= new String[5];
 		expected[0]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8362,11 +8362,35 @@ public class AssistQuickFixTest extends QuickFixTest {
 			""";
 
 		expected[1]= """
+				package p;
+
+				public class E {
+				    enum MyEnum {
+				        X3, X2, X1
+				    }
+				   \s
+				    public void foo(MyEnum x) {
+				        switch (x) {
+				            case X3 :
+				                break;
+				            case X2 :
+				                break;
+				            case X1 :
+				                break;
+				            default :
+				                break;
+				       \s
+				        }
+				    }
+				}
+				""";
+
+		expected[2]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8385,12 +8409,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			}
 			""";
 
-		expected[2]= """
+		expected[3]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8398,12 +8422,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			}
 			""";
 
-		expected[3]= """
+		expected[4]= """
 				package p;
 
 				public class E {
 				    enum MyEnum {
-				        X1, X2, X3
+				        X3, X2, X1
 				    }
 				   \s
 				    public void foo(MyEnum x) {
@@ -8426,7 +8450,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8444,15 +8468,15 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
-		String[] expected= new String[3];
+		String[] expected= new String[4];
 		expected[0]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8468,11 +8492,35 @@ public class AssistQuickFixTest extends QuickFixTest {
 			""";
 
 		expected[1]= """
+				package p;
+
+				public class E {
+				    enum MyEnum {
+				        X3, X2, X1
+				    }
+				   \s
+				    public void foo(MyEnum x) {
+				        switch (x) {
+				            case X1 :
+				                break;
+				            case X3 :
+				                break;
+				            case X2 :
+				                break;
+				            default :
+				                break;
+				       \s
+				        }
+				    }
+				}
+				""";
+
+		expected[2]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8491,12 +8539,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			}
 			""";
 
-		expected[2]= """
+		expected[3]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8517,7 +8565,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8535,15 +8583,15 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
 		expected[0]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8563,16 +8611,16 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
 			        switch (x) {
 			            case X1 :
 			                break;
-			            case X2 :
-			                break;
 			            case X3 :
+			                break;
+			            case X2 :
 			                break;
 			            default :
 			                break;
@@ -8581,6 +8629,30 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    }
 			}
 			""";
+
+		expected[2]= """
+				package p;
+
+				public class E {
+				    enum MyEnum {
+				        X3, X2, X1
+				    }
+				   \s
+				    public void foo(MyEnum x) {
+				        switch (x) {
+				            case X1 :
+				                break;
+				            case X2 :
+				                break;
+				            case X3 :
+				                break;
+				            default :
+				                break;
+				       \s
+				        }
+				    }
+				}
+				""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -8593,7 +8665,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8613,23 +8685,23 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
 		expected[0]= """
 			package p;
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
 			        switch (x) {
 			            case X1 :
 			                break;
-			            case X2 :
 			            case X3 :
+			            case X2 :
 			            default :
 			                break;
 			       \s
@@ -8637,6 +8709,28 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    }
 			}
 			""";
+
+		expected[1]= """
+				package p;
+
+				public class E {
+				    enum MyEnum {
+				        X3, X2, X1
+				    }
+				   \s
+				    public void foo(MyEnum x) {
+				        switch (x) {
+				            case X1 :
+				                break;
+				            case X2 :
+				            case X3 :
+				            default :
+				                break;
+				       \s
+				        }
+				    }
+				}
+				""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -8650,7 +8744,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8680,7 +8774,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
@@ -8704,7 +8798,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			public class E {
 			    enum MyEnum {
-			        X1, X2, X3
+			        X3, X2, X1
 			    }
 			   \s
 			    public void foo(MyEnum x) {
