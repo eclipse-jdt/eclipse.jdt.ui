@@ -490,7 +490,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						} else {  // more than one import-on-demand
 							ambiguousImports= true;
 						}
-					} else if (getModuleImportsEntryForQualifier(containerName) == null) {
+					} else if (getModuleImportsEntryForQualifier(containerName) != null) {
 						return null; // we don't reimport
 					}
 				}
