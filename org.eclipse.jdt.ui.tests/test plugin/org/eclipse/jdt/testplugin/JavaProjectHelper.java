@@ -109,6 +109,8 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS21= new Path("testresources/rtstubs_21.jar");
 	public static final IPath RT_STUBS22= new Path("testresources/rtstubs_22.jar");
 	public static final IPath RT_STUBS23= new Path("testresources/rtstubs_23.jar");
+	public static final IPath RT_STUBS24= new Path("testresources/rtstubs_24.jar");
+	public static final IPath RT_STUBS25= new Path("testresources/rtstubs_25.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -401,6 +403,40 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 24 for the given project.
+	 *
+	 * @param project the java project
+	 * @param enable_preview_feature sets enable-preview compliance project option based on the
+	 *            value specified.
+	 */
+	public static void set24CompilerOptions(IJavaProject project, boolean enable_preview_feature) {
+		Map<String, String> options= project.getOptions(false);
+		set24_CompilerOptions(options);
+		if (enable_preview_feature) {
+			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		}
+		project.setOptions(options);
+	}
+
+	/**
+	 * Sets the compiler options to 25 for the given project.
+	 *
+	 * @param project the java project
+	 * @param enable_preview_feature sets enable-preview compliance project option based on the
+	 *            value specified.
+	 */
+	public static void set25CompilerOptions(IJavaProject project, boolean enable_preview_feature) {
+		Map<String, String> options= project.getOptions(false);
+		set25_CompilerOptions(options);
+		if (enable_preview_feature) {
+			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		}
+		project.setOptions(options);
+	}
+
+	/**
 	 * Sets the compiler options to 9.
 	 *
 	 * @param options the compiler options to configure
@@ -506,6 +542,24 @@ public class JavaProjectHelper {
 	 */
 	public static void set23_CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_23, options);
+	}
+
+	/**
+	 * Sets the compiler options to 24.
+	 *
+	 * @param options the compiler options to configure
+	 */
+	public static void set24_CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_24, options);
+	}
+
+	/**
+	 * Sets the compiler options to 25.
+	 *
+	 * @param options the compiler options to configure
+	 */
+	public static void set25_CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_25, options);
 	}
 
 	/**

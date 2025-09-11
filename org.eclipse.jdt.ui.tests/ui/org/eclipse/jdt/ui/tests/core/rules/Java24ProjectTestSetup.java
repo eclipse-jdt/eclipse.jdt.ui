@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 GK Software SE and others.
+ * Copyright (c) 2025 GK Software SE and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,9 +29,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 
 /** Variant derived from Java17ProjectTestSetup */
-public class Java23ProjectTestSetup extends ProjectTestSetup {
+public class Java24ProjectTestSetup extends ProjectTestSetup {
 
-	public static final String PROJECT_NAME23= "TestSetupProject23";
+	public static final String PROJECT_NAME24= "TestSetupProject24";
 
 	private final String projectName;
 
@@ -45,17 +45,17 @@ public class Java23ProjectTestSetup extends ProjectTestSetup {
 
 	@Override
 	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS23);
+		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS24);
 		IClasspathAttribute[] extraAttributes= { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, Boolean.TRUE.toString()) };
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], ClasspathEntry.NO_ACCESS_RULES, extraAttributes, true) };
 	}
 
-	public Java23ProjectTestSetup( boolean enable_preview_feature) {
+	public Java24ProjectTestSetup( boolean enable_preview_feature) {
 		this.enable_preview_feature= enable_preview_feature;
-		projectName= PROJECT_NAME23;
+		projectName= PROJECT_NAME24;
 	}
 
-	public Java23ProjectTestSetup( String projectName, boolean enable_preview_feature) {
+	public Java24ProjectTestSetup( String projectName, boolean enable_preview_feature) {
 		this.enable_preview_feature= enable_preview_feature;
 		this.projectName= projectName;
 	}
@@ -69,7 +69,7 @@ public class Java23ProjectTestSetup extends ProjectTestSetup {
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject(projectName, "bin");
 		javaProject.setRawClasspath(getDefaultClasspath(), null);
-		JavaProjectHelper.set23CompilerOptions(javaProject, enable_preview_feature);
+		JavaProjectHelper.set24CompilerOptions(javaProject, enable_preview_feature);
 		return javaProject;
 	}
 
