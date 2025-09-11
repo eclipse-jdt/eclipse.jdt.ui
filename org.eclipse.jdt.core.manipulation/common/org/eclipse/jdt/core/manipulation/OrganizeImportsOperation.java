@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -49,12 +50,10 @@ import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IModuleBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -77,13 +76,12 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
 
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddImportCorrectionProposalCore;
 
 
 /**
@@ -268,22 +266,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				try {
 					IType[] types= cu.getAllTypes();
 					if (types.length > 0 && types[0].isImplicitlyDeclared()) {
-						ASTParser parser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
-						Map<String, String> compilerOptions= RefactoringASTParser.getCompilerOptions(cu);
-						parser.setCompilerOptions(compilerOptions);
-						parser.setEnvironment(null, null, null, true);
-						parser.setUnitName("A.java"); //$NON-NLS-1$
-						parser.setKind(ASTParser.K_COMPILATION_UNIT);
-						parser.setSource("import module java.base; class A { BigDecimal a; }".toCharArray()); //$NON-NLS-1$
-						parser.setResolveBindings(true);
-						CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
-						List<ImportDeclaration> importDecls= astRoot.imports();
-						if (!importDecls.isEmpty()) {
-							ImportDeclaration importDecl= importDecls.get(0);
-							if (importDecl.resolveBinding() instanceof IModuleBinding moduleBinding) {
-								IPackageBinding[] packageBindings= moduleBinding.getExportedPackages();
-								for (IPackageBinding packageBinding : packageBindings) {
-									fImplicitImports.add(packageBinding.getName());
+						IJavaProject javaProject= cu.getJavaProject();
+						if (javaProject != null) {
+							IModuleDescription module= javaProject.findModule(AddImportCorrectionProposalCore.JAVA_BASE, cu.getOwner());
+							if (module != null) {
+								for (String packageName: module.getExportedPackageNames(null)) {
+									fImplicitImports.add(packageName);
 								}
 							}
 						}
@@ -370,8 +358,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						String qualifier= qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf('.'));
 						Entry<String, Set<String>> entry= getModuleImportsEntryForQualifier(qualifier);
 						if (entry != null) {
-							fImportsAdded.add(typeName);
 							if (fModuleImportsAdded.contains(entry.getKey())) {
+								fImportsAdded.add(typeName);
 								return;
 							}
 							fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));

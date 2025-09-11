@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class AddImportCorrectionProposalCore extends ASTRewriteCorrectionProposalCore {
 
-	static String JAVA_BASE= "java.base"; //$NON-NLS-1$
+	public static final String JAVA_BASE= "java.base"; //$NON-NLS-1$
 
 	private final String fTypeName;
 
