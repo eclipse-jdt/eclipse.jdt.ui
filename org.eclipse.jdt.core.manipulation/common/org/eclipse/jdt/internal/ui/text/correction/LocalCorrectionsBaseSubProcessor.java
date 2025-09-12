@@ -1310,8 +1310,8 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 					ThrowStatement newThrowStatement= getThrowForUnsupportedCase(expression, ast, astRewrite);
 					listRewrite.insertAt(newThrowStatement, defaultIndex, null);
 					proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, enumConstName);
+					defaultIndex++;
 				}
-				defaultIndex++;
 				if (!hasDefault) {
 					if (ASTHelper.isSwitchExpressionNodeSupportedInAST(ast)) {
 						if (statements.size() > 0) {
