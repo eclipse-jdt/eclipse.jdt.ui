@@ -1157,7 +1157,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	public static void createMissingCaseProposals(IInvocationContext context, ASTNode parent, ArrayList<String> enumConstNames, Collection<ICommandAccess> proposals) {
-		new LocalCorrectionsSubProcessor().createMissingCaseProposalsBase(context, parent, enumConstNames, proposals);
+		new LocalCorrectionsSubProcessor().createMissingCaseProposalsBase(context, parent, null, enumConstNames, proposals);
 	}
 
 	public static void removeDefaultCaseProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {

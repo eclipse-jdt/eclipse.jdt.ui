@@ -1208,7 +1208,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 			if (missingEnumCases.size() == 0 && hasDefault)
 				return;
 
-			createMissingCaseProposalsBase(context, parent, missingEnumCases, proposals);
+			createMissingCaseProposalsBase(context, parent, problem, missingEnumCases, proposals);
 		}
 	}
 
@@ -1249,7 +1249,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void createMissingCaseProposalsBase(IInvocationContext context, ASTNode parent, ArrayList<String> enumConstNames, Collection<T> proposals) {
+	public void createMissingCaseProposalsBase(IInvocationContext context, ASTNode parent, IProblemLocation problem, ArrayList<String> enumConstNames, Collection<T> proposals) {
 		List<Statement> statements;
 		Expression expression;
 		if (parent instanceof SwitchStatement) {
@@ -1305,6 +1305,13 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 				}
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
+				if (problem != null && problem.getProblemId() == IProblem.SwitchExpressionMissingEnumConstantCaseDespiteDefault) {
+					newSwitchCase.setSwitchLabeledRule(true);
+					ThrowStatement newThrowStatement= getThrowForUnsupportedCase(expression, ast, astRewrite);
+					listRewrite.insertAt(newThrowStatement, defaultIndex, null);
+					proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, enumConstName);
+					defaultIndex++;
+				}
 				if (!hasDefault) {
 					if (ASTHelper.isSwitchExpressionNodeSupportedInAST(ast)) {
 						if (statements.size() > 0) {
