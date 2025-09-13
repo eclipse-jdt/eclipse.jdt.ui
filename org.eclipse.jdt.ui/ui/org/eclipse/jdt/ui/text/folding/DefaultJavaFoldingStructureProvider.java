@@ -1320,13 +1320,14 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		List<JavaProjectionAnnotation> updates= new ArrayList<>();
 
 		computeFoldingStructure(ctx);
-		Map<JavaProjectionAnnotation, Position> newStructure= ctx.fMap;
 		Map<IJavaElement, List<Tuple>> oldStructure= computeCurrentStructure(ctx);
 
-		Iterator<JavaProjectionAnnotation> e= newStructure.keySet().iterator();
-		while (e.hasNext()) {
-			JavaProjectionAnnotation newAnnotation= e.next();
-			Position newPosition= newStructure.get(newAnnotation);
+		List<Map.Entry<JavaProjectionAnnotation, Position>> newStructureList = new ArrayList<>(ctx.fMap.entrySet());
+		Collections.sort(newStructureList, Comparator.comparingInt(e -> e.getValue().offset));
+
+		for(Map.Entry<JavaProjectionAnnotation, Position> newStructureEntry : newStructureList) {
+			JavaProjectionAnnotation newAnnotation= newStructureEntry.getKey();
+			Position newPosition= newStructureEntry.getValue();
 
 			IJavaElement element= newAnnotation.getElement();
 			/*
