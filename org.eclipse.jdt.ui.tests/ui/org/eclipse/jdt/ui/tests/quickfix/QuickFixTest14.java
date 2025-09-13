@@ -651,7 +651,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 	@Test
 	public void testIncompleteSwitchDespiteSwitch() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= projectSetup.getProject();
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		Map<String, String> options= fJProject1.getOptions(false);
