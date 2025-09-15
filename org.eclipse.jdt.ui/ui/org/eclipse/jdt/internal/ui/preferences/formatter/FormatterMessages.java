@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -83,6 +83,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_comments_pref_enable_block;
 	public static String FormatterModifyDialog_comments_pref_enable_javadoc;
 	public static String FormatterModifyDialog_comments_pref_enable_line;
+	public static String FormatterModifyDialog_comments_pref_enable_markdown;
 	public static String FormatterModifyDialog_comments_pref_format_code_snippets;
 	public static String FormatterModifyDialog_comments_pref_format_header;
 	public static String FormatterModifyDialog_comments_pref_format_html;
