@@ -708,4 +708,38 @@ public class QuickFixTest17 extends QuickFixTest {
 		assertProposalExists(proposals, expectedProposal6);
 	}
 
+	@Test
+	public void testAddSealedNonSealedModifier() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=576380
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set17CompilerOptions(fJProject1, false);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String str= """
+				package test;
+				interface I permits J {}
+				record J() implements I {}""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+		expected[0]= """
+				package test;
+				sealed interface I permits J {}
+				record J() implements I {}""";
+
+		expected[1]= """
+				package test;
+				non-sealed interface I permits J {}
+				record J() implements I {}""";
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 }
