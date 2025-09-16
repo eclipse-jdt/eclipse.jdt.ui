@@ -330,6 +330,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalTotalPatternWithDefault:
 			case IProblem.IllegalFallthroughToPattern:
 			case IProblem.ExpressionShouldBeAVariable:
+			case IProblem.SealedMissingSealedModifier:
 				return true;
 
 			default:
@@ -500,6 +501,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.SealedMissingClassModifier:
 			case IProblem.SealedMissingInterfaceModifier:
+			case IProblem.SealedMissingSealedModifier:
 				ModifierCorrectionSubProcessor.addSealedMissingModifierProposal(context, problem, proposals);
 				break;
 			case IProblem.SealedNotDirectSuperInterface:
