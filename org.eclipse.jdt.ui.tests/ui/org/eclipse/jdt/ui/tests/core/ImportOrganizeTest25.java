@@ -52,12 +52,20 @@ import org.eclipse.jdt.ui.tests.core.rules.Java25ProjectTestSetup;
 public class ImportOrganizeTest25 extends CoreTests {
 	@Rule
 	public Java25ProjectTestSetup proj= new Java25ProjectTestSetup(true);
+	@Rule
+	public Java25ProjectTestSetup proj2= new Java25ProjectTestSetup("TestSetupProject25_2", true);
+	@Rule
+	public Java25ProjectTestSetup proj3= new Java25ProjectTestSetup("TestSetupProject25_3", true);
 
 	private IJavaProject fJProject1;
+	private IJavaProject fJProject2;
+	private IJavaProject fJProject3;
 
 	@Before
 	public void before() throws Exception {
 		fJProject1= proj.getProject();
+		fJProject2= proj2.getProject();
+		fJProject3= proj3.getProject();
 
 //		fJProject1.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 //		fJProject1.setOption(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
@@ -73,7 +81,12 @@ public class ImportOrganizeTest25 extends CoreTests {
 	@After
 	public void after() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
+		setOrganizeImportSettings(null, 99, 99, fJProject2);
+		setOrganizeImportSettings(null, 99, 99, fJProject3);
+
 		JavaProjectHelper.clear(fJProject1, proj.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject2, proj2.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject3, proj3.getDefaultClasspath());
 	}
 
 	protected IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
@@ -264,4 +277,71 @@ public class ImportOrganizeTest25 extends CoreTests {
 		});
 	}
 
+	@Test
+	public void testAmbigousClassNeeded() throws Exception {
+		IPackageFragmentRoot sourceFolder2= JavaProjectHelper.addSourceContainer(fJProject2, "src");
+
+		IPackageFragment defaultPkg2= sourceFolder2.createPackageFragment("", false, null);
+		String mod2= """
+			module mod2 {
+				exports pack2;
+			}
+			""";
+		defaultPkg2.createCompilationUnit("module-info.java", mod2, false, null);
+
+		IPackageFragment pack2= sourceFolder2.createPackageFragment("pack2", false, null);
+		String code= """
+			package pack2;
+			public class List<T> {}
+			""";
+		pack2.createCompilationUnit("List.java", code, false, null);
+
+		String code2= """
+			package pack2;
+			public class NewList<T> {}
+			""";
+		pack2.createCompilationUnit("NewList.java", code2, false, null);
+
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject3, "src");
+		IPackageFragment defaultPkg= sourceFolder.createPackageFragment("", false, null);
+		String mod= """
+			module mod {
+			   requires java.base;
+		       requires mod2;
+		       exports pack1;
+		    }
+			""";
+		defaultPkg.createCompilationUnit("module-info.java", mod, false, null);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		String str= """
+			package pack1;
+			import module mod2;
+			import module java.base;
+			import java.util.List;
+			import pack2.NewList;
+			public class X {
+				List<String> a;
+				NewList<String> b;
+				ArrayList<String> c;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", str, false, null);
+		Map<String, String> options= new HashMap<>();
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_25);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_25);
+		cu.setOptions(options);
+
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("E", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		assertImports(cu, new String[] {
+				"mod2",
+				"java.base",
+				"java.util.List",
+		});
+	}
 }
