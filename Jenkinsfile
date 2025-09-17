@@ -21,8 +21,7 @@ pipeline {
 						clean verify --batch-mode --fail-at-end \
 						-Pbree-libs -Papi-check -Pjavadoc -Pbuild-individual-bundles \
 						-Dmaven.test.failure.ignore=true \
-						-Dcompare-version-with-baselines.skip=true \
-						-DcompilerBaselineMode=disable -DcompilerBaselineReplace=none
+						-Dcompare-version-with-baselines.skip=false
 					"""
 				}
 			}
