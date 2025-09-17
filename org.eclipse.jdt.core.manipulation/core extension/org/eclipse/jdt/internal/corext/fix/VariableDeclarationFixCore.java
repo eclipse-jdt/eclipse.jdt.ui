@@ -300,7 +300,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 								@Override
 								public boolean visit(SimpleName name) {
 									IBinding nameBinding= name.resolveBinding();
-									if (nameBinding == null || (nameBinding instanceof IVariableBinding varBinding && varBinding.isEqualTo(binding))) {
+									if (nameBinding == null || (nameBinding instanceof IVariableBinding varBinding && varBinding.getVariableDeclaration().isEqualTo(binding))) {
 										throw new SearchException();
 									}
 									return false;
