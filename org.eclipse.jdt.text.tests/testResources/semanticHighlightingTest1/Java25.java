@@ -1,6 +1,6 @@
 import module java.base;
 
-public class Java24 {
+public class Java25 {
 	sealed record SampleRecord(String left, String right) {
 		
 	}
