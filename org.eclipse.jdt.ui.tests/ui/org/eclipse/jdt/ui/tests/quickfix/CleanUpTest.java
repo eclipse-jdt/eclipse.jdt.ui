@@ -4110,6 +4110,42 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testCodeStyleIssue2494() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+			public class E1 {
+				public void foo(int a) {
+					if (a == 3) // is 3
+						System.out.println("3");
+					else // value is 2
+						System.out.println("2");
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+
+		sample= """
+			package test1;
+			public class E1 {
+				public void foo(int a) {
+					if (a == 3) { // is 3
+			        	System.out.println("3");
+			        } else { // value is 2
+			        	System.out.println("2");
+			        }
+				}
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
 	public void testCodeStyle_StaticAccessThroughInstance_Bug307407() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
