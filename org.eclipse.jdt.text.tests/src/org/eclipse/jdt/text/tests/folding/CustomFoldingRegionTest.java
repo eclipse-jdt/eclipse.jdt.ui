@@ -84,8 +84,7 @@ public class CustomFoldingRegionTest {
 
 
 	@After
-	public void tearDown() throws CoreException {
-		JavaProjectHelper.delete(fJProject1);
+	public void tearDown() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setToDefault(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START);
 		store.setToDefault(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END);
