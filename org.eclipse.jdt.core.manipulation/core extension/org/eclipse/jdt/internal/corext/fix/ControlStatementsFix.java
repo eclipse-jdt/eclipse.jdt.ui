@@ -239,7 +239,9 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCor
 				List<Comment> comments= cuRoot.getCommentList();
 				for (Comment comment : comments) {
 					int commentLine= cuRoot.getLineNumber(comment.getStartPosition());
-					if (commentLine == controlStatementLine && comment.getStartPosition() > startPosition &&
+					if ((commentLine == controlStatementLine ||
+							fBodyProperty == IfStatement.ELSE_STATEMENT_PROPERTY && commentLine >= controlStatementLine)
+							&& commentLine < bodyLine && comment.getStartPosition() > startPosition &&
 							comment.getStartPosition() < fBody.getStartPosition()) {
 						commentsToPreserve.add(comment);
 						String commentText= cuBuffer.getText(comment.getStartPosition(), comment.getLength());
