@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Carsten Hammer.
+ * Copyright (c) 2021, 2025 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.common;
 
+import java.util.AbstractMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,6 +35,9 @@ import org.eclipse.jdt.core.dom.*;
  */
 public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
+	public static final String TYPEOF = "typeof"; //$NON-NLS-1$
+	public static final String METHODNAME = "methodname"; //$NON-NLS-1$
+	public static final String PARAMTYPENAMES = "paramtypenames"; //$NON-NLS-1$
 	ASTVisitor astvisitor;
 
 	public E dataholder;
@@ -367,6 +371,20 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 * @return - previous BiPredicate registered
 	 */
 	public BiPredicate<? extends ASTNode, E> addClassInstanceCreation(BiPredicate<ClassInstanceCreation, E> bs) {
+		return predicatemap.put(VisitorEnum.ClassInstanceCreation, bs);
+	}
+
+	/**
+	 *
+	 * @param typeof class to be instantiated
+	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @return - previous BiPredicate registered
+	 */
+	public BiPredicate<? extends ASTNode, E> addClassInstanceCreation(Class<?> typeof, BiPredicate<ClassInstanceCreation, E> bs) {
+		Map<String, Object> map = Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(TYPEOF, typeof)
+				);
+		predicatedata.put(VisitorEnum.ClassInstanceCreation, map);
 		return predicatemap.put(VisitorEnum.ClassInstanceCreation, bs);
 	}
 
@@ -719,7 +737,27 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 */
 	public BiPredicate<? extends ASTNode, E> addMethodInvocation(String methodname,
 			BiPredicate<MethodInvocation, E> bs) {
-		this.predicatedata.put(VisitorEnum.MethodInvocation, methodname);
+		this.predicatedata.put(VisitorEnum.MethodInvocation, Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(METHODNAME, methodname)
+				));
+		return predicatemap.put(VisitorEnum.MethodInvocation, bs);
+	}
+
+	/**
+	 * Add BiPredicate to use for MethodInvocation visit where class and method name is specified
+	 *
+	 * @param typeof class whose method is called
+	 * @param methodname name of the method that is called
+	 * @param bs BiPredicate that can be assigned a lambda expression
+	 * @return previous BiPredicate registered
+	 */
+	public BiPredicate<? extends ASTNode, E> addMethodInvocation(Class<?> typeof, String methodname,
+			BiPredicate<MethodInvocation, E> bs) {
+		Map<String, Object> map = Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(METHODNAME, methodname),
+				new AbstractMap.SimpleEntry<>(TYPEOF, typeof)
+				);
+		predicatedata.put(VisitorEnum.MethodInvocation, map);
 		return predicatemap.put(VisitorEnum.MethodInvocation, bs);
 	}
 
@@ -1484,7 +1522,9 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	}
 
 	public BiConsumer<? extends ASTNode, E> addMethodInvocation(String methodname, BiConsumer<MethodInvocation, E> bc) {
-		this.consumerdata.put(VisitorEnum.MethodInvocation, methodname);
+		this.consumerdata.put(VisitorEnum.MethodInvocation, Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(METHODNAME, methodname)
+				));
 		return consumermap.put(VisitorEnum.MethodInvocation, bc);
 	}
 
@@ -2180,23 +2220,50 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 
 	/**
 	 *
-	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @param methodname Only visit MethodInvocation with this name
+	 * @param bs - BiPredicate that is visited when a MethodInvocation is found
+	 * @param bc - BiConsumer that is visited at the end after a MethodInvocation has been found
 	 */
 	public void addMethodInvocation(String methodname, BiPredicate<MethodInvocation, E> bs,
 			BiConsumer<MethodInvocation, E> bc) {
-		this.predicatedata.put(VisitorEnum.MethodInvocation, methodname);
+		predicatedata.put(VisitorEnum.MethodInvocation, Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(METHODNAME, methodname)
+				));
 		predicatemap.put(VisitorEnum.MethodInvocation, bs);
+		consumerdata.put(VisitorEnum.MethodInvocation, Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(METHODNAME, methodname)
+				));
+		consumermap.put(VisitorEnum.MethodInvocation, bc);
+	}
+
+	/**
+	 * @param typeof Only visit MethodInvocation calling a method of this class
+	 * @param methodname Only visit MethodInvocation with this name
+	 * @param bs - BiPredicate that is visited when a MethodInvocation is found
+	 * @param bc - BiConsumer that is visited at the end after a MethodInvocation has been found
+	 */
+	public void addMethodInvocation(Class<?> typeof, String methodname, BiPredicate<MethodInvocation, E> bs,
+			BiConsumer<MethodInvocation, E> bc) {
+		Map<String, Object> map = Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(METHODNAME, methodname),
+				new AbstractMap.SimpleEntry<>(TYPEOF, typeof)
+				);
+		predicatedata.put(VisitorEnum.MethodInvocation, map);
+		predicatemap.put(VisitorEnum.MethodInvocation, bs);
+		consumerdata.put(VisitorEnum.MethodInvocation, map);
 		consumermap.put(VisitorEnum.MethodInvocation, bc);
 	}
 
 	/**
 	 *
 	 * @param bs - BiPredicate that can be assigned a lambda expression
+	 * @param bc - BiConsumer that is visited at the end after a MethodInvocation has been found
 	 */
 	public void addMethodInvocation(BiPredicate<MethodInvocation, E> bs, BiConsumer<MethodInvocation, E> bc) {
 		predicatemap.put(VisitorEnum.MethodInvocation, bs);
 		consumermap.put(VisitorEnum.MethodInvocation, bc);
 	}
+
 
 	/**
 	 *
@@ -3428,6 +3495,13 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 		hv.build(node);
 	}
 
+	public static <V, T> void callMethodInvocationVisitor(Class<?> methodof, String methodname, ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
+			BiPredicate<MethodInvocation, ReferenceHolder<V, T>> bs) {
+
+		HelperVisitor<ReferenceHolder<V, T>,V,T> hv= new HelperVisitor<>(nodesprocessed, dataholder);
+		hv.addMethodInvocation(methodof, methodname, bs);
+		hv.build(node);
+	}
 	/**
 	 *
 	 * @param nodesprocessed - set of nodes processed
@@ -5627,6 +5701,13 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 		hv.build(node);
 	}
 
+	public static <V, T> void callClassInstanceCreationVisitor(Class<?> class1, ASTNode node, ReferenceHolder<V, T> dataholder, Set<ASTNode> nodesprocessed,
+			BiPredicate<ClassInstanceCreation, ReferenceHolder<V, T>> bs) {
+
+		HelperVisitor<ReferenceHolder<V, T>,V,T> hv= new HelperVisitor<>(nodesprocessed, dataholder);
+		hv.addClassInstanceCreation(class1, bs);
+		hv.build(node);
+	}
 	/**
 	 *
 	 * @param nodesprocessed - set of nodes processed
