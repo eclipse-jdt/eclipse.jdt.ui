@@ -173,7 +173,17 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 			buf.append("();"); //$NON-NLS-1$
 			buf.append(lineDelim);
 		} else {
-			buf.append("() {"); //$NON-NLS-1$
+			buf.append("("); //$NON-NLS-1$
+			if (fType.isRecord()) {
+				IField[] components= fType.getRecordComponents();
+				String separator= ""; //$NON-NLS-1$
+				for (IField component : components) {
+					buf.append(separator + Signature.toString(component.getTypeSignature()));
+					buf.append(" " + component.getElementName()); //$NON-NLS-1$
+					separator= ", "; //$NON-NLS-1$
+				}
+			}
+			buf.append(") {"); //$NON-NLS-1$
 			buf.append(lineDelim);
 
 			String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", lineDelim); //$NON-NLS-1$
