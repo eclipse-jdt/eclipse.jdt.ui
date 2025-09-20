@@ -367,7 +367,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 								fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
 								fModuleImportsAdded.add(entry.getKey());
 							}
-							if (fOldModuleImports.size() > 0 && typeNameAmbiguousForImportedModules(typeName)) {
+							if (!fOldModuleImports.isEmpty() && typeNameAmbiguousForImportedModules(typeName)) {
 								fImpStructure.addImport(typeBinding, UNRESOLVABLE_IMPORT_CONTEXT);
 							}
 							return;
