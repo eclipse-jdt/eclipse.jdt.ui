@@ -446,16 +446,20 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		String text= super.getPatternText();
 		fTypeItemsComparator.setOriginalPattern(text);
 		StringBuilder builder= new StringBuilder();
-		boolean lastCharIsUpperCase= true;
+		boolean canAddAnyStringNext= true;
 		for (int i= 0; i < text.length(); ++i) {
 			char ch= text.charAt(i);
-			if (!lastCharIsUpperCase && Character.isUpperCase(ch)) {
+			if (canAddAnyStringNext && Character.isUpperCase(ch)) {
 				builder.append('*');
 			}
 			builder.append(ch);
-			lastCharIsUpperCase= Character.isUpperCase(ch);
+			canAddAnyStringNext= canAddAnyStringNext(ch);
 		}
 		return builder.toString();
+	}
+
+	private boolean canAddAnyStringNext(char c) {
+		return !Character.isUpperCase(c) && c != '.' && c != '*';
 	}
 
 	/**
