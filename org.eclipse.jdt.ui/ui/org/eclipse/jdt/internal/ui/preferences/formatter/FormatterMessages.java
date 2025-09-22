@@ -531,6 +531,7 @@ final class FormatterMessages extends NLS {
 	public static String ModifyDialogTabPage_error_msg_values_items_text_unassigned;
 	public static String ModifyDialogTabPage_NumberPreference_error_invalid_key;
 	public static String ModifyDialogTabPage_NumberPreference_error_invalid_value;
+	public static String FormatterModifyDialog_comments_pref_format_markdown_tags;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, FormatterMessages.class);

@@ -50,7 +50,8 @@ public class JavaFormattingContext extends FormattingContext {
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT,
 			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT,
-			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML};}
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML,
+			    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_MARKDOWN_TAGS};}
 
 
 	/*
