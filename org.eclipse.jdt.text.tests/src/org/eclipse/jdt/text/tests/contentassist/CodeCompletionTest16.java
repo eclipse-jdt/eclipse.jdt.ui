@@ -335,5 +335,7 @@ public class CodeCompletionTest16 extends AbstractCompletionTest {
 
 		String proposalString= doc.get();
 		assertTrue(proposalString.contains("public FooBar(String foo, String bar) {"), "proper constructor not found");
+		assertTrue(proposalString.contains("this.foo = foo;"), "first component not initialized");
+		assertTrue(proposalString.contains("this.bar = bar;"), "second component not initialized");
 	}
 }
