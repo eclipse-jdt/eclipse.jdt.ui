@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 GK Software AG, IBM Corporation and others.
+ * Copyright (c) 2024, 2025 GK Software AG, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -299,5 +300,40 @@ public class CodeCompletionTest16 extends AbstractCompletionTest {
 		if (idx == -1) {
 			fail("Expected Javadoc not found. Found instead: " + info);
 		}
+	}
+	@Test
+	public void testRecordConstructor() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents=
+				"""
+					package test1;
+					/**
+					 * A foo bar.
+					 * @param foo The foo.
+					 * @param bar The bar.
+					 */
+					public record FooBar(String foo, String bar) {
+						/* here */
+						Foo
+					}
+					""";
+		ICompilationUnit cu= pack1.createCompilationUnit("FooBar.java", contents, false, null);
+
+		int offset= contents.indexOf("here");
+		offset= contents.indexOf("Foo", offset) + "Foo".length() - 1;
+
+		JavaTypeCompletionProposalComputer comp= new JavaAllCompletionProposalComputer();
+
+		List<ICompletionProposal> proposals= comp.computeCompletionProposals(createContext(offset, cu), null);
+		ICompletionProposal proposal= findProposal(proposals, "FooBar() - Constructor");
+		assertNotNull("Proposal not found", proposal.getDisplayString());
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposal.apply(doc);
+
+		String proposalString= doc.get();
+		assertTrue(proposalString.contains("public FooBar(String foo, String bar) {"), "proper constructor not found");
 	}
 }
