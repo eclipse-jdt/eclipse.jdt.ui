@@ -4663,4 +4663,29 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
     }
 
+	@Test
+	public void testUnnecessaryArrayIssue2513_MethodConflict() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class A {
+			    public static void doNotChangeMethodDispatch() {
+			        bar("d", new Object[] {"e"});
+			    }
+
+			    public static void bar(Object... elements) {
+			    }
+
+			    public static void bar(Object element, Object ...elements) {
+			    }
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
 }
