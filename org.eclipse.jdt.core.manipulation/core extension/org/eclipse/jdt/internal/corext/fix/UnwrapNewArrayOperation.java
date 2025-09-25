@@ -64,10 +64,12 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 
 		boolean tagged= false;
 		try {
-			for (int i= 0; i < expressionsInArray.size(); ++i) {
-				Expression operand= expressionsInArray.get(i);
-				int lineNo= root.getLineNumber(operand.getStartPosition());
-				for (NLSLine nlsLine : NLSScanner.scan(cu)) {
+			NLSLine[] nlsLines= NLSScanner.scan(cu);
+			ASTNode topNode= ASTNodes.getFirstAncestorOrNull(node, MethodInvocation.class, SuperMethodInvocation.class, ClassInstanceCreation.class);
+			int startLine= root.getLineNumber(topNode.getStartPosition());
+			int endLine= root.getLineNumber(topNode.getStartPosition() + topNode.getLength());
+			for (int lineNo= startLine; lineNo <= endLine; ++lineNo) {
+				for (NLSLine nlsLine : nlsLines) {
 					if (nlsLine.getLineNumber() == lineNo - 1) {
 						for (NLSElement element : nlsLine.getElements()) {
 							if (element.hasTag()) {
