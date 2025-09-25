@@ -4688,4 +4688,36 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
+	public void testUnnecessaryArrayIssue2515_NLS() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class TestNLSUnnecessaryArray {
+				private void func(String a, Object ...list) {
+				}
+				public void foo() {
+					func("a", new Object[] {this, this}); //$NON-NLS-1$
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		String expected= """
+			package test1;
+
+			public class TestNLSUnnecessaryArray {
+				private void func(String a, Object ...list) {
+				}
+				public void foo() {
+					func("a", this, this); //$NON-NLS-1$
+				}
+			}
+			""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
 }
