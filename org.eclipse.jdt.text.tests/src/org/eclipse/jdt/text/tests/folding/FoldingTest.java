@@ -76,8 +76,7 @@ public class FoldingTest {
 	}
 
 	@After
-	public void tearDown() throws CoreException {
-		JavaProjectHelper.delete(jProject);
+	public void tearDown() {
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
 	}
 
