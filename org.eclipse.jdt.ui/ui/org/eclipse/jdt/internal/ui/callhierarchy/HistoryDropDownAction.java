@@ -81,6 +81,7 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         }
         fMenu= new Menu(parent);
         IMember[][] elements= fView.getHistoryEntries();
+
         addEntries(fMenu, elements);
 		new MenuItem(fMenu, SWT.SEPARATOR);
 		addActionToMenu(fMenu, new HistoryListAction(fView));
