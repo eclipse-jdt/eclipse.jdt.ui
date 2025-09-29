@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -65,9 +66,8 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 		boolean tagged= false;
 		try {
 			NLSLine[] nlsLines= NLSScanner.scan(cu);
-			ASTNode topNode= ASTNodes.getFirstAncestorOrNull(node, MethodInvocation.class, SuperMethodInvocation.class, ClassInstanceCreation.class);
-			int startLine= root.getLineNumber(topNode.getStartPosition());
-			int endLine= root.getLineNumber(topNode.getStartPosition() + topNode.getLength());
+			int startLine= root.getLineNumber(call.getStartPosition());
+			int endLine= root.getLineNumber(call.getStartPosition() + call.getLength());
 			for (int lineNo= startLine; lineNo <= endLine; ++lineNo) {
 				for (NLSLine nlsLine : nlsLines) {
 					if (nlsLine.getLineNumber() == lineNo - 1) {
@@ -81,6 +81,9 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 					if (tagged) {
 						break;
 					}
+				}
+				if (tagged) {
+					break;
 				}
 			}
 		} catch (Exception e) {
@@ -124,12 +127,19 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 			int arrayStart= node.getStartPosition();
 			List<Expression> expressionList= node.getInitializer().expressions();
 			int arrayExpressionStart= expressionList.get(0).getStartPosition();
+			IBuffer cuBuffer= cu.getBuffer();
+			String arrayStartString= cuBuffer.getText(arrayStart, arrayExpressionStart - arrayStart);
+			int index= arrayStartString.indexOf('{') + 1;
+			while (index < arrayStartString.length() && (arrayStartString.charAt(index) == ' ' || arrayStartString.charAt(index) == '\t')) {
+				++index;
+			}
+			arrayExpressionStart= arrayStart + index;
 			Expression lastExpression= expressionList.get(expressionList.size() - 1);
 			int arrayExpressionEnd= lastExpression.getStartPosition() + lastExpression.getLength();
 			int arrayInitializerEnd= node.getInitializer().getStartPosition() + node.getInitializer().getLength();
-			buf.append(cu.getBuffer().getText(nodeStart, arrayStart - nodeStart));
-			buf.append(cu.getBuffer().getText(arrayExpressionStart, arrayExpressionEnd - arrayExpressionStart));
-			buf.append(cu.getBuffer().getText(arrayInitializerEnd, nodeEnd - arrayInitializerEnd));
+			buf.append(cuBuffer.getText(nodeStart, arrayStart - nodeStart));
+			buf.append(cuBuffer.getText(arrayExpressionStart, arrayExpressionEnd - arrayExpressionStart));
+			buf.append(cuBuffer.getText(arrayInitializerEnd, nodeEnd - arrayInitializerEnd));
 
 			ASTNode replacementNode= null;
 			if (call instanceof ClassInstanceCreation) {
