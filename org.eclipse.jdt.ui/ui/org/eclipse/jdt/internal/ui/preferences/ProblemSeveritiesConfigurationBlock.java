@@ -631,6 +631,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		}
 		private AnnotationTarget getAnnotationKind(String name) {
 			try {
+				if (fProject == null) {
+					return AnnotationTarget.NONE;
+				}
 				IType annotationType= JavaCore.create(fProject).findType(name);
 				if (annotationType != null && annotationType.exists()) {
 					for (IAnnotation metaAnn : annotationType.getAnnotations()) {
