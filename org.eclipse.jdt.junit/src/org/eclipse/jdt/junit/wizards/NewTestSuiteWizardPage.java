@@ -380,12 +380,12 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	}
 
 	@Override
-	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {
+	public void createTypes(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		IPackageFragment pack= getPackageFragment();
 		ICompilationUnit cu= pack.getCompilationUnit(getTypeName() + ".java"); //$NON-NLS-1$
 
 		if (!cu.exists()) {
-			super.createType(monitor);
+			super.createTypes(monitor);
 			fUpdatedExistingClassButton= false;
 		} else {
 			updateExistingType(cu, monitor);
