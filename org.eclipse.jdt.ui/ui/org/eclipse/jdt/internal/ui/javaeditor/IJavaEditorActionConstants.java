@@ -52,4 +52,10 @@ public interface IJavaEditorActionConstants {
 	 * @since 4.21
 	 */
 	String RAW_PASTE= "rawPaste"; //$NON-NLS-1$
+
+	/**
+	 * ID of the action to open method in a new tab.
+	 * @since 4.37
+	 */
+	String OPEN_METHOD="openMethod"; //$NON-NLS-1$
 }
