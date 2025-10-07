@@ -50,6 +50,9 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 		@Override
 		public String getAdditionalProposalInfo() {
+			if (fJunitVersion == 6) {
+				return JUnitMessages.JUnitAddLibraryProposal_junit6_info;
+			}
 			if (fJunitVersion == 5) {
 				return JUnitMessages.JUnitAddLibraryProposal_junit5_info;
 			}
@@ -68,6 +71,9 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			try {
 				IClasspathEntry entry= null;
 				switch (fJunitVersion) {
+				case 6:
+					entry= BuildPathSupport.getJUnit6ClasspathEntry();
+					break;
 				case 5:
 					entry= BuildPathSupport.getJUnit5ClasspathEntry();
 					break;
@@ -126,6 +132,9 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 		@Override
 		public String getDisplayString() {
+			if (fJunitVersion == 6) {
+				return JUnitMessages.JUnitAddLibraryProposa_junit6_label;
+			}
 			if (fJunitVersion == 5) {
 				return JUnitMessages.JUnitAddLibraryProposa_junit5_label;
 			}
@@ -149,12 +158,14 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 	private static final int JUNIT3= 1;
 	private static final int JUNIT4= 2;
 	private static final int JUNIT5= 4;
+	private static final int JUNIT6= 5;
 
 
 	@Override
 	public ClasspathFixProposal[] getFixImportProposals(IJavaProject project, String missingType) throws CoreException {
 		String s= missingType;
 		int res= 0;
+		// TODO: how to differentiate between JUnit 5 and JUnit 6 here?
 		if (s.startsWith("org.junit.jupiter") || s.startsWith("org.junit.platform")) { //$NON-NLS-1$ //$NON-NLS-2$
 			res= JUNIT5;
 		} else if (s.startsWith("org.junit.")) { //$NON-NLS-1$
@@ -181,6 +192,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			}
 		if (res != 0) {
 			ArrayList<JUnitClasspathFixProposal> proposals= new ArrayList<>();
+			// TODO: how to differentiate between JUnit 5 and JUnit 6 here? based on JRE version?
 			if ((res & JUNIT5) != 0) {
 				proposals.add(new JUnitClasspathFixProposal(project, 5, 15));
 			}

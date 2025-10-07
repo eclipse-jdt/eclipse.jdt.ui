@@ -344,6 +344,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	public void setJUnitVersion(JUnitVersion version) {
 		internalSetJUnit(version);
 		switch (fJUnitVersion) {
+			// TODO: do we need JUnit 6 here?
 			case VERSION_5:
 				if (fJUnit5Button != null && !fJUnit5Button.isDisposed()) {
 					fJUnit5Button.setSelection(true);
@@ -1236,6 +1237,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 					boolean noMatch= false;
 					if (fJUnitVersion != null) {
 						switch (fJUnitVersion) {
+							// TODO: do we need JUnit 6 here?...
 							case VERSION_5:
 								if (project.findType(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME) == null) {
 									status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit5NotOnbuildpath);

@@ -52,6 +52,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	private final static String JUNIT3= "3"; //$NON-NLS-1$
 	private final static String JUNIT4= "4"; //$NON-NLS-1$
 	private final static String JUNIT5= "5"; //$NON-NLS-1$
+	private final static String JUNIT6= "6"; //$NON-NLS-1$
 
 	private static class JUnitContainer implements IClasspathContainer {
 
@@ -70,6 +71,9 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 
 		@Override
 		public String getDescription() {
+			if (JUnitCore.JUNIT6_CONTAINER_PATH.equals(fPath)) {
+				return JUnitMessages.JUnitContainerInitializer_description_junit6;
+			}
 			if (JUnitCore.JUNIT5_CONTAINER_PATH.equals(fPath)) {
 				return JUnitMessages.JUnitContainerInitializer_description_junit5;
 			}
@@ -113,6 +117,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	private static JUnitContainer getNewContainer(IPath containerPath, IClasspathAttribute[] attributes) {
 		List<IClasspathEntry> entriesList= new ArrayList<>();
 		String version= containerPath.segment(1);
+		boolean vintage;
 		if (null != version) switch (version) {
 		case JUNIT3_8_1:
 		case JUNIT3:
@@ -123,7 +128,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());
 			break;
 		case JUNIT5:
-			boolean vintage = isVintage(attributes);
+			vintage = isVintage(attributes);
 			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterMigrationSupportLibraryEntry());
@@ -137,6 +142,30 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteCommonsLibraryEntry());
 			if (vintage) {
 				entriesList.add(BuildPathSupport.getJUnitVintageEngineLibraryEntry());
+			}
+			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
+			if (vintage) {
+				entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
+			}
+			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());
+			// errors will be reported above
+			entriesList.removeIf(e -> e == null);
+			break;
+		case JUNIT6:
+			vintage = isVintage(attributes);
+			entriesList.add(BuildPathSupport.getJUnit6JupiterApiLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6JupiterEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6JupiterMigrationSupportLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6JupiterParamsLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6PlatformCommonsLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6PlatformEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6PlatformLauncherLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6PlatformSuiteApiLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6PlatformSuiteEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit6PlatformSuiteCommonsLibraryEntry());
+			if (vintage) {
+				entriesList.add(BuildPathSupport.getJUnit6VintageEngineLibraryEntry());
 			}
 			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
@@ -280,6 +309,40 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 				} else {
 					return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;
 				}
+			} else if (JUNIT6.equals(version)) {
+				if (lastSegment.contains("jupiter.api") || lastSegment.contains("jupiter-api")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_JUPITER_API_JAVADOC;
+				} else if (lastSegment.contains("jupiter.engine") || lastSegment.contains("jupiter-engine")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_JUPITER_ENGINE_JAVADOC;
+				} else if (lastSegment.contains("jupiter.migrationsupport") || lastSegment.contains("jupiter-migrationsupport")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_JUPITER_MIGRATIONSUPPORT_JAVADOC;
+				} else if (lastSegment.contains("jupiter.params") || lastSegment.contains("jupiter-params")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_JUPITER_PARAMS_JAVADOC;
+				} else if (lastSegment.contains("platform.commons") || lastSegment.contains("platform-commons")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_PLATFORM_COMMONS_JAVADOC;
+				} else if (lastSegment.contains("platform.engine") || lastSegment.contains("platform-engine")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_PLATFORM_ENGINE_JAVADOC;
+				} else if (lastSegment.contains("platform.launcher") || lastSegment.contains("platform-launcher")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_PLATFORM_LAUNCHER_JAVADOC;
+				} else if (lastSegment.contains("platform.runner") || lastSegment.contains("platform-runner")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_PLATFORM_RUNNER_JAVADOC;
+				} else if (lastSegment.contains("platform.suite.api") || lastSegment.contains("platform-suite-api")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_PLATFORM_SUITE_API_JAVADOC;
+				} else if (lastSegment.contains("platform.suite.engine") || lastSegment.contains("platform-suite-engine")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_PLATFORM_SUITE_ENGINE_JAVADOC;
+				} else if (lastSegment.contains("platform.suite.commons") || lastSegment.contains("platform-suite-commons")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_PLATFORM_SUITE_COMMONS_JAVADOC;
+				} else if (lastSegment.contains("vintage.engine") || lastSegment.contains("vintage-engine")) { //$NON-NLS-1$ //$NON-NLS-2$
+					return JUnitPreferencesConstants.JUNIT6_VINTAGE_ENGINE_JAVADOC;
+				} else if (lastSegment.contains("opentest4j")) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC;
+				} else if (lastSegment.contains("apiguardian")) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC;
+				} else if (lastSegment.contains("junit")) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT4_JAVADOC;
+				} else {
+					return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;
+				}
 			}
 		}
 		return null;
@@ -324,6 +387,8 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit4;
 			case JUNIT5:
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit5;
+			case JUNIT6:
+				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit6;
 			default:
 				break;
 			}

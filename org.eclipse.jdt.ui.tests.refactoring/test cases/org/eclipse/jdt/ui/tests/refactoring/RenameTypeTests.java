@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,14 +30,22 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.eclipse.core.internal.events.NotificationManager;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.WorkspaceJob;
 
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -58,7 +67,10 @@ import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.compiler.env.IElementInfo;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
@@ -1925,5 +1937,53 @@ public class RenameTypeTests extends GenericRefactoringTest {
 	public void testSimilarElements34() throws Exception {
 		// Test references in annotations and type parameters
 		helper3("Try", "Bla", true, false, true);
+	}
+
+	@Test
+	public void testRenameProcessor() throws Exception {
+		for (int idx = 0; idx < 1; ++idx) {
+			final int i = idx;
+			WorkspaceJob j = new WorkspaceJob("test job " + i) {
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor pm) throws CoreException {
+					ICompilationUnit compilationUnit = null;
+					try {
+						compilationUnit = createCU(getPackageP(), "X" + i + ".java", "package p; class X" + i + "{}");
+						Job.getJobManager().join(NotificationManager.class, pm);
+						RenameCompilationUnitProcessor renameProcessor = new RenameCompilationUnitProcessor(compilationUnit);
+				        renameProcessor.setNewElementName("X" + i + "New");
+				        RenameRefactoring renameRefactoring = new RenameRefactoring(renameProcessor);
+				        renameRefactoring.setValidationContext(null); // no UI context
+				        RefactoringStatus checkStatus = renameRefactoring.checkAllConditions(pm);
+				        assertFalse("Status has errors: " + checkStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL), checkStatus.hasFatalError());
+				        Change renameChange = renameRefactoring.createChange(pm);
+				        renameChange.perform(pm);
+				        compilationUnit= getPackageP().getCompilationUnit("X" + i + "New.java");
+						String s = compilationUnit.getSource();
+						IElementInfo info= JavaModelManager.getJavaModelManager().getInfo(compilationUnit);
+						String f = info.toString();
+						System.out.println("info:" + f);
+						System.out.println("source:" + s);
+						assertTrue("Invalid info: " + f, f.contains("class X" + i + "New [in X" + i + "New.java"));
+						assertEquals("Invalid source: " + s, "package p; class X" + i + "New{}", s);
+					} catch (Throwable e) {
+						IStatus error = Status.error("test job error", e);
+						throw new CoreException(error);
+					} finally {
+						if (compilationUnit != null) {
+							compilationUnit.delete(true, pm);
+						}
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
+			j.join(30_000, new NullProgressMonitor());
+			IStatus r= j.getResult();
+			if (!r.isOK()) {
+				fail("exception: " + r.getMessage(), r.getException());
+			}
+			JavaModelManager.getIndexManager().waitForIndex(true, new NullProgressMonitor());
+		}
 	}
 }

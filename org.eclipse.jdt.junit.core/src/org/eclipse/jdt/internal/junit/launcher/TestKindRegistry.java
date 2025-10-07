@@ -40,6 +40,7 @@ public class TestKindRegistry {
 	public static final String JUNIT3_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit3"; //$NON-NLS-1$
 	public static final String JUNIT4_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit4"; //$NON-NLS-1$
 	public static final String JUNIT5_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit5"; //$NON-NLS-1$
+	public static final String JUNIT6_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit6"; //$NON-NLS-1$
 
 	public static TestKindRegistry getDefault() {
 		if (fgRegistry != null)
@@ -111,6 +112,7 @@ public class TestKindRegistry {
 			if (isRunWithJUnitPlatform(element)) {
 				return JUNIT4_TEST_KIND_ID;
 			}
+			// TODO: how to distinguish JUnit 5 and JUnit 6? JRE 17 or higher on classpath?
 			if (CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
 				return JUNIT5_TEST_KIND_ID;
 			}

@@ -193,7 +193,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			String[] classpath= classpathAndModulepath[0];
 			String[] modulepath= classpathAndModulepath[1];
 
-			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId())) {
+
+			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId()) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId())) {
+				// TODO: will this work with JUnit 5 and JUnit 6? don't we have version conflicts then?
 				if (!configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY, false)) {
 					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-platform-launcher") || s.contains("org.junit.platform.launcher"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
@@ -321,7 +323,8 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			ITestKind testKind= getTestRunnerKind(configuration);
 			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
 			boolean isJUnit5Configuration= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId());
-			if (!isJUnit5Configuration && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+			boolean isJUnit6Configuration= TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKind.getId());
+			if (!isJUnit5Configuration && !isJUnit6Configuration && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 			if (isJUnit4Configuration && !CoreTestSearchEngine.hasJUnit4TestAnnotation(javaProject)) {
@@ -329,6 +332,10 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 			if (isJUnit5Configuration && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
 				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit5notonpath, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
+				abort(msg, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+			}
+			if (isJUnit6Configuration && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit6notonpath, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
 				abort(msg, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 		} finally {

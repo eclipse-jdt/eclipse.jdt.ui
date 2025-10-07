@@ -107,6 +107,18 @@
       </kind>
    </extension>
    <extension
+         point="org.eclipse.jdt.junit.internal_testKinds">
+      <kind
+            id="org.eclipse.jdt.junit.loader.junit6"
+            displayName="%testKind.junit6"
+            finderClass="org.eclipse.jdt.internal.junit.launcher.JUnit5TestFinder"
+            loaderPluginId="org.eclipse.jdt.junit6.runtime"
+            loaderClass="org.eclipse.jdt.internal.junit6.runner.JUnit5TestLoader">
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit5.runtime" />
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" />
+      </kind>
+   </extension>
+   <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
             base-type="org.eclipse.core.runtime.xml"

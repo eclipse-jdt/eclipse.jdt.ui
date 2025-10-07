@@ -276,7 +276,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			if (ss.size() == 1) {
 				Object first= ss.getFirstElement();
 				if (first instanceof ITestKind) {
-					boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(((ITestKind) first).getId());
+					String id= ((ITestKind) first).getId();
+					boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(id) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(id);
 					fIncludeExcludeTagsButton.setEnabled(isJUnit5);
 				}
 			}
@@ -1001,7 +1002,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private void validateJavaProject(IJavaProject javaProject) {
 		TestKind testKind= getSelectedTestKind();
 		if (testKind != null) {
-			if (!TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+			if (!TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testcasenotonpath);
 				return;
 			}
@@ -1011,7 +1012,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME));
 				return;
 			}
-			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+			if ((TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKind.getId())) && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
 				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
 				return;
 			}

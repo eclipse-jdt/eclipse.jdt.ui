@@ -59,5 +59,19 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC, junit5JavadocLocation);
 		prefs.put(JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC, "http://ota4j-team.github.io/opentest4j/docs/current/api/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC, "https://apiguardian-team.github.io/apiguardian/docs/current/api/"); //$NON-NLS-1$
+
+		String junit6JavadocLocation= "http://junit.org/junit6/docs/current/api/"; //$NON-NLS-1$
+		prefs.put(JUnitPreferencesConstants.JUNIT6_JUPITER_API_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_JUPITER_ENGINE_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_JUPITER_MIGRATIONSUPPORT_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_JUPITER_PARAMS_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_PLATFORM_COMMONS_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_PLATFORM_ENGINE_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_PLATFORM_LAUNCHER_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_PLATFORM_RUNNER_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_PLATFORM_SUITE_API_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_PLATFORM_SUITE_ENGINE_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_PLATFORM_SUITE_COMMONS_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT6_VINTAGE_ENGINE_JAVADOC, junit5JavadocLocation);
 	}
 }
