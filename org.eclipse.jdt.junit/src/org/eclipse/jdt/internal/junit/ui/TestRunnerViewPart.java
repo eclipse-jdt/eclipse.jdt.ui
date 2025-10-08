@@ -1547,7 +1547,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private void logMessageIfNoTests() {
-		if (fTestRunSession != null && TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId()) && fTestRunSession.getTotalCount() == 0) {
+		if (fTestRunSession != null && (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId()) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId())) && fTestRunSession.getTotalCount() == 0) {
 			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
 			ILog.of(getClass()).error(msg);
 		}

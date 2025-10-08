@@ -73,8 +73,8 @@ public class CoreTestSearchEngine {
 			if (!(parent instanceof IType)) {
 				return false;
 			}
-			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId)) {
-				// A nested/inner class need not be public in JUnit 5.
+			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId)) {
+				// A nested/inner class need not be public in JUnit 5 and JUnit 6.
 				if (Flags.isPrivate(flags)) {
 					return false;
 				}

@@ -103,6 +103,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		try {
 			JUnitVersion jUnitVersion= fPage1.getJUnitVersion();
 			switch (jUnitVersion) {
+				// TODO: does this code have problems with JUnit 6? if not, does it apply also for JUnit 6?
 				case VERSION_5:
 					if (project.findType(JUnitCorePlugin.JUNIT5_JUPITER_TEST_ANNOTATION_NAME) == null) {
 						runnable= addJUnitToClasspath(project, runnable, jUnitVersion);
@@ -232,6 +233,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 		private static String getDialogMessage(JUnitVersion junitVersion) {
 			switch (junitVersion) {
+				// TODO: this will need JUnit 6 text...
 				case VERSION_5:
 					return WizardMessages.NewTestCaseCreationWizard_fix_selection_junit5_description;
 				case VERSION_4:
