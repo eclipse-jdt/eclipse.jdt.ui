@@ -153,6 +153,31 @@ public class JUnitPreferencesConstants {
 	 */
 	public static final String JUNIT_APIGUARDIAN_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.apiguardian.javadoclocation"; //$NON-NLS-1$
 
+	/** Javadoc location for org.junit.jupiter.api (JUnit 6)*/
+	public static final String JUNIT6_JUPITER_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.jupiter.api.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.jupiter.engine (JUnit 6) */
+	public static final String JUNIT6_JUPITER_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.jupiter.engine.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.jupiter.migrationsupport (JUnit 6) */
+	public static final String JUNIT6_JUPITER_MIGRATIONSUPPORT_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.jupiter.migrationsupport.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.jupiter.params (JUnit 6)*/
+	public static final String JUNIT6_JUPITER_PARAMS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.jupiter.params.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.platform.commons (JUnit 6) */
+	public static final String JUNIT6_PLATFORM_COMMONS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.platform.commons.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.platform.engine (JUnit 6 */
+	public static final String JUNIT6_PLATFORM_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.platform.engine.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.platform.launcher (JUnit 6) */
+	public static final String JUNIT6_PLATFORM_LAUNCHER_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.platform.launcher.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.platform.runner (JUnit 6) */
+	public static final String JUNIT6_PLATFORM_RUNNER_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.platform.runner.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.platform.suite.api (JUnit 6) */
+	public static final String JUNIT6_PLATFORM_SUITE_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.platform.suite.api.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.platform.suite.engine (JUnit 6) */
+	public static final String JUNIT6_PLATFORM_SUITE_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.platform.suite.engine.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.platform.suite.commons (JUnit 6) */
+	public static final String JUNIT6_PLATFORM_SUITE_COMMONS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.platform.suite.commons.javadoclocation"; //$NON-NLS-1$
+	/** Javadoc location for org.junit.vintage.engine (JUnit 6) */
+	public static final String JUNIT6_VINTAGE_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit6.vintage.engine.javadoclocation"; //$NON-NLS-1$
+
 	private static final String[] fgDefaultFilterPatterns= new String[] {
 		"org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit4.runner.*", //$NON-NLS-1$

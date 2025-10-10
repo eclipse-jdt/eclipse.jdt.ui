@@ -363,6 +363,42 @@ public class BuildPathSupport {
 			"org.apiguardian.api", new VersionRange("[1.0.0,2.0.0)"), null, "org.apiguardian.api_1.*.jar", "org.apiguardian.api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 			JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC);
 
+	public static final JUnitPluginDescription JUNIT6_JUPITER_API_PLUGIN= new JUnitPluginDescription(
+			"junit-jupiter-api", new VersionRange("[6.0.0,7.0.0)"), null, "junit-jupiter-api_6.*.jar", "junit-jupiter-api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT6_JUPITER_ENGINE_PLUGIN= new JUnitPluginDescription(
+			"junit-jupiter-engine", new VersionRange("[6.0.0,7.0.0)"), null, "junit-jupiter-engine_6.*.jar", "junit-jupiter-engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT6_JUPITER_PARAMS_PLUGIN= new JUnitPluginDescription(
+			"junit-jupiter-params", new VersionRange("[6.0.0,7.0.0)"), null, "junit-jupiter-params_6.*.jar", "junit-jupiter-params.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_JUPITER_PARAMS_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT6_PLATFORM_COMMONS_PLUGIN= new JUnitPluginDescription(
+			"junit-platform-commons", new VersionRange("[6.0.0,7.0.0)"), null, "junit-platform-commons_6.*.jar", "junit-platform-commons.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_PLATFORM_COMMONS_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT6_PLATFORM_ENGINE_PLUGIN= new JUnitPluginDescription(
+			"junit-platform-engine", new VersionRange("[6.0.0,7.0.0)"), null, "junit-platform-engine_6.*.jar", "junit-platform-engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_PLATFORM_ENGINE_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT6_PLATFORM_LAUNCHER_PLUGIN= new JUnitPluginDescription(
+			"junit-platform-launcher", new VersionRange("[6.0.0,7.0.0)"), null, "junit-platform-launcher_6.*.jar", "junit-platform-launcher.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_PLATFORM_LAUNCHER_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT6_PLATFORM_SUITE_API_PLUGIN= new JUnitPluginDescription(
+			"junit-platform-suite-api", new VersionRange("[6.0.0,7.0.0)"), null, "junit-platform-suite-api_6.*.jar", "junit-platform-suite-api.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT6_PLATFORM_SUITE_ENGINE_PLUGIN= new JUnitPluginDescription(
+			"junit-platform-suite-engine", new VersionRange("[6.0.0,7.0.0)"), null, "junit-platform-suite-engine_6.*.jar", "junit-platform-suite-engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_ENGINE_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT6_PLATFORM_SUITE_COMMONS_PLUGIN= new JUnitPluginDescription(
+			"junit-platform-suite-commons", new VersionRange("[6.0.0,7.0.0)"), null, "junit-platform-suite-commons_6.*.jar", "junit-platform-suite-commons.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC);
+
 	public static final JUnitPluginDescription JUNIT4_AS_3_PLUGIN= new JUnitPluginDescription(
 			JUNIT4_PLUGIN.bundleId, JUNIT4_PLUGIN.versionRange, JUNIT4_PLUGIN.bundleRoot, JUNIT4_PLUGIN.binaryImportedRoot,
 			JUNIT4_PLUGIN.sourceBundleId, JUNIT4_PLUGIN.repositorySource, JUNIT3_PLUGIN.javadocPreferenceKey) {
@@ -397,6 +433,13 @@ public class BuildPathSupport {
 	}
 
 	/**
+	 * @return the JUnit6 classpath container
+	 */
+	public static IClasspathEntry getJUnit6ClasspathEntry() {
+		return JavaCore.newContainerEntry(JUnitCore.JUNIT6_CONTAINER_PATH);
+	}
+
+	/**
 	 * @return the org.junit version 3 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnit3LibraryEntry() {
@@ -426,84 +469,84 @@ public class BuildPathSupport {
 	}
 
 	/**
-	 * @return the org.junit.jupiter.api library, or <code>null</code> if not available
+	 * @return the org.junit.jupiter.api JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitJupiterApiLibraryEntry() {
 		return JUNIT_JUPITER_API_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.jupiter.engine library, or <code>null</code> if not available
+	 * @return the org.junit.jupiter.engine JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitJupiterEngineLibraryEntry() {
 		return JUNIT_JUPITER_ENGINE_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.jupiter.migrationsupport library, or <code>null</code> if not available
+	 * @return the org.junit.jupiter.migrationsupport JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitJupiterMigrationSupportLibraryEntry() {
 		return JUNIT_JUPITER_MIGRATIONSUPPORT_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.jupiter.params library, or <code>null</code> if not available
+	 * @return the org.junit.jupiter.params JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitJupiterParamsLibraryEntry() {
 		return JUNIT_JUPITER_PARAMS_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.platform.commons library, or <code>null</code> if not available
+	 * @return the org.junit.platform.commons JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitPlatformCommonsLibraryEntry() {
 		return JUNIT_PLATFORM_COMMONS_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.platform.engine library, or <code>null</code> if not available
+	 * @return the org.junit.platform.engine JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitPlatformEngineLibraryEntry() {
 		return JUNIT_PLATFORM_ENGINE_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.platform.launcher library, or <code>null</code> if not available
+	 * @return the org.junit.platform.launcher JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitPlatformLauncherLibraryEntry() {
 		return JUNIT_PLATFORM_LAUNCHER_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.platform.runner library, or <code>null</code> if not available
+	 * @return the org.junit.platform.runner JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitPlatformRunnerLibraryEntry() {
 		return JUNIT_PLATFORM_RUNNER_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.platform.suite.api library, or <code>null</code> if not available
+	 * @return the org.junit.platform.suite.api JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitPlatformSuiteApiLibraryEntry() {
 		return JUNIT_PLATFORM_SUITE_API_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.platform.suite.api library, or <code>null</code> if not available
+	 * @return the org.junit.platform.suite.api JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitPlatformSuiteEngineLibraryEntry() {
 		return JUNIT_PLATFORM_SUITE_ENGINE_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.platform.suite.commons library, or <code>null</code> if not available
+	 * @return the org.junit.platform.suite.commons JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitPlatformSuiteCommonsLibraryEntry() {
 		return JUNIT_PLATFORM_SUITE_COMMONS_PLUGIN.getLibraryEntry();
 	}
 
 	/**
-	 * @return the org.junit.vintage.engine library, or <code>null</code> if not available
+	 * @return the org.junit.vintage.engine JUnit 5 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnitVintageEngineLibraryEntry() {
 		return JUNIT_VINTAGE_ENGINE_PLUGIN.getLibraryEntry();
@@ -521,6 +564,69 @@ public class BuildPathSupport {
 	 */
 	public static IClasspathEntry getJUnitApiGuardianLibraryEntry() {
 		return JUNIT_APIGUARDIAN_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.jupiter.api JUnit 6 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6JupiterApiLibraryEntry() {
+		return JUNIT6_JUPITER_API_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.jupiter.engine JUnit 5 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6JupiterEngineLibraryEntry() {
+		return JUNIT6_JUPITER_ENGINE_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.jupiter.params JUnit 6 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6JupiterParamsLibraryEntry() {
+		return JUNIT6_JUPITER_PARAMS_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.platform.commons JUnit 6 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6PlatformCommonsLibraryEntry() {
+		return JUNIT6_PLATFORM_COMMONS_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.platform.engine JUnit 6 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6PlatformEngineLibraryEntry() {
+		return JUNIT6_PLATFORM_ENGINE_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.platform.launcher JUnit 6 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6PlatformLauncherLibraryEntry() {
+		return JUNIT6_PLATFORM_LAUNCHER_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.platform.suite.api JUnit 6 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6PlatformSuiteApiLibraryEntry() {
+		return JUNIT6_PLATFORM_SUITE_API_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.platform.suite.api JUnit 6 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6PlatformSuiteEngineLibraryEntry() {
+		return JUNIT6_PLATFORM_SUITE_ENGINE_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.platform.suite.commons JUnit 6 library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnit6PlatformSuiteCommonsLibraryEntry() {
+		return JUNIT6_PLATFORM_SUITE_COMMONS_PLUGIN.getLibraryEntry();
 	}
 
 	private BuildPathSupport() {
