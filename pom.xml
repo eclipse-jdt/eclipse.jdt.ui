@@ -64,6 +64,7 @@
     <module>org.eclipse.jdt.junit.runtime</module>
     <module>org.eclipse.jdt.junit4.runtime</module>
     <module>org.eclipse.jdt.junit5.runtime</module>
+    <module>org.eclipse.jdt.junit6.runtime</module>
     <module>org.eclipse.jdt.ui.unittest.junit</module>
     <module>org.eclipse.jdt.ui.unittest.junit.feature</module>
     <module>org.eclipse.jdt.astview</module>
