@@ -30,6 +30,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitContainerInitializer_description_initializer_junit5;
 
+	public static String JUnitContainerInitializer_description_initializer_junit6;
+
 	public static String JUnitContainerInitializer_description_initializer_unresolved;
 
 	public static String JUnitContainerInitializer_description_junit3;
@@ -37,6 +39,8 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitContainerInitializer_description_junit4;
 
 	public static String JUnitContainerInitializer_description_junit5;
+
+	public static String JUnitContainerInitializer_description_junit6;
 
 	public static String JUnitLaunchConfigurationDelegate_create_source_locator_description;
 
