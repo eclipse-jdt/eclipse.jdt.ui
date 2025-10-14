@@ -446,7 +446,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		String text= super.getPatternText();
 		fTypeItemsComparator.setOriginalPattern(text);
 		StringBuilder builder= new StringBuilder();
-		boolean canAddAnyStringNext= true;
+		boolean canAddAnyStringNext= false;
 		for (int i= 0; i < text.length(); ++i) {
 			char ch= text.charAt(i);
 			if (canAddAnyStringNext && Character.isUpperCase(ch)) {
