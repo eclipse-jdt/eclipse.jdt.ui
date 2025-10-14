@@ -1,7 +1,18 @@
 # JDT UI
 
+[![Java CI with Maven](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/maven.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/maven.yml)
+
+[![Check Code Freeze Period](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/verifyFreezePeriod.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/verifyFreezePeriod.yml)
+
+[![CodeQL](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codeql.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codeql.yml)
+
+[![Codacy Security Scan](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codacy.yml/badge.svg)](https://github.com/carstenartur/eclipse.jdt.ui/actions/workflows/codacy.yml)
+
+Thanks for your interest in this project.
+
 This is the UI part of Eclipse's Java development tools, the user interface for the Java IDE. 
 This includes views like Package Explorer and JUnit, the Java and properties files editors, Java search, and refactorings.
+
 
 For more information and important links, refer to the [JDT wiki page](https://github.com/eclipse-jdt/eclipse.jdt.core/wiki) or the [JDT project overview page](https://projects.eclipse.org/projects/eclipse.jdt).
 
