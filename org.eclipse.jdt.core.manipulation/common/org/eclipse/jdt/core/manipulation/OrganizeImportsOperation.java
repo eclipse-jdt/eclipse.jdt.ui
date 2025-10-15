@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IModuleBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -238,6 +239,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private IPackageFragment fCurrPackage;
 
 		private ScopeAnalyzer fAnalyzer;
+		private CompilationUnit fRoot;
 
 		private Map<String, UnresolvedTypeData> fUnresolvedTypes;
 		private Set<String> fImportsAdded;
@@ -254,6 +256,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fImpStructure= impStructure;
 			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
 			fUnresolvableImportMatcher= unresolvableImportMatcher;
+			fRoot= root;
 
 			ICompilationUnit cu= impStructure.getCompilationUnit();
 
@@ -360,10 +363,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						if (entry != null) {
 							if (fModuleImportsAdded.contains(entry.getKey())) {
 								fImportsAdded.add(typeName);
-								return;
+							} else {
+								fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
+								fModuleImportsAdded.add(entry.getKey());
 							}
-							fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
-							fModuleImportsAdded.add(entry.getKey());
+							if (!fOldModuleImports.isEmpty() && typeNameAmbiguousForImportedModules(typeName)) {
+								fImpStructure.addImport(typeBinding, UNRESOLVABLE_IMPORT_CONTEXT);
+							}
 							return;
 						}
 						if (fImplicitImports.contains(qualifier)) {
@@ -387,6 +393,29 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			fImportsAdded.add(typeName);
 			fUnresolvedTypes.put(typeName, new UnresolvedTypeData(ref));
+		}
+
+		private boolean typeNameAmbiguousForImportedModules(String typeName) {
+			IJavaProject project= fCurrPackage.getJavaProject();
+			List<ImportDeclaration> imports= fRoot.imports();
+			ITypeBinding typeBinding= null;
+			for (ImportDeclaration importDecl : imports) {
+				if (Modifier.isModule(importDecl.getModifiers())) {
+					if (importDecl.resolveBinding() instanceof IModuleBinding binding) {
+						List<IPackageBinding> packageBindings= ImportRewrite.getPackageBindingsForModule(binding, project);
+						for (IPackageBinding packageBinding : packageBindings) {
+							ITypeBinding foundTypeBinding= packageBinding.findTypeBinding(typeName);
+							if (foundTypeBinding != null) {
+								if (typeBinding != null) {
+									return true;
+								}
+								typeBinding= foundTypeBinding;
+							}
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 		public boolean process(IProgressMonitor monitor) throws JavaModelException {
@@ -462,6 +491,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			} else {
 				String typeToImport= null;
 				boolean ambiguousImports= false;
+				boolean foundInModule= false;
 
 				// multiple found, use old imports to find an entry
 				for (int i= 0; i < nFound; i++) {
@@ -478,13 +508,23 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						} else {  // more than one import-on-demand
 							ambiguousImports= true;
 						}
-					} else if (getModuleImportsEntryForQualifier(containerName) != null) {
-						return null; // we don't reimport
+					} else {
+						Entry<String, Set<String>> entry= getModuleImportsEntryForQualifier(containerName);
+						foundInModule= true;
+						if (entry != null) {
+							if (typeToImport == null) {
+								typeToImport= fullName;
+							} else { // more than one import module
+								ambiguousImports= true;
+							}
+						}
 					}
 				}
 
 				if (typeToImport != null && !ambiguousImports) {
-					fImpStructure.addImport(typeToImport);
+					if (!foundInModule) { // we only add an import if not already covered by an import module
+						fImpStructure.addImport(typeToImport);
+					}
 					return null;
 				}
 				// return the open choices
