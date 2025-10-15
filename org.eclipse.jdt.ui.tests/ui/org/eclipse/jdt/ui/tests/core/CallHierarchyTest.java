@@ -140,6 +140,23 @@ public class CallHierarchyTest {
         helper.assertCalls(expectedMethodsTo3, wrapper2.getCalls(new NullProgressMonitor()));
     }
 
+	/*
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.core/pull/4341
+	 */
+	@Test
+	public void callers_GH4341() throws Exception {
+        helper.createReproducerGH4341();
+
+        IType type= helper.getType1();
+
+        IMethod caller= type.getMethod("method1", new String[] {});
+        IMethod callee= type.getMethod("method2", new String[] {"QA;"});
+
+        MethodWrapper callerHierarchy= getSingleCallerRoot(callee);
+
+        helper.assertCalls(List.of(caller), callerHierarchy.getCalls(null));
+    }
+
 	@Test
 	public void calleesNoResults() throws Exception {
         helper.createSimpleClasses();

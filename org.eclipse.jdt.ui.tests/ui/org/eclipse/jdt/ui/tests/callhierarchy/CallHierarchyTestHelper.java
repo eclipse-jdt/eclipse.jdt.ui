@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
@@ -154,6 +155,98 @@ public class CallHierarchyTestHelper {
         assertBuildWithoutErrors(fJavaProject1);
         assertBuildWithoutErrors(fJavaProject2);
     }
+
+	/**
+	 * Create a hierarchy of interfaces (D -> A -> B -> C) and an imports relation (C -> D).
+	 */
+	public void createReproducerGH4341() throws Exception {
+		createPackages();
+
+		JavaProjectHelper.addRTJar9(fJavaProject1);
+		IPackageFragmentRoot srcFolder= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
+		IPackageFragment packageX= createPackageInProject(srcFolder, "x");
+
+		createCUInPackage("""
+				//package x;
+				public interface A extends B {}
+				""", //
+				packageX, //
+				"A.java");
+
+		createCUInPackage("""
+				//package x;
+				public interface B extends C {}
+				""", //
+				packageX, //
+				"B.java");
+
+		createCUInPackage("""
+				//package x;
+				//import javax.annotation.processing.SupportedSourceVersion;
+				//import javax.lang.model.SourceVersion;
+				//import y.D;
+				/**
+				 * {@link y.D}
+				 */
+				@SupportedSourceVersion(SourceVersion.RELEASE_0)
+				public interface C {}
+				""", //
+				packageX, //
+				"C.java", //
+				"javax.annotation.processing.SupportedSourceVersion", //
+				"javax.lang.model.SourceVersion", //
+				"y.D");
+
+		IPackageFragment packageZ= createPackageInProject(srcFolder, "z");
+		fType1= createCUInPackage("""
+				//package z;
+				//import x.A;
+				//import y.D;
+
+				public class Main {
+					public void method1() {
+						D d = new D() {};
+						method2(d);
+					}
+
+					public void method2(A a) {}
+				}
+				""", //
+				packageZ, //
+				"Main.java", //
+				"x.A", //
+				"y.D");
+
+		IPackageFragment packageY= createPackageInProject(srcFolder, "y");
+		createCUInPackage("""
+				//package y;
+				//import x.A;
+				public interface D extends A {}
+				""", //
+				packageY, //
+				"D.java", //
+				"x.A");
+
+		assertBuildWithoutErrors(fJavaProject1);
+	}
+
+	private IType createCUInPackage(String srcCode, IPackageFragment pkg, String cuName, String... imports) throws JavaModelException {
+		ICompilationUnit cu= pkg.getCompilationUnit(cuName);
+
+		IType type= cu.createType(srcCode, null, true, null);
+		for (String i : imports) {
+			cu.createImport(i, type, null);
+		}
+
+		return type;
+
+	}
+
+	private IPackageFragment createPackageInProject(IPackageFragmentRoot srcFolder, String packagename) throws CoreException, JavaModelException, Exception {
+		IPackageFragment pkg= srcFolder.createPackageFragment(packagename, true, null);
+        assertBuildWithoutErrors(pkg);
+        return pkg;
+	}
 
     /**
      * Creates two simple classes, A and its subclass B, where B calls A's implicit constructor explicitly. Sets the instance fields fType1 and fType2.
