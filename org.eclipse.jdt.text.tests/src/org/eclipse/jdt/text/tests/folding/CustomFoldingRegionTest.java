@@ -694,10 +694,13 @@ public class CustomFoldingRegionTest {
 				// region outer
 
 				public class Test {
+					// region middle
+
 					// region inner
 					void someMethod() {
 						// content
 					}
+					// endregion
 					// endregion
 				}
 
@@ -710,24 +713,19 @@ public class CustomFoldingRegionTest {
 
 			List<IRegion> initialRegions= FoldingTestUtils.extractRegions(model);
 
-			assertEquals(3, initialRegions.size());
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 2, 12);//outer
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 5, 9);//inner
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 6, 7);//someMethod
+			assertEquals(4, initialRegions.size());
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 2, 15);//outer
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 5, 12);//middle
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 7, 11);//inner
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 8, 9);//someMethod
 
-			List<Position> positions= new ArrayList<>();
-			Iterator<Annotation> it= model.getAnnotationIterator();
-			while (it.hasNext()) {
-				Annotation a= it.next();
-				if (a instanceof ProjectionAnnotation) {
-					Position p= model.getPosition(a);
-					positions.add(p);
-				}
-			}
+			// get the mutable Positions which are in the same order as the extracted regions (copies)
+			List<Position> positions= getFoldingPositionsFromModel(model);
 			assertEquals(initialRegions.size(), positions.size());
 
 			String additionalText= "more ";
 			editor.getViewer().getDocument().replace(code.indexOf("content"), 0, additionalText);
+			cu.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 			for(int i= 0; i < positions.size(); i++) {
 				assertEquals(initialRegions.get(i).getOffset(), positions.get(i).getOffset());
@@ -736,6 +734,19 @@ public class CustomFoldingRegionTest {
 		} finally {
 			editor.close(false);
 		}
+	}
+
+	private List<Position> getFoldingPositionsFromModel(ProjectionAnnotationModel model) {
+		List<Position> positions= new ArrayList<>();
+		Iterator<Annotation> it= model.getAnnotationIterator();
+		while (it.hasNext()) {
+			Annotation a= it.next();
+			if (a instanceof ProjectionAnnotation) {
+				Position p= model.getPosition(a);
+				positions.add(p);
+			}
+		}
+		return positions;
 	}
 
 	private List<IRegion> getProjectionRangesOfFile(String str) throws Exception {
