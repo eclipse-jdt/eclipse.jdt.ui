@@ -298,6 +298,9 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 								Modifier modifier= (Modifier)node;
 								startIndentation+= modifier.getLength();
 								node= getASTNode(cu, mapWidgetToLineNumber(sourceViewer, textWidgetLineNumber+1), line);
+								if(node == modifier) {
+									node= node.getParent();
+								}
 							} else {
 								node= node.getParent();
 							}
