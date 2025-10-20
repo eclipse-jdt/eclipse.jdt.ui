@@ -1627,7 +1627,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 	        int token;
 	        while ((token = scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
-	            if (token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
+	            if (token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || token == ITerminalSymbols.TokenNameCOMMENT_MARKDOWN) {
 	                int start = scanner.getCurrentTokenStartPosition();
 	                int end = scanner.getCurrentTokenEndPosition() + 1;
 	                try {
