@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -121,6 +122,58 @@ import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
  * @since 3.2 (API)
  */
 public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructureProvider, IJavaFoldingStructureProviderExtension {
+
+	private static class Preferences {
+		private boolean fCollapseJavadoc= false;
+
+		private boolean fCollapseImportContainer= true;
+
+		private boolean fCollapseInnerTypes= true;
+
+		private boolean fCollapseMembers= false;
+
+		private boolean fCollapseHeaderComments= true;
+
+		private boolean fCollapseCustomRegions= false;
+
+		private boolean fNewFolding;
+
+		private boolean fCustomFoldingRegionsEnabled;
+
+		private char[] fCustomFoldingRegionBegin;
+
+		private char[] fCustomFoldingRegionEnd;
+
+		private boolean fCustomFoldingRegionMarkersCanOverlap;
+
+		@Override
+		public int hashCode() {
+			final int prime= 31;
+			int result= 1;
+			result= prime * result + Arrays.hashCode(fCustomFoldingRegionBegin);
+			result= prime * result + Arrays.hashCode(fCustomFoldingRegionEnd);
+			result= prime * result + Objects.hash(fCollapseCustomRegions, fCollapseHeaderComments, fCollapseImportContainer, fCollapseInnerTypes, fCollapseJavadoc, fCollapseMembers,
+					fCustomFoldingRegionMarkersCanOverlap, fCustomFoldingRegionsEnabled, fNewFolding);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Preferences other= (Preferences) obj;
+			return fCollapseCustomRegions == other.fCollapseCustomRegions && fCollapseHeaderComments == other.fCollapseHeaderComments && fCollapseImportContainer == other.fCollapseImportContainer
+					&& fCollapseInnerTypes == other.fCollapseInnerTypes && fCollapseJavadoc == other.fCollapseJavadoc && fCollapseMembers == other.fCollapseMembers
+					&& Arrays.equals(fCustomFoldingRegionBegin, other.fCustomFoldingRegionBegin) && Arrays.equals(fCustomFoldingRegionEnd, other.fCustomFoldingRegionEnd)
+					&& fCustomFoldingRegionMarkersCanOverlap == other.fCustomFoldingRegionMarkersCanOverlap && fCustomFoldingRegionsEnabled == other.fCustomFoldingRegionsEnabled
+					&& fNewFolding == other.fNewFolding;
+		}
+	}
+
 	/**
 	 * A context that contains the information needed to compute the folding structure of an
 	 * {@link ICompilationUnit} or an {@link IClassFile}. Computed folding regions are collected
@@ -243,7 +296,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * @return <code>true</code> if header comments should be collapsed
 		 */
 		public boolean collapseHeaderComments() {
-			return fAllowCollapsing && fCollapseHeaderComments;
+			return fAllowCollapsing && fCurrentPreferences.fCollapseHeaderComments;
 		}
 
 		/**
@@ -252,7 +305,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * @return <code>true</code> if import containers should be collapsed
 		 */
 		public boolean collapseImportContainer() {
-			return fAllowCollapsing && fCollapseImportContainer;
+			return fAllowCollapsing && fCurrentPreferences.fCollapseImportContainer;
 		}
 
 		/**
@@ -261,7 +314,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * @return <code>true</code> if inner types should be collapsed
 		 */
 		public boolean collapseInnerTypes() {
-			return fAllowCollapsing && fCollapseInnerTypes;
+			return fAllowCollapsing && fCurrentPreferences.fCollapseInnerTypes;
 		}
 
 		/**
@@ -270,7 +323,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * @return <code>true</code> if javadoc comments should be collapsed
 		 */
 		public boolean collapseJavadoc() {
-			return fAllowCollapsing && fCollapseJavadoc;
+			return fAllowCollapsing && fCurrentPreferences.fCollapseJavadoc;
 		}
 
 		/**
@@ -279,7 +332,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * @return <code>true</code> if methods should be collapsed
 		 */
 		public boolean collapseMembers() {
-			return fAllowCollapsing && fCollapseMembers;
+			return fAllowCollapsing && fCurrentPreferences.fCollapseMembers;
 		}
 
 		/**
@@ -289,7 +342,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * @since 3.35
 		 */
 		public boolean collapseCustomRegions() {
-			return fAllowCollapsing && fCollapseCustomRegions;
+			return fAllowCollapsing && fCurrentPreferences.fCollapseCustomRegions;
 		}
 
 	}
@@ -1105,23 +1158,25 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private IJavaElement fInput;
 	private IElementChangedListener fElementListener;
 	private final IPropertyChangeListener fPropertyChangeListener = event -> {
-	    initializePreferences();
-	    initialize();
+		final Set<String> foldingProperties= Set.of(PreferenceConstants.EDITOR_FOLDING_COLLAPSE_CUSTOM_REGIONS, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END,
+				PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, PreferenceConstants.EDITOR_FOLDING_HEADERS,
+				PreferenceConstants.EDITOR_FOLDING_ENABLED,
+				PreferenceConstants.EDITOR_FOLDING_IMPORTS, PreferenceConstants.EDITOR_FOLDING_INNERTYPES, PreferenceConstants.EDITOR_FOLDING_JAVADOC, PreferenceConstants.EDITOR_FOLDING_METHODS,
+				PreferenceConstants.EDITOR_FOLDING_PROJECT_SPECIFIC_SETTINGS_ENABLED, PreferenceConstants.EDITOR_FOLDING_PROVIDER, PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
+
+		if (!foldingProperties.contains(event.getProperty())) {
+			// Only interested in the properties that affect folding.
+			return;
+		}
+
+	    boolean preferencesChanged= initializePreferences();
+		if (preferencesChanged) {
+	    	initialize();
+	    }
 	};
 
 	/* preferences */
-	private boolean fCollapseJavadoc= false;
-	private boolean fCollapseImportContainer= true;
-	private boolean fCollapseInnerTypes= true;
-	private boolean fCollapseMembers= false;
-	private boolean fCollapseHeaderComments= true;
-	private boolean fCollapseCustomRegions= false;
-	private boolean fNewFolding;
-
-	private boolean fCustomFoldingRegionsEnabled;
-	private char[] fCustomFoldingRegionBegin;
-	private char[] fCustomFoldingRegionEnd;
-	private boolean fCustomFoldingRegionMarkersCanOverlap;
+	private Preferences fCurrentPreferences = new Preferences();
 
 	/* filters */
 	/** Member filter, matches nested members (but not top-level types). */
@@ -1292,23 +1347,35 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		return EditorUtility.getEditorInputJavaElement(fEditor, false);
 	}
 
-	private void initializePreferences() {
+	/**
+	 * @return <code>true</code> if the preferences changed from the last time they were initialized.
+	 */
+	private boolean initializePreferences() {
 		IPreferenceStore store= FoldingPreferencePage.getFoldingPreferenceStore(fEditor);
-	    fCollapseInnerTypes = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_INNERTYPES);
-	    fCollapseImportContainer = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_IMPORTS);
-	    fCollapseJavadoc = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_JAVADOC);
-	    fCollapseMembers = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_METHODS);
-	    fCollapseHeaderComments = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_HEADERS);
+
+		Preferences temp= new Preferences();
+	    temp.fCollapseInnerTypes = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_INNERTYPES);
+	    temp.fCollapseImportContainer = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_IMPORTS);
+	    temp.fCollapseJavadoc = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_JAVADOC);
+	    temp.fCollapseMembers = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_METHODS);
+	    temp.fCollapseHeaderComments = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_HEADERS);
 
 		String customFoldingRegionBegin= store.getString(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START);
 		String customFoldingRegionEnd= store.getString(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END);
-		fCustomFoldingRegionBegin=customFoldingRegionBegin.toCharArray();
-		fCustomFoldingRegionEnd=customFoldingRegionEnd.toCharArray();
-		fCustomFoldingRegionsEnabled = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED) &&
+		temp.fCustomFoldingRegionBegin=customFoldingRegionBegin.toCharArray();
+		temp.fCustomFoldingRegionEnd=customFoldingRegionEnd.toCharArray();
+		temp.fCustomFoldingRegionsEnabled = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED) &&
 				!customFoldingRegionBegin.isEmpty() && !customFoldingRegionEnd.isEmpty();
 		// do not include the end region marker in the folded region if the start and end markers are not mutually exclusive
-		fCustomFoldingRegionMarkersCanOverlap = customFoldingRegionBegin.startsWith(customFoldingRegionEnd) || customFoldingRegionEnd.startsWith(customFoldingRegionBegin);
-		fNewFolding = store.getBoolean(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
+		temp.fCustomFoldingRegionMarkersCanOverlap = customFoldingRegionBegin.startsWith(customFoldingRegionEnd) || customFoldingRegionEnd.startsWith(customFoldingRegionBegin);
+		temp.fNewFolding = store.getBoolean(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
+
+		boolean preferencesChanged = !Objects.equals(temp, fCurrentPreferences);
+
+		// Swap
+		fCurrentPreferences = temp;
+
+		return preferencesChanged;
 	}
 
 	private void update(FoldingStructureComputationContext ctx) {
@@ -1394,7 +1461,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
-	    if (fNewFolding && fInput instanceof ICompilationUnit) {
+	    if (fCurrentPreferences.fNewFolding && fInput instanceof ICompilationUnit) {
 	        processCompilationUnit((ICompilationUnit) fInput, ctx);
 	        processComments(ctx);
 	    } else {
@@ -1428,7 +1495,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	        FoldingVisitor visitor= new FoldingVisitor(ctx, unit);
 			ast.accept(visitor);
 
-			if (fCustomFoldingRegionsEnabled) {
+			if (fCurrentPreferences.fCustomFoldingRegionsEnabled) {
 				List<Comment> comments= ast.getCommentList();
 				int currentCommentIndex= 0;
 
@@ -1525,12 +1592,12 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			int currentFoldingPositionEnd= currentFoldingPosition.getOffset() + currentFoldingPosition.getLength();
 			currentCommentIndex= checkCustomFoldingCommentsBeforePosition(sourceArray, visitor, comments, currentCommentIndex, innerOpenStartPositions, currentFoldingPositionEnd);
 
-			if (fCustomFoldingRegionMarkersCanOverlap) {
+			if (fCurrentPreferences.fCustomFoldingRegionMarkersCanOverlap) {
 				endAllActiveFoldingRegions(sourceArray, visitor, innerOpenStartPositions, currentFoldingPositionEnd);
 			}
 
 			if (currentCommentIndex >= comments.size()) {
-				if (fCustomFoldingRegionMarkersCanOverlap) {
+				if (fCurrentPreferences.fCustomFoldingRegionMarkersCanOverlap) {
 					// end all remaining custom folding regions of all remaining blocks if last comment reached
 					while (!currentFoldingPositions.isEmpty() && !openCustomRegionStartPositions.isEmpty()) {
 						currentFoldingPosition= currentFoldingPositions.removeLast();
@@ -1547,7 +1614,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void endAllActiveFoldingRegions(char[] sourceArray, FoldingVisitor visitor, Deque<Integer> openRegionsToEnd, int foldingRegionEnd) {
-		if (fCustomFoldingRegionMarkersCanOverlap) {
+		if (fCurrentPreferences.fCustomFoldingRegionMarkersCanOverlap) {
 			for (Integer startPosition : openRegionsToEnd) {
 				IRegion region= new Region(startPosition, foldingRegionEnd - startPosition);
 				checkIncludeLastLineAndCreateCustomFoldingRegion(sourceArray, visitor, region, false);
@@ -1588,13 +1655,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				comment.getStartPosition(), comment.getStartPosition() + comment.getLength()
 		);
 		if (customFoldingRegion != null) {
-			checkIncludeLastLineAndCreateCustomFoldingRegion(sourceArray, visitor, customFoldingRegion, fCustomFoldingRegionMarkersCanOverlap);
+			checkIncludeLastLineAndCreateCustomFoldingRegion(sourceArray, visitor, customFoldingRegion, fCurrentPreferences.fCustomFoldingRegionMarkersCanOverlap);
 		}
 	}
 
 	private void checkIncludeLastLineAndCreateCustomFoldingRegion(char[] sourceArray, FoldingVisitor visitor, IRegion customFoldingRegion, boolean excludeEndregionComment) {
 		includelastLine = includeLastLineInCustomFoldingRegion(sourceArray, customFoldingRegion.getOffset() + customFoldingRegion.getLength(), excludeEndregionComment);
-		visitor.createFoldingRegion(customFoldingRegion.getOffset(), customFoldingRegion.getLength(), fCollapseCustomRegions, true);
+		visitor.createFoldingRegion(customFoldingRegion.getOffset(), customFoldingRegion.getLength(), fCurrentPreferences.fCollapseCustomRegions, true);
 	}
 
 	private boolean includeLastLineInCustomFoldingRegion(char[] sourceArray, int regionEnd, boolean excludeEndregionComment) {
@@ -1761,7 +1828,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				computeFoldingStructure(parent.getChildren(), ctx);
 				ctx.fOpenCustomRegionStartPositions = outerOpenRegions;
 			}
-			if (fCustomFoldingRegionsEnabled && element instanceof ISourceReference sourceRef) {
+			if (fCurrentPreferences.fCustomFoldingRegionsEnabled && element instanceof ISourceReference sourceRef) {
 				// mark as scanned until end after scanning all children
 				ISourceRange sourceRange= sourceRef.getSourceRange();
 				ctx.fLastScannedIndex = sourceRange.getLength()+sourceRange.getOffset();
@@ -1935,7 +2002,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				final int shift= range.getOffset();
 				IScanner scanner= ctx.getScanner();
 
-				if (fCustomFoldingRegionsEnabled &&
+				if (fCurrentPreferences.fCustomFoldingRegionsEnabled &&
 						reference instanceof IJavaElement javaElement && javaElement.getParent() != null &&
 							javaElement.getParent() instanceof IParent parent && parent instanceof ISourceReference parentSourceReference) {
 						// check tokens between the last sibling (or the parent) and start of current sibling
@@ -1975,7 +2042,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 				regions.add(new Region(start, shift + range.getLength() - start));
 
-				if (fCustomFoldingRegionsEnabled) {
+				if (fCurrentPreferences.fCustomFoldingRegionsEnabled) {
 					if (reference instanceof IParent parent && !parent.hasChildren()) {
 						// if the element has no children, check content for custom folding region markers
 						Deque<Integer> openCustomRegionStartPositions= new ArrayDeque<>();
@@ -2009,7 +2076,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void addRemainingOpenCustomFoldingRegions(ISourceRange range, List<IRegion> regions, FoldingStructureComputationContext ctx, Deque<Integer> openCustomRegionStartPositions, boolean includeLastLine) {
-		if (fCustomFoldingRegionMarkersCanOverlap) {
+		if (fCurrentPreferences.fCustomFoldingRegionMarkersCanOverlap) {
 			for (Integer openRegion : openCustomRegionStartPositions) {
 				Region region= new Region(openRegion, range.getOffset() + range.getLength() - openRegion);
 				this.includelastLine= includeLastLine;
@@ -2031,7 +2098,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void checkCustomFolding(FoldingStructureComputationContext ctx, List<IRegion> regions, Deque<Integer> openCustomRegionStartPositions, IScanner scanner, int token, int regionArrayIndex) {
-		if (!fCustomFoldingRegionsEnabled) {
+		if (!fCurrentPreferences.fCustomFoldingRegionsEnabled) {
 			return;
 		}
 		int commentTextStart = findPossibleRegionCommentStart(scanner, token);
@@ -2042,7 +2109,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		IRegion region= checkCustomFolding(openCustomRegionStartPositions, commentTextStart, source, currentTokenStartPosition, currentTokenEndPosition);
 		if (region != null) {
-			if (!includeLastLineInCustomFoldingRegion(source, currentTokenEndPosition, fCustomFoldingRegionMarkersCanOverlap)) {
+			if (!includeLastLineInCustomFoldingRegion(source, currentTokenEndPosition, fCurrentPreferences.fCustomFoldingRegionMarkersCanOverlap)) {
 				includelastLine= false;
 				region= alignRegion(region, ctx);
 			}
@@ -2055,13 +2122,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		int currentTokenLengthStartingAtCommentTextStart= currentTokenEndPosition - commentTextStart;
 
 		Region returnedRegion= null;
-		if (startsWith(source, commentTextStart, currentTokenLengthStartingAtCommentTextStart, fCustomFoldingRegionEnd) && !openCustomRegionStartPositions.isEmpty()) {
+		if (startsWith(source, commentTextStart, currentTokenLengthStartingAtCommentTextStart, fCurrentPreferences.fCustomFoldingRegionEnd) && !openCustomRegionStartPositions.isEmpty()) {
 			int end= currentTokenEndPosition;
 			Integer regionStart= openCustomRegionStartPositions.removeLast();
 			returnedRegion= new Region(regionStart, end - regionStart);
 		}
 
-		if (startsWith(source, commentTextStart, currentTokenLengthStartingAtCommentTextStart, fCustomFoldingRegionBegin)) {
+		if (startsWith(source, commentTextStart, currentTokenLengthStartingAtCommentTextStart, fCurrentPreferences.fCustomFoldingRegionBegin)) {
 			openCustomRegionStartPositions.add(currentTokenStartPosition);
 		}
 		return returnedRegion;
