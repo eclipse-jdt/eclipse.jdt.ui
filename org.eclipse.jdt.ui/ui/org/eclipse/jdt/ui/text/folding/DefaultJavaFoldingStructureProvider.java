@@ -1192,10 +1192,10 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			handleProjectionDisabled();
 			fProjectionListener.dispose();
 			fProjectionListener= null;
-			fEditor= null;
 			for (IPreferenceStore store : FoldingPreferencePage.getAllFoldingPreferenceStores(fEditor)) {
 				store.removePropertyChangeListener(fPropertyChangeListener);
 			}
+			fEditor= null;
 		}
 	}
 
