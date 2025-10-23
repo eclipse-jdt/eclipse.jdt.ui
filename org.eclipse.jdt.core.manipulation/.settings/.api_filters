@@ -40,6 +40,22 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="common/org/eclipse/jdt/internal/ui/fix/ModuleImportsCleanUpCore.java" type="org.eclipse.jdt.internal.ui.fix.ModuleImportsCleanUpCore$CreateModuleImportsFix">
+        <filter comment="Use ImportDeclaration.getModifiers()" id="640712815">
+            <message_arguments>
+                <message_argument value="ImportDeclaration"/>
+                <message_argument value="CreateModuleImportsFix"/>
+                <message_argument value="getModifiers()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Use Modifier.isModule" id="640712815">
+            <message_arguments>
+                <message_argument value="Modifier"/>
+                <message_argument value="CreateModuleImportsFix"/>
+                <message_argument value="isModule(int)"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ASTFlattener.java" type="org.eclipse.jdt.internal.corext.dom.ASTFlattener">
         <filter comment="Java preview feature API" id="640712815">
             <message_arguments>

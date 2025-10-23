@@ -7578,9 +7578,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unboxing">
       </cleanUp>
       <cleanUp
+      		class="org.eclipse.jdt.internal.ui.fix.ModuleImportsCleanUpCore"
+      		id="org.eclipse.jdt.ui.cleanup.module_imports"
+      		runAfter="org.eclipse.jdt.ui.cleanup.rename_unused">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnusedSuppressWarningsCleanUp"
             id="org.eclipse.jdt.ui.cleanup.remove_unused_suppress_warnings"
-            runAfter="org.eclipse.jdt.ui.cleanup.rename_unused">
+            runAfter="org.eclipse.jdt.ui.cleanup.module_imports">
       </cleanUp>
    </extension>
 
