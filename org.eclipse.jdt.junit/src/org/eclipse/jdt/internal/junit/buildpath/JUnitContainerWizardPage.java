@@ -117,7 +117,11 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		label.setText(JUnitMessages.JUnitContainerWizardPage_combo_label);
 
 		fVersionCombo= new Combo(composite, SWT.READ_ONLY);
-		fVersionCombo.setItems(JUnitMessages.JUnitContainerWizardPage_option_junit3, JUnitMessages.JUnitContainerWizardPage_option_junit4, JUnitMessages.JUnitContainerWizardPage_option_junit5);
+		fVersionCombo.setItems(
+				JUnitMessages.JUnitContainerWizardPage_option_junit3,
+				JUnitMessages.JUnitContainerWizardPage_option_junit4,
+				JUnitMessages.JUnitContainerWizardPage_option_junit5,
+				JUnitMessages.JUnitContainerWizardPage_option_junit6);
 		fVersionCombo.setFont(composite.getFont());
 
 		GridData data= new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1);
@@ -128,8 +132,10 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 			fVersionCombo.select(0);
 		} else if (fContainerEntryResult != null && JUnitCore.JUNIT4_CONTAINER_PATH.equals(fContainerEntryResult.getPath())) {
 			fVersionCombo.select(1);
-		} else {
+		} else if (fContainerEntryResult != null && JUnitCore.JUNIT5_CONTAINER_PATH.equals(fContainerEntryResult.getPath())) {
 			fVersionCombo.select(2);
+		} else {
+			fVersionCombo.select(3);
 		}
 		fVersionCombo.addModifyListener(e -> doSelectionChanged());
 
@@ -175,7 +181,10 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 
 		IClasspathEntry libEntry;
 		IPath containerPath;
-		if (fVersionCombo != null && fVersionCombo.getSelectionIndex() == 2) {
+		if (fVersionCombo != null && fVersionCombo.getSelectionIndex() == 3) {
+			containerPath= JUnitCore.JUNIT6_CONTAINER_PATH;
+			libEntry= BuildPathSupport.getJUnit6JupiterApiLibraryEntry();
+		} else if (fVersionCombo != null && fVersionCombo.getSelectionIndex() == 2) {
 			containerPath= JUnitCore.JUNIT5_CONTAINER_PATH;
 			libEntry= BuildPathSupport.getJUnitJupiterApiLibraryEntry();
 		} else if (fVersionCombo != null && fVersionCombo.getSelectionIndex() == 1) {
