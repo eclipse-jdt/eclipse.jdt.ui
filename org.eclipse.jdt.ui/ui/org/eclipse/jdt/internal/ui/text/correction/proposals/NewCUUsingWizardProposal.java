@@ -317,7 +317,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 			wizard.addPages();
 			try {
 				NewTypeWizardPage page= getPage(wizard);
-				page.createType(null);
+				page.createTypes(null);
 				createdType= page.getCreatedType();
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
