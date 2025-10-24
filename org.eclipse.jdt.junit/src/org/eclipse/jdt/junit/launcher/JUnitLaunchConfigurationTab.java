@@ -276,8 +276,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			if (ss.size() == 1) {
 				Object first= ss.getFirstElement();
 				if (first instanceof ITestKind) {
-					boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(((ITestKind) first).getId());
-					fIncludeExcludeTagsButton.setEnabled(isJUnit5);
+					String testKindId= ((ITestKind) first).getId();
+					boolean isJUnitJupiter= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
+					fIncludeExcludeTagsButton.setEnabled(isJUnitJupiter);
 				}
 			}
 		}
@@ -1001,17 +1002,19 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private void validateJavaProject(IJavaProject javaProject) {
 		TestKind testKind= getSelectedTestKind();
 		if (testKind != null) {
-			if (!TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+			String testKindId= testKind.getId();
+			boolean isJUnitJupiter= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
+			if (!isJUnitJupiter && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testcasenotonpath);
 				return;
 			}
 
 			String msg= JUnitMessages.JUnitLaunchConfigurationTab_error_testannotationnotonpath;
-			if (TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasJUnit4TestAnnotation(javaProject)) {
+			if (TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId) && !CoreTestSearchEngine.hasJUnit4TestAnnotation(javaProject)) {
 				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME));
 				return;
 			}
-			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+			if (isJUnitJupiter && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
 				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
 				return;
 			}

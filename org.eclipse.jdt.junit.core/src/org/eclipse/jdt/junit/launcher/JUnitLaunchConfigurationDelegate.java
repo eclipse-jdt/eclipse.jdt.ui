@@ -194,7 +194,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			String[] classpath= classpathAndModulepath[0];
 			String[] modulepath= classpathAndModulepath[1];
 
-			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId())) {
+			String testKindId= getTestRunnerKind(configuration).getId();
+			boolean isJUnitJupiter= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
+			if (isJUnitJupiter) {
 				if (!configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY, false)) {
 					if (!Arrays.stream(classpath).anyMatch(s -> s.contains(BuildPathSupport.JUNIT_PLATFORM_LAUNCHER) || s.contains("org.junit.platform.launcher"))) { //$NON-NLS-1$
 						try {
@@ -320,15 +322,16 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
 			}
 			ITestKind testKind= getTestRunnerKind(configuration);
-			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
-			boolean isJUnit5Configuration= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId());
-			if (!isJUnit5Configuration && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+			String testKindId= testKind.getId();
+			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId);
+			boolean isJUnitJupiterConfiguration= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
+			if (!isJUnitJupiterConfiguration && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 			if (isJUnit4Configuration && !CoreTestSearchEngine.hasJUnit4TestAnnotation(javaProject)) {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
-			if (isJUnit5Configuration && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+			if (isJUnitJupiterConfiguration && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
 				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit5notonpath, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
 				abort(msg, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
@@ -399,11 +402,12 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		vmArguments.addAll(Arrays.asList(execArgs.getVMArgumentsArray()));
 		programArguments.addAll(Arrays.asList(execArgs.getProgramArgumentsArray()));
 
-		boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId());
+		String testKindId= getTestRunnerKind(configuration).getId();
+		boolean isJUnitJupiter= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
 		boolean isModularProject= JavaRuntime.isModularProject(getJavaProject(configuration));
 		String addOpensTargets;
 		if (isModularProject) {
-			if (isJUnit5) {
+			if (isJUnitJupiter) {
 				if (isOnModulePath(getJavaProject(configuration), "org.junit.jupiter.api.Test")) { //$NON-NLS-1$
 					addOpensTargets= "org.junit.platform.commons,ALL-UNNAMED"; //$NON-NLS-1$
 				} else {
