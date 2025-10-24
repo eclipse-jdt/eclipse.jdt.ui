@@ -50,7 +50,7 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationDelegate_error_junit4notonpath;
 
-	public static String JUnitLaunchConfigurationDelegate_error_junit5notonpath;
+	public static String JUnitLaunchConfigurationDelegate_error_junitjupiternotonpath;
 
 	public static String JUnitLaunchConfigurationDelegate_error_junitnotonpath;
 
