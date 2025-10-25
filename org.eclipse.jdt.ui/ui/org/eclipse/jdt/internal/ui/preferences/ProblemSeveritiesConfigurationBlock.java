@@ -19,10 +19,14 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.osgi.util.NLS;
@@ -49,7 +53,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 
 import org.eclipse.core.resources.IProject;
@@ -82,6 +88,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
@@ -98,6 +111,7 @@ import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.Preference
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -573,8 +587,21 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				Map<AnnotationTarget,List<String>> namesPerTarget= new HashMap<>();
 				detectedAnnotationTargets(fNullableAnnotationDialogField, fOtherNullableAnnotationsDialogField, namesPerTarget);
 				detectedAnnotationTargets(fNonNullAnnotationDialogField, fOtherNonNullAnnotationsDialogField, namesPerTarget);
+				if (!Collections.disjoint(namesPerTarget.keySet(), AnnotationTarget.problemKinds)) {
+					if (warnProblemAnnotations(namesPerTarget, AnnotationTarget.problemKinds,
+							PreferencesMessages.NullAnnotationsConfigurationDialog_problemAnnotations_dialogTitle,
+							PreferencesMessages.NullAnnotationsConfigurationDialog_problemAnnotations_dialogMessage) != 0)
+					{
+						return;
+					}
+				}
+				namesPerTarget.remove(AnnotationTarget.NOT_FOUND);
+				namesPerTarget.remove(AnnotationTarget.AMBIGUOS);
 				if (namesPerTarget.size() > 1) {
-					if (warnIncompatibleAnnotations(namesPerTarget) != 0) {
+					if (warnProblemAnnotations(namesPerTarget, null,
+							PreferencesMessages.NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogTitle,
+							PreferencesMessages.NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogMessage ) != 0)
+					{
 						return;
 					}
 				}
@@ -584,25 +611,33 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			}
 		}
 
-		enum AnnotationTarget { NONE, DECLARATIONS, TYPE_USE, BOTH;
+		enum AnnotationTarget { NONE, DECLARATIONS, TYPE_USE, BOTH, NOT_FOUND, AMBIGUOS;
+			static EnumSet<AnnotationTarget> problemKinds= EnumSet.of(NOT_FOUND, AMBIGUOS);
 			static AnnotationTarget forMemberValuePairs(IMemberValuePair[] pairs) {
 				AnnotationTarget result= NONE;
 				for (IMemberValuePair pair : pairs) {
 					int kind= pair.getValueKind();
 					if (kind == IMemberValuePair.K_QUALIFIED_NAME || kind == IMemberValuePair.K_SIMPLE_NAME) {
-						for (Object val : (Object[]) pair.getValue()) {
-							AnnotationTarget current= forName((String) val);
-							if (result == NONE)
-								result= current;
-							else if (current != result)
-								return BOTH;
+						Object value= pair.getValue();
+						if (value instanceof Object[] vals) {
+							for (Object val : vals) {
+								AnnotationTarget current= forName((String) val);
+								if (result == NONE)
+									result= current;
+								else if (current != result)
+									return BOTH;
+							}
+						} else if (value instanceof String val) {
+							return forName(val);
 						}
 					}
 				}
 				return result;
 			}
 			private static AnnotationTarget forName(String name) {
-				if (name.equals(ElementType.TYPE_USE.name()) || name.equals(ElementType.class.getName()+'.'+ElementType.TYPE_USE.name()))
+				if (name.equals(ElementType.TYPE_USE.name())
+						|| name.equals(ElementType.class.getSimpleName()+'.'+ElementType.TYPE_USE.name())
+						|| name.equals(ElementType.class.getName()+'.'+ElementType.TYPE_USE.name()))
 					return AnnotationTarget.TYPE_USE;
 				else
 					return AnnotationTarget.DECLARATIONS;
@@ -613,6 +648,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					case TYPE_USE -> PreferencesMessages.NullAnnotationsConfigurationDialog_targetTypeuse;
 					case DECLARATIONS -> PreferencesMessages.NullAnnotationsConfigurationDialog_targetDeclarations;
 					case BOTH -> PreferencesMessages.NullAnnotationsConfigurationDialog_targetBoth;
+					case AMBIGUOS -> PreferencesMessages.NullAnnotationsConfigurationDialog_ambiguousType;
+					case NOT_FOUND -> PreferencesMessages.NullAnnotationsConfigurationDialog_notFoundType;
 				};
 			}
 		}
@@ -630,22 +667,53 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			}
 		}
 		private AnnotationTarget getAnnotationKind(String name) {
-			try {
-				if (fProject == null) {
-					return AnnotationTarget.NONE;
-				}
-				IType annotationType= JavaCore.create(fProject).findType(name);
-				if (annotationType != null && annotationType.exists()) {
-					for (IAnnotation metaAnn : annotationType.getAnnotations()) {
-						if (isTargetMetaAnnotation(metaAnn, annotationType)) {
-							return AnnotationTarget.forMemberValuePairs(metaAnn.getMemberValuePairs());
+			if (fProject == null) {
+				Set<AnnotationTarget> kinds= new HashSet<>();
+				int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+				SearchPattern pattern= SearchPattern.createPattern(name, IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.DECLARATIONS, matchMode);
+				SearchParticipant[] participants= { SearchEngine.getDefaultSearchParticipant() };
+				IJavaSearchScope scope= JavaSearchScopeFactory.getInstance().createWorkspaceScope(false);
+				SearchRequestor requestor= new SearchRequestor() {
+					@Override
+					public void acceptSearchMatch(SearchMatch match) throws CoreException {
+						if (match.getElement() instanceof IType type) {
+							kinds.add(annotationKindOfType(type));
 						}
 					}
+				};
+				try {
+					new SearchEngine().search(pattern, participants, scope, requestor, new NullProgressMonitor());
+					if (kinds.size() == 0) {
+						return AnnotationTarget.NOT_FOUND;
+					} else if (kinds.size() == 1) {
+						return kinds.iterator().next();
+					} else {
+						return AnnotationTarget.AMBIGUOS;
+					}
+				} catch (CoreException e) {
+					return AnnotationTarget.NONE;
 				}
-			} catch (JavaModelException e) {
-				// fall through
+			} else {
+				try {
+					IType annotationType= JavaCore.create(fProject).findType(name);
+					return annotationKindOfType(annotationType);
+				} catch (JavaModelException e) {
+					// fall through
+				}
 			}
 			return AnnotationTarget.NONE;
+		}
+
+		private AnnotationTarget annotationKindOfType(IType annotationType) throws JavaModelException {
+			if (annotationType != null && annotationType.exists()) {
+				for (IAnnotation metaAnn : annotationType.getAnnotations()) {
+					if (isTargetMetaAnnotation(metaAnn, annotationType)) {
+						return AnnotationTarget.forMemberValuePairs(metaAnn.getMemberValuePairs());
+					}
+				}
+				return AnnotationTarget.NONE;
+			}
+			return AnnotationTarget.NOT_FOUND;
 		}
 		private boolean isTargetMetaAnnotation(IAnnotation metaAnn, IType context) {
 			String name= metaAnn.getElementName();
@@ -663,17 +731,21 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			}
 			return false;
 		}
-		private int warnIncompatibleAnnotations(Map<AnnotationTarget,List<String>> namesPerTarget) {
-			StringBuilder message= new StringBuilder(PreferencesMessages.NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogMessage);
+		private int warnProblemAnnotations(Map<AnnotationTarget,List<String>> namesPerTarget, Set<AnnotationTarget> filter,
+				String dialogTitle, String dialogMessage) {
+			StringBuilder message= new StringBuilder(dialogMessage);
 			for (Entry<AnnotationTarget, List<String>> entry : namesPerTarget.entrySet()) {
+				if (filter != null && !filter.contains(entry.getKey()))
+					continue;
 				message.append("\n\n\t").append(entry.getKey().displayString()).append(':'); //$NON-NLS-1$
 				for (String name : entry.getValue()) {
 					message.append("\n\t\t").append(name); //$NON-NLS-1$
 				}
 			}
+			message.append("\n\nProceed anyway?"); //$NON-NLS-1$
 			MessageDialog messageDialog= new MessageDialog(
 					getShell(),
-					PreferencesMessages.NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogTitle,
+					dialogTitle,
 					null,
 					message.toString(),
 					MessageDialog.QUESTION,
