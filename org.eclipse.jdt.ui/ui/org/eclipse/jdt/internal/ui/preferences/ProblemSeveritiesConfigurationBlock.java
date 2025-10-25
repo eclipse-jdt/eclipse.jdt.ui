@@ -742,7 +742,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					message.append("\n\t\t").append(name); //$NON-NLS-1$
 				}
 			}
-			message.append("\n\nProceed anyway?"); //$NON-NLS-1$
+			message.append(PreferencesMessages.NullAnnotationsConfigurationDialog_problemDialogQuestion);
 			MessageDialog messageDialog= new MessageDialog(
 					getShell(),
 					dialogTitle,

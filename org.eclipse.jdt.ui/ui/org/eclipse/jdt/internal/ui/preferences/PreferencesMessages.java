@@ -823,6 +823,7 @@ public final class PreferencesMessages extends NLS {
 	public static String NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogTitle;
 	public static String NullAnnotationsConfigurationDialog_problemAnnotations_dialogMessage;
 	public static String NullAnnotationsConfigurationDialog_problemAnnotations_dialogTitle;
+	public static String NullAnnotationsConfigurationDialog_problemDialogQuestion;
 	public static String NullAnnotationsConfigurationDialog_ambiguousType;
 	public static String NullAnnotationsConfigurationDialog_notFoundType;
 	public static String NullAnnotationsConfigurationDialog_restore_defaults;
