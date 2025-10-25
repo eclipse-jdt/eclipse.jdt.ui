@@ -90,6 +90,10 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitContainerWizardPage_option_junit5;
 
+	public static String JUnitContainerWizardPage_enableVintage;
+
+	public static String JUnitContainerWizardPage_enableVintage_tooltip;
+
 	public static String JUnitClasspathFixProcessor_progress_desc;
 
 	public static String JUnitContainerWizardPage_resolved_label;
