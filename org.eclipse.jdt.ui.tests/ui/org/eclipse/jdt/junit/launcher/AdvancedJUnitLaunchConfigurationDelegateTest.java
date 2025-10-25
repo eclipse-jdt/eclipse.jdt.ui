@@ -28,6 +28,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.debug.core.ILaunch;
@@ -35,6 +36,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -173,7 +175,60 @@ public class AdvancedJUnitLaunchConfigurationDelegateTest {
 		assertThat(fileLines).contains(lineForFirstTest).size().isEqualTo(1);
 	}
 
+	@Test
+	void runTestsInSourceFolderPackagesWithCommonPrefix() throws Exception {
+		String projectName= "JUnitLaunchConfigurationDelegate-TestProject-PackagesCommonPrefix";
+		fJavaProject= JavaProjectHelper.createJavaProject(projectName, "bin");
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
+		IPackageFragment firstPackage= root.createPackageFragment("a", true, new NullProgressMonitor());
+		IPackageFragment nestedPackage= root.createPackageFragment("a.nested", true, new NullProgressMonitor());
+		IPackageFragment secondPackage= root.createPackageFragment("ab", true, new NullProgressMonitor());
+
+		firstPackage.createCompilationUnit("FirstTest.java", """
+				package a;
+				class FirstTest {
+					@org.junit.jupiter.api.Test
+					void myTest() {
+					}
+				}
+				""", true, new NullProgressMonitor());
+
+		nestedPackage.createCompilationUnit("NestedTest.java", """
+				package a.nested;
+				class NestedTest {
+					@org.junit.jupiter.api.Test
+					void myTest() {
+					}
+				}
+				""", true, new NullProgressMonitor());
+
+		secondPackage.createCompilationUnit("UnrelatedTest.java", """
+				package ab;
+				class UnrelatedTest {
+					@org.junit.jupiter.api.Test
+					void myTest() {
+					}
+				}
+				""", true, new NullProgressMonitor());
+
+		List<String> fileLines= showCommandAndExtractContentOfPackageNameFile(projectName, fJavaProject, firstPackage);
+
+		assertThat(fileLines) //
+				.hasSize(2) //
+				.containsExactly("a", "a.nested");
+	}
+
 	private List<String> showCommandLineAndExtractContentOfTestNameFile(String projectName, IJavaProject javaProject, IPackageFragmentRoot testSrc1)
+			throws CoreException, JavaModelException, IOException {
+		return showCommandLineAndExtractContentOfFileArgument(projectName, javaProject, testSrc1, "-testNameFile");
+	}
+
+	private List<String> showCommandAndExtractContentOfPackageNameFile(String projectName, IJavaProject javaProject, IPackageFragment testPackage)
+			throws CoreException, JavaModelException, IOException {
+		return showCommandLineAndExtractContentOfFileArgument(projectName, javaProject, testPackage, "-packageNameFile");
+	}
+
+	private List<String> showCommandLineAndExtractContentOfFileArgument(String projectName, IJavaProject javaProject, IJavaElement testElement, String searchString)
 			throws CoreException, JavaModelException, IOException {
 		JavaProjectHelper.addRTJar18(javaProject);
 		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT5_CONTAINER_PATH);
@@ -184,16 +239,15 @@ public class AdvancedJUnitLaunchConfigurationDelegateTest {
 		configuration.setProjectName(projectName);
 		String testRunnerKind= TestKindRegistry.JUNIT5_TEST_KIND_ID;
 		configuration.setTestRunnerKind(testRunnerKind);
-		String containerHandle= testSrc1.getHandleIdentifier();
+		String containerHandle= testElement.getHandleIdentifier();
 		configuration.setContainerHandle(containerHandle);
 		String mode= ILaunchManager.DEBUG_MODE;
 		ILaunch launch= new Launch(configuration, mode, null);
-		IProgressMonitor progressMonitor= null;
+		IProgressMonitor progressMonitor= new NullProgressMonitor();
 		String showCommandLine= delegate.showCommandLine(configuration, mode, launch, progressMonitor);
-		String firstSearchStr= "-testNameFile";
-		int indexTestNameFile= showCommandLine.indexOf(firstSearchStr);
-		assertThat(indexTestNameFile).overridingErrorMessage("-testNameFile argument not found").isGreaterThan(-1);
-		String filePath= extractPathForArgumentFile(showCommandLine, firstSearchStr, indexTestNameFile);
+		int indexSearchString= showCommandLine.indexOf(searchString);
+		assertThat(indexSearchString).overridingErrorMessage("%s argument not found", searchString).isGreaterThan(-1);
+		String filePath= extractPathForArgumentFile(showCommandLine, searchString, indexSearchString);
 		List<String> fileLines= Files.readAllLines(Paths.get(filePath));
 		return fileLines;
 	}

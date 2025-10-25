@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -663,9 +664,16 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	private void addAllSubPackageFragments(IPackageFragment pkgFragment, Set<String> pkgNames) throws JavaModelException {
 		String elementName= getPackageName(pkgFragment.getElementName());
 		IPackageFragmentRoot pkgFragmentRoot= (IPackageFragmentRoot) pkgFragment.getParent();
+		Pattern packagePattern = Pattern.compile(elementName.replace(".", "\\.") + "(?:$|\\..*)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		for (IJavaElement child : pkgFragmentRoot.getChildren()) {
-			if (child instanceof IPackageFragment && getPackageName(((IPackageFragment) child).getElementName()).startsWith(elementName) && ((IPackageFragment) child).hasChildren()) {
-				pkgNames.add(getPackageName(((IPackageFragment) child).getElementName()));
+			if (!(child instanceof IPackageFragment childFragment)) {
+				continue;
+			}
+
+			final String childPackageName = getPackageName(childFragment.getElementName());
+
+			if (childFragment.hasChildren() && packagePattern.matcher(childPackageName).matches()) {
+				pkgNames.add(childPackageName);
 			}
 		}
 	}
