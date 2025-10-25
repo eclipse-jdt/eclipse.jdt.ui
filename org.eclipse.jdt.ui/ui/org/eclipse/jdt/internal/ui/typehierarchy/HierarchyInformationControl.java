@@ -35,6 +35,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.views.WorkbenchViewerSetup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -134,6 +136,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		TreeViewer treeViewer= new TreeViewer(tree) {
+			private final int expansionLimit = WorkbenchViewerSetup.getItemsLimit();
 			private Set<Object> visited;
 
 			@Override
@@ -153,7 +156,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			}
 
 			private boolean shouldExpand(Widget widget) {
-				if (widget == null) {
+				if (widget == null || visited.size() > expansionLimit) {
 					return false;
 				}
 				Object data= widget.getData();
