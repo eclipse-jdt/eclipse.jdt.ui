@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Daniel Schmid and others.
+ * Copyright (c) 2025, 2026 Daniel Schmid and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,8 @@ import org.junit.platform.suite.api.Suite;
 	FoldingTest.class,
 	MarkdownJavadocFoldingTest.class,
 	CustomFoldingRegionTest.class,
-	FoldingWithShowSelectedElementTests.class
+	FoldingWithShowSelectedElementTests.class,
+	FoldingIncludeClosingBracketTests.class
 })
 public class FoldingTestSuite {
 }
