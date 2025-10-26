@@ -43,6 +43,8 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -65,12 +67,43 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 	public static class WrittenNamesFinder extends GenericVisitor {
 
-		private final HashMap<IBinding, List<SimpleName>> fResult;
+		private final HashMap<IBinding, List<Name>> fResult;
 		private final HashSet<String> fUnresolved;
 
-		public WrittenNamesFinder(HashMap<IBinding, List<SimpleName>> result, HashSet<String> unresolved) {
+		public WrittenNamesFinder(HashMap<IBinding, List<Name>> result, HashSet<String> unresolved) {
 			fResult= result;
 			fUnresolved= unresolved;
+		}
+
+		@Override
+		public boolean visit(QualifiedName node) {
+			if (node.getParent() instanceof VariableDeclarationFragment)
+				return super.visit(node);
+			if (node.getParent() instanceof SingleVariableDeclaration)
+				return super.visit(node);
+
+			IBinding binding= node.resolveBinding();
+			if (binding == null) {
+				fUnresolved.add(node.getFullyQualifiedName());
+			} else if (binding.isRecovered()) {
+				throw new AbortSearchException();
+			}
+			if (!(binding instanceof IVariableBinding))
+				return false;
+
+			binding= ((IVariableBinding)binding).getVariableDeclaration();
+			if (ASTResolving.isWriteAccess(node)) {
+				List<Name> list;
+				if (fResult.containsKey(binding)) {
+					list= fResult.get(binding);
+				} else {
+					list= new ArrayList<>();
+				}
+				list.add(node);
+				fResult.put(binding, list);
+			}
+
+			return false;
 		}
 
 		@Override
@@ -83,7 +116,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 			IBinding binding= node.resolveBinding();
 			if (binding == null) {
 				fUnresolved.add(node.getFullyQualifiedName());
-			} else 	if (binding.isRecovered()) {
+			} else if (binding.isRecovered()) {
 				throw new AbortSearchException();
 			}
 			if (!(binding instanceof IVariableBinding))
@@ -91,7 +124,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 			binding= ((IVariableBinding)binding).getVariableDeclaration();
 			if (ASTResolving.isWriteAccess(node)) {
-				List<SimpleName> list;
+				List<Name> list;
 				if (fResult.containsKey(binding)) {
 					list= fResult.get(binding);
 				} else {
@@ -117,7 +150,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 	public static class VariableDeclarationFinder extends GenericVisitor {
 
 		private final List<ModifierChangeOperation> fResult;
-		private final HashMap<IBinding, List<SimpleName>> fWrittenVariables;
+		private final HashMap<IBinding, List<Name>> fWrittenVariables;
 		private final HashSet<String> fUnresolved;
 		private final boolean fAddFinalFields;
 		private final boolean fAddFinalParameters;
@@ -126,7 +159,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		public VariableDeclarationFinder(boolean addFinalFields,
 				boolean addFinalParameters,
 				boolean addFinalLocals,
-				final List<ModifierChangeOperation> result, final HashMap<IBinding, List<SimpleName>> writtenNames,
+				final List<ModifierChangeOperation> result, final HashMap<IBinding, List<Name>> writtenNames,
 				final HashSet<String> unresolved) {
 
 			super();
@@ -238,13 +271,13 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 			if (declaringClass == null)
 				return false;
 
-			List<SimpleName> writes= fWrittenVariables.get(binding);
+			List<Name> writes= fWrittenVariables.get(binding);
 			if (!isWrittenInTypeConstructors(writes, declaringClass))
 				return false;
 
 			HashSet<IMethodBinding> writingConstructorBindings= new HashSet<>();
 			ArrayList<MethodDeclaration> writingConstructors= new ArrayList<>();
-			for (SimpleName name : writes) {
+			for (Name name : writes) {
 	            MethodDeclaration constructor= getWritingConstructor(name);
 	            if (writingConstructors.contains(constructor))//variable is written twice or more in constructor
 	            	return false;
@@ -367,9 +400,9 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 			}
 		}
 
-		private boolean isWrittenInTypeConstructors(List<SimpleName> writes, ITypeBinding declaringClass) {
+		private boolean isWrittenInTypeConstructors(List<Name> writes, ITypeBinding declaringClass) {
 
-			for (SimpleName name : writes) {
+			for (Name name : writes) {
 	            MethodDeclaration methodDeclaration= getWritingConstructor(name);
 	            if (methodDeclaration == null)
 	            	return false;
@@ -414,7 +447,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 	        return true;
         }
 
-		private MethodDeclaration getWritingConstructor(SimpleName name) {
+		private MethodDeclaration getWritingConstructor(Name name) {
 			Assignment assignement= ASTNodes.getParent(name, Assignment.class);
 			if (assignement == null)
 				return null;
@@ -533,7 +566,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 	}
 
 	public static VariableDeclarationFixCore createChangeModifierToFinalFix(final CompilationUnit compilationUnit, ASTNode[] selectedNodes) {
-		HashMap<IBinding, List<SimpleName>> writtenNames= new HashMap<>();
+		HashMap<IBinding, List<Name>> writtenNames= new HashMap<>();
 		HashSet<String> unresolved= new HashSet<>();
 		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames, unresolved);
 		try {
@@ -569,7 +602,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		if (!addFinalFields && !addFinalParameters && !addFinalLocals)
 			return null;
 
-		HashMap<IBinding, List<SimpleName>> writtenNames= new HashMap<>();
+		HashMap<IBinding, List<Name>> writtenNames= new HashMap<>();
 		HashSet<String> unresolved= new HashSet<>();
 		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames, unresolved);
 		try {

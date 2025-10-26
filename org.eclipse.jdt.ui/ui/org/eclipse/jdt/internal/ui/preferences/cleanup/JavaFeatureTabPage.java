@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.ModuleImportsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternInstanceofToSwitchCleanUpCore;
@@ -45,6 +46,7 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(final Map<String, String> values) {
 		return new AbstractCleanUp[] {
+				new ModuleImportsCleanUpCore(values),
 				new PatternMatchingForInstanceofCleanUpCore(values),
 				new SwitchExpressionsCleanUpCore(values),
 				new VarCleanUpCore(values),
@@ -67,6 +69,10 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 
 	@Override
 	protected void doCreatePreferences(final Composite composite, final int numColumns) {
+		Group java25Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java25);
+		CheckboxPreference useImportModule= createCheckboxPref(java25Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_UseModuleImports, CleanUpConstants.USE_MODULE_IMPORTS, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(useImportModule);
+
 		Group java21Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java21);
 		CheckboxPreference patternInstanceofToSwitch= createCheckboxPref(java21Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_PatternInstanceofToSwitch, CleanUpConstants.USE_SWITCH_FOR_INSTANCEOF_PATTERN, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(patternInstanceofToSwitch);

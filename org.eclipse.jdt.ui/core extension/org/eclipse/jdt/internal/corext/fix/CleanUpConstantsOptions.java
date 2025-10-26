@@ -183,6 +183,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PULL_OUT_IF_FROM_IF_ELSE, CleanUpOptions.FALSE);
 
 		// Java Features
+		options.setOption(USE_MODULE_IMPORTS, CleanUpOptions.FALSE);
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(USE_SWITCH_FOR_INSTANCEOF_PATTERN, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
@@ -374,6 +375,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PULL_OUT_IF_FROM_IF_ELSE, CleanUpOptions.FALSE);
 
 		// Java Features
+		options.setOption(USE_MODULE_IMPORTS, CleanUpOptions.FALSE);
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(USE_SWITCH_FOR_INSTANCEOF_PATTERN, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);

@@ -46,10 +46,12 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.template.java.JavaPostfixContextType;
 
@@ -258,9 +260,14 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 			});
 
 			completionNode= bestNode[0];
-			ASTNode completionNodeParent= findBestMatchingParentNode(completionNode);
-			postfixCompletionTemplateEngine.setASTNodes(completionNode, completionNodeParent);
-			postfixCompletionTemplateEngine.setContext(context);
+			Statement s= completionNode instanceof Statement stmt ? stmt : ASTNodes.getFirstAncestorOrNull(completionNode, Statement.class);
+			if (s != null && s.getStartPosition() < invOffset && s.getStartPosition() + s.getLength() >= invOffset) {
+				ASTNode completionNodeParent= findBestMatchingParentNode(completionNode);
+				postfixCompletionTemplateEngine.setASTNodes(completionNode, completionNodeParent);
+				postfixCompletionTemplateEngine.setContext(context);
+			} else {
+				postfixCompletionTemplateEngine.reset();
+			}
 		}
 	}
 
