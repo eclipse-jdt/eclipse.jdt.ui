@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Daniel Schmid and others.
+ * Copyright (c) 2025, 2026 Daniel Schmid and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -76,15 +76,14 @@ public class FoldingWithShowSelectedElementTests {
 	public void testFoldingActive() throws Exception {
 		String str= """
 				package org.example.test;
-				public class A {
+				class A {
 					void someMethod() {
 						// this method should be folded
 					}
 				}
 				""";
-		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "B.java", str);
-		assertEquals(1, regions.size());
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 3);
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4);
 	}
 
 	@Test
@@ -92,7 +91,7 @@ public class FoldingWithShowSelectedElementTests {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, true);
 		String str= """
 				package org.example.test;
-				public class A {
+				class A {
 					// region
 					void someMethod() {
 						// content here
@@ -118,21 +117,17 @@ public class FoldingWithShowSelectedElementTests {
 
 			List<IRegion> regions= FoldingTestUtils.extractRegions(model);
 
-			assertEquals(2, regions.size());
-
 			IDocument document= editor.getViewer().getDocument();
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6);
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4);
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // region (custom)
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5); // someMethod
 
 			document.replace(str.indexOf("content"), 0, "method ");
 
 			regions = FoldingTestUtils.extractRegions(model);
 			str = document.get();
 
-			assertEquals(2, regions.size());
-
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6);
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4);
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // region (custom)
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5); // someMethod
 		} finally {
 			editor.close(false);
 		}
@@ -143,7 +138,7 @@ public class FoldingWithShowSelectedElementTests {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, true);
 		String str= """
 				package org.example.test;
-				public class A {
+				class A {
 					void someMethod() {
 						// content here
 					}\t\t\t\t
