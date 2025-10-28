@@ -16,6 +16,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 
@@ -2392,4 +2393,40 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
+
+	/**
+	 * Changes code to specify explicit charset encodings.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.36
+	 *
+	 */
+	public static final String EXPLICITENCODING_CLEANUP= "cleanup.explicit_encoding"; //$NON-NLS-1$
+
+	/**
+	 * Don't change behavior - just replace or insert to make use of platform encoding visible in the code.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 *
+	 */
+	public static final String EXPLICITENCODING_KEEP_BEHAVIOR= "cleanup.explicit_encoding_keep_behavior"; //$NON-NLS-1$
+
+	/**
+	 * Set all uses of platform encoding explicitly to UTF-8 - This changes behavior of the resulting code!
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 *
+	 */
+	public static final String EXPLICITENCODING_INSERT_UTF8= "cleanup.explicit_encoding_insert_utf8"; //$NON-NLS-1$
 }

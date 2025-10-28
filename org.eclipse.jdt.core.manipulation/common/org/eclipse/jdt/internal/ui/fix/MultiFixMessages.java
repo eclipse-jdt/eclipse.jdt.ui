@@ -213,6 +213,8 @@ public class MultiFixMessages extends NLS {
 	public static String StringConcatToTextBlockCleanUp_description;
 	public static String StringConcatToTextBlockStringBuffer_description;
 	public static String StringBuilderForLocalVarsOnlyCleanUp_description;
+	public static String ExplicitEncodingCleanUp_description;
+	public static String ExplicitEncodingCleanUpFix_refactor;
 
 	static {
 		// initialize resource bundle
