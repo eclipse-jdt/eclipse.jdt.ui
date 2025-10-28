@@ -84,6 +84,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
@@ -98,9 +99,11 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension5;
+import org.eclipse.jface.text.ITextViewerExtension7;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TabsToSpacesConverter;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.codemining.ICodeMiningProvider;
@@ -3507,6 +3510,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			} finally {
 				monitor.done();
 			}
+		}
+	}
+
+	@Override
+	protected void installTabsToSpacesConverter() {
+		SourceViewerConfiguration config = getSourceViewerConfiguration();
+		if (config != null && getSourceViewer() instanceof ITextViewerExtension7) {
+			int tabWidth = config.getTabWidth(getSourceViewer());
+			TabsToSpacesConverter tabToSpacesConverter = new JavaTabsToSpacesConverter();
+			tabToSpacesConverter.setLineTracker(new DefaultLineTracker());
+			tabToSpacesConverter.setNumberOfSpacesPerTab(tabWidth);
+			tabToSpacesConverter.setDeleteSpacesAsTab(isSpacesAsTabsDeletionEnabled());
+			((ITextViewerExtension7) getSourceViewer()).setTabsToSpacesConverter(tabToSpacesConverter);
+			updateIndentPrefixes();
 		}
 	}
 

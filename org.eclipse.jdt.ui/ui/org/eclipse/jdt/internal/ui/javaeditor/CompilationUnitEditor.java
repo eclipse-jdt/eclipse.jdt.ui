@@ -1462,7 +1462,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		SourceViewerConfiguration config= getSourceViewerConfiguration();
 		if (config != null && sourceViewer instanceof ITextViewerExtension7) {
 			int tabWidth= config.getTabWidth(sourceViewer);
-			TabsToSpacesConverter tabToSpacesConverter= new TabsToSpacesConverter();
+			TabsToSpacesConverter tabToSpacesConverter= new JavaTabsToSpacesConverter();
 			tabToSpacesConverter.setNumberOfSpacesPerTab(tabWidth);
 			tabToSpacesConverter.setDeleteSpacesAsTab(isSpacesAsTabsDeletionEnabled());
 			IDocumentProvider provider= getDocumentProvider();
