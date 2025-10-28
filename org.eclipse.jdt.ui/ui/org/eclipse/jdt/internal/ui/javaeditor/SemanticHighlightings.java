@@ -1244,7 +1244,7 @@ public class SemanticHighlightings {
 						else
 							return declaringClass.getSuperclass().isDeprecated();
 					}
-					return declaringClass.isDeprecated() && methodBinding.isDefaultConstructor();
+					return declaringClass.isDeprecated() && (methodBinding.isDefaultConstructor() || methodBinding.isCanonicalConstructor());
 				} else if (binding instanceof IVariableBinding) {
 					IVariableBinding variableBinding= (IVariableBinding) binding;
 					ITypeBinding declaringClass= variableBinding.getDeclaringClass();
