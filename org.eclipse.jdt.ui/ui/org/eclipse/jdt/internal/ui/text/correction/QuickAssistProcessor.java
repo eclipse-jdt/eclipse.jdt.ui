@@ -215,7 +215,7 @@ import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PatternInstanceofToSwitchCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
+import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -1160,7 +1160,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			int relevance= locations == null ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
 			Map<String, String> options= new HashMap<>();
 			options.put(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), relevance, image, context);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUpCore(options), relevance, image, context);
 			resultingCollections.add(proposal);
 		} else {
 			return false;

@@ -124,6 +124,7 @@ import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.SealedClassFixCore;
+import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
@@ -140,6 +141,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore;
@@ -219,6 +221,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	public static final int CREATE_CONSTRUCTOR= 0x40a;
 	public static final int REMOVE_DEFAULT= 0x40b;
 	public static final int ADD_PERMITTED_TYPES= 0x40c;
+	public static final int REMOVE_REDUNDANT_TYPE_ARGS= 0x40d;
 
 	public void getUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -1914,6 +1917,16 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 		}
 
 		proposals.add(linkedCorrectionProposalToT(proposal, ADD_OVERRIDE));
+	}
+
+	public void getRemoveRedundantTypeArgumentsProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
+		IProposableFix fix= TypeParametersFixCore.createRemoveRedundantTypeArgumentsFix(context.getASTRoot(), problem);
+		if (fix != null) {
+			Map<String, String> options= new HashMap<>();
+			options.put(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
+			FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(fix, new TypeParametersCleanUpCore(options), IProposalRelevance.REMOVE_REDUNDANT_TYPE_ARGUMENTS, context);
+			proposals.add(fixCorrectionProposalToT(proposal, REMOVE_REDUNDANT_TYPE_ARGS));
+		}
 	}
 
 	public void getServiceProviderConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
