@@ -121,7 +121,6 @@ import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
 import org.eclipse.jdt.internal.corext.fix.RenameUnusedVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringFixCore;
-import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -149,7 +148,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
-import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -1126,14 +1124,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	public static void addRemoveRedundantTypeArgumentsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		IProposableFix fix= TypeParametersFixCore.createRemoveRedundantTypeArgumentsFix(context.getASTRoot(), problem);
-		if (fix != null) {
-			Image image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
-			Map<String, String> options= new HashMap<>();
-			options.put(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), IProposalRelevance.REMOVE_REDUNDANT_TYPE_ARGUMENTS, image, context);
-			proposals.add(proposal);
-		}
+		new LocalCorrectionsSubProcessor().getRemoveRedundantTypeArgumentsProposals(context, problem, proposals);
 	}
 
 	public static void addFallThroughProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -1349,7 +1340,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 				STATIC_INSTANCE_ACCESS, REMOVE_UNNECESSARY_CAST, UNQUALIFIED_FIELD_ACCESS -> {
 				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			}
-			case UNUSED_CODE -> {
+			case UNUSED_CODE, REMOVE_REDUNDANT_TYPE_ARGS -> {
 				image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 			}
 			case RENAME_CODE -> {

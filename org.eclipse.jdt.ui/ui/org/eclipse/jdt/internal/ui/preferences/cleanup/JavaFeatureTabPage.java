@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TryWithResourceCleanUp;
-import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
+import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VarCleanUpCore;
 
@@ -56,7 +56,7 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 				new TryWithResourceCleanUp(values),
 				new StringConcatToTextBlockCleanUpCore(values),
 				new MultiCatchCleanUpCore(values),
-				new TypeParametersCleanUp(values),
+				new TypeParametersCleanUpCore(values),
 				new HashCleanUp(values),
 				new ObjectsEqualsCleanUp(values),
 				new ConvertLoopCleanUp(values),

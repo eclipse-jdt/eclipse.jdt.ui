@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 IBM Corporation and others.
+ * Copyright (c) 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,8 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- * IBM Corporation - initial API and implementation
+ * 		IBM Corporation - initial API and implementation
+ * 		Red Hat Inc. - refactored to jdt.core.manipulation from TypeParametersCleanup
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -32,16 +33,16 @@ import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-public class TypeParametersCleanUp extends AbstractMultiFix {
+public class TypeParametersCleanUpCore extends AbstractMultiFix {
 
 	private Map<String, String> fOptions;
 
-	public TypeParametersCleanUp(Map<String, String> options) {
+	public TypeParametersCleanUpCore(Map<String, String> options) {
 		super(options);
 		fOptions= options;
 	}
 
-	public TypeParametersCleanUp() {
+	public TypeParametersCleanUpCore() {
 		super();
 	}
 
@@ -93,6 +94,7 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		return result.toArray(new String[result.size()]);
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int problemId= problem.getProblemId();
@@ -106,6 +108,7 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		return false;
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		if (fOptions == null)
