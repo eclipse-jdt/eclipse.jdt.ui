@@ -212,9 +212,10 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					}
 				}
 				if ((returnList.size() + throwList.size()) < caseCount) {
-					return null;
+					createReturnStatement= false;
 				}
-			} else {
+			}
+			if (!createReturnStatement) {
 				for (Map.Entry<SwitchCase, List<Statement>> entry : caseMap.entrySet()) {
 					SwitchCase entryCase= entry.getKey();
 					List<Statement> entryStatements= entry.getValue();
@@ -232,12 +233,14 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					}
 					// case must end in an assignment
 					if (!(lastStatement instanceof ExpressionStatement) || !(((ExpressionStatement)lastStatement).getExpression() instanceof Assignment)) {
-						return null;
+						assignmentBinding= null;
+						break;
 					}
 					Assignment assignment= (Assignment)((ExpressionStatement) lastStatement).getExpression();
 					// must be simple assign operator
 					if (assignment.getOperator() != Assignment.Operator.ASSIGN) {
-						return null;
+						assignmentBinding= null;
+						break;
 					}
 					if (commonAssignmentName == null) {
 						Expression exp= assignment.getLeftHandSide();
@@ -245,22 +248,23 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							commonAssignmentName= ((Name)exp).getFullyQualifiedName();
 							assignmentBinding= ((Name) exp).resolveBinding();
 						} else {
-							return null;
+							break;
 						}
 					} else {
 						Expression exp= assignment.getLeftHandSide();
 						if (exp instanceof Name) {
 							Name name= (Name)exp;
 							if (!name.getFullyQualifiedName().equals(commonAssignmentName)) {
-								return null;
+								commonAssignmentName= null;
+								assignmentBinding= null;
+								break;
 							}
 						} else {
-							return null;
+							commonAssignmentName= null;
+							assignmentBinding= null;
+							break;
 						}
 					}
-				}
-				if (assignmentBinding == null) {
-					return null;
 				}
 			}
 
@@ -280,7 +284,20 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			} else if (!defaultFound) {
 				return null;
 			}
-			return new SwitchExpressionsFixOperation(switchStatement, caseMap, createReturnStatement, commonAssignmentName, assignmentBinding);
+			boolean forceOldStyle= false;
+			// if there are comments at end of case statements, we have to use old style cases
+			for (Map.Entry<SwitchCase, List<Statement>> entry : caseMap.entrySet()) {
+				SwitchCase oldSwitchCase= entry.getKey();
+				List<Comment> trailingComments= ASTNodes.getTrailingComments(oldSwitchCase);
+				if (trailingComments != null && !trailingComments.isEmpty()) {
+					forceOldStyle= true;
+					break;
+				}
+			}
+			if (forceOldStyle && !createReturnStatement && assignmentBinding == null) {
+				return null;
+			}
+			return new SwitchExpressionsFixOperation(switchStatement, caseMap, createReturnStatement, commonAssignmentName, assignmentBinding, forceOldStyle);
 		}
 	}
 
@@ -291,14 +308,16 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		private final boolean createReturnStatement;
 		private final String varName;
 		private final IBinding assignmentBinding;
+		private final boolean forceOldStyle;
 
 		public SwitchExpressionsFixOperation(SwitchStatement switchStatement, Map<SwitchCase, List<Statement>> caseMap,
-				boolean createReturnStatement, String varName, IBinding assignmentBinding) {
+				boolean createReturnStatement, String varName, IBinding assignmentBinding, boolean forceOldStyle) {
 			this.switchStatement= switchStatement;
 			this.caseMap= caseMap;
 			this.createReturnStatement= createReturnStatement;
 			this.varName= varName;
 			this.assignmentBinding= assignmentBinding;
+			this.forceOldStyle= forceOldStyle;
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -314,16 +333,6 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			newSwitchExpression.setExpression(newSwitchExpressionExpression);
 			SwitchCase lastSwitchCase= null;
 
-			boolean forceOldStyle= false;
-			// if there are comments at end of case statements, we have to use old style cases
-			for (Map.Entry<SwitchCase, List<Statement>> entry : caseMap.entrySet()) {
-				SwitchCase oldSwitchCase= entry.getKey();
-				List<Comment> trailingComments= ASTNodes.getTrailingComments(oldSwitchCase);
-				if (trailingComments != null && !trailingComments.isEmpty()) {
-					forceOldStyle= true;
-					break;
-				}
-			}
 
 			// build switch expression
 			boolean defaultFallThrough= false;
@@ -413,9 +422,21 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						} else if (forceOldStyle) {
 							newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatement);
 						} else {
-							newStatement= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
-							if (defaultFallThrough) {
-								newStatement2= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
+							if (assignmentBinding != null) {
+								newStatement= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
+								if (defaultFallThrough) {
+									newStatement2= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
+								}
+							} else 	if (oldStatement instanceof ReturnStatement) {
+								newStatement= getNewBlockForStatement(rewrite, oldStatement);
+								if (defaultFallThrough) {
+									newStatement2= getNewBlockForStatement(rewrite, oldStatement);
+								}
+							} else {
+								newStatement= (Statement) rewrite.createCopyTarget(oldStatement);
+								if (defaultFallThrough) {
+									newStatement2= (Statement) rewrite.createCopyTarget(oldStatement);
+								}
 							}
 						}
 						newSwitchExpression.statements().add(newStatement);
@@ -438,10 +459,12 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						if (lastStatement instanceof ThrowStatement) {
 							ThrowStatement throwStatement= (ThrowStatement)lastStatement;
 							newStatement= (Statement)rewrite.createCopyTarget(throwStatement);
-						} else if (lastStatement instanceof ReturnStatement) {
+						} else if ((assignmentBinding != null || createReturnStatement) && lastStatement instanceof ReturnStatement) {
 							newStatement= getNewYieldStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatements.get(statementsLen-1));
-						} else {
+						} else if (assignmentBinding != null){
 							newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatements.get(statementsLen-1));
+						} else {
+							newStatement= (Statement)rewrite.createCopyTarget(lastStatement);
 						}
 						newBlock.statements().add(newStatement);
 						newSwitchExpression.statements().add(newBlock);
@@ -522,11 +545,15 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						}
 					}
 				}
-				// otherwise just assign new switch expression to varName
-				Assignment newAssignment= ast.newAssignment();
-				newExpressionStatement= ast.newExpressionStatement(newAssignment);
-				newAssignment.setLeftHandSide(ast.newName(varName));
-				newAssignment.setRightHandSide(newSwitchExpression);
+				if (varName != null) {
+					// otherwise just assign new switch expression to varName
+					Assignment newAssignment= ast.newAssignment();
+					newExpressionStatement= ast.newExpressionStatement(newAssignment);
+					newAssignment.setLeftHandSide(ast.newName(varName));
+					newAssignment.setRightHandSide(newSwitchExpression);
+				} else {
+					newExpressionStatement= ast.newExpressionStatement(newSwitchExpression);
+				}
 			}
 
 			ASTNode parent= switchStatement.getParent();
@@ -536,6 +563,14 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			} else {
 				rewrite.replace(switchStatement, newExpressionStatement, group);
 			}
+		}
+
+		public static Statement getNewBlockForStatement(final ASTRewrite rewrite, Statement oldStatement) throws JavaModelException {
+			AST ast= rewrite.getAST();
+			Block b= ast.newBlock();
+			Statement newStatement= (Statement) rewrite.createCopyTarget(oldStatement);
+			b.statements().add(newStatement);
+			return b;
 		}
 
 		public static Statement getNewStatementFromReturn(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, ReturnStatement oldStatement) throws JavaModelException {
