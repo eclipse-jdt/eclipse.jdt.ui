@@ -1267,12 +1267,16 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 			return;
 		}
 		int defaultIndex= statements.size();
+		boolean newCaseFormat= false;
+		boolean hasDefault= false;
 		for (int i= 0; i < statements.size(); i++) {
 			Statement curr= statements.get(i);
 			if (curr instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) curr;
+				newCaseFormat= switchCase.isSwitchLabeledRule();
 				if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(switchCase.getAST())) {
 					if (switchCase.expressions().size() == 0) {
+						hasDefault= true;
 						defaultIndex= i;
 						break;
 					}
@@ -1282,7 +1286,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 				}
 			}
 		}
-		boolean hasDefault= defaultIndex < statements.size();
+		int originalDefaultIndex= defaultIndex;
 
 		AST ast= parent.getAST();
 
@@ -1298,49 +1302,87 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
 			LinkedCorrectionProposalCore proposal= new LinkedCorrectionProposalCore(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_CASE_STATEMENTS);
 
-			for (String enumConstName : enumConstNames) {
+			if (newCaseFormat) {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
-				Name newName= ast.newName(enumConstName);
-				if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast)) {
+				newSwitchCase.setSwitchLabeledRule(true);
+				for (String enumConstName : enumConstNames) {
+					Name newName= ast.newName(enumConstName);
 					newSwitchCase.expressions().add(newName);
-				} else {
-					newSwitchCase.setExpression(newName);
 				}
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 				if (problem != null && problem.getProblemId() == IProblem.SwitchExpressionMissingEnumConstantCaseDespiteDefault) {
-					newSwitchCase.setSwitchLabeledRule(true);
 					ThrowStatement newThrowStatement= getThrowForUnsupportedCase(expression, ast, astRewrite);
 					listRewrite.insertAt(newThrowStatement, defaultIndex, null);
-					proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, enumConstName);
 					defaultIndex++;
+				} else {
+					if (hasDefault && originalDefaultIndex < statements.size() - 1) {
+						List<Statement> originalList= listRewrite.getOriginalList();
+						Statement firstStatement= originalList.get(originalDefaultIndex + 1);
+						Statement lastStatement= originalList.get(statements.size() - 1);
+						try {
+							// kludge to get around failure of listRewrite to format added blocks
+							// properly when inserted
+							String s= context.getCompilationUnit().getSource().substring(firstStatement.getStartPosition(), lastStatement.getStartPosition() + lastStatement.getLength());
+							Block defaultCopy= (Block) listRewrite.getASTRewrite().createStringPlaceholder(s, ASTNode.BLOCK);
+							listRewrite.insertAt(defaultCopy, defaultIndex, null);
+							defaultIndex++;
+						} catch (JavaModelException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					} else {
+						ThrowStatement newThrowStatement= getThrowForUnsupportedCase(expression, ast, astRewrite);
+						listRewrite.insertAt(newThrowStatement, defaultIndex, null);
+						defaultIndex++;
+					}
 				}
-				if (!hasDefault) {
-					if (ASTHelper.isSwitchExpressionNodeSupportedInAST(ast)) {
-						if (statements.size() > 0) {
-							Statement firstStatement= statements.get(0);
-							SwitchCase switchCase= (SwitchCase) firstStatement;
-							boolean isArrow= switchCase.isSwitchLabeledRule();
-							newSwitchCase.setSwitchLabeledRule(isArrow);
-							if (isArrow || parent instanceof SwitchExpression) {
-								ThrowStatement newThrowStatement= getThrowForUnsupportedCase(expression, ast, astRewrite);
-								listRewrite.insertLast(newThrowStatement, null);
-								proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, enumConstName);
+			} else {
+				for (String enumConstName : enumConstNames) {
+					SwitchCase newSwitchCase= ast.newSwitchCase();
+					Name newName= ast.newName(enumConstName);
+					if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast)) {
+						newSwitchCase.expressions().add(newName);
+					} else {
+						newSwitchCase.setExpression(newName);
+					}
+					listRewrite.insertAt(newSwitchCase, defaultIndex, null);
+					defaultIndex++;
+					if (problem != null && problem.getProblemId() == IProblem.SwitchExpressionMissingEnumConstantCaseDespiteDefault) {
+						newSwitchCase.setSwitchLabeledRule(true);
+						ThrowStatement newThrowStatement= getThrowForUnsupportedCase(expression, ast, astRewrite);
+						listRewrite.insertAt(newThrowStatement, defaultIndex, null);
+						proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, enumConstName);
+						defaultIndex++;
+					}
+					if (!hasDefault) {
+						if (ASTHelper.isSwitchExpressionNodeSupportedInAST(ast)) {
+							if (statements.size() > 0) {
+								Statement firstStatement= statements.get(0);
+								SwitchCase switchCase= (SwitchCase) firstStatement;
+								boolean isArrow= switchCase.isSwitchLabeledRule();
+								newSwitchCase.setSwitchLabeledRule(isArrow);
+								if (isArrow || parent instanceof SwitchExpression) {
+									ThrowStatement newThrowStatement= getThrowForUnsupportedCase(expression, ast, astRewrite);
+									listRewrite.insertLast(newThrowStatement, null);
+									proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, enumConstName);
+								} else {
+									listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+								}
 							} else {
 								listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
 							}
 						} else {
 							listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
 						}
-					} else {
-						listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
-					}
 
-					defaultIndex++;
+						defaultIndex++;
+					}
 				}
 			}
 			if (!hasDefault) {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
+				newSwitchCase.setSwitchLabeledRule(newCaseFormat);
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 
