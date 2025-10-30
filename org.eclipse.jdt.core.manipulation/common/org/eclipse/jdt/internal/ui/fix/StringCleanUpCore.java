@@ -37,13 +37,13 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * Create fixes which can solve problems in connection with Strings
  * @see org.eclipse.jdt.internal.corext.fix.StringFixCore
  */
-public class StringCleanUp extends AbstractMultiFix {
+public class StringCleanUpCore extends AbstractMultiFix {
 
-	public StringCleanUp(Map<String, String> options) {
+	public StringCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
-	public StringCleanUp() {
+	public StringCleanUpCore() {
 		super();
 	}
 

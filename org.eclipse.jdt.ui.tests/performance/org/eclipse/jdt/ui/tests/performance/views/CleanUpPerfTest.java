@@ -97,7 +97,7 @@ import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUpCore;
@@ -403,7 +403,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new StringCleanUp());
+		cleanUpRefactoring.addCleanUp(new StringCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}

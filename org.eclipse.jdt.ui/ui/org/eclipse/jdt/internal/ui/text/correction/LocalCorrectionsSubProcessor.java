@@ -120,7 +120,6 @@ import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
 import org.eclipse.jdt.internal.corext.fix.RenameUnusedVariableFixCore;
-import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -147,7 +146,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
-import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -192,10 +190,6 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 
 	private static final String RAW_TYPE_REFERENCE_ID= "org.eclipse.jdt.ui.correction.rawTypeReference"; //$NON-NLS-1$
 
-	private static final String ADD_NON_NLS_ID= "org.eclipse.jdt.ui.correction.addNonNLS"; //$NON-NLS-1$
-
-	private static final String REMOVE_UNNECESSARY_NLS_TAG_ID= "org.eclipse.jdt.ui.correction.removeNlsTag"; //$NON-NLS-1$
-
 	private static final String ADD_STATIC_ACCESS_ID= "org.eclipse.jdt.ui.correction.changeToStatic"; //$NON-NLS-1$
 
 	public static void addUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
@@ -232,29 +226,12 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 		};
 		proposals.add(proposal);
 
-		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), problem, false, true);
-		if (fix != null) {
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
-			Map<String, String> options= new Hashtable<>();
-			options.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpOptions.TRUE);
-			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(options), IProposalRelevance.ADD_MISSING_NLS_TAGS, image, context);
-			addNLS.setCommandId(ADD_NON_NLS_ID);
-			proposals.add(addNLS);
-		}
+		new LocalCorrectionsSubProcessor().getAddNLSTagProposalsCore(context, problem, proposals);
 	}
 
 	public static void getUnnecessaryNLSTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
-		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), problem, true, false);
-		if (fix != null) {
-			Image image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
-			Map<String, String> options= new Hashtable<>();
-			options.put(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringCleanUp(options), IProposalRelevance.UNNECESSARY_NLS_TAG, image, context);
-			proposal.setCommandId(REMOVE_UNNECESSARY_NLS_TAG_ID);
-			proposals.add(proposal);
-		}
+		new LocalCorrectionsSubProcessor().getUnnecessaryNLSTagProposalsCore(context, problem, proposals);
 	}
-
 
 	/*
 	 * Fix instance accesses and indirect (static) accesses to fields/methods
@@ -1340,11 +1317,14 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 				STATIC_INSTANCE_ACCESS, REMOVE_UNNECESSARY_CAST, UNQUALIFIED_FIELD_ACCESS -> {
 				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			}
-			case UNUSED_CODE, REMOVE_REDUNDANT_TYPE_ARGS -> {
+			case UNUSED_CODE, REMOVE_REDUNDANT_TYPE_ARGS, REMOVE_UNNECESSARY_NLS -> {
 				image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 			}
 			case RENAME_CODE -> {
 				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LINKED_RENAME);
+			}
+			case ADD_NLS -> {
+				image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			}
 		}
 		return new FixCorrectionProposal(core, image);
