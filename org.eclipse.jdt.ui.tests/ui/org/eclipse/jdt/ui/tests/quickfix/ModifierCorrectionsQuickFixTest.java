@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -4531,4 +4532,111 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
+	public void testDeprecateMembersOfDeprecated1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			@Deprecated abstract class Test {
+			    public abstract void m();
+			    protected String f;
+			    private String fPriv;
+			    class Inner {
+			    }
+			}
+			interface I {
+			    void mi();
+			}
+			@Deprecated interface I2 extends I {
+			    @Override
+			    void mi();
+			}
+			""";
+		ICompilationUnit cu=  pack1.createCompilationUnit("Test.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<ICompletionProposal> proposals= collectAllCorrections(cu, astRoot, 4);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 8);
+
+		String[] expected= new String[] {
+				"""
+				package test1;
+				@Deprecated abstract class Test {
+				    @Deprecated
+				    public abstract void m();
+				    protected String f;
+				    private String fPriv;
+				    class Inner {
+				    }
+				}
+				interface I {
+				    void mi();
+				}
+				@Deprecated interface I2 extends I {
+				    @Override
+				    void mi();
+				}
+				""",
+				"""
+				package test1;
+				@Deprecated abstract class Test {
+				    public abstract void m();
+				    @Deprecated
+				    protected String f;
+				    private String fPriv;
+				    class Inner {
+				    }
+				}
+				interface I {
+				    void mi();
+				}
+				@Deprecated interface I2 extends I {
+				    @Override
+				    void mi();
+				}
+				""",
+				"""
+				package test1;
+				@Deprecated abstract class Test {
+				    public abstract void m();
+				    protected String f;
+				    private String fPriv;
+				    @Deprecated
+				    class Inner {
+				    }
+				}
+				interface I {
+				    void mi();
+				}
+				@Deprecated interface I2 extends I {
+				    @Override
+				    void mi();
+				}
+				""",
+				"""
+				package test1;
+				@Deprecated abstract class Test {
+				    public abstract void m();
+				    protected String f;
+				    private String fPriv;
+				    class Inner {
+				    }
+				}
+				interface I {
+				    void mi();
+				}
+				@Deprecated interface I2 extends I {
+				    @Deprecated
+				    @Override
+				    void mi();
+				}
+				""",
+		};
+		Class<IJavaCompletionProposal> clazz= IJavaCompletionProposal.class;
+		List<IJavaCompletionProposal> javaProposals= proposals.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
+		assertExpectedExistInProposals(javaProposals, expected);
+	}
 }

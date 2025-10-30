@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -868,6 +868,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_DEPRECATION_IN_DEPRECATED_CODE=getJDTCoreKey(JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE);
 	private static final Key PREF_PB_DEPRECATION_WHEN_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD);
 	private static final Key PREF_PB_TERMINAL_DEPRECATION= getJDTCoreKey(JavaCore.COMPILER_PB_TERMINAL_DEPRECATION);
+	private static final Key PREF_PB_MEMBER_DEPRECATION= getJDTCoreKey(JavaCore.COMPILER_PB_MEMBER_OF_DEPRECATED_TYPE);
+
 
 	private static final Key PREF_PB_API_LEAKS= getJDTCoreKey(JavaCore.COMPILER_PB_API_LEAKS);
 	private static final Key PREF_PB_UNSTABLE_AUTO_MODULE_NAME= getJDTCoreKey(JavaCore.COMPILER_PB_UNSTABLE_AUTO_MODULE_NAME);
@@ -1041,7 +1043,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_UNUSED_PARAMETER, PREF_PB_UNUSED_EXCEPTION_PARAMETER, PREF_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE,
 				PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
 				PREF_PB_UNUSED_IMPORT, PREF_PB_UNUSED_LABEL,
-				PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE,
+				PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_PB_MEMBER_DEPRECATION,
 				PREF_PB_NO_EFFECT_ASSIGNMENT, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD,
 				PREF_PB_UNUSED_PRIVATE, PREF_PB_UNUSED_TYPE_PARAMETER, PREF_PB_CHAR_ARRAY_IN_CONCAT, PREF_PB_UNNECESSARY_ELSE,
 				PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, PREF_PB_LOCAL_VARIABLE_HIDING, PREF_PB_FIELD_HIDING,
@@ -1361,6 +1363,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_terminal_deprecation_label;
 		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_TERMINAL_DEPRECATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_member_deprecation;
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MEMBER_DEPRECATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_forbidden_reference_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
