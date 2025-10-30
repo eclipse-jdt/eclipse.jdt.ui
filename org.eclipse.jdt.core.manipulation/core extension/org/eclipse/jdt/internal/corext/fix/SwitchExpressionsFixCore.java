@@ -565,7 +565,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			}
 		}
 
-		public static Statement getNewBlockForStatement(final ASTRewrite rewrite, Statement oldStatement) throws JavaModelException {
+		public static Statement getNewBlockForStatement(final ASTRewrite rewrite, Statement oldStatement) {
 			AST ast= rewrite.getAST();
 			Block b= ast.newBlock();
 			Statement newStatement= (Statement) rewrite.createCopyTarget(oldStatement);
