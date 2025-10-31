@@ -74,6 +74,7 @@ public class TemplateSet {
 	private static final int TEMPLATE_IO_EXCEPTION= 10005;
 	private ContextTypeRegistry fRegistry;
 
+	@Deprecated
 	public TemplateSet(String templateTag, ContextTypeRegistry registry) {
 		fTemplateTag= templateTag;
 		fRegistry= registry;
@@ -87,6 +88,7 @@ public class TemplateSet {
 	 * @throws CoreException if reading fails
 	 * @see #addFromStream(InputStream, boolean)
 	 */
+	@Deprecated
 	public void addFromFile(File file, boolean allowDuplicates) throws CoreException {
 		try (InputStream stream= new FileInputStream(file)) {
 			addFromStream(stream, allowDuplicates);
@@ -95,6 +97,7 @@ public class TemplateSet {
 		}
 	}
 
+	@Deprecated
 	public String getTemplateTag() {
 		return fTemplateTag;
 	}
@@ -107,6 +110,7 @@ public class TemplateSet {
 	 * @param allowDuplicates <code>true</code> if duplicates are allowed
 	 * @throws CoreException if reading fails
 	 */
+	@Deprecated
 	public void addFromStream(InputStream stream, boolean allowDuplicates) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
@@ -162,6 +166,7 @@ public class TemplateSet {
 		}
 	}
 
+	@Deprecated
 	protected String validateTemplate(Template template) {
 		TemplateContextType type= fRegistry.getContextType(template.getContextTypeId());
 		if (type == null) {
@@ -190,6 +195,7 @@ public class TemplateSet {
 	 * @throws CoreException in case the save operation fails
 	 * @see #saveToStream(OutputStream)
 	 */
+	@Deprecated
 	public void saveToFile(File file) throws CoreException {
 		try (OutputStream stream= new FileOutputStream(file)) {
 			saveToStream(stream);
@@ -204,6 +210,7 @@ public class TemplateSet {
 	 * @param stream the stream
 	 * @throws CoreException in case the save operation fails
 	 */
+	@Deprecated
 	public void saveToStream(OutputStream stream) throws CoreException {
 		try {
 			DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
@@ -272,6 +279,7 @@ public class TemplateSet {
 	 *
 	 * @param template the template to add to the set
 	 */
+	@Deprecated
 	public void add(Template template) {
 		if (exists(template))
 			return; // ignore duplicate
@@ -288,6 +296,7 @@ public class TemplateSet {
 	 *
 	 * @param template the template to remove from the set
 	 */
+	@Deprecated
 	public void remove(Template template) {
 		fTemplates.remove(template);
 	}
@@ -295,6 +304,7 @@ public class TemplateSet {
 	/**
 	 * Empties the set.
 	 */
+	@Deprecated
 	public void clear() {
 		fTemplates.clear();
 	}
@@ -304,6 +314,7 @@ public class TemplateSet {
 	 *
 	 * @return all templates
 	 */
+	@Deprecated
 	public Template[] getTemplates() {
 		return fTemplates.toArray(new Template[fTemplates.size()]);
 	}
@@ -314,6 +325,7 @@ public class TemplateSet {
 	 * @param name the template name
 	 * @return the templates with the given name
 	 */
+	@Deprecated
 	public Template[] getTemplates(String name) {
 		ArrayList<Template> res= new ArrayList<>();
 		for (Template curr : fTemplates) {
@@ -330,6 +342,7 @@ public class TemplateSet {
 	 * @param name the template name
 	 * @return the first template with the given name
 	 */
+	@Deprecated
 	public Template getFirstTemplate(String name) {
 		for (Template curr : fTemplates) {
 			if (curr.getName().equals(name)) {

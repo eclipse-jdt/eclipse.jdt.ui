@@ -35,6 +35,7 @@ public interface ITestRunListener {
  	 *
      * @see #testFailed(int, String, String, String)
  	 */
+	@Deprecated
  	int STATUS_OK= ITestRunListener2.STATUS_OK;
  	/**
 	 * Status constant indicating that a test had an error an unanticipated
@@ -42,6 +43,7 @@ public interface ITestRunListener {
  	 *
 	 * @see #testFailed(int, String, String, String)
  	 */
+	@Deprecated
  	int STATUS_ERROR= ITestRunListener2.STATUS_ERROR;
  	/**
 	 * Status constant indicating that a test failed an assertion
@@ -49,24 +51,28 @@ public interface ITestRunListener {
  	 *
  	 * @see #testFailed(int, String, String, String)
 	 */
+	@Deprecated
  	int STATUS_FAILURE= ITestRunListener2.STATUS_FAILURE;
  	/**
  	 * A test run has started.
  	 *
  	 * @param testCount the number of individual tests that will be run
  	 */
+	@Deprecated
 	void testRunStarted(int testCount);
 	/**
  	 * A test run has ended.
 	 *
 	 * @param elapsedTime the total elapsed time of the test run
 	 */
+	@Deprecated
 	void testRunEnded(long elapsedTime);
 	/**
 	 * A test run has been stopped prematurely.
 	 *
  	 * @param elapsedTime the time elapsed before the test run was stopped
 	 */
+	@Deprecated
 	void testRunStopped(long elapsedTime);
 	/**
 	 * An individual test has started.
@@ -74,6 +80,7 @@ public interface ITestRunListener {
 	 * @param testId a unique Id identifying the test
 	 * @param testName the name of the test that started
 	 */
+	@Deprecated
 	void testStarted(String testId, String testName);
 	/**
 	 * An individual test has ended.
@@ -81,6 +88,7 @@ public interface ITestRunListener {
 	 * @param testId a unique Id identifying the test
 	 * @param testName the name of the test that ended
 	 */
+	@Deprecated
 	void testEnded(String testId, String testName);
 	/**
 	 * An individual test has failed with a stack trace.
@@ -92,11 +100,13 @@ public interface ITestRunListener {
  	 * @param testName the name of the test that failed
 	 * @param trace the stack trace
 	 */
+	@Deprecated
 	void testFailed(int status, String testId, String testName, String trace);
 
 	/**
 	 * The VM instance performing the tests has terminated.
 	 */
+	@Deprecated
 	void testRunTerminated();
 
 	/**
@@ -111,6 +121,7 @@ public interface ITestRunListener {
 	 * @param trace the stack trace in the case of abnormal termination,
 	 * or the empty string if none
 	 */
+	@Deprecated
 	void testReran(String testId, String testClass, String testName, int status, String trace);
 }
 

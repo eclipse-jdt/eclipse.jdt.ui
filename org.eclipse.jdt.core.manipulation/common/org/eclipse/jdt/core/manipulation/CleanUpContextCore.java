@@ -42,6 +42,7 @@ public class CleanUpContextCore {
 	 *            previous clean ups only if {@link CleanUpRequirementsCore#requiresFreshAST()} returns
 	 *            <code>true</code>.
 	 */
+	@Deprecated
 	public CleanUpContextCore(ICompilationUnit unit, CompilationUnit ast) {
 		Assert.isLegal(unit != null);
 		fUnit= unit;
@@ -53,6 +54,7 @@ public class CleanUpContextCore {
 	 *
 	 * @return the compilation unit to clean up
 	 */
+	@Deprecated
 	public ICompilationUnit getCompilationUnit() {
 		return fUnit;
 	}
@@ -69,6 +71,7 @@ public class CleanUpContextCore {
 	 *
 	 * @return an AST or <code>null</code> if none required
 	 */
+	@Deprecated
 	public CompilationUnit getAST() {
 		return fAst;
 	}

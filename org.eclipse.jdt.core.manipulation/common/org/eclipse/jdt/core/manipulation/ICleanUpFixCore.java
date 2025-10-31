@@ -38,6 +38,7 @@ public interface ICleanUpFixCore {
 	 * @return a compilation unit change change which should not be empty
 	 * @throws CoreException if something went wrong while calculating the change
 	 */
+	@Deprecated
 	CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException;
 
 }

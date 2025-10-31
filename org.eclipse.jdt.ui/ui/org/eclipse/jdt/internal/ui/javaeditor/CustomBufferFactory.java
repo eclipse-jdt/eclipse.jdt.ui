@@ -33,6 +33,7 @@ public class CustomBufferFactory implements IBufferFactory {
 	/*
 	 * @see org.eclipse.jdt.core.IBufferFactory#createBuffer(org.eclipse.jdt.core.IOpenable)
 	 */
+	@Deprecated
 	@Override
 	public IBuffer createBuffer(IOpenable owner) {
 		if (owner instanceof ICompilationUnit) {

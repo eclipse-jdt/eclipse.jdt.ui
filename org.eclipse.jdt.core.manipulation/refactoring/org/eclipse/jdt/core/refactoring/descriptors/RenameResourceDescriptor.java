@@ -61,6 +61,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	/**
 	 * Creates a new refactoring descriptor.
 	 */
+	@Deprecated
 	public RenameResourceDescriptor() {
 		super(IJavaRefactorings.RENAME_RESOURCE);
 	}
@@ -88,12 +89,14 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
+	@Deprecated
 	public RenameResourceDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.RENAME_RESOURCE, project, description, comment, arguments, flags);
 		fResourcePath= JavaRefactoringDescriptorUtil.getResourcePath(arguments, ATTRIBUTE_INPUT, project);
 		fName= JavaRefactoringDescriptorUtil.getString(arguments, ATTRIBUTE_NAME);
 	}
 
+	@Deprecated
 	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
@@ -107,6 +110,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 * @param name
 	 *            the non-empty new name to set
 	 */
+	@Deprecated
 	public void setNewName(final String name) {
 		Assert.isNotNull(name);
 		Assert.isLegal(!"".equals(name), "Name must not be empty"); //$NON-NLS-1$//$NON-NLS-2$
@@ -121,6 +125,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
+	@Deprecated
 	public String getNewName() {
 		return fName;
 	}
@@ -141,6 +146,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @see #getProject()
 	 */
+	@Deprecated
 	@Override
 	public void setProject(final String project) {
 		super.setProject(project);
@@ -156,6 +162,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 * @param resource
 	 *            the resource to be renamed
 	 */
+	@Deprecated
 	public void setResource(final IResource resource) {
 		Assert.isNotNull(resource);
 		fResourcePath= resource.getFullPath();
@@ -170,10 +177,12 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
+	@Deprecated
 	public IPath getResourcePath() {
 		return fResourcePath;
 	}
 
+	@Deprecated
 	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();

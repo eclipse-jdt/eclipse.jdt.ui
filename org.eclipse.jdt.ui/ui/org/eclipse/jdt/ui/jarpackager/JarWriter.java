@@ -76,6 +76,7 @@ public class JarWriter {
 	 * 								This can also be used to return information
 	 * 								in the status object.
 	 */
+	@Deprecated
 	public JarWriter(JarPackageData jarPackage, Shell parent) throws CoreException {
 		Assert.isNotNull(jarPackage, "The JAR specification is null"); //$NON-NLS-1$
 		fJarPackage= jarPackage;
@@ -104,6 +105,7 @@ public class JarWriter {
 	 * 								This can also be used to return information
 	 * 								in the status object.
 	 */
+	@Deprecated
 	public void close() throws CoreException {
 		if (fJarOutputStream != null)
 			try {
@@ -123,6 +125,7 @@ public class JarWriter {
 	 * 								This can also be used to return information
 	 * 								in the status object.
 	 */
+	@Deprecated
 	public void write(IFile resource, IPath destinationPath) throws CoreException {
 		try (ByteArrayOutputStream output= new ByteArrayOutputStream();
 				BufferedInputStream contentStream= new BufferedInputStream(resource.getContents(false))) {
@@ -163,6 +166,7 @@ public class JarWriter {
 	 * @param	lastModified	a long which represents the last modification date
      * @throws	IOException		if an I/O error has occurred
 	 */
+	@Deprecated
 	protected void write(IPath path, byte[] contents, long lastModified) throws IOException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
 		if (fJarPackage.isCompressed())
@@ -240,6 +244,7 @@ public class JarWriter {
 	 * 			or <code>null</code> if no dialog should be presented
 	 * @return	<code>true</code> if it is OK to create the JAR
 	 */
+	@Deprecated
 	protected boolean canCreateJar(Shell parent) {
 		File file= fJarPackage.getAbsoluteJarLocation().toFile();
 		if (file.exists()) {

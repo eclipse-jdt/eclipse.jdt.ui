@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
  */
 @Deprecated
 public class TypeNameMatchCollector extends org.eclipse.jdt.core.manipulation.TypeNameMatchCollector {
+	@Deprecated
 	public TypeNameMatchCollector(Collection<TypeNameMatch> collection) {
 		super(collection);
 	}
