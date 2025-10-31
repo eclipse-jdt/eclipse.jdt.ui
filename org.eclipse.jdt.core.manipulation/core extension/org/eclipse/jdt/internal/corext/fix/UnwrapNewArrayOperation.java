@@ -65,8 +65,6 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 
 		boolean commented= false;
 		List<Comment> comments= root.getCommentList();
-		int startLine= root.getLineNumber(call.getStartPosition());
-		int endLine= root.getLineNumber(call.getStartPosition() + call.getLength());
 		int callExtendedEnd= root.getExtendedStartPosition(call) + root.getExtendedLength(call);
 		for (Comment comment : comments) {
 			if (comment.getStartPosition() > call.getStartPosition() &&
