@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameResourceDescriptor;
 @Deprecated
 public final class RenameResourceRefactoringContribution extends JavaRefactoringContribution {
 
+	@Deprecated
 	@Override
 	public Refactoring createRefactoring(JavaRefactoringDescriptor javaDescriptor, RefactoringStatus status) throws CoreException {
 		if (javaDescriptor instanceof RenameResourceDescriptor) {
@@ -58,11 +59,13 @@ public final class RenameResourceRefactoringContribution extends JavaRefactoring
 		return null;
 	}
 
+	@Deprecated
 	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return new RenameResourceDescriptor();
 	}
 
+	@Deprecated
 	@Override
 	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new RenameResourceDescriptor(project, description, comment, arguments, flags);

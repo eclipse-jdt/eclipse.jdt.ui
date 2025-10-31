@@ -53,6 +53,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li>participants registered for renaming <code>IProject</code>.</li>
 	 * </ul>
 	 */
+	@Deprecated
 	String RENAME_JAVA_PROJECT_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_JAVA_PROJECT_PROCESSOR;
 
 	/**
@@ -65,6 +66,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li>participants registered for renaming <code>IFolder</code>.</li>
 	 * </ul>
 	 */
+	@Deprecated
 	String RENAME_SOURCE_FOLDER_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_SOURCE_FOLDER_PROCESSOR;
 
 	/**
@@ -91,6 +93,7 @@ public interface IRefactoringProcessorIds {
 	 * {@link IJavaElementMapper} and {@link IResourceMapper}, which can be
 	 * retrieved from the processor using the getAdapter() method.</p>
 	 */
+	@Deprecated
 	String RENAME_PACKAGE_FRAGMENT_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_PACKAGE_FRAGMENT_PROCESSOR;
 
 	/**
@@ -105,6 +108,7 @@ public interface IRefactoringProcessorIds {
 	 *       compilation unit contains a top level type.</li>
 	 * </ul>
 	 */
+	@Deprecated
 	String RENAME_COMPILATION_UNIT_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_COMPILATION_UNIT_PROCESSOR;
 
 	/**
@@ -132,6 +136,7 @@ public interface IRefactoringProcessorIds {
 	 * through the interfaces {@link IJavaElementMapper} and {@link IResourceMapper}, which can be retrieved from the
 	 * processor using the getAdapter() method.</p>
 	 */
+	@Deprecated
 	String RENAME_TYPE_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_TYPE_PROCESSOR;
 
 	/**
@@ -146,6 +151,7 @@ public interface IRefactoringProcessorIds {
 	 *       For those derived methods participants will be loaded as well.</li>
 	 * </ul>
 	 */
+	@Deprecated
 	String RENAME_METHOD_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_METHOD_PROCESSOR;
 
 	/**
@@ -159,6 +165,7 @@ public interface IRefactoringProcessorIds {
 	 *       corresponding setter and getter methods are renamed as well.</li>
 	 * </ul>
 	 */
+	@Deprecated
 	String RENAME_FIELD_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_FIELD_PROCESSOR;
 
 	/**
@@ -171,6 +178,7 @@ public interface IRefactoringProcessorIds {
 	 * </ul>
 	 * @since 3.24
 	 */
+	@Deprecated
 	String RENAME_MODULE_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_MODULE_PROCESSOR;
 
 	/**
@@ -183,6 +191,7 @@ public interface IRefactoringProcessorIds {
 	 * </ul>
 	 * @since 3.1
 	 */
+	@Deprecated
 	String RENAME_ENUM_CONSTANT_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_ENUM_CONSTANT_PROCESSOR;
 
 	/**
@@ -194,6 +203,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li>participants registered for renaming <code>IResource</code>.</li>
 	 * </ul>
 	 */
+	@Deprecated
 	String RENAME_RESOURCE_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_RESOURCE_PROCESSOR;
 
 	/**
@@ -217,6 +227,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IResource</code>: participants registered for moving resources.</li>
 	 * </ul>
 	 */
+	@Deprecated
 	String MOVE_PROCESSOR= IRefactoringProcessorIdsCore.MOVE_PROCESSOR;
 
 	/**
@@ -227,6 +238,7 @@ public interface IRefactoringProcessorIds {
 	 * static Java element that gets moved. No support is available to participate
 	 * in non static member moves.
 	 */
+	@Deprecated
 	String MOVE_STATIC_MEMBERS_PROCESSOR= IRefactoringProcessorIdsCore.MOVE_STATIC_MEMBERS_PROCESSOR;
 
 	/**
@@ -254,6 +266,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IResource</code>: participants registered for deleting resources.</li>
 	 * </ul>
 	 */
+	@Deprecated
 	String DELETE_PROCESSOR= IRefactoringProcessorIdsCore.DELETE_PROCESSOR;
 
 	/**
@@ -284,5 +297,6 @@ public interface IRefactoringProcessorIds {
 	 * @see org.eclipse.core.resources.mapping.ResourceMapping
 	 * @since 3.3
 	 */
+	@Deprecated
 	String COPY_PROCESSOR= IRefactoringProcessorIdsCore.COPY_PROCESSOR;
 }

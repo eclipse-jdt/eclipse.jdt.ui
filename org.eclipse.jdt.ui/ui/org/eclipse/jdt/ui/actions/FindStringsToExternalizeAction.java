@@ -101,12 +101,14 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 *
 	 * @param site the site providing context information for this action
 	 */
+	@Deprecated
 	public FindStringsToExternalizeAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.FindStringsToExternalizeAction_label);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_STRINGS_TO_EXTERNALIZE_ACTION);
 	}
 
+	@Deprecated
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -141,6 +143,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		return true;
 	}
 
+	@Deprecated
 	@Override
 	public void run(final IStructuredSelection selection) {
 		try {
