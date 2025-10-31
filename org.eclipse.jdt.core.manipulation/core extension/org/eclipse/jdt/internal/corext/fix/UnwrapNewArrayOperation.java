@@ -22,22 +22,22 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 
@@ -63,36 +63,22 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 		CompilationUnit root= cuRewrite.getRoot();
 		ImportRemover remover= cuRewrite.getImportRemover();
 
-		boolean tagged= false;
-		try {
-			NLSLine[] nlsLines= NLSScanner.scan(cu);
-			int startLine= root.getLineNumber(call.getStartPosition());
-			int endLine= root.getLineNumber(call.getStartPosition() + call.getLength());
-			for (int lineNo= startLine; lineNo <= endLine; ++lineNo) {
-				for (NLSLine nlsLine : nlsLines) {
-					if (nlsLine.getLineNumber() == lineNo - 1) {
-						for (NLSElement element : nlsLine.getElements()) {
-							if (element.hasTag()) {
-								tagged= true;
-								break;
-							}
-						}
-					}
-					if (tagged) {
-						break;
-					}
-				}
-				if (tagged) {
-					break;
-				}
+		boolean commented= false;
+		List<Comment> comments= root.getCommentList();
+		int startLine= root.getLineNumber(call.getStartPosition());
+		int endLine= root.getLineNumber(call.getStartPosition() + call.getLength());
+		int callExtendedEnd= root.getExtendedStartPosition(call) + root.getExtendedLength(call);
+		for (Comment comment : comments) {
+			if (comment.getStartPosition() > call.getStartPosition() &&
+					comment.getStartPosition() < callExtendedEnd) {
+				commented= true;
+				break;
 			}
-		} catch (Exception e) {
-			// do nothing
 		}
 
 		TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description, cuRewrite);
 
-		if (!tagged) {
+		if (!commented) {
 			ListRewrite listRewrite;
 			if (call instanceof ClassInstanceCreation) {
 				listRewrite= rewrite.getListRewrite(call, ClassInstanceCreation.ARGUMENTS_PROPERTY);
@@ -126,7 +112,7 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 			int nodeEnd= comp.getExtendedStartPosition(call) + comp.getExtendedLength(call);
 			int arrayStart= node.getStartPosition();
 			List<Expression> expressionList= node.getInitializer().expressions();
-			int arrayExpressionStart= expressionList.get(0).getStartPosition();
+			int arrayExpressionStart= comp.getExtendedStartPosition(expressionList.get(0));
 			IBuffer cuBuffer= cu.getBuffer();
 			String arrayStartString= cuBuffer.getText(arrayStart, arrayExpressionStart - arrayStart);
 			int index= arrayStartString.indexOf('{') + 1;
@@ -134,11 +120,31 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 				++index;
 			}
 			arrayExpressionStart= arrayStart + index;
-			Expression lastExpression= expressionList.get(expressionList.size() - 1);
-			int arrayExpressionEnd= lastExpression.getStartPosition() + lastExpression.getLength();
 			int arrayInitializerEnd= node.getInitializer().getStartPosition() + node.getInitializer().getLength();
 			buf.append(cuBuffer.getText(nodeStart, arrayStart - nodeStart));
-			buf.append(cuBuffer.getText(arrayExpressionStart, arrayExpressionEnd - arrayExpressionStart));
+			int currentLine= root.getLineNumber(arrayExpressionStart);
+			int currentPos= arrayExpressionStart;
+			int nextLinePos= root.getPosition(++currentLine, 0);
+			String tab= getTab(cu);
+			String prepend= ""; //$NON-NLS-1$
+			while (nextLinePos < arrayInitializerEnd) {
+				buf.append(prepend);
+				buf.append(cuBuffer.getText(currentPos, nextLinePos - currentPos));
+				currentPos= nextLinePos;
+				while (cuBuffer.getChar(currentPos) == '\t' || cuBuffer.getChar(currentPos) == ' ') {
+					++currentPos;
+				}
+				nextLinePos= root.getPosition(++currentLine,  0);
+				prepend= tab;
+			}
+			if (currentPos < arrayInitializerEnd) {
+				Expression lastExpression= expressionList.get(expressionList.size() - 1);
+				int lastExpressionEnd= root.getExtendedStartPosition(lastExpression) + root.getExtendedLength(lastExpression);
+				if (root.getLineNumber(arrayInitializerEnd) == root.getLineNumber(lastExpressionEnd)) {
+					buf.append(prepend);
+				}
+				buf.append(cuBuffer.getText(currentPos, arrayInitializerEnd - currentPos - 1));
+			}
 			buf.append(cuBuffer.getText(arrayInitializerEnd, nodeEnd - arrayInitializerEnd));
 
 			ASTNode replacementNode= null;
@@ -156,6 +162,17 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 		}
 		if (arrayType != null) {
 			remover.registerRemovedNode(arrayType);
+		}
+	}
+
+	private String getTab(ICompilationUnit cu) {
+		String tabChar= cu.getOptions(true).get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
+		if (JavaCore.TAB.equals(tabChar)
+				|| DefaultCodeFormatterConstants.MIXED.equals(tabChar)) {
+			return "\t\t"; //$NON-NLS-1$
+		} else {
+			int tabSize= Integer.parseInt(cu.getOptions(true).get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE));
+			return " ".repeat(tabSize * 2); //$NON-NLS-1$
 		}
 	}
 }
