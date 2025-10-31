@@ -124,6 +124,7 @@ import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.SealedClassFixCore;
+import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -141,6 +142,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.StringCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -168,6 +170,10 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	private final String ADD_EXCEPTION_TO_THROWS_ID= "org.eclipse.jdt.ui.correction.addThrowsDecl"; //$NON-NLS-1$
 
 	private final String ADD_FIELD_QUALIFICATION_ID= "org.eclipse.jdt.ui.correction.qualifyField"; //$NON-NLS-1$
+
+	private static final String REMOVE_UNNECESSARY_NLS_TAG_ID= "org.eclipse.jdt.ui.correction.removeNlsTag"; //$NON-NLS-1$
+
+	private static final String ADD_NON_NLS_ID= "org.eclipse.jdt.ui.correction.addNonNLS"; //$NON-NLS-1$
 
 	public static final int SURROUND_WITH_TRY_CATCH= 0x100;
 	public static final int SURROUND_WITH_TRY_MULTI_CATCH= 0x101;
@@ -222,6 +228,8 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	public static final int REMOVE_DEFAULT= 0x40b;
 	public static final int ADD_PERMITTED_TYPES= 0x40c;
 	public static final int REMOVE_REDUNDANT_TYPE_ARGS= 0x40d;
+	public static final int REMOVE_UNNECESSARY_NLS= 0x40e;
+	public static final int ADD_NLS= 0x40f;
 
 	public void getUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -1830,6 +1838,28 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 		newCic.arguments().add(newInfixExpr);
 		newThrowStatement.setExpression(newCic);
 		return newThrowStatement;
+	}
+
+	public void getAddNLSTagProposalsCore(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
+		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), problem, false, true);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpOptions.TRUE);
+			FixCorrectionProposalCore addNLS= new FixCorrectionProposalCore(fix, new StringCleanUpCore(options), IProposalRelevance.ADD_MISSING_NLS_TAGS, context);
+			addNLS.setCommandId(ADD_NON_NLS_ID);
+			proposals.add(fixCorrectionProposalToT(addNLS, ADD_NLS));
+		}
+	}
+
+	public void getUnnecessaryNLSTagProposalsCore(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
+		IProposableFix fix= StringFixCore.createFix(context.getASTRoot(), problem, true, false);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
+			FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(fix, new StringCleanUpCore(options), IProposalRelevance.UNNECESSARY_NLS_TAG, context);
+			proposal.setCommandId(REMOVE_UNNECESSARY_NLS_TAG_ID);
+			proposals.add(fixCorrectionProposalToT(proposal, REMOVE_UNNECESSARY_NLS));
+		}
 	}
 
 	public void getOverrideDefaultMethodProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
