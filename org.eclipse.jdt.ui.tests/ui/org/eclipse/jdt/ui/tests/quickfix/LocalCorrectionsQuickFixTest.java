@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedDuplicateNavigationProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
@@ -7763,7 +7764,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
@@ -7788,7 +7789,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
@@ -7815,7 +7816,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
@@ -7843,7 +7844,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
@@ -7872,7 +7873,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
@@ -7900,7 +7901,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
@@ -13557,5 +13558,23 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testNavigateToInitialVariableAssist() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public class E {
+			  public void foo(int x) {
+			      double x;
+			  }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertTrue(proposals.get(1) instanceof LinkedDuplicateNavigationProposal);
 	}
 }
