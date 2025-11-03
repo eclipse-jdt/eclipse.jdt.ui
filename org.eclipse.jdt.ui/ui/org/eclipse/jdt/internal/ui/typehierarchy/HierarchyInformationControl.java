@@ -134,6 +134,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		TreeViewer treeViewer= new TreeViewer(tree) {
+			private static final int EXPANSION_LIMIT = 10;
 			private Set<Object> visited;
 
 			@Override
@@ -153,7 +154,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			}
 
 			private boolean shouldExpand(Widget widget) {
-				if (widget == null) {
+				if (widget == null || visited.size() > EXPANSION_LIMIT) {
 					return false;
 				}
 				Object data= widget.getData();
