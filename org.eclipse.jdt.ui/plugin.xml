@@ -7343,7 +7343,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unlooped_while">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.unimplemented_code"
             runAfter="org.eclipse.jdt.ui.cleanup.strings">
       </cleanUp>
