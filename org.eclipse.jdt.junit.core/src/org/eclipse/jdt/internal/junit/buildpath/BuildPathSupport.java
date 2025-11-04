@@ -409,10 +409,6 @@ public class BuildPathSupport {
 			JUNIT_PLATFORM_SUITE_ENGINE, new VersionRange("[6.0.0,7.0.0)"), null, "junit-platform-suite-engine_6.*.jar", "junit-platform-suite-engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
 			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_ENGINE_JAVADOC);
 
-	public static final JUnitPluginDescription JUNIT6_PLATFORM_SUITE_COMMONS_PLUGIN= new JUnitPluginDescription(
-			JUNIT_PLATFORM_SUITE_COMMONS, new VersionRange("[6.0.0,7.0.0)"), null, "junit-platform-suite-commons_6.*.jar", "junit-platform-suite-commons.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
-			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_COMMONS_JAVADOC);
-
 	public static final JUnitPluginDescription JUNIT4_AS_3_PLUGIN= new JUnitPluginDescription(
 			JUNIT4_PLUGIN.bundleId, JUNIT4_PLUGIN.versionRange, JUNIT4_PLUGIN.bundleRoot, JUNIT4_PLUGIN.binaryImportedRoot,
 			JUNIT4_PLUGIN.sourceBundleId, JUNIT4_PLUGIN.repositorySource, JUNIT3_PLUGIN.javadocPreferenceKey) {
@@ -634,13 +630,6 @@ public class BuildPathSupport {
 	 */
 	public static IClasspathEntry getJUnit6PlatformSuiteEngineLibraryEntry() {
 		return JUNIT6_PLATFORM_SUITE_ENGINE_PLUGIN.getLibraryEntry();
-	}
-
-	/**
-	 * @return the org.junit.platform.suite.commons JUnit 6 library, or <code>null</code> if not available
-	 */
-	public static IClasspathEntry getJUnit6PlatformSuiteCommonsLibraryEntry() {
-		return JUNIT6_PLATFORM_SUITE_COMMONS_PLUGIN.getLibraryEntry();
 	}
 
 	private BuildPathSupport() {
