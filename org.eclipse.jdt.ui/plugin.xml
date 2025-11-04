@@ -7253,7 +7253,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.primitive_serialization">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.PatternCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.PatternCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.precompile_regex"
             runAfter="org.eclipse.jdt.ui.cleanup.primitive_rather_than_wrapper">
       </cleanUp>

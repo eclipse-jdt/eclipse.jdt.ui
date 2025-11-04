@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
@@ -75,7 +75,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * It uses <code>split()</code>, <code>replaceFirst()</code>, <code>replaceAll()</code> and <code>matches()</code> methods on a <code>java.util.regex.Pattern</code> object.
  * It only changes code inside one method.
  */
-public class PatternCleanUp extends AbstractMultiFix {
+public class PatternCleanUpCore extends AbstractMultiFix {
 	private static final String STRING_CLASS_NAME= String.class.getCanonicalName();
 
 	private static final String SPLIT_METHOD= "split"; //$NON-NLS-1$
@@ -85,11 +85,11 @@ public class PatternCleanUp extends AbstractMultiFix {
 	private static final String MATCHES_METHOD= "matches"; //$NON-NLS-1$
 	private static final String COMPILE_METHOD= "compile"; //$NON-NLS-1$
 
-	public PatternCleanUp() {
+	public PatternCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public PatternCleanUp(Map<String, String> options) {
+	public PatternCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -275,7 +275,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.PatternCleanup_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.PatternCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
