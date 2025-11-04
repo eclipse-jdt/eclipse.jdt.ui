@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
 import org.eclipse.jdt.internal.corext.dom.VarConflictVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -78,12 +78,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  *  </li>
  * </ul>
  */
-public class BreakLoopCleanUp extends AbstractMultiFix {
-	public BreakLoopCleanUp() {
+public class BreakLoopCleanUpCore extends AbstractMultiFix {
+	public BreakLoopCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public BreakLoopCleanUp(Map<String, String> options) {
+	public BreakLoopCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -378,7 +378,7 @@ public class BreakLoopCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.BreakLoopCleanUp_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.BreakLoopCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 

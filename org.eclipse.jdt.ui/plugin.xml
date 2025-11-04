@@ -7128,7 +7128,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.toolscleanup">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.AddAllCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.AddAllCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.add_all"
             runAfter="org.eclipse.jdt.ui.cleanup.switch">
       </cleanUp>
@@ -7188,7 +7188,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.number_suffix">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.break_loop"
             runAfter="org.eclipse.jdt.ui.cleanup.single_used_field">
       </cleanUp>
@@ -7263,7 +7263,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.boolean_literal"
             runAfter="org.eclipse.jdt.ui.cleanup.no_string_creation">
       </cleanUp>
@@ -7368,7 +7368,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.format">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.arrays_fill"
             runAfter="org.eclipse.jdt.ui.cleanup.substring">
       </cleanUp>
@@ -7438,7 +7438,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.invert_equals">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup"
+            class="org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanupCore"
             id="org.eclipse.jdt.ui.cleanup.bitwise_conditional_expression"
             runAfter="org.eclipse.jdt.ui.cleanup.standard_comparison">
       </cleanUp>
@@ -7563,7 +7563,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.objects_equals">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.autoboxing"
             runAfter="org.eclipse.jdt.ui.cleanup.variables">
       </cleanUp>

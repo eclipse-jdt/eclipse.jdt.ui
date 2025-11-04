@@ -60,12 +60,12 @@ import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
-import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
-import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
-import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanupCore;
+import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
@@ -577,7 +577,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new ArraysFillCleanUp());
+		cleanUpRefactoring.addCleanUp(new ArraysFillCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -593,7 +593,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new AutoboxingCleanUp());
+		cleanUpRefactoring.addCleanUp(new AutoboxingCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -609,7 +609,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new BitwiseConditionalExpressionCleanup());
+		cleanUpRefactoring.addCleanUp(new BitwiseConditionalExpressionCleanupCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -625,7 +625,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new BooleanLiteralCleanUp());
+		cleanUpRefactoring.addCleanUp(new BooleanLiteralCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -641,7 +641,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new BreakLoopCleanUp());
+		cleanUpRefactoring.addCleanUp(new BreakLoopCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}

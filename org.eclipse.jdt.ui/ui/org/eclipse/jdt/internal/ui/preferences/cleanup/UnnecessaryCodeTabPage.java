@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
@@ -61,7 +61,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new UnusedSuppressWarningsCleanUp(values),
 				new SubstringCleanUpCore(values),
 				new StringCleanUpCore(values),
-				new ArraysFillCleanUp(values),
+				new ArraysFillCleanUpCore(values),
 				new EvaluateNullableCleanUp(values),
 				new PushDownNegationCleanUp(values),
 				new BooleanValueRatherThanComparisonCleanUpCore(values),

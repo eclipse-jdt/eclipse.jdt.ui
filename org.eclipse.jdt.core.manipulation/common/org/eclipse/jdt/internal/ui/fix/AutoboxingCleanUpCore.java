@@ -41,7 +41,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -57,14 +57,14 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * And it is the case for all the primitive types. The method call is automatically added at compile time.</li>
  * </ul>
  */
-public class AutoboxingCleanUp extends AbstractMultiFix {
+public class AutoboxingCleanUpCore extends AbstractMultiFix {
 	private static final String VALUE_OF_METHOD= "valueOf"; //$NON-NLS-1$
 
-	public AutoboxingCleanUp() {
+	public AutoboxingCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public AutoboxingCleanUp(Map<String, String> options) {
+	public AutoboxingCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -186,7 +186,7 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.AutoboxingCleanup_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.AutoboxingCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[rewriteOperations.size()]));
 	}
 
