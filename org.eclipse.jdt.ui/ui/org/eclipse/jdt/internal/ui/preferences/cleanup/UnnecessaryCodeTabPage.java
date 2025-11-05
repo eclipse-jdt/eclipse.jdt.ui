@@ -25,10 +25,10 @@ import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
-import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
-import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUpCore;
@@ -62,19 +62,19 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new SubstringCleanUpCore(values),
 				new StringCleanUpCore(values),
 				new ArraysFillCleanUpCore(values),
-				new EvaluateNullableCleanUp(values),
+				new EvaluateNullableCleanUpCore(values),
 				new PushDownNegationCleanUp(values),
 				new BooleanValueRatherThanComparisonCleanUpCore(values),
-				new DoubleNegationCleanUp(values),
+				new DoubleNegationCleanUpCore(values),
 				new RedundantComparisonStatementCleanUp(values),
 				new RedundantSuperCallCleanUp(values),
 				new UnreachableBlockCleanUp(values),
 				new MapMethodCleanUp(values),
-				new CollectionCloningCleanUp(values),
+				new CollectionCloningCleanUpCore(values),
 				new MapCloningCleanUp(values),
 				new OverriddenAssignmentCleanUpCore(values),
 				new RedundantModifiersCleanUp(values),
-				new EmbeddedIfCleanUp(values),
+				new EmbeddedIfCleanUpCore(values),
 				new RedundantSemicolonsCleanUpCore(values),
 				new RedundantComparatorCleanUpCore(values),
 				new UnnecessaryArrayCreationCleanUpCore(values),
