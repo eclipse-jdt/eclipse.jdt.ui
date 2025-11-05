@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.dom.ForLoops;
 import org.eclipse.jdt.internal.corext.dom.ForLoops.ForLoopContent;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -68,12 +68,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * If the source is an array, the list is raw and the JVM is Java 1.5 or higher, we use Arrays.asList() to handle the erasure type.
  * It doesn't decrease the performance.
  */
-public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
-	public AddAllCleanUp() {
+public class AddAllCleanUpCore extends AbstractMultiFix implements ICleanUpFix {
+	public AddAllCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public AddAllCleanUp(Map<String, String> options) {
+	public AddAllCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -259,7 +259,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.AddAllCleanup_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.AddAllCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 

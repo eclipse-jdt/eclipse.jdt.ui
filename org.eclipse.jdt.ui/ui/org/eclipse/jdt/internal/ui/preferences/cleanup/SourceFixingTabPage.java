@@ -26,7 +26,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
+import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanupCore;
 import org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ReplaceDeprecatedFieldCleanUpCore;
@@ -40,7 +40,7 @@ public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 		return new AbstractCleanUp[] {
 				new InvertEqualsCleanUpCore(values),
 				new StandardComparisonCleanUpCore(values),
-				new BitwiseConditionalExpressionCleanup(values),
+				new BitwiseConditionalExpressionCleanupCore(values),
 				new InlineDeprecatedMethodCleanUpCore(values),
 				new ReplaceDeprecatedFieldCleanUpCore(values)
 		};
