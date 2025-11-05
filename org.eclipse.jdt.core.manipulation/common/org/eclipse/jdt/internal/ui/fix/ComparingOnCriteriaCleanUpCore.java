@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -82,7 +82,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>The cleanup can handle the null values.</li>
  * </ul>
  */
-public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
+public class ComparingOnCriteriaCleanUpCore extends AbstractMultiFix {
 	private static final class ObjectNotNullMatcher extends NodeMatcher<Expression> {
 		private final SimpleName name;
 
@@ -109,11 +109,11 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 		}
 	}
 
-	public ComparingOnCriteriaCleanUp() {
+	public ComparingOnCriteriaCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public ComparingOnCriteriaCleanUp(final Map<String, String> options) {
+	public ComparingOnCriteriaCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}
 
@@ -477,7 +477,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.ComparingOnCriteriaCleanUp_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.ComparingOnCriteriaCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 

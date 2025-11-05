@@ -28,12 +28,12 @@ import java.util.Map;
  * <li>FileSystems.getDefault() gets you the default filesystem.
  * </ul>
  */
-public class ConstantsForSystemPropertyCleanUp extends AbstractCleanUpCoreWrapper<ConstantsForSystemPropertiesCleanUpCore> {
-	public ConstantsForSystemPropertyCleanUp(final Map<String, String> options) {
+public class ConstantsForSystemPropertyCleanUpCore extends AbstractCleanUpCoreWrapper<ConstantsForSystemPropertiesCleanUpCore> {
+	public ConstantsForSystemPropertyCleanUpCore(final Map<String, String> options) {
 		super(options, new ConstantsForSystemPropertiesCleanUpCore());
 	}
 
-	public ConstantsForSystemPropertyCleanUp() {
+	public ConstantsForSystemPropertyCleanUpCore() {
 		this(Collections.EMPTY_MAP);
 	}
 }

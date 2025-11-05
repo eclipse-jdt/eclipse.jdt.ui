@@ -47,7 +47,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -60,12 +60,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 /**
  * A fix that raises embedded if into parent if.
  */
-public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
-	public EmbeddedIfCleanUp() {
+public class EmbeddedIfCleanUpCore extends AbstractMultiFix implements ICleanUpFix {
+	public EmbeddedIfCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public EmbeddedIfCleanUp(Map<String, String> options) {
+	public EmbeddedIfCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -142,7 +142,7 @@ public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.EmbeddedIfCleanup_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.EmbeddedIfCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 

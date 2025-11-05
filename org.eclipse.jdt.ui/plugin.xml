@@ -7114,7 +7114,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.code_style">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.loop"
             runAfter="org.eclipse.jdt.ui.cleanup.control_statements">
       </cleanUp>
@@ -7163,7 +7163,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.reduce_indentation">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.extract_increment"
             runAfter="org.eclipse.jdt.ui.cleanup.expressions">
       </cleanUp>
@@ -7293,7 +7293,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_code">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.embedded_if"
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
       </cleanUp>
@@ -7373,7 +7373,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.substring">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.evaluate_nullable"
             runAfter="org.eclipse.jdt.ui.cleanup.arrays_fill">
       </cleanUp>
@@ -7388,7 +7388,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.double_negation"
             runAfter="org.eclipse.jdt.ui.boolean_value_rather_than_comparison">
       </cleanUp>
@@ -7418,7 +7418,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unreachable_block">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.collection_cloning"
             runAfter="org.eclipse.jdt.ui.cleanup.use_directly_map_method">
       </cleanUp>
@@ -7463,7 +7463,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.strictly_equal_or_different">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.controlflow_merge"
             runAfter="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks">
       </cleanUp>
@@ -7518,7 +7518,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.lambda">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.comparing_on_criteria"
             runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
       </cleanUp>
@@ -7538,7 +7538,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.try_with_resource">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.systemproperty"
             runAfter="org.eclipse.jdt.ui.cleanup.multi_catch">
       </cleanUp>

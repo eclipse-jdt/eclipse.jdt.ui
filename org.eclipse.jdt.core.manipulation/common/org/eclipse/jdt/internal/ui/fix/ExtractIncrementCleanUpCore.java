@@ -47,7 +47,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -66,12 +66,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>Do not cleanup several increments in the same statement.</li>
  * </ul>
  */
-public class ExtractIncrementCleanUp extends AbstractMultiFix {
-	public ExtractIncrementCleanUp() {
+public class ExtractIncrementCleanUpCore extends AbstractMultiFix {
+	public ExtractIncrementCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public ExtractIncrementCleanUp(final Map<String, String> options) {
+	public ExtractIncrementCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}
 
@@ -286,7 +286,7 @@ public class ExtractIncrementCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.CodeStyleCleanUp_ExtractIncrement_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.CodeStyleCleanUp_ExtractIncrement_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
