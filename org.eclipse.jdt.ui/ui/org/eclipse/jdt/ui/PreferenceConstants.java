@@ -360,7 +360,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * @since 3.35
+	 * @since 3.36
 	 */
 	public static final String CODEGEN_USE_MARKDOWN= CodeGenerationSettingsConstants.CODEGEN_USE_MARKDOWN;
 
