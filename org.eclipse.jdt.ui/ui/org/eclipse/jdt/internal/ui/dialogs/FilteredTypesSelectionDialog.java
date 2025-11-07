@@ -459,7 +459,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	}
 
 	private boolean canAddAnyStringNext(char c) {
-		return !Character.isUpperCase(c) && c != '.' && c != '*';
+		return c != '.' && c != '*';
 	}
 
 	/**
