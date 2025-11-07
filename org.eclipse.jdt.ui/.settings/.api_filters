@@ -161,6 +161,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/ui/StandardJavaElementContentProvider.java" type="org.eclipse.jdt.ui.StandardJavaElementContentProvider">
+        <filter comment="For Java 13 Enable Preview feature" id="576725006">
+            <message_arguments>
+                <message_argument value="IWorkingCopyProvider"/>
+                <message_argument value="StandardJavaElementContentProvider"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/ui/actions/IJavaEditorActionDefinitionIds.java" type="org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds">
         <filter id="571473929">
             <message_arguments>
