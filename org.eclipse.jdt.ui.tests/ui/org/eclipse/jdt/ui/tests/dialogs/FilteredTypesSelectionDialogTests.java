@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Patrick Ziegler others.
+ * Copyright (c) 2025 Patrick Ziegler and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -103,7 +103,10 @@ public class FilteredTypesSelectionDialogTests {
 		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2505
 		"java.lang.String, java.lang.String",
 		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2538
-		"OOME, java.lang.OutOfMemoryError"
+		"OOME, java.lang.OutOfMemoryError",
+		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2583
+		"OOfME, java.lang.OutOfMemoryError",
+		"OOMemE, java.lang.OutOfMemoryError"
 	})
 	public void testWithSearchString(String pattern, String expectedType) {
 		dialog.setInitialPattern(pattern);
