@@ -63,6 +63,9 @@ public class JUnitTestPlugin extends AbstractUIPlugin {
 		JUNIT3("org.eclipse.jdt.junit.loader.junit3"), //$NON-NLS-1$
 		JUNIT4("org.eclipse.jdt.junit.loader.junit4"), //$NON-NLS-1$
 		JUNIT5("org.eclipse.jdt.junit.loader.junit5"), //$NON-NLS-1$
+		/**
+		 * @since 1.3
+		 */
 		JUNIT6("org.eclipse.jdt.junit.loader.junit6"); //$NON-NLS-1$
 
 		public final String junitTestKindId;
