@@ -355,6 +355,16 @@ public class PreferenceConstants {
 	public static final String CODEGEN_ADD_COMMENTS= CodeGenerationSettingsConstants.CODEGEN_ADD_COMMENTS;
 
 	/**
+	 * A named preference that controls if comment stubs will be added
+	 * automatically to newly created types and methods.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.35
+	 */
+	public static final String CODEGEN_USE_MARKDOWN= CodeGenerationSettingsConstants.CODEGEN_USE_MARKDOWN;
+
+	/**
 	 * A named preference that controls if a comment stubs will be added
 	 * automatically to newly created types and methods.
 	 * <p>
@@ -4161,6 +4171,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, true);
 		store.setDefault(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME, "e"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
+		store.setDefault(PreferenceConstants.CODEGEN_USE_MARKDOWN, false);
 		store.setDefault(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, true);
 
 		// MembersOrderPreferencePage
