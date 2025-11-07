@@ -630,6 +630,15 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeTemplateBlock_constructorcomment_label;
 	public static String CodeTemplateBlock_gettercomment_label;
 	public static String CodeTemplateBlock_settercomment_label;
+	public static String CodeTemplateBlock_markdowntypecomment_label;
+	public static String CodeTemplateBlock_markdownfieldcomment_label;
+	public static String CodeTemplateBlock_markdownfilecomment_label;
+	public static String CodeTemplateBlock_markdownmethodcomment_label;
+	public static String CodeTemplateBlock_markdowndelegatecomment_label;
+	public static String CodeTemplateBlock_markdownconstructorcomment_label;
+	public static String CodeTemplateBlock_markdowngettercomment_label;
+	public static String CodeTemplateBlock_markdownsettercomment_label;
+	public static String CodeTemplateBlock_markdownmodulecomment_label;
 	public static String CodeTemplateBlock_getterstub_label;
 	public static String CodeTemplateBlock_setterstub_label;
 	public static String CodeTemplateBlock_modulecomment_label;
