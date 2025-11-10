@@ -60,8 +60,8 @@ import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
  */
 public class CoreTestSearchEngine {
 
-	private static final String JUNIT_PLATFORM_SUITE_API_PREFIX= BuildPathSupport.JUNIT_PLATFORM_SUITE_API + "_"; //$NON-NLS-1$
-	private static final String JUNIT_PLATFORM_COMMONS_PREFIX= BuildPathSupport.JUNIT_PLATFORM_COMMONS + "_"; //$NON-NLS-1$
+	private static final String JUNIT_PLATFORM_SUITE_API_PREFIX= BuildPathSupport.JUNIT_PLATFORM_SUITE_API;
+	private static final String JUNIT_PLATFORM_COMMONS_PREFIX= BuildPathSupport.JUNIT_PLATFORM_COMMONS;
 	private static final String JAR_EXTENSION= ".jar"; //$NON-NLS-1$
 
 	public static boolean isTestOrTestSuite(IType declaringType) throws CoreException {
@@ -173,8 +173,8 @@ public class CoreTestSearchEngine {
 				if (type != null) {
 					// check if we have the right JUnit JUpiter version
 					String filename= type.getPath().lastSegment();
-					if (filename.startsWith(junitBundlePrefix) && filename.endsWith(JAR_EXTENSION)) {
-						String versionString = filename.substring(junitBundlePrefix.length(), filename.length() - JAR_EXTENSION.length());
+					if ((filename.startsWith(junitBundlePrefix + "_") || filename.startsWith(junitBundlePrefix + "-")) && filename.endsWith(JAR_EXTENSION)) { //$NON-NLS-1$ //$NON-NLS-2$
+						String versionString = filename.substring(junitBundlePrefix.length() + 1, filename.length() - JAR_EXTENSION.length());
 						Version version = new Version(versionString);
 						if (version.getMajor() != junitMajorVersion) {
 							return false;
