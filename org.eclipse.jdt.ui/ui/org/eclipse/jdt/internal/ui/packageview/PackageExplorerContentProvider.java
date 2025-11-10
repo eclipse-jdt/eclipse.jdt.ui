@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -28,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -93,6 +96,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	private UIJob fUpdateJob;
 
+	private final DeltaJob fdeltaJob;
+
 	/**
 	 * We use a cache to know whether a package has a single child for the hierarchical representation.
 	 * This avoids looping over all packages for each call to
@@ -107,6 +112,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	 */
 	public PackageExplorerContentProvider(boolean provideMembers) {
 		super(provideMembers);
+		fdeltaJob= new DeltaJob();
 		fShowLibrariesNode= false;
 		fIsFlatLayout= false;
 		fFoldPackages= arePackagesFoldedInHierarchicalLayout();
@@ -127,6 +133,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	@Override
 	public void elementChanged(final ElementChangedEvent event) {
+		IJavaElementDelta delta= event.getDelta();
+		fdeltaJob.queue.add(delta);
+		fdeltaJob.schedule();
+	}
+
+	protected void processDelta(IJavaElementDelta delta) {
 		final ArrayList<Runnable> runnables= new ArrayList<>();
 		try {
 			clearPackageCache();
@@ -136,7 +148,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if (inputDeleted(runnables))
 				return;
 
-			processDelta(event.getDelta(), runnables);
+			processDelta(delta, runnables);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		} finally {
@@ -1005,5 +1017,30 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				fViewer.getControl().setRedraw(true);
 			}
 		}
+	}
+
+	private final class DeltaJob extends Job {
+		private Queue<IJavaElementDelta> queue= new ConcurrentLinkedQueue<>();
+
+		DeltaJob() {
+			super(PackagesMessages.PackageExplorerContentProvider_update_job_description);
+			setSystem(true);
+		}
+
+		@Override
+		public boolean belongsTo(Object family) {
+			return family == PackageExplorerContentProvider.class;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+
+			IJavaElementDelta delta;
+			while ((delta= queue.poll()) != null) {
+				processDelta(delta);
+			}
+			return Status.OK_STATUS;
+		}
+
 	}
 }
