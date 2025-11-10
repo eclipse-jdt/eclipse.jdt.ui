@@ -57,7 +57,26 @@
  * ${see_to_target}
  */</template>
 
-<template name="newtype" id="org.eclipse.jdt.ui.text.codetemplates.newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">${filecomment}
+<template name="markdowngettercomment" id="org.eclipse.jdt.ui.text.codetemplates.markdowngettercomment" description="%CodeTemplates.markdowngettercomment" context="markdowngettercomment_context" enabled="true">/// @return %CodeTemplates.gettercomment.returntagcontent </template>
+
+<template name="markdownsettercomment" id="org.eclipse.jdt.ui.text.codetemplates.markdownsettercomment" description="%CodeTemplates.markdownsettercomment" context="markdownsettercomment_context" enabled="true">/// @param ${param} %CodeTemplates.settercomment.paramtagcontent </template>
+
+<template name="markdownconstructorcomment" id="org.eclipse.jdt.ui.text.codetemplates.markdownconstructorcomment" description="%CodeTemplates.markdownconstructorcomment" context="markdownconstructorcomment_context" enabled="true">/// ${tags} </template>
+
+<template name="markdownfilecomment" id="org.eclipse.jdt.ui.text.codetemplates.markdownfilecomment" description="%CodeTemplates.markdownfilecomment" context="markdownfilecomment_context" enabled="true">/// </template>
+
+<template name="markdowntypecomment" id="org.eclipse.jdt.ui.text.codetemplates.markdowntypecomment" description="%CodeTemplates.markdowntypecomment" context="markdowntypecomment_context" enabled="true">/// ${tags} </template>
+ 
+<template name="markdownfieldcomment" id="org.eclipse.jdt.ui.text.codetemplates.markdownfieldcomment" description="%CodeTemplates.markdownfieldcomment" context="markdownfieldcomment_context" enabled="true">/// </template>
+ 
+<template name="markdownmethodcomment" id="org.eclipse.jdt.ui.text.codetemplates.markdownmethodcomment" description="%CodeTemplates.markdownnonoverridingcomment" context="markdownmethodcomment_context" enabled="true">/// ${tags} </template>
+
+<template name="markdownmodulecomment" id="org.eclipse.jdt.ui.text.codetemplates.markdownmodulecomment" description="%CodeTemplates.markdownmodulecomment" context="markdownmodulecomment_context" enabled="true">/// ${tags} </template>
+
+<template name="markdowndelegatecomment" id="org.eclipse.jdt.ui.text.codetemplates.markdowndelegatecomment" description="%CodeTemplates.markdowndelegatecomment" context="markdowndelegatecomment_context" enabled="true">/// ${tags}
+/// ${see_to_target}</template>
+ 
+ <template name="newtype" id="org.eclipse.jdt.ui.text.codetemplates.newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">${filecomment}
 ${package_declaration}
 
 ${typecomment}
