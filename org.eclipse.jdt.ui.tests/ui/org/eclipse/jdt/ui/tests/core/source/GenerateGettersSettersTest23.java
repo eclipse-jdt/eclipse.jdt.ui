@@ -106,7 +106,7 @@ public class GenerateGettersSettersTest23 {
 	}
 
 	@After
-	public void tearDown() throws CoreException {
+	public void tearDown() {
 		fJavaProject= null;
 		fPackageP= null;
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
