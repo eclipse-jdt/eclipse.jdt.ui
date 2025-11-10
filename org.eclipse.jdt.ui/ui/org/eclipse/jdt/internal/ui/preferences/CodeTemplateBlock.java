@@ -124,8 +124,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		@Override
 		public Object[] getChildren(TreeListDialogField<String> field, Object element) {
-			if (element == COMMENT_NODE || element == CODE_NODE) {
-				return getTemplateOfCategory(element == COMMENT_NODE);
+			if (element == COMMENT_NODE || element == MARKDOWN_COMMENT_NODE || element == CODE_NODE) {
+				return getTemplateOfCategory(element == COMMENT_NODE, element == MARKDOWN_COMMENT_NODE);
 			}
 			return NO_CHILDREN;
 		}
@@ -134,6 +134,9 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		public Object getParent(TreeListDialogField<String> field, Object element) {
 			if (element instanceof TemplatePersistenceData) {
 				TemplatePersistenceData data= (TemplatePersistenceData) element;
+				if (data.getTemplate().getName().startsWith(CodeTemplateContextType.MARKDOWN_COMMENT_PREFIX)) {
+					return MARKDOWN_COMMENT_NODE;
+				}
 				if (data.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
 					return COMMENT_NODE;
 				}
@@ -144,7 +147,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		@Override
 		public boolean hasChildren(TreeListDialogField<String> field, Object element) {
-			return (element == COMMENT_NODE || element == CODE_NODE);
+			return (element == COMMENT_NODE || element == CODE_NODE  || element == MARKDOWN_COMMENT_NODE);
 		}
 
 		@Override
@@ -164,8 +167,10 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		public int category(Object element) {
 			if (element == COMMENT_NODE) {
 				return 1;
-			} else if (element == CODE_NODE) {
+			} else if (element == MARKDOWN_COMMENT_NODE) {
 				return 2;
+			} else if (element == CODE_NODE) {
+				return 3;
 			}
 
 			TemplatePersistenceData data= (TemplatePersistenceData) element;
@@ -251,7 +256,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		@Override
 		public String getText(Object element) {
-			if (element == COMMENT_NODE || element == CODE_NODE) {
+			if (element == COMMENT_NODE || element == CODE_NODE || element == MARKDOWN_COMMENT_NODE) {
 				return (String) element;
 			}
 			TemplatePersistenceData data= (TemplatePersistenceData) element;
@@ -281,43 +286,34 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 					case CodeTemplateContextType.ANNOTATIONBODY_ID:
 						return PreferencesMessages.CodeTemplateBlock_annotationbody_label;
 					case CodeTemplateContextType.FILECOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_filecomment_label;
 					case CodeTemplateContextType.MARKDOWNFILECOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdownfilecomment_label;
+						return PreferencesMessages.CodeTemplateBlock_filecomment_label;
 					case CodeTemplateContextType.TYPECOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_typecomment_label;
 					case CodeTemplateContextType.MARKDOWNTYPECOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdowntypecomment_label;
+						return PreferencesMessages.CodeTemplateBlock_typecomment_label;
 					case CodeTemplateContextType.FIELDCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_fieldcomment_label;
 					case CodeTemplateContextType.MARKDOWNFIELDCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdownfieldcomment_label;
+						return PreferencesMessages.CodeTemplateBlock_fieldcomment_label;
 					case CodeTemplateContextType.METHODCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_methodcomment_label;
 					case CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdownmethodcomment_label;
+						return PreferencesMessages.CodeTemplateBlock_methodcomment_label;
 					case CodeTemplateContextType.OVERRIDECOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_overridecomment_label;
 					case CodeTemplateContextType.DELEGATECOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_delegatecomment_label;
 					case CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdowndelegatecomment_label;
+						return PreferencesMessages.CodeTemplateBlock_delegatecomment_label;
 					case CodeTemplateContextType.CONSTRUCTORCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_constructorcomment_label;
 					case CodeTemplateContextType.MARKDOWNCONSTRUCTORCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdownconstructorcomment_label;
+						return PreferencesMessages.CodeTemplateBlock_constructorcomment_label;
 					case CodeTemplateContextType.GETTERCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_gettercomment_label;
 					case CodeTemplateContextType.MARKDOWNGETTERCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdowngettercomment_label;
+						return PreferencesMessages.CodeTemplateBlock_gettercomment_label;
 					case CodeTemplateContextType.SETTERCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_settercomment_label;
 					case CodeTemplateContextType.MARKDOWNSETTERCOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdownsettercomment_label;
+						return PreferencesMessages.CodeTemplateBlock_settercomment_label;
 					case CodeTemplateContextType.MODULECOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_modulecomment_label;
 					case CodeTemplateContextType.MARKDOWNMODULECOMMENT_ID:
-						return PreferencesMessages.CodeTemplateBlock_markdownmodulecomment_label;
+						return PreferencesMessages.CodeTemplateBlock_modulecomment_label;
 					default:
 						break;
 				}
@@ -341,6 +337,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	private final static int IDX_EXPORTALL= 4;
 
 	protected final static String COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node;
+	protected final static String MARKDOWN_COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_markdown_comment_node;
 	protected final static String CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node;
 
 	private TreeListDialogField<String> fCodeTemplateTree;
@@ -387,6 +384,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		fCodeTemplateTree.enableButton(IDX_EDIT, false);
 
 		fCodeTemplateTree.addElement(COMMENT_NODE);
+		fCodeTemplateTree.addElement(MARKDOWN_COMMENT_NODE);
 		fCodeTemplateTree.addElement(CODE_NODE);
 
 		fCodeTemplateTree.selectFirstElement();
@@ -533,11 +531,21 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			fPatternViewerCopyAction.update();
 	}
 
-	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment) {
+	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment, boolean isMarkdownComment) {
 		ArrayList<TemplatePersistenceData> res=  new ArrayList<>();
 		for (TemplatePersistenceData curr : fTemplateStore.getTemplateData()) {
-			if (isComment == curr.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
-				res.add(curr);
+			if (curr.getTemplate().getName().startsWith(CodeTemplateContextType.MARKDOWN_COMMENT_PREFIX)) {
+				if (isMarkdownComment) {
+					res.add(curr);
+				}
+			} else if (curr.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
+				if (isComment) {
+					res.add(curr);
+				}
+			} else {
+				if (!isComment && !isMarkdownComment) {
+					res.add(curr);
+				}
 			}
 		}
 		return res.toArray(new TemplatePersistenceData[res.size()]);
@@ -642,7 +650,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			if (curr instanceof TemplatePersistenceData) {
 				datas.add(curr);
 			} else {
-				TemplatePersistenceData[] cat= getTemplateOfCategory(curr == COMMENT_NODE);
+				TemplatePersistenceData[] cat= getTemplateOfCategory(curr == COMMENT_NODE, curr == MARKDOWN_COMMENT_NODE);
 				datas.addAll(Arrays.asList(cat));
 			}
 		}
