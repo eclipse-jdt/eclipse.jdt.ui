@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -157,11 +157,11 @@ public class GenericVisitor extends ASTVisitor {
 	public void endVisit(DoStatement node) {
 		endVisitNode(node);
 	}
-	@Override
-	public void endVisit(EmptyStatement node) {
+ 	@Override
+	public void endVisit(EitherOrMultiPattern node) {
 		endVisitNode(node);
 	}
-	@Override
+ 	@Override
 	public void endVisit(EnhancedForStatement node) {
 		endVisitNode(node);
 	}
@@ -199,6 +199,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public void endVisit(IfStatement node) {
+		endVisitNode(node);
+	}
+	@Override
+	public void endVisit(ImplicitTypeDeclaration node) {
 		endVisitNode(node);
 	}
 	@Override
@@ -307,6 +311,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public void endVisit(ParenthesizedExpression node) {
+		endVisitNode(node);
+	}
+	@Override
+	public void endVisit(PatternInstanceofExpression node) {
 		endVisitNode(node);
 	}
 	@Override
@@ -435,6 +443,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public void endVisit(TypeParameter node) {
+		endVisitNode(node);
+	}
+	@Override
+	public void endVisit(TypePattern node) {
 		endVisitNode(node);
 	}
 	@Override
@@ -572,6 +584,10 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	@Override
+	public boolean visit(EitherOrMultiPattern node) {
+		return visitNode(node);
+	}
+	@Override
 	public boolean visit(EmptyStatement node) {
 		return visitNode(node);
 	}
@@ -613,6 +629,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(IfStatement node) {
+		return visitNode(node);
+	}
+	@Override
+	public boolean visit(ImplicitTypeDeclaration node) {
 		return visitNode(node);
 	}
 	@Override
@@ -724,6 +744,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(ParenthesizedExpression node) {
+		return visitNode(node);
+	}
+	@Override
+	public boolean visit(PatternInstanceofExpression node) {
 		return visitNode(node);
 	}
 	@Override
@@ -852,6 +876,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(TypeParameter node) {
+		return visitNode(node);
+	}
+	@Override
+	public boolean visit(TypePattern node) {
 		return visitNode(node);
 	}
 	@Override
