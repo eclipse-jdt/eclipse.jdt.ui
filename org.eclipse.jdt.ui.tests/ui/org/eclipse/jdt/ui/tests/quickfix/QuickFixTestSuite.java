@@ -51,6 +51,7 @@ import org.junit.platform.suite.api.Suite;
 	AssistQuickFixTest12.class,
 	AssistQuickFixTest14.class,
 	AssistQuickFixTest15.class,
+	AssistQuickFixTest16.class,
 	AssistQuickFixTest21.class,
 	ChangeNonStaticToStaticTest.class,
 	MarkerResolutionTest.class,
