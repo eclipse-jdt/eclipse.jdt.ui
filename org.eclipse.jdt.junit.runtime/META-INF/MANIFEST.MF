@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.junit.runtime
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.junit.runtime;singleton:=true
-Bundle-Version: 3.7.700.qualifier
+Bundle-Version: 3.8.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: 
@@ -20,4 +20,4 @@ Export-Package:
    org.eclipse.jdt.junit5.runtime,
    org.eclipse.jdt.ui.tests"
 Require-Bundle: org.junit;bundle-version="3.8.2"
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
