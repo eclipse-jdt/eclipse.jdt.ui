@@ -126,6 +126,7 @@ import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.SealedClassFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
+import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
@@ -137,6 +138,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
@@ -144,6 +146,7 @@ import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore;
@@ -230,6 +233,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	public static final int REMOVE_REDUNDANT_TYPE_ARGS= 0x40d;
 	public static final int REMOVE_UNNECESSARY_NLS= 0x40e;
 	public static final int ADD_NLS= 0x40f;
+	public static final int ADD_UNIMPLEMENTED_METHODS= 0x410;
 
 	public void getUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -2065,6 +2069,26 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 				NewMethodCorrectionProposalCore proposal= new NewMethodCorrectionProposalCore(label, targetCU, targetRoot, new ArrayList<>(), targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR);
 				proposals.add(newMethodCorrectionProposalToT(proposal, CREATE_CONSTRUCTOR));
 			}
+		}
+	}
+
+	public void getUnimplementedMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
+		IProposableFix addMethodFix= UnimplementedCodeFixCore.createAddUnimplementedMethodsFix(context.getASTRoot(), problem);
+		if (addMethodFix != null) {
+			Map<String, String> settings= new Hashtable<>();
+			settings.put(CleanUpConstants.ADD_MISSING_METHODES, CleanUpOptions.TRUE);
+			ICleanUp cleanUp= new UnimplementedCodeCleanUpCore(settings);
+			FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(addMethodFix, cleanUp, IProposalRelevance.ADD_UNIMPLEMENTED_METHODS, context);
+			proposals.add(fixCorrectionProposalToT(proposal, ADD_UNIMPLEMENTED_METHODS));
+		}
+
+		IProposableFix makeAbstractFix= UnimplementedCodeFixCore.createMakeTypeAbstractFix(context.getASTRoot(), problem);
+		if (makeAbstractFix != null) {
+			Map<String, String> settings= new Hashtable<>();
+			settings.put(UnimplementedCodeCleanUpCore.MAKE_TYPE_ABSTRACT, CleanUpOptions.TRUE);
+			ICleanUp cleanUp= new UnimplementedCodeCleanUpCore(settings);
+			FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(makeAbstractFix, cleanUp, IProposalRelevance.MAKE_TYPE_ABSTRACT, context);
+			proposals.add(fixCorrectionProposalToT(proposal, ADD_UNIMPLEMENTED_METHODS));
 		}
 	}
 

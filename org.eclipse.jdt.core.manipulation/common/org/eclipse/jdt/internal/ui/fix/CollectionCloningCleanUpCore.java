@@ -58,7 +58,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -70,12 +70,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 /**
  * A fix that replaces creating a new Collection, then invoking Collection.addAll() on it, by creating the new Collection with the other Collection as parameter.
  */
-public class CollectionCloningCleanUp extends AbstractMultiFix {
-	public CollectionCloningCleanUp() {
+public class CollectionCloningCleanUpCore extends AbstractMultiFix {
+	public CollectionCloningCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public CollectionCloningCleanUp(Map<String, String> options) {
+	public CollectionCloningCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -236,7 +236,7 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.CollectionCloningCleanUp_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.CollectionCloningCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 

@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.dom.ForLoops;
 import org.eclipse.jdt.internal.corext.dom.ForLoops.ContainerType;
 import org.eclipse.jdt.internal.corext.dom.ForLoops.ForLoopContent;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -64,12 +64,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>Check that we always set the same value.</li>
  * </ul>
  */
-public class ArraysFillCleanUp extends AbstractMultiFix {
-	public ArraysFillCleanUp() {
+public class ArraysFillCleanUpCore extends AbstractMultiFix {
+	public ArraysFillCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public ArraysFillCleanUp(Map<String, String> options) {
+	public ArraysFillCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -197,7 +197,7 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.ArraysFillCleanUp_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.ArraysFillCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 

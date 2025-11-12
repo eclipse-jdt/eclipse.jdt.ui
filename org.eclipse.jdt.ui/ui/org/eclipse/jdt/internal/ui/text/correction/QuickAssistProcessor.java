@@ -209,7 +209,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.DoWhileRatherThanWhileCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PatternInstanceofToSwitchCleanUpCore;
@@ -3053,7 +3053,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
+		ICleanUp cleanUp= new ConvertLoopCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_FOR_LOOP_TO_ENHANCED, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 
@@ -3076,7 +3076,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
+		ICleanUp cleanUp= new ConvertLoopCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_ITERABLE_LOOP_TO_ENHANCED, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 

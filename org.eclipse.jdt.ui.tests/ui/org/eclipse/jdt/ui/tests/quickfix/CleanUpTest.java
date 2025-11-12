@@ -78,7 +78,7 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 public class CleanUpTest extends CleanUpTestCase {
@@ -30313,7 +30313,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("E02.java", sample, false, null);
 
-		enable(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT);
+		enable(UnimplementedCodeCleanUpCore.MAKE_TYPE_ABSTRACT);
 
 		sample= """
 			package test;

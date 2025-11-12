@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher;
 import org.eclipse.jdt.internal.corext.dom.VarConflictVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -62,12 +62,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>Ultimately it removes the empty and passive if conditions.</li>
  * </ul>
  */
-public class ControlFlowMergeCleanUp extends AbstractMultiFix {
-	public ControlFlowMergeCleanUp() {
+public class ControlFlowMergeCleanUpCore extends AbstractMultiFix {
+	public ControlFlowMergeCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public ControlFlowMergeCleanUp(Map<String, String> options) {
+	public ControlFlowMergeCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -94,8 +94,8 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 				    j++;
 				}
 				++i;
-				
-				
+
+
 				"""; //$NON-NLS-1$
 		}
 
@@ -306,7 +306,7 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.ControlFlowMergeCleanUp_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.ControlFlowMergeCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
