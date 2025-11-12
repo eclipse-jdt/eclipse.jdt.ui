@@ -44,9 +44,16 @@ public class JUnit6TestListener implements TestExecutionListener {
 
 	private TestPlan fTestPlan;
 
+	private boolean fStopped;
+
 	public JUnit6TestListener(IListensToTestExecutions notified, RemoteTestRunner remoteTestRunner) {
 		fNotified= notified;
 		fRemoteTestRunner= remoteTestRunner;
+		fStopped= false;
+	}
+
+	void executionStopped() {
+		fStopped= true;
 	}
 
 	@Override
@@ -77,6 +84,10 @@ public class JUnit6TestListener implements TestExecutionListener {
 	private void notifyIfNotSuccessful(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
 		Status result= testExecutionResult.getStatus();
 		if (result != Status.SUCCESSFUL) {
+			if (result == Status.ABORTED && fStopped && testIdentifier.isContainer() && testIdentifier.getParentId().isEmpty()) {
+				// launch was cancelled, don't report failures for top-most containers
+				return;
+			}
 			String trace= ""; //$NON-NLS-1$
 			FailedComparison comparison= null;
 			String status= MessageIds.TEST_FAILED;

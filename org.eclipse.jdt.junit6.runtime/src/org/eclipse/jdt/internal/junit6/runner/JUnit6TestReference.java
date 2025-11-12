@@ -15,13 +15,14 @@
 package org.eclipse.jdt.internal.junit6.runner;
 
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.platform.engine.CancellationToken;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.LauncherExecutionRequest;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
+import org.junit.platform.launcher.core.LauncherExecutionRequestBuilder;
 
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 import org.eclipse.jdt.internal.junit.runner.ITestReference;
@@ -32,6 +33,8 @@ import org.eclipse.jdt.internal.junit.runner.TestIdMap;
 
 public class JUnit6TestReference implements ITestReference {
 
+	private final CancellationToken fCancellationToken;
+
 	private LauncherDiscoveryRequest fRequest;
 
 	private Launcher fLauncher;
@@ -40,7 +43,9 @@ public class JUnit6TestReference implements ITestReference {
 
 	private RemoteTestRunner fRemoteTestRunner;
 
+
 	public JUnit6TestReference(LauncherDiscoveryRequest request, Launcher launcher, RemoteTestRunner remoteTestRunner) {
+		fCancellationToken = CancellationToken.create();
 		fRequest= request;
 		fLauncher= launcher;
 		fRemoteTestRunner= remoteTestRunner;
@@ -88,19 +93,16 @@ public class JUnit6TestReference implements ITestReference {
 
 	@Override
 	public void run(TestExecution execution) {
-		registerStopListener(fLauncher, execution);
-		boolean foundMethodThatAvoidsRedundantDiscovery;
-		try {
-			fLauncher.getClass().getMethod("execute", TestPlan.class, TestExecutionListener[].class); //$NON-NLS-1$
-			foundMethodThatAvoidsRedundantDiscovery= true;
-		} catch (NoSuchMethodException e) {
-			foundMethodThatAvoidsRedundantDiscovery= false;
-		}
-		if (foundMethodThatAvoidsRedundantDiscovery) {
-			fLauncher.execute(fTestPlan, new JUnit6TestListener(execution.getListener(), fRemoteTestRunner));
-		} else {
-			fLauncher.execute(fRequest, new JUnit6TestListener(execution.getListener(), fRemoteTestRunner));
-		}
+		JUnit6TestListener listener= new JUnit6TestListener(execution.getListener(), fRemoteTestRunner);
+		execution.addStopListener(() -> {
+			listener.executionStopped();
+			fCancellationToken.cancel();
+		});
+		LauncherExecutionRequest request = LauncherExecutionRequestBuilder.request(fTestPlan)
+				.cancellationToken(fCancellationToken)
+				.listeners(listener)
+				.build();
+		fLauncher.execute(request);
 	}
 
 	@Override
@@ -125,21 +127,5 @@ public class JUnit6TestReference implements ITestReference {
 	@Override
 	public String toString() {
 		return fRequest.toString();
-	}
-
-	// XXX: hack for stopping JUnit 5 tests, use API from https://github.com/junit-team/junit5/issues/1880 once available
-	private static void registerStopListener(Launcher launcher, TestExecution execution) {
-		AtomicBoolean stopped = new AtomicBoolean(false);
-		execution.addStopListener(() -> stopped.set(true));
-		launcher.registerTestExecutionListeners(new TestExecutionListener() {
-			@Override
-			public void executionStarted(TestIdentifier testIdentifier) {
-				if (stopped.get()) {
-					// fake an OOM, since this is the only type of exception that JUnit 5 doesn't swallow
-					// This exception and exact message is handled in RemoteTestRunnerClient
-					throw new OutOfMemoryError("Junit5 test stopped by user"); //$NON-NLS-1$
-				}
-			}
-		});
 	}
 }
