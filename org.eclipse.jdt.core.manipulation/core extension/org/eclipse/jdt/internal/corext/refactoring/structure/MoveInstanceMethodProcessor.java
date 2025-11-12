@@ -1802,7 +1802,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						IBinding nodeBinding= node.resolveBinding();
 						if (nodeBinding instanceof IVariableBinding fieldBinding && fieldBinding.isField()) {
 							ITypeBinding nodeTypeBinding= fieldBinding.getDeclaringClass();
-							ITypeBinding newBinding= nodeTypeBinding.getTypeDeclaration();
 							if (nodeTypeBinding != null && nodeTypeBinding.isParameterizedType() &&
 									genericBinding.isEqualTo(nodeTypeBinding.getTypeDeclaration())) {
 								throw new AbortSearchException();
