@@ -27,28 +27,28 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContext;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettingsConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-public class UnimplementedCodeCleanUp extends AbstractMultiFix {
+public class UnimplementedCodeCleanUpCore extends AbstractMultiFix {
 
 	public static final String MAKE_TYPE_ABSTRACT= "cleanup.make_type_abstract_if_missing_method"; //$NON-NLS-1$
 
-	public UnimplementedCodeCleanUp() {
+	public UnimplementedCodeCleanUpCore() {
 		super();
 	}
 
-	public UnimplementedCodeCleanUp(Map<String, String> settings) {
+	public UnimplementedCodeCleanUpCore(Map<String, String> settings) {
 		super(settings);
 	}
 
@@ -73,7 +73,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 			bld.append("public class Face implements IFace {\n"); //$NON-NLS-1$
 		}
 		if (isEnabled(CleanUpConstants.ADD_MISSING_METHODES)) {
-			boolean createComments= Boolean.parseBoolean(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, null));
+			boolean createComments= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_ADD_COMMENTS, null));
 			if (createComments)
 				bld.append(indent(getOverridingMethodComment(), "    ")); //$NON-NLS-1$
 
@@ -170,7 +170,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 	}
 
 	private static Template getCodeTemplate(String id) {
-		return JavaPlugin.getDefault().getCodeTemplateStore().findTemplateById(id);
+		return JavaManipulation.getCodeTemplateStore().findTemplateById(id);
 	}
 
 	private String evaluateTemplate(Template template, CodeTemplateContext context) {
@@ -178,7 +178,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		try {
 			buffer= context.evaluate(template);
 		} catch (BadLocationException | TemplateException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 			return ""; //$NON-NLS-1$
 		}
 		if (buffer == null)

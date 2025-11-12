@@ -35,7 +35,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -47,12 +47,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 /**
  * A fix that replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
  */
-public class BooleanLiteralCleanUp extends AbstractMultiFix implements ICleanUpFix {
-	public BooleanLiteralCleanUp() {
+public class BooleanLiteralCleanUpCore extends AbstractMultiFix implements ICleanUpFix {
+	public BooleanLiteralCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public BooleanLiteralCleanUp(Map<String, String> options) {
+	public BooleanLiteralCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -113,7 +113,7 @@ public class BooleanLiteralCleanUp extends AbstractMultiFix implements ICleanUpF
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.BooleanLiteralCleanup_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.BooleanLiteralCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 

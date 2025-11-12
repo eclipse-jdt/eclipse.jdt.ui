@@ -212,7 +212,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			String[] classpath = classpathAndModulepath[0];
 			String[] modulepath = classpathAndModulepath[1];
 
-			if (junitVersion == JUnitVersion.JUNIT5) {
+			if (junitVersion == JUnitVersion.JUNIT5 || junitVersion == JUnitVersion.JUNIT6) {
 				if (!configuration.getAttribute(
 						JUnitLaunchConfigurationConstants.ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY, false)) {
 					if (!Arrays.stream(classpath).anyMatch(
@@ -369,7 +369,8 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 						IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
 			}
 			JUnitVersion junitVersion = getJUnitVersion(configuration);
-			if (junitVersion != JUnitVersion.JUNIT5 && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+			if (junitVersion != JUnitVersion.JUNIT5 && junitVersion != JUnitVersion.JUNIT6
+					&& !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 				abort(Messages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null,
 						IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
@@ -470,7 +471,8 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		boolean isModularProject = JavaRuntime.isModularProject(getJavaProject(configuration));
 		String addOpensTargets;
 		if (isModularProject) {
-			if (getJUnitVersion(configuration) == JUnitVersion.JUNIT5) {
+			JUnitVersion jUnitVersion = getJUnitVersion(configuration);
+			if (jUnitVersion == JUnitVersion.JUNIT5 || jUnitVersion == JUnitVersion.JUNIT6) {
 				if (isOnModulePath(getJavaProject(configuration), "org.junit.jupiter.api.Test")) { //$NON-NLS-1$
 					addOpensTargets = "org.junit.platform.commons,ALL-UNNAMED"; //$NON-NLS-1$
 				} else {

@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -53,12 +53,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>It also checks the expression is passive.</li>
  * </ul>
  */
-public class EvaluateNullableCleanUp extends AbstractMultiFix implements ICleanUpFix {
-	public EvaluateNullableCleanUp() {
+public class EvaluateNullableCleanUpCore extends AbstractMultiFix implements ICleanUpFix {
+	public EvaluateNullableCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public EvaluateNullableCleanUp(final Map<String, String> options) {
+	public EvaluateNullableCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}
 
@@ -167,7 +167,7 @@ public class EvaluateNullableCleanUp extends AbstractMultiFix implements ICleanU
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.EvaluateNullableCleanUp_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.EvaluateNullableCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 

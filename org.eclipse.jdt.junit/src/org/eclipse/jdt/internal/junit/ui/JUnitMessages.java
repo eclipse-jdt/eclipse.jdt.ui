@@ -65,6 +65,7 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitAddLibraryProposa_junit4_label;
 	public static String JUnitAddLibraryProposa_junit5_label;
+	public static String JUnitAddLibraryProposa_junit6_label;
 
 	public static String JUnitAddLibraryProposal_info;
 	public static String JUnitAddLibraryProposal_title;
@@ -72,6 +73,7 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitAddLibraryProposal_junit4_info;
 	public static String JUnitAddLibraryProposal_junit5_info;
+	public static String JUnitAddLibraryProposal_junit6_info;
 	public static String JUnitAddLibraryProposal_label;
 
 	public static String JUnitContainerWizardPage_combo_label;

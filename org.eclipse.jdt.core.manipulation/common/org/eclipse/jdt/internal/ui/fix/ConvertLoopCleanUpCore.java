@@ -28,13 +28,13 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class ConvertLoopCleanUp extends AbstractCleanUp {
+public class ConvertLoopCleanUpCore extends AbstractCleanUp {
 
-	public ConvertLoopCleanUp(Map<String, String> options) {
+	public ConvertLoopCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
-	public ConvertLoopCleanUp() {
+	public ConvertLoopCleanUpCore() {
 		super();
 	}
 

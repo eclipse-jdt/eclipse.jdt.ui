@@ -161,7 +161,6 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnit6PlatformLauncherLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit6PlatformSuiteApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit6PlatformSuiteEngineLibraryEntry());
-			entriesList.add(BuildPathSupport.getJUnit6PlatformSuiteCommonsLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
 			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());

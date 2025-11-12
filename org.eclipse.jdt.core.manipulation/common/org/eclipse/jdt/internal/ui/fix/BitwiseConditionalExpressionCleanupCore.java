@@ -35,7 +35,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -50,12 +50,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  *
  * @see <a href="http://findbugs.sourceforge.net/bugDescriptions.html#BIT_SIGNED_CHECK">FindBugs:BIT_SIGNED_CHECK</a>
  */
-public class BitwiseConditionalExpressionCleanup extends AbstractMultiFix {
-	public BitwiseConditionalExpressionCleanup() {
+public class BitwiseConditionalExpressionCleanupCore extends AbstractMultiFix {
+	public BitwiseConditionalExpressionCleanupCore() {
 		this(Collections.emptyMap());
 	}
 
-	public BitwiseConditionalExpressionCleanup(Map<String, String> options) {
+	public BitwiseConditionalExpressionCleanupCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -140,7 +140,7 @@ public class BitwiseConditionalExpressionCleanup extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.CheckSignOfBitwiseOperation_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.CheckSignOfBitwiseOperation_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
