@@ -146,7 +146,7 @@ public class GetterSetterCorrectionSubProcessor extends GetterSetterCorrectionBa
 		new GetterSetterCorrectionSubProcessor().addGetterSetterProposals(context, location, proposals, relevance);
 	}
 
-	private GetterSetterCorrectionSubProcessor() {
+	public GetterSetterCorrectionSubProcessor() {
 		super();
 	}
 

@@ -60,6 +60,10 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 
+	public AssignToVariableAssistProposal(AssignToVariableAssistProposalCore core) {
+		super("", core.getCompilationUnit(), null, core.getRelevance(), null, core); //$NON-NLS-1$
+	}
+
 	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance) {
 		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new AssignToVariableAssistProposalCore(cu, parameter, existingFragment, typeBinding, relevance, false)); //$NON-NLS-1$
 	}
