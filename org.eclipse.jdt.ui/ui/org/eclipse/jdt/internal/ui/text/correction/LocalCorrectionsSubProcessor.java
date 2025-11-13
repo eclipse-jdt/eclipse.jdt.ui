@@ -21,7 +21,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +31,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -56,7 +52,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
@@ -82,7 +77,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -116,15 +110,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
-import org.eclipse.jdt.internal.corext.fix.RenameUnusedVariableFixCore;
-import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
@@ -142,15 +132,14 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.ChangeDescription;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConstructorFromSuperclassProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConstructorFromSuperclassProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateNewObjectProposal;
@@ -186,8 +175,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcessor<ICommandAccess>{
 
 	private static final String RAW_TYPE_REFERENCE_ID= "org.eclipse.jdt.ui.correction.rawTypeReference"; //$NON-NLS-1$
-
-	private static final String ADD_STATIC_ACCESS_ID= "org.eclipse.jdt.ui.correction.changeToStatic"; //$NON-NLS-1$
 
 	public static void addUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		new LocalCorrectionsSubProcessor().getUncaughtExceptionProposals(context, problem, proposals);
@@ -234,40 +221,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	 * Fix instance accesses and indirect (static) accesses to fields/methods
 	 */
 	public static void addCorrectAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
-		IProposableFix fix= CodeStyleFixCore.createIndirectAccessToStaticFix(context.getASTRoot(), problem);
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-
-		if (fix != null) {
-			Map<String, String> options= new HashMap<>();
-			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
-			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUpCore(options), IProposalRelevance.CREATE_INDIRECT_ACCESS_TO_STATIC, image, context);
-			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
-			proposals.add(proposal);
-			return;
-		}
-
-		IProposableFix[] fixes= CodeStyleFixCore.createNonStaticAccessFixes(context.getASTRoot(), problem);
-		if (fixes != null) {
-			IProposableFix fix1= fixes[0];
-			Map<String, String> options= new HashMap<>();
-			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
-			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleCleanUpCore(options), IProposalRelevance.CREATE_NON_STATIC_ACCESS_USING_DECLARING_TYPE, image, context);
-			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
-			proposals.add(proposal);
-
-			if (fixes.length > 1) {
-				Map<String, String> options1= new HashMap<>();
-				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
-				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpOptions.TRUE);
-				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
-				IProposableFix fix2= fixes[1];
-				proposal= new FixCorrectionProposal(fix2, new CodeStyleCleanUpCore(options1), IProposalRelevance.CREATE_NON_STATIC_ACCESS_USING_INSTANCE_TYPE, image, context);
-				proposals.add(proposal);
-			}
-		}
-		ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessorCore.TO_NON_STATIC, IProposalRelevance.REMOVE_STATIC_MODIFIER);
+		new LocalCorrectionsSubProcessor().getCorrectAccessToStaticProposals(context, problem, proposals, new ModifierCorrectionSubProcessor());
 	}
 
 	public static void addUnimplementedMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -295,65 +249,16 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		int problemId= problem.getProblemId();
-		if (JavaModelUtil.is22OrHigher(context.getCompilationUnit().getJavaProject()) &&
-				(problemId == IProblem.LocalVariableIsNeverUsed || problemId == IProblem.LambdaParameterIsNeverUsed)) {
-			RenameUnusedVariableFixCore fix= RenameUnusedVariableFixCore.createRenameToUnnamedFix(context.getASTRoot(), problem);
-			if (fix != null) {
-				addRenameProposal(context, proposals, fix);
-				return;
-			}
-		}
-		if (problemId == IProblem.LambdaParameterIsNeverUsed) {
-			return;
-		}
-		UnusedCodeFixCore fix= UnusedCodeFixCore.createUnusedMemberFix(context.getASTRoot(), problem, false);
-		if (fix != null) {
-			addProposal(context, proposals, fix);
-		}
-
-		if (problemId == IProblem.LocalVariableIsNeverUsed) {
-			fix= UnusedCodeFixCore.createUnusedMemberFix(context.getASTRoot(), problem, true);
-			addProposal(context, proposals, fix);
-		}
-
-		if (problemId == IProblem.ArgumentIsNeverUsed) {
-			addProposal(context, proposals, UnusedCodeFixCore.createUnusedParameterFix(context.getASTRoot(), problem));
-			JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problem, proposals);
-		}
-
-		if (problemId == IProblem.UnusedPrivateField) {
-			GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, IProposalRelevance.GETTER_SETTER_UNUSED_PRIVATE_FIELD);
-		}
+		new LocalCorrectionsSubProcessor().getUnusedMemberProposal(context, problem, proposals,
+				new JavadocTagsSubProcessor(), new GetterSetterCorrectionSubProcessor());
 	}
 
 	public static void addUnusedTypeParameterProposal(IInvocationContext context, IProblemLocation problemLoc, Collection<ICommandAccess> proposals) {
-		UnusedCodeFixCore fix= UnusedCodeFixCore.createUnusedTypeParameterFix(context.getASTRoot(), problemLoc);
-		if (fix != null) {
-			addProposal(context, proposals, fix);
-		}
-
-		JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problemLoc, proposals);
+		new LocalCorrectionsSubProcessor().getUnusedTypeParameterProposal(context, problemLoc, proposals, new JavadocTagsSubProcessor());
 	}
 
 	public static void addRedundantSuperInterfaceProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new LocalCorrectionsSubProcessor().getRedundantSuperInterfaceProposal(context, problem, proposals);
-	}
-
-	private static void addProposal(IInvocationContext context, Collection<ICommandAccess> proposals, final UnusedCodeFixCore fix) {
-		if (fix != null) {
-			Image image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), IProposalRelevance.UNUSED_MEMBER, image, context);
-			proposals.add(proposal);
-		}
-	}
-
-	private static void addRenameProposal(IInvocationContext context, Collection<ICommandAccess> proposals, final RenameUnusedVariableFixCore fix) {
-		if (fix != null) {
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LINKED_RENAME);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), IProposalRelevance.UNUSED_MEMBER, image, context);
-			proposals.add(proposal);
-		}
 	}
 
 	public static void addSuperfluousSemicolonProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -373,30 +278,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	public static void addUnnecessaryThrownExceptionProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		selectedNode= ASTNodes.getNormalizedNode(selectedNode);
-		if (selectedNode == null || selectedNode.getLocationInParent() != MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
-			return;
-		}
-		MethodDeclaration decl= (MethodDeclaration) selectedNode.getParent();
-		IMethodBinding binding= decl.resolveBinding();
-		if (binding != null) {
-			List<Type> thrownExceptions= decl.thrownExceptionTypes();
-			int index= thrownExceptions.indexOf(selectedNode);
-			if (index == -1) {
-				return;
-			}
-			ChangeDescription[] desc= new ChangeDescription[thrownExceptions.size()];
-			desc[index]= new RemoveDescription();
-
-			ICompilationUnit cu= context.getCompilationUnit();
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_unnecessarythrow_description;
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-
-			proposals.add(new ChangeMethodSignatureProposal(label, cu, selectedNode, binding, null, desc, IProposalRelevance.UNNECESSARY_THROW, image));
-		}
-
-		JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problem, proposals);
+		new LocalCorrectionsSubProcessor().getUnnecessaryThrownExceptionProposal(context, problem, proposals, new JavadocTagsSubProcessor());
 	}
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -455,126 +337,12 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	public static void getInvalidOperatorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		CompilationUnit root= context.getASTRoot();
-		AST ast= root.getAST();
-
-		ASTNode selectedNode= ASTNodes.getUnparenthesedExpression(problem.getCoveringNode(root));
-
-		if (selectedNode instanceof PrefixExpression) {
-			// !x instanceof X -> !(x instanceof X)
-
-			PrefixExpression expression= (PrefixExpression) selectedNode;
-			if (expression.getOperator() == PrefixExpression.Operator.NOT) {
-				ASTNode parent= expression.getParent();
-
-				String label= null;
-				switch (parent.getNodeType()) {
-					case ASTNode.INSTANCEOF_EXPRESSION:
-						label= CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_instanceof_description;
-						break;
-					case ASTNode.INFIX_EXPRESSION:
-						InfixExpression infixExpression= (InfixExpression) parent;
-						label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_description, infixExpression.getOperator().toString());
-						break;
-				}
-
-				if (label != null) {
-					ASTRewrite rewrite= ASTRewrite.create(ast);
-					rewrite.replace(selectedNode, rewrite.createMoveTarget(expression.getOperand()), null);
-
-					ParenthesizedExpression newParentExpr= ast.newParenthesizedExpression();
-					newParentExpr.setExpression((Expression) rewrite.createMoveTarget(parent));
-					PrefixExpression newPrefixExpr= ast.newPrefixExpression();
-					newPrefixExpr.setOperand(newParentExpr);
-					newPrefixExpr.setOperator(PrefixExpression.Operator.NOT);
-
-					rewrite.replace(parent, newPrefixExpr, null);
-
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INVALID_OPERATOR, image);
-					proposals.add(proposal);
-				}
-			}
-		} else if (selectedNode instanceof InfixExpression && isBitOperation((((InfixExpression) selectedNode).getOperator()))) {
-			// a & b == c -> (a & b) == c
-			final CompareInBitWiseOpFinder opFinder= new CompareInBitWiseOpFinder(selectedNode);
-			if (opFinder.getCompareExpression() != null) { // compare operation inside bit operations: set parents
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_bitop_description;
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
-				CUCorrectionProposal proposal= new CUCorrectionProposal(label, context.getCompilationUnit(), IProposalRelevance.INVALID_OPERATOR, image) {
-					@Override
-					protected boolean useDelegateToCreateTextChange() {
-						return false;
-					}
-
-					@Override
-					protected void addEdits(IDocument document, TextEdit edit) throws CoreException {
-						InfixExpression compareExpression= opFinder.getCompareExpression();
-						InfixExpression expression= opFinder.getParentInfixExpression();
-						ASTNode left= compareExpression.getLeftOperand();
-						if (expression.getStartPosition() < left.getStartPosition()) {
-							edit.addChild(new InsertEdit(expression.getStartPosition(), String.valueOf('(')));
-							edit.addChild(new InsertEdit(ASTNodes.getExclusiveEnd(left), String.valueOf(')')));
-						}
-						ASTNode rigth= compareExpression.getRightOperand();
-						int selEnd= ASTNodes.getExclusiveEnd(expression);
-						if (selEnd > ASTNodes.getExclusiveEnd(rigth)) {
-							edit.addChild(new InsertEdit(rigth.getStartPosition(), String.valueOf('(')));
-							edit.addChild(new InsertEdit(selEnd, String.valueOf(')')));
-						}
-					}
-				};
-				proposals.add(proposal);
-			}
-		}
-	}
-
-	private static boolean isBitOperation(InfixExpression.Operator op) {
-		return op == InfixExpression.Operator.AND || op == InfixExpression.Operator.OR || op == InfixExpression.Operator.XOR;
-	}
-
-	private static class CompareInBitWiseOpFinder extends ASTVisitor {
-
-		private InfixExpression fCompareExpression= null;
-
-		private final ASTNode fSelectedNode;
-
-		public CompareInBitWiseOpFinder(ASTNode selectedNode) {
-			fSelectedNode= selectedNode;
-			selectedNode.accept(this);
-		}
-
-		@Override
-		public boolean visit(InfixExpression e) {
-			InfixExpression.Operator op= e.getOperator();
-			if (isBitOperation(op)) {
-				return true;
-			} else if (op == InfixExpression.Operator.EQUALS || op == InfixExpression.Operator.NOT_EQUALS) {
-				fCompareExpression= e;
-				return false;
-			}
-			return false;
-		}
-
-		public InfixExpression getCompareExpression() {
-			return fCompareExpression;
-		}
-
-		public InfixExpression getParentInfixExpression() {
-			ASTNode expr= fSelectedNode;
-			ASTNode parent= expr.getParent(); // include all parents
-			while (parent instanceof InfixExpression && isBitOperation(((InfixExpression) parent).getOperator())) {
-				expr= parent;
-				parent= expr.getParent();
-			}
-			return (InfixExpression) expr;
-		}
+		new LocalCorrectionsSubProcessor().getInvalidOperatorProposalsBase(context, problem, proposals);
 	}
 
 	public static void getUnnecessaryElseProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new LocalCorrectionsSubProcessor().getUnnecessaryElseProposalsBase(context, problem, proposals);
 	}
-
 
 	public static void getInterfaceExtendsClassProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new LocalCorrectionsSubProcessor().getInterfaceExtendsClassProposalsBase(context, problem, proposals);
@@ -893,8 +661,11 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 			}
 
 		}
+		getAssignToVariableProposals(context, selectedNode, null, proposals);
+	}
 
-		QuickAssistProcessor.getAssignToVariableProposals(context, selectedNode, null, proposals);
+	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+		return new LocalCorrectionsSubProcessor().getAssignToVariableProposalsBase(context, node, locations, resultingCollections);
 	}
 
 	public static void getAssignmentHasNoEffectProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -1287,18 +1058,23 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	@Override
+	protected ICommandAccess assignToVariableAssistProposalToT(AssignToVariableAssistProposalCore core) {
+		return new AssignToVariableAssistProposal(core);
+	}
+
+	@Override
 	protected ICommandAccess fixCorrectionProposalToT(FixCorrectionProposalCore core, int uid) {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		switch (uid) {
 			case STATIC_INDIRECT_ACCESS, STATIC_NON_STATIC_ACCESS_USING_TYPE,
 				STATIC_INSTANCE_ACCESS, REMOVE_UNNECESSARY_CAST, UNQUALIFIED_FIELD_ACCESS,
-				ADD_UNIMPLEMENTED_METHODS -> {
+				ADD_UNIMPLEMENTED_METHODS, ADD_STATIC_ACCESS -> {
 				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			}
-			case UNUSED_CODE, REMOVE_REDUNDANT_TYPE_ARGS, REMOVE_UNNECESSARY_NLS -> {
+			case UNUSED_CODE, REMOVE_REDUNDANT_TYPE_ARGS, REMOVE_UNNECESSARY_NLS, DELETE_ID -> {
 				image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 			}
-			case RENAME_CODE -> {
+			case RENAME_CODE, RENAME_ID -> {
 				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LINKED_RENAME);
 			}
 			case ADD_NLS -> {
@@ -1335,6 +1111,9 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 			case REMOVE_REDUNDANT_SUPERINTERFACE, REMOVE_PROPOSAL -> {
 				image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 			}
+			case INVALID_OPERATOR -> {
+				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
+			}
 			case REMOVE_UNNECESSARY_INSTANCEOF, UNQUALIFY_ENUM_CONSTANT,
 				MOVE_ELSE_CLAUSE, CHANGE_EXTENDS_TO_IMPLEMENTS, CHANGE_TO_INTERFACE,
 				CHANGE_CODE, INSERT_BREAK_STATEMENT, INSERT_FALL_THROUGH, INSERT_CASES_OMITTED,
@@ -1360,6 +1139,9 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 		switch (uid) {
 			case ADD_PERMITTED_TYPE, ADD_SEALED_SUPERTYPE -> {
 				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+			}
+			case INVALID_OPERATOR -> {
+				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
 			}
 		}
 		try {
