@@ -62,6 +62,14 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	public AssignToVariableAssistProposal(AssignToVariableAssistProposalCore core) {
 		super("", core.getCompilationUnit(), null, core.getRelevance(), null, core); //$NON-NLS-1$
+		int variableKind= core.getVariableKind();
+		if (variableKind == LOCAL) {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
+		} else if (variableKind == FIELD) {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
+		} else {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+		}
 	}
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance) {
