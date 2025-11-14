@@ -45,11 +45,9 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -77,10 +75,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -88,7 +83,6 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -102,7 +96,6 @@ import org.eclipse.jdt.core.manipulation.CUCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecker;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
@@ -114,8 +107,6 @@ import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.actions.GenerateHashCodeEqualsAction;
@@ -150,9 +141,12 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateVariableRefer
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateVariableReferenceProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposal;
@@ -163,6 +157,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.NewLocalVariableCor
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewProviderMethodDeclaration;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewProviderMethodDeclarationCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
@@ -286,54 +281,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	public static void addInvalidVariableNameProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		// hiding, redefined or future keyword
-
-		CompilationUnit root= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveringNode(root);
-		if (selectedNode instanceof MethodDeclaration methodDeclaration) {
-			if (methodDeclaration.isConstructor()) {
-				addRemoveProposal(context, methodDeclaration, proposals);
-				return;
-			}
-			selectedNode= methodDeclaration.getName();
-		}
-		if (!(selectedNode instanceof SimpleName)) {
-			return;
-		}
-		SimpleName nameNode= (SimpleName) selectedNode;
-		String valueSuggestion= null;
-
-		String name;
-		switch (problem.getProblemId()) {
-			case IProblem.LocalVariableHidingLocalVariable:
-			case IProblem.LocalVariableHidingField:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_local_label, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
-				break;
-			case IProblem.FieldHidingLocalVariable:
-			case IProblem.FieldHidingField:
-			case IProblem.DuplicateField:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_field_label, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
-				break;
-			case IProblem.ArgumentHidingLocalVariable:
-			case IProblem.ArgumentHidingField:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_argument_label, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
-				break;
-			case IProblem.DuplicateMethod:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_renaming_duplicate_method, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
-				break;
-
-			default:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_rename_var_label, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
-		}
-
-		if (problem.getProblemId() == IProblem.UseEnumAsAnIdentifier) {
-			valueSuggestion= "enumeration"; //$NON-NLS-1$
-		} else {
-			valueSuggestion= nameNode.getIdentifier() + '1';
-		}
-
-		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name, context, nameNode, valueSuggestion);
-		proposals.add(proposal);
+		new LocalCorrectionsSubProcessor().getInvalidVariableNameProposals(context, problem, proposals);
 	}
 
 	public static void getInvalidOperatorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -591,77 +539,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	public static void getUnusedObjectAllocationProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		CompilationUnit root= context.getASTRoot();
-		AST ast= root.getAST();
-		ASTNode selectedNode= problem.getCoveringNode(root);
-		if (selectedNode == null) {
-			return;
-		}
-
-		ASTNode parent= selectedNode.getParent();
-
-		if (parent instanceof ExpressionStatement) {
-			ExpressionStatement expressionStatement= (ExpressionStatement) parent;
-			Expression expr= expressionStatement.getExpression();
-			ITypeBinding exprType= expr.resolveTypeBinding();
-
-			if (exprType != null && Bindings.isSuperType(ast.resolveWellKnownType("java.lang.Throwable"), exprType)) { //$NON-NLS-1$
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-				TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
-				rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
-
-				ThrowStatement throwStatement= ast.newThrowStatement();
-				throwStatement.setExpression((Expression) rewrite.createMoveTarget(expr));
-				sourceRangeComputer.addTightSourceNode(expressionStatement);
-				rewrite.replace(expressionStatement, throwStatement, null);
-
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_throw_allocated_description;
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.THROW_ALLOCATED_OBJECT, image);
-				proposal.setEndPosition(rewrite.track(throwStatement));
-				proposals.add(proposal);
-			}
-
-			MethodDeclaration method= ASTResolving.findParentMethodDeclaration(selectedNode);
-			if (method != null && !method.isConstructor()) {
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-				TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
-				rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
-
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression((Expression) rewrite.createMoveTarget(expr));
-				sourceRangeComputer.addTightSourceNode(expressionStatement);
-				rewrite.replace(expressionStatement, returnStatement, null);
-
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_return_allocated_description;
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				int relevance;
-				ITypeBinding returnTypeBinding= method.getReturnType2().resolveBinding();
-				if (returnTypeBinding != null && exprType != null && exprType.isAssignmentCompatible(returnTypeBinding)) {
-					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT_MATCH;
-				} else if (method.getReturnType2() instanceof PrimitiveType
-						&& ((PrimitiveType) method.getReturnType2()).getPrimitiveTypeCode() == PrimitiveType.VOID) {
-					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT_VOID;
-				} else {
-					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT;
-				}
-				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, relevance, image);
-				proposal.setEndPosition(rewrite.track(returnStatement));
-				proposals.add(proposal);
-			}
-
-			{
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-				rewrite.remove(parent, null);
-
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_allocated_description;
-				Image image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_UNUSED_ALLOCATED_OBJECT, image);
-				proposals.add(proposal);
-			}
-
-		}
-		getAssignToVariableProposals(context, selectedNode, null, proposals);
+		new LocalCorrectionsSubProcessor().getUnusedObjectAllocationProposalsBase(context, problem, proposals);
 	}
 
 	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
@@ -985,8 +863,12 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	public static void getGenerateForLoopProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		if (coveringNode != null) {
-			QuickAssistProcessor.getGenerateForLoopProposals(context, coveringNode, null, proposals);
+			getGenerateForLoopProposals(context, coveringNode, null, proposals);
 		}
+	}
+
+	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] problems, Collection<ICommandAccess> proposals) {
+		return new LocalCorrectionsSubProcessor().getGenerateForLoopProposalsBase(context, coveringNode, problems, proposals);
 	}
 
 	public static void getTryWithResourceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -1006,26 +888,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	}
 
 	public static void addServiceProviderProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
-		ASTNode node= problem.getCoveredNode(context.getASTRoot());
-		if (!(node instanceof Name) || !(node.getParent() instanceof ProvidesDirective)) {
-			return;
-		}
-
-		Name name= (Name) node;
-		ProvidesDirective prov= (ProvidesDirective) name.getParent();
-		ITypeBinding targetBinding= name.resolveTypeBinding();
-		ITypeBinding serviceBinding= prov.getName().resolveTypeBinding();
-		if (targetBinding != null && serviceBinding != null) {
-			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(context.getCompilationUnit(), context.getASTRoot(), targetBinding);
-
-			IJavaProject proj= context.getCompilationUnit().getJavaProject();
-			IType type= proj.findType(serviceBinding.getQualifiedName());
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-			proposals.add(new NewProviderMethodDeclaration(
-					Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_add_provider_method_description, type.getElementName()),
-					targetCU, context.getASTRoot(), targetBinding,
-					IProposalRelevance.CREATE_METHOD, image, type));
-		}
+		new LocalCorrectionsSubProcessor().getServiceProviderProposal(context, problem, proposals);
 	}
 
 	public static void addServiceProviderConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
@@ -1046,7 +909,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 		switch (uid) {
 			case INITIALIZE_VARIABLE, RETURN_ALLOCATED_OBJECT, ADD_MISSING_CASE,
-				CREATE_DEFAULT, ADD_PERMITTED_TYPES -> {
+				CREATE_DEFAULT, ADD_PERMITTED_TYPES, CORRECTION_CHANGE_ID -> {
 				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			}
 			case ADD_OVERRIDE -> {
@@ -1113,7 +976,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 	protected ICommandAccess astRewriteCorrectionProposalToT(ASTRewriteCorrectionProposalCore core, int uid) {
 		Image image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 		switch (uid) {
-			case REMOVE_REDUNDANT_SUPERINTERFACE, REMOVE_PROPOSAL -> {
+			case REMOVE_REDUNDANT_SUPERINTERFACE, REMOVE_PROPOSAL, DELETE_ID -> {
 				image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 			}
 			case INVALID_OPERATOR -> {
@@ -1201,5 +1064,26 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 			}
 		}
 		return new ModifierChangeCorrectionProposal(core, image);
+	}
+
+	@Override
+	protected ICommandAccess newProviderMethodDeclarationProposalToT(NewProviderMethodDeclarationCore core, int uid) {
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+		switch (uid) {
+			case MISC_PUBLIC_ID -> {
+				image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+			}
+		}
+		return new NewProviderMethodDeclaration(core, image);
+	}
+
+	@Override
+	protected ICommandAccess generateForLoopAssistProposalToT(GenerateForLoopAssistProposalCore core) {
+		return new GenerateForLoopAssistProposal(core);
+	}
+
+	@Override
+	protected ICommandAccess linkedNamesAssistProposalToT(LinkedNamesAssistProposalCore core) {
+		return new LinkedNamesAssistProposal(core.getLabel(), core.getContext(), core.getNode(), core.getValueSuggestion());
 	}
 }
