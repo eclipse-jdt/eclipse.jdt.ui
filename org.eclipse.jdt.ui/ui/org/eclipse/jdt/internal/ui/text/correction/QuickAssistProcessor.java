@@ -226,6 +226,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.AddStaticFavoritePr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConvertFieldNamingConventionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
@@ -3029,8 +3030,57 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
-		return LocalCorrectionsSubProcessor.getGenerateForLoopProposals(context, coveringNode, locations, resultingCollections);
+	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, @SuppressWarnings("unused") IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+//		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
+//			return false;
+
+		Statement statement= ASTResolving.findParentStatement(coveringNode);
+		if (!(statement instanceof ExpressionStatement)) {
+			return false;
+		}
+
+		ExpressionStatement expressionStatement= (ExpressionStatement) statement;
+		Expression expression= expressionStatement.getExpression();
+		if (expression instanceof Assignment) {
+			Assignment assignment= (Assignment) expression;
+			Expression leftHandSide= assignment.getLeftHandSide();
+			if (leftHandSide instanceof FieldAccess && leftHandSide.getStartPosition() == assignment.getStartPosition() && leftHandSide.getLength() == assignment.getLength()) {
+				// "this.fieldname" recovered as "this.fieldname = $missing$"
+				expression= leftHandSide;
+			}
+		}
+		ITypeBinding expressionType= null;
+		if (expression instanceof MethodInvocation
+				|| expression instanceof SimpleName
+				|| expression instanceof FieldAccess
+				|| expression instanceof QualifiedName) {
+			expressionType= expression.resolveTypeBinding();
+		} else {
+			return false;
+		}
+
+		if (expressionType == null)
+			return false;
+
+		ICompilationUnit cu= context.getCompilationUnit();
+		if (Bindings.findTypeInHierarchy(expressionType, "java.lang.Iterable") != null) { //$NON-NLS-1$
+			if (resultingCollections == null)
+				return true;
+			resultingCollections.add(new GenerateForLoopAssistProposal(cu, expressionStatement, GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR));
+			if (Bindings.findTypeInHierarchy(expressionType, "java.util.List") != null) { //$NON-NLS-1$
+				resultingCollections.add(new GenerateForLoopAssistProposal(cu, expressionStatement, GenerateForLoopAssistProposal.GENERATE_ITERATE_LIST));
+			}
+		} else if (expressionType.isArray()) {
+			if (resultingCollections == null)
+				return true;
+			resultingCollections.add(new GenerateForLoopAssistProposal(cu, expressionStatement, GenerateForLoopAssistProposal.GENERATE_ITERATE_ARRAY));
+		} else {
+			return false;
+		}
+
+		resultingCollections.add(new GenerateForLoopAssistProposal(cu, expressionStatement, GenerateForLoopAssistProposal.GENERATE_FOREACH));
+
+		return true;
 	}
 
 	private static ForStatement getEnclosingForStatementHeader(ASTNode node) {
