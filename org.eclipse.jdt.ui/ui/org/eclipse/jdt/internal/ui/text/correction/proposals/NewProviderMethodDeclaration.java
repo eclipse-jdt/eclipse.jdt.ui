@@ -55,6 +55,10 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 		this.fReturnType= returnType;
 	}
 
+	public NewProviderMethodDeclaration(NewProviderMethodDeclarationCore core, Image image) {
+		super(core.getName(), core.getCompilationUnit(), core.getRelevance(), image, core);
+	}
+
 	@Override
 	protected void performChange(IEditorPart part, IDocument document) throws CoreException {
 		// Should this really be done in the UI api call and not in the core API call?
