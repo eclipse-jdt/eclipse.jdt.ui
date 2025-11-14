@@ -77,7 +77,6 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -145,7 +144,6 @@ import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatch
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.SurroundWithAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -171,13 +169,11 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateNewObjectProp
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateObjectReferenceProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CreateVariableReferenceProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewLocalVariableCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposalCore;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.NewProviderMethodDeclarationCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposalCore;
@@ -261,8 +257,6 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	public static final int DELETE_ID= 0x412;
 	public static final int RENAME_ID= 0x413;
 	public static final int INVALID_OPERATOR= 0x414;
-	public static final int CORRECTION_CHANGE_ID=0x415;
-	public static final int MISC_PUBLIC_ID=0x416;
 
 	private static class CompareInBitWiseOpFinder extends ASTVisitor {
 
@@ -304,100 +298,6 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 
 	private static boolean isBitOperation(InfixExpression.Operator op) {
 		return op == InfixExpression.Operator.AND || op == InfixExpression.Operator.OR || op == InfixExpression.Operator.XOR;
-	}
-
-	public void getServiceProviderProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
-		ASTNode node= problem.getCoveredNode(context.getASTRoot());
-		if (!(node instanceof Name) || !(node.getParent() instanceof ProvidesDirective)) {
-			return;
-		}
-
-		Name name= (Name) node;
-		ProvidesDirective prov= (ProvidesDirective) name.getParent();
-		ITypeBinding targetBinding= name.resolveTypeBinding();
-		ITypeBinding serviceBinding= prov.getName().resolveTypeBinding();
-		if (targetBinding != null && serviceBinding != null) {
-			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(context.getCompilationUnit(), context.getASTRoot(), targetBinding);
-
-			IJavaProject proj= context.getCompilationUnit().getJavaProject();
-			IType type= proj.findType(serviceBinding.getQualifiedName());
-			NewProviderMethodDeclarationCore proposal= new NewProviderMethodDeclarationCore(
-					Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_add_provider_method_description, type.getElementName()),
-					targetCU, context.getASTRoot(), targetBinding,
-					IProposalRelevance.CREATE_METHOD, type);
-			proposals.add(newProviderMethodDeclarationProposalToT(proposal, MISC_PUBLIC_ID));
-		}
-	}
-
-	public void getUnusedObjectAllocationProposalsBase(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
-		CompilationUnit root= context.getASTRoot();
-		AST ast= root.getAST();
-		ASTNode selectedNode= problem.getCoveringNode(root);
-		if (selectedNode == null) {
-			return;
-		}
-
-		ASTNode parent= selectedNode.getParent();
-
-		if (parent instanceof ExpressionStatement) {
-			ExpressionStatement expressionStatement= (ExpressionStatement) parent;
-			Expression expr= expressionStatement.getExpression();
-			ITypeBinding exprType= expr.resolveTypeBinding();
-
-			if (exprType != null && Bindings.isSuperType(ast.resolveWellKnownType("java.lang.Throwable"), exprType)) { //$NON-NLS-1$
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-				TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
-				rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
-
-				ThrowStatement throwStatement= ast.newThrowStatement();
-				throwStatement.setExpression((Expression) rewrite.createMoveTarget(expr));
-				sourceRangeComputer.addTightSourceNode(expressionStatement);
-				rewrite.replace(expressionStatement, throwStatement, null);
-
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_throw_allocated_description;
-				LinkedCorrectionProposalCore proposal= new LinkedCorrectionProposalCore(label, context.getCompilationUnit(), rewrite, IProposalRelevance.THROW_ALLOCATED_OBJECT);
-				proposal.setEndPosition(rewrite.track(throwStatement));
-				proposals.add(linkedCorrectionProposalToT(proposal, CORRECTION_CHANGE_ID));
-			}
-
-			MethodDeclaration method= ASTResolving.findParentMethodDeclaration(selectedNode);
-			if (method != null && !method.isConstructor()) {
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-				TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
-				rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
-
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression((Expression) rewrite.createMoveTarget(expr));
-				sourceRangeComputer.addTightSourceNode(expressionStatement);
-				rewrite.replace(expressionStatement, returnStatement, null);
-
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_return_allocated_description;
-				int relevance;
-				ITypeBinding returnTypeBinding= method.getReturnType2().resolveBinding();
-				if (returnTypeBinding != null && exprType != null && exprType.isAssignmentCompatible(returnTypeBinding)) {
-					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT_MATCH;
-				} else if (method.getReturnType2() instanceof PrimitiveType
-						&& ((PrimitiveType) method.getReturnType2()).getPrimitiveTypeCode() == PrimitiveType.VOID) {
-					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT_VOID;
-				} else {
-					relevance= IProposalRelevance.RETURN_ALLOCATED_OBJECT;
-				}
-				LinkedCorrectionProposalCore proposal= new LinkedCorrectionProposalCore(label, context.getCompilationUnit(), rewrite, relevance);
-				proposal.setEndPosition(rewrite.track(returnStatement));
-				proposals.add(linkedCorrectionProposalToT(proposal, CORRECTION_CHANGE_ID));
-			}
-
-			{
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-				rewrite.remove(parent, null);
-
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_allocated_description;
-				ASTRewriteCorrectionProposalCore proposal= new ASTRewriteCorrectionProposalCore(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_UNUSED_ALLOCATED_OBJECT);
-				proposals.add(astRewriteCorrectionProposalToT(proposal, DELETE_ID));
-			}
-
-		}
-		getAssignToVariableProposalsBase(context, selectedNode, null, proposals);
 	}
 
 	public boolean getAssignToVariableProposalsBase(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<T> resultingCollections) {
@@ -463,63 +363,6 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 		}
 		return false;
 	}
-
-	public boolean getGenerateForLoopProposalsBase(IInvocationContext context, ASTNode coveringNode, @SuppressWarnings("unused") IProblemLocation[] locations, Collection<T> resultingCollections) {
-//		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
-//			return false;
-
-		Statement statement= ASTResolving.findParentStatement(coveringNode);
-		if (!(statement instanceof ExpressionStatement)) {
-			return false;
-		}
-
-		ExpressionStatement expressionStatement= (ExpressionStatement) statement;
-		Expression expression= expressionStatement.getExpression();
-		if (expression instanceof Assignment) {
-			Assignment assignment= (Assignment) expression;
-			Expression leftHandSide= assignment.getLeftHandSide();
-			if (leftHandSide instanceof FieldAccess && leftHandSide.getStartPosition() == assignment.getStartPosition() && leftHandSide.getLength() == assignment.getLength()) {
-				// "this.fieldname" recovered as "this.fieldname = $missing$"
-				expression= leftHandSide;
-			}
-		}
-		ITypeBinding expressionType= null;
-		if (expression instanceof MethodInvocation
-				|| expression instanceof SimpleName
-				|| expression instanceof FieldAccess
-				|| expression instanceof QualifiedName) {
-			expressionType= expression.resolveTypeBinding();
-		} else {
-			return false;
-		}
-
-		if (expressionType == null)
-			return false;
-
-		ICompilationUnit cu= context.getCompilationUnit();
-		if (Bindings.findTypeInHierarchy(expressionType, "java.lang.Iterable") != null) { //$NON-NLS-1$
-			if (resultingCollections == null)
-				return true;
-			GenerateForLoopAssistProposalCore proposal= new GenerateForLoopAssistProposalCore(cu, expressionStatement, GenerateForLoopAssistProposalCore.GENERATE_ITERATOR_FOR);
-			resultingCollections.add(generateForLoopAssistProposalToT(proposal));
-			if (Bindings.findTypeInHierarchy(expressionType, "java.util.List") != null) { //$NON-NLS-1$
-				proposal= new GenerateForLoopAssistProposalCore(cu, expressionStatement, GenerateForLoopAssistProposalCore.GENERATE_ITERATE_LIST);
-				resultingCollections.add(generateForLoopAssistProposalToT(proposal));
-			}
-		} else if (expressionType.isArray()) {
-			if (resultingCollections == null)
-				return true;
-			GenerateForLoopAssistProposalCore proposal= new GenerateForLoopAssistProposalCore(cu, expressionStatement, GenerateForLoopAssistProposalCore.GENERATE_ITERATE_ARRAY);
-			resultingCollections.add(generateForLoopAssistProposalToT(proposal));
-		} else {
-			return false;
-		}
-		GenerateForLoopAssistProposalCore proposal= new GenerateForLoopAssistProposalCore(cu, expressionStatement, GenerateForLoopAssistProposalCore.GENERATE_FOREACH);
-		resultingCollections.add(generateForLoopAssistProposalToT(proposal));
-
-		return true;
-	}
-
 
 	public void getInvalidOperatorProposalsBase(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		CompilationUnit root= context.getASTRoot();
@@ -2579,7 +2422,6 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	protected abstract T createNewObjectProposalToT(CreateNewObjectProposalCore core, int uid);
 	protected abstract T createObjectReferenceProposalToT(CreateObjectReferenceProposalCore core, int uid);
 	protected abstract T createVariableReferenceProposalToT(CreateVariableReferenceProposalCore core, int uid);
-	protected abstract T generateForLoopAssistProposalToT(GenerateForLoopAssistProposalCore proposal);
 	protected abstract T astRewriteCorrectionProposalToT(ASTRewriteCorrectionProposalCore core, int uid);
 	protected abstract T replaceCorrectionProposalToT(ReplaceCorrectionProposalCore core, int uid);
 	protected abstract T cuCorrectionProposalToT(CUCorrectionProposalCore core, int uid);
@@ -2588,7 +2430,6 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	protected abstract T newLocalVariableCorrectionProposalToT(NewLocalVariableCorrectionProposalCore core, int uid);
 	protected abstract T missingAnnotationAttributesProposalToT(MissingAnnotationAttributesProposalCore core, int uid);
 	protected abstract T newMethodCorrectionProposalToT(NewMethodCorrectionProposalCore core, int uid);
-	protected abstract T newProviderMethodDeclarationProposalToT(NewProviderMethodDeclarationCore core, int uid);
 	protected abstract T modifierChangeCorrectionProposalToT(ModifierChangeCorrectionProposalCore core, int uid);
 
 }

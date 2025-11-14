@@ -32,10 +32,6 @@ public class NewProviderMethodDeclarationCore extends AbstractMethodCorrectionPr
 		return false;
 	}
 
-	public IType getReturnType() {
-		return this.fReturnType;
-	}
-
 	@Override
 	protected void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers) {
 		modifiers.addAll(rewrite.getAST().newModifiers(Modifier.PUBLIC | Modifier.STATIC));
