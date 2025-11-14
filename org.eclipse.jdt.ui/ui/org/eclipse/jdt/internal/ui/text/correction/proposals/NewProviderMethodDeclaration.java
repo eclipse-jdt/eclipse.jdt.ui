@@ -57,6 +57,7 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 
 	public NewProviderMethodDeclaration(NewProviderMethodDeclarationCore core, Image image) {
 		super(core.getName(), core.getCompilationUnit(), core.getRelevance(), image, core);
+		this.fReturnType= core.getReturnType();
 	}
 
 	@Override
