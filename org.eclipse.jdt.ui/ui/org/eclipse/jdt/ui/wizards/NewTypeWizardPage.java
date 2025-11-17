@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionEvent;
@@ -862,6 +865,30 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		return JavaConventionsUtil.validateJavaTypeName(text, project);
 	}
+
+	/**
+	 * @since 3.37
+	 */
+	protected Composite createScrollableContainer(Composite parent) {
+		ScrolledComposite sc= new ScrolledComposite(parent, SWT.V_SCROLL);
+		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sc.setExpandHorizontal(true);
+		sc.setExpandVertical(true);
+		Composite content= new Composite(sc, SWT.NONE);
+		sc.setContent(content);
+
+		sc.addControlListener(new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				int width= sc.getClientArea().width;
+				content.setSize(content.computeSize(width, SWT.DEFAULT));
+				sc.setMinSize(content.computeSize(width, SWT.DEFAULT));
+			}
+		});
+
+		return content;
+	}
+
 
 	private static IStatus validatePackageName(String text, IJavaProject project) {
 		if (project == null || !project.exists()) {

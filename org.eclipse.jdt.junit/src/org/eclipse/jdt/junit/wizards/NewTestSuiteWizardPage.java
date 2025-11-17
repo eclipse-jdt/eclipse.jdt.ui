@@ -16,6 +16,7 @@
 package org.eclipse.jdt.junit.wizards;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -163,10 +164,12 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		createTypeNameControls(composite, nColumns);
 		createClassesInSuiteControl(composite, nColumns);
 		createMethodStubSelectionControls(composite, nColumns);
-		setControl(composite);
+		ScrolledComposite sc= (ScrolledComposite) composite.getParent();
+		setControl(sc);
 		restoreWidgetValues();
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTSUITE_WIZARD_PAGE);
+		sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	/**
