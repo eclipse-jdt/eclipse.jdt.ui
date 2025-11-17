@@ -24,6 +24,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -470,7 +471,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= createScrollableContainer(parent);
 
 		int nColumns= 4;
 
@@ -488,8 +489,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		createSeparator(composite, nColumns);
 		createClassUnderTestControls(composite, nColumns);
 		createBuildPathConfigureControls(composite, nColumns);
-
-		setControl(composite);
+		ScrolledComposite sc= (ScrolledComposite) composite.getParent();
+		setControl(sc);
 
 		//set default and focus
 		String classUnderTest= getClassUnderTestText();
@@ -502,6 +503,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);
 
 		setFocus();
+		sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	/**
