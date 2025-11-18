@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -531,6 +531,8 @@ public class JavaPluginImages {
 	public static final String IMG_CORRECTION_CAST= NAME_PREFIX + "correction_cast.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_MULTI_FIX= NAME_PREFIX + "correction_multi_fix.gif"; //$NON-NLS-1$
 
+	public static final String IMG_SHOW_DECLARATION = NAME_PREFIX + "show_declaration.svg"; //$NON-NLS-1$
+
 	static {
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_CHANGE);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_MOVE);
@@ -546,6 +548,7 @@ public class JavaPluginImages {
 		createManagedFromKey(T_OBJ, IMG_OBJS_WARNING_ALT);
 		createManagedFromKey(T_OBJ, IMG_OBJS_INFO_ALT);
 		createManagedFromKey(T_OBJ, IMG_BLANK);
+		createManagedFromKey(T_OBJ, IMG_SHOW_DECLARATION);
 	}
 
 	private static class SmallIntMap<V> {
