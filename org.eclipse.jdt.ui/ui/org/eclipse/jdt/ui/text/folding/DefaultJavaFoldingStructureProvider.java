@@ -617,6 +617,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 
 		private void createFoldingRegion(int start, int length, boolean collapse) {
+			includelastLine |= shouldIncludeLastLine(ctx, start + length);
 			createFoldingRegion(start, length, collapse, false);
 		}
 
@@ -1861,10 +1862,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		switch (element.getElementType()) {
 			case IJavaElement.IMPORT_CONTAINER:
 				collapse= ctx.collapseImportContainer();
-				includelastLine= true;
 				break;
 			case IJavaElement.TYPE:
-				collapseCode= includelastLine= isInnerType((IType) element) && !isAnonymousEnum((IType) element);
+				collapseCode= isInnerType((IType) element) && !isAnonymousEnum((IType) element);
 				collapse= ctx.collapseInnerTypes() && collapseCode;
 				break;
 			case IJavaElement.FIELD:
@@ -1905,7 +1905,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 			// code
 			if (collapseCode) {
-				IRegion normalized= alignRegion(regions[regions.length - 1], ctx);
+				IRegion region= regions[regions.length - 1];
+				includelastLine= shouldIncludeLastLine(ctx, region.getOffset() + region.getLength());
+				IRegion normalized= alignRegion(region, ctx);
 				if (normalized != null) {
 					Position position;
 					if (element instanceof IMember) {
@@ -1919,6 +1921,25 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 						ctx.addProjectionRange(new JavaProjectionAnnotation(collapse, element, false), position);
 				}
 			}
+		}
+	}
+
+	private boolean shouldIncludeLastLine(FoldingStructureComputationContext ctx, int regionEnd) {
+		try {
+			IDocument doc= ctx.fDocument;
+			for(int i= regionEnd; i<doc.getLength();i++) {
+				char c = doc.getChar(i);
+				if (c == '\n' || c == '\r') {
+					return true;
+				}
+				if (!Character.isWhitespace(c) && c != ';' && c != ',') {
+					return false;
+				}
+			}
+			return true;
+		}catch (BadLocationException e) {
+			JavaPlugin.log(e);
+			return false;
 		}
 	}
 
