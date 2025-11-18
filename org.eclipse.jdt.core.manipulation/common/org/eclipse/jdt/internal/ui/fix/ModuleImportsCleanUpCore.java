@@ -194,6 +194,9 @@ public class ModuleImportsCleanUpCore extends AbstractCleanUp {
 							node.getParent().getNodeType() != ASTNode.NAME_QUALIFIED_TYPE) {
 						IBinding binding= node.resolveBinding();
 						if (binding instanceof ITypeBinding typeBinding) {
+							if (typeBinding.isParameterizedType()) {
+								typeBinding= typeBinding.getTypeDeclaration();
+							}
 							if (findTypeInModules(typeBinding) == ModuleTypeStatus.NOT_FOUND) {
 								IPackageBinding pkgBinding= typeBinding.getPackage();
 								if (pkgBinding != null
