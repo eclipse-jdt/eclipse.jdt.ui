@@ -3003,7 +3003,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			  public int foo(String x, String ...y) { return y.length + 1; }
 			  public int bar() {
 			      return foo
-			          (/* first */ "a", "b", "c", "d");
+			              (/* first */ "a", "b", "c", "d");
 			  };
 			  public int bar2() {
 			      return foo("a", "b", new String[] {"c", "d"});
@@ -3049,9 +3049,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			  public static class Z extends Y {
 			      public int foo2() {
 			          List<String> list= Arrays.asList("one"/* 1 */
-			              + "one", "two"/* 2 */
-			          + "two", "three"/* 3 */
-			          + "three");
+			                + "one", "two"/* 2 */
+			                + "two", "three"/* 3 */
+			                + "three");
 			          return super.foo("x", "y", "z");
 			      }
 			}
@@ -3233,10 +3233,10 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				public class NLS {
 				    private static final List<String> WHITELISTED_IDS = Arrays
 				                .asList("org.eclipse.search.text.FileSearchResultPage", //$NON-NLS-1$
-				                        "org.eclipse.jdt.ui.JavaSearchResultPage", //$NON-NLS-1$
-				                        "org.eclipse.jdt.ui.CodeGeneration",\s
-				                        "org.eclipse.jdt.ui.ISharedImages", //$NON-NLS-1$
-				                        "org.eclipse.jdt.ui.IWorkingCopyManager"); //$NON-NLS-1$
+				            "org.eclipse.jdt.ui.JavaSearchResultPage", //$NON-NLS-1$
+				            "org.eclipse.jdt.ui.CodeGeneration",\s
+				            "org.eclipse.jdt.ui.ISharedImages", //$NON-NLS-1$
+				            "org.eclipse.jdt.ui.IWorkingCopyManager" ); //$NON-NLS-1$
 				}
 				"""; //
 
@@ -3958,7 +3958,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 					Integer b = 0;
 					Double c = 1.4;
 					foo1("abc", Arrays.asList(a, //$NON-NLS-1$
-			        				b, c));
+			                b, c));
 				}
 
 			}
@@ -4662,5 +4662,153 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		String expected1= sample;
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
     }
+
+	@Test
+	public void testUnnecessaryArrayIssue2513_MethodConflict() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class A {
+			    public static void doNotChangeMethodDispatch() {
+			        bar("d", new Object[] {"e"});
+			    }
+
+			    public static void bar(Object... elements) {
+			    }
+
+			    public static void bar(Object element, Object ...elements) {
+			    }
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayIssue2515_NLS() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class TestNLSUnnecessaryArray {
+				private void func(String a, Object ...list) {
+				}
+				public void foo() {
+					func("a", new Object[] {this, this}); //$NON-NLS-1$
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		String expected= """
+			package test1;
+
+			public class TestNLSUnnecessaryArray {
+				private void func(String a, Object ...list) {
+				}
+				public void foo() {
+					func("a", this, this); //$NON-NLS-1$
+				}
+			}
+			""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
+
+	@Test
+	public void testUnnecessaryArrayIssue2521_NLS() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class TestNLSUnnecessaryArray {
+				private void func(String a, Object ...list) {
+				}
+				public void foo() {
+					func("a", new Object[] { //$NON-NLS-1$
+							this, this});
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		String expected= """
+			package test1;
+
+			public class TestNLSUnnecessaryArray {
+				private void func(String a, Object ...list) {
+				}
+				public void foo() {
+					func("a", //$NON-NLS-1$
+			                this, this);
+				}
+			}
+			""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
+
+	@Test
+	public void testUnnecessaryArrayIssue2593() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			import java.util.Arrays;
+			import java.util.List;
+
+			public class A {
+
+				public void foo1(String x, String ...y) {
+					// do nothing
+				}
+
+				public void foo() {
+					String a = "abc";
+					foo1("abc", new String[] { //$NON-NLS-1$
+							"a" //$NON-NLS-1$
+					});
+				}
+
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= """
+			package test1;
+
+			import java.util.Arrays;
+			import java.util.List;
+
+			public class A {
+
+				public void foo1(String x, String ...y) {
+					// do nothing
+				}
+
+				public void foo() {
+					String a = "abc";
+					foo1("abc", //$NON-NLS-1$
+			                "a" //$NON-NLS-1$
+			        );
+				}
+
+			}
+			""";
+		String expected= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
+	}
 
 }

@@ -59,6 +59,7 @@ public interface ITestKind {
 
 	String CLASSPATH_PLUGIN_ID = "pluginId"; //$NON-NLS-1$
 	String CLASSPATH_PATH_TO_JAR = "pathToJar"; //$NON-NLS-1$
+	String CLASSPATH_JAR_VERSION = "jarVersion"; //$NON-NLS-1$
 
 	ITestFinder getFinder();
 

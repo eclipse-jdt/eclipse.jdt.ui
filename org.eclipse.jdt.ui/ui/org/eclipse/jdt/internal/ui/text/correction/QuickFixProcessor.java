@@ -244,6 +244,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.TypeMissingDeprecatedAnnotation:
 			case IProblem.UsingDeprecatedMethod:
 			case IProblem.UsingDeprecatedField:
+			case IProblem.MemberOfDeprecatedTypeNotDeprecated:
 			case IProblem.MissingOverrideAnnotation:
 			case IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation:
 			case IProblem.MethodMustOverride:
@@ -318,6 +319,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PreviewFeatureNotSupported:
 			case IProblem.SwitchExpressionsYieldMissingEnumConstantCase:
 			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
+			case IProblem.SwitchExpressionMissingEnumConstantCaseDespiteDefault:
 			case IProblem.PreviewFeaturesNotAllowed:
 			case IProblem.UninitializedBlankFinalField:
 			case IProblem.FeatureNotSupported:
@@ -329,6 +331,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalTotalPatternWithDefault:
 			case IProblem.IllegalFallthroughToPattern:
 			case IProblem.ExpressionShouldBeAVariable:
+			case IProblem.SealedMissingSealedModifier:
 				return true;
 
 			default:
@@ -499,6 +502,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.SealedMissingClassModifier:
 			case IProblem.SealedMissingInterfaceModifier:
+			case IProblem.SealedMissingSealedModifier:
 				ModifierCorrectionSubProcessor.addSealedMissingModifierProposal(context, problem, proposals);
 				break;
 			case IProblem.SealedNotDirectSuperInterface:
@@ -728,6 +732,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FieldMissingDeprecatedAnnotation:
 			case IProblem.MethodMissingDeprecatedAnnotation:
 			case IProblem.TypeMissingDeprecatedAnnotation:
+			case IProblem.MemberOfDeprecatedTypeNotDeprecated:
 				ModifierCorrectionSubProcessor.addDeprecatedAnnotationProposal(context, problem, proposals);
 				break;
 			case IProblem.OverridingDeprecatedMethod:
@@ -812,6 +817,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MissingEnumConstantCase:
 			case IProblem.MissingEnumDefaultCase:
 			case IProblem.SwitchExpressionsYieldMissingEnumConstantCase:
+			case IProblem.SwitchExpressionMissingEnumConstantCaseDespiteDefault:
 				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
 				break;
 			case IProblem.EnhancedSwitchMissingDefault:

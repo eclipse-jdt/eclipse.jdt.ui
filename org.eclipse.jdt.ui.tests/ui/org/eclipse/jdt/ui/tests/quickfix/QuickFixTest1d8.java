@@ -3135,7 +3135,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
 

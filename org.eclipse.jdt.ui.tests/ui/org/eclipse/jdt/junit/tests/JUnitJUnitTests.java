@@ -31,6 +31,7 @@ TestTestSearchEngine.class,
 TestRunListenerTest3.class,
 TestRunListenerTest4.class,
 TestRunListenerTest5.class,
+TestRunListenerTest6.class,
 
 TestRunFilteredStandardRunnerTest4.class,
 TestRunFilteredParameterizedRunnerTest4.class,
@@ -42,6 +43,7 @@ JUnit3TestFinderTest.class,
 JUnitTestFinderTest.class,
 JUnit4TestFinderTest16.class,
 JUnit5TestFinderJupiterTest.class,
+JUnit6TestFinderJupiterTest.class,
 
 TestSorting.class
 //LegacyTestRunListenerTest.class

@@ -64,6 +64,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 
 	}
 
+	@Deprecated
 	public TestSelectionDialog(Shell shell, IType[] types) {
 		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS),
 				new PackageRenderer());
@@ -73,6 +74,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	/**
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
+	@Deprecated
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
@@ -82,6 +84,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	/*
 	 * @see Window#open()
 	 */
+	@Deprecated
 	@Override
 	public int open() {
 		setElements(fTypes);

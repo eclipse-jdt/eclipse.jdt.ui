@@ -342,6 +342,37 @@ public class CleanUpTest16 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testPatternMatchingForInstanceof3() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/780
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E {
+				public boolean bar(Object something) {
+					return something instanceof Boolean ? ((Boolean) something).booleanValue() : false;
+				}
+			}
+			"""; //
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+
+		String expected= """
+			package test1;
+
+			public class E {
+				public boolean bar(Object something) {
+					return something instanceof final Boolean b ? b.booleanValue() : false;
+				}
+			}
+			"""; //
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PatternMatchingForInstanceofCleanup_description)));
+	}
+
+	@Test
 	public void testOneIfWithPatternInstanceof() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1200
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """

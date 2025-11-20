@@ -274,8 +274,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			IStructuredSelection ss = (IStructuredSelection) selection;
 			if (ss.size() == 1) {
 				Object first = ss.getFirstElement();
-				if (first instanceof JUnitVersion) {
-					fIncludeExcludeTagsButton.setEnabled(((JUnitVersion) first) == JUnitVersion.JUNIT5);
+				if (first instanceof JUnitVersion junitVersion) {
+					fIncludeExcludeTagsButton
+							.setEnabled(junitVersion == JUnitVersion.JUNIT5 || junitVersion == JUnitVersion.JUNIT6);
 				}
 			}
 		}
@@ -765,7 +766,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				IAnnotation annotation = method.getAnnotation("Test"); //$NON-NLS-1$
 				if (annotation.exists()) {
 					methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
-				} else if (jUnitVersion == JUnitVersion.JUNIT5) {
+				} else if (jUnitVersion == JUnitVersion.JUNIT5 || jUnitVersion == JUnitVersion.JUNIT6) {
 					boolean hasAnyTestAnnotation = method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
 							|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
 							|| method.getAnnotation("TestTemplate").exists() //$NON-NLS-1$
@@ -1002,7 +1003,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private void validateJavaProject(IJavaProject javaProject) {
 		JUnitVersion jUnitVersion = getSelectedJUnitVersion();
 		if (jUnitVersion != null) {
-			if (jUnitVersion != JUnitVersion.JUNIT5 && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+			if (jUnitVersion != JUnitVersion.JUNIT5 && jUnitVersion != JUnitVersion.JUNIT6
+					&& !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 				setErrorMessage(Messages.JUnitLaunchConfigurationTab_error_testcasenotonpath);
 				return;
 			}
@@ -1013,6 +1015,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				return;
 			}
 			if (jUnitVersion == JUnitVersion.JUNIT5 && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+				setErrorMessage(MessageFormat.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
+				return;
+			}
+			if (jUnitVersion == JUnitVersion.JUNIT6 && !CoreTestSearchEngine.hasJUnit6TestAnnotation(javaProject)) {
 				setErrorMessage(MessageFormat.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
 				return;
 			}

@@ -43,6 +43,7 @@ public class CodeGeneration {
 	 * for a new class type body.
 	 * @since 3.2
 	 */
+	@Deprecated
 	public static final String CLASS_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.CLASS_BODY_TEMPLATE_ID;
 
 	/**
@@ -50,6 +51,7 @@ public class CodeGeneration {
 	 * for a new interface type body.
 	 * @since 3.2
 	 */
+	@Deprecated
 	public static final String INTERFACE_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.INTERFACE_BODY_TEMPLATE_ID;
 
 	/**
@@ -57,6 +59,7 @@ public class CodeGeneration {
 	 * for a new enum type body.
 	 * @since 3.2
 	 */
+	@Deprecated
 	public static final String ENUM_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.ENUM_BODY_TEMPLATE_ID;
 
 	/**
@@ -64,6 +67,7 @@ public class CodeGeneration {
 	 * for a new annotation type body.
 	 * @since 3.2
 	 */
+	@Deprecated
 	public static final String ANNOTATION_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.ANNOTATION_BODY_TEMPLATE_ID;
 
 	private CodeGeneration() {
@@ -79,6 +83,7 @@ public class CodeGeneration {
 	 * @return Returns the new content or <code>null</code> if the template is undefined or empty.
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
+	@Deprecated
 	public static String getCompilationUnitContent(ICompilationUnit cu, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
 	}
@@ -96,6 +101,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.1
 	 */
+	@Deprecated
 	public static String getCompilationUnitContent(ICompilationUnit cu, String fileComment, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getCompilationUnitContent(cu, fileComment, typeComment, typeContent, lineDelimiter);
 	}
@@ -108,6 +114,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.1
 	 */
+	@Deprecated
 	public static String getFileComment(ICompilationUnit cu, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getFileComment(cu, lineDelimiter);
 	}
@@ -121,6 +128,7 @@ public class CodeGeneration {
 	 * @return Returns the new content or <code>null</code> if the code template is undefined or empty. The returned content is unformatted and is not indented.
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
+	@Deprecated
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getTypeComment(cu, typeQualifiedName, lineDelimiter);
 	}
@@ -136,6 +144,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.1
 	 */
+	@Deprecated
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getTypeComment(cu, typeQualifiedName, typeParameterNames, lineDelimiter);
 	}
@@ -151,6 +160,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.2
 	 */
+	@Deprecated
 	public static String getTypeBody(String typeKind, ICompilationUnit cu, String typeName, String lineDelim) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getTypeBody(typeKind, cu, typeName, lineDelim);
 	}
@@ -165,6 +175,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.0
 	 */
+	@Deprecated
 	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getFieldComment(cu, typeName, fieldName, lineDelimiter);
 	}
@@ -185,6 +196,7 @@ public class CodeGeneration {
 	 * code template is empty. The returned content is unformatted and not indented (formatting required).
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
+	@Deprecated
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(cu, declaringTypeName, decl, overridden, lineDelimiter);
 	}
@@ -211,6 +223,7 @@ public class CodeGeneration {
 	 * the comment code template is empty. The returned content is unformatted and not indented (formatting required).
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
+	@Deprecated
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, overridden, lineDelimiter);
 	}
@@ -239,6 +252,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.1
 	 */
+	@Deprecated
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames, IMethod overridden, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, typeParameterNames, overridden, lineDelimiter);
 	}
@@ -256,6 +270,7 @@ public class CodeGeneration {
 	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
+	@Deprecated
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(method, overridden, lineDelimiter);
 	}
@@ -285,6 +300,7 @@ public class CodeGeneration {
 	 * @since 3.2
 	 */
 
+	@Deprecated
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodName, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodName, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, lineDelimiter);
 	}
@@ -305,6 +321,7 @@ public class CodeGeneration {
 	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
+	@Deprecated
 	public static String getMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, boolean isConstructor, String bodyStatement, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodBodyContent(cu, declaringTypeName, methodName, isConstructor, bodyStatement, lineDelimiter);
 	}
@@ -325,6 +342,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.0
 	 */
+	@Deprecated
 	public static String getGetterMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getGetterMethodBodyContent(cu, declaringTypeName, methodName, fieldName, lineDelimiter);
 	}
@@ -346,6 +364,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.0
 	 */
+	@Deprecated
 	public static String getSetterMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String paramName, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getSetterMethodBodyContent(cu, declaringTypeName, methodName, fieldName, paramName, lineDelimiter);
 	}
@@ -368,6 +387,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.0
 	 */
+	@Deprecated
 	public static String getGetterComment(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getGetterComment(cu, declaringTypeName, methodName, fieldName, fieldType, bareFieldName, lineDelimiter);
 	}
@@ -391,6 +411,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 * @since 3.0
 	 */
+	@Deprecated
 	public static String getSetterComment(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
 		return org.eclipse.jdt.core.manipulation.CodeGeneration.getSetterComment(cu, declaringTypeName, methodName, fieldName, fieldType, paramName, bareFieldName, lineDelimiter);
 	}

@@ -296,6 +296,7 @@ public class ModifierCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			package p;
 			import java.util.List;
 			public class E {
+			    @SuppressWarnings("deprecation")
 			    void foo() {
 			        Y.asList(Y.asList("Hello", " World"));
 			    }
@@ -320,6 +321,7 @@ public class ModifierCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			package p;
 			import java.util.List;
 			public class E {
+			    @SuppressWarnings("deprecation")
 			    void foo() {
 			        Y.asList(Y.asList("Hello", " World"));
 			    }

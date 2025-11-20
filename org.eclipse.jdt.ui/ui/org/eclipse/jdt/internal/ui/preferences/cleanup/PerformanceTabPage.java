@@ -21,11 +21,11 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp;
-import org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.PatternCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PatternCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp;
@@ -45,7 +45,7 @@ public final class PerformanceTabPage extends AbstractCleanUpTabPage {
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
 				new SingleUsedFieldCleanUp(values),
-				new BreakLoopCleanUp(values),
+				new BreakLoopCleanUpCore(values),
 				new StaticInnerClassCleanUpCore(values),
 				new StringBuilderCleanUp(values),
 				new PlainReplacementCleanUpCore(values),
@@ -56,10 +56,10 @@ public final class PerformanceTabPage extends AbstractCleanUpTabPage {
 				new PrimitiveParsingCleanUp(values),
 				new PrimitiveSerializationCleanUp(values),
 				new PrimitiveRatherThanWrapperCleanUpCore(values),
-				new PatternCleanUp(values),
+				new PatternCleanUpCore(values),
 				new StringBufferToStringBuilderCleanUpCore(values),
 				new NoStringCreationCleanUpCore(values),
-				new BooleanLiteralCleanUp(values)
+				new BooleanLiteralCleanUpCore(values)
 		};
 	}
 

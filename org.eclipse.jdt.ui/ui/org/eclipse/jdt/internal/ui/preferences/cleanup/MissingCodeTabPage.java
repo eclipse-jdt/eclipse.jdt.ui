@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUpCore;
 
 public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 
@@ -35,7 +35,7 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
-		return new AbstractCleanUp[] { new Java50CleanUp(values), new PotentialProgrammingProblemsCleanUpCore(values), new UnimplementedCodeCleanUp(values) };
+		return new AbstractCleanUp[] { new Java50CleanUp(values), new PotentialProgrammingProblemsCleanUpCore(values), new UnimplementedCodeCleanUpCore(values) };
 	}
 
 	@Override

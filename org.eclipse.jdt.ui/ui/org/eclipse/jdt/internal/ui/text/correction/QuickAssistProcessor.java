@@ -209,13 +209,13 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.DoWhileRatherThanWhileCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PatternInstanceofToSwitchCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
+import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -244,12 +244,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String SPLIT_JOIN_VARIABLE_DECLARATION_ID= "org.eclipse.jdt.ui.correction.splitJoinVariableDeclaration.assist"; //$NON-NLS-1$
 
 	public static final String CONVERT_FOR_LOOP_ID= "org.eclipse.jdt.ui.correction.convertForLoop.assist"; //$NON-NLS-1$
-
-	public static final String ASSIGN_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.assignToLocal.assist"; //$NON-NLS-1$
-
-	public static final String ASSIGN_IN_TRY_WITH_RESOURCES_ID= "org.eclipse.jdt.ui.correction.assignInTryWithResources.assist"; //$NON-NLS-1$
-
-	public static final String ASSIGN_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignToField.assist"; //$NON-NLS-1$
 
 	public static final String ASSIGN_PARAM_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignParamToField.assist"; //$NON-NLS-1$
 
@@ -1123,6 +1117,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	@SuppressWarnings("removal")
 	public static boolean getInferDiamondArgumentsProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
 		// don't add if already added as quick fix
 		if (containsMatchingProblem(locations, IProblem.DiamondNotBelow17))
@@ -1160,7 +1155,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			int relevance= locations == null ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
 			Map<String, String> options= new HashMap<>();
 			options.put(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), relevance, image, context);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUpCore(options), relevance, image, context);
 			resultingCollections.add(proposal);
 		} else {
 			return false;
@@ -1210,56 +1205,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
-		// don't add if already added as quick fix
-		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
-			return false;
-		Statement statement= ASTResolving.findParentStatement(node);
-		if (!(statement instanceof ExpressionStatement)) {
-			return false;
-		}
-		ExpressionStatement expressionStatement= (ExpressionStatement) statement;
-
-		Expression expression= expressionStatement.getExpression();
-		if (expression.getNodeType() == ASTNode.ASSIGNMENT) {
-			return false; // too confusing and not helpful
-		}
-
-		ITypeBinding typeBinding= expression.resolveTypeBinding();
-		typeBinding= Bindings.normalizeTypeBinding(typeBinding);
-		if (typeBinding == null) {
-			return false;
-		}
-		if (resultingCollections == null) {
-			return true;
-		}
-
-		// don't add if already added as quick fix
-		if (containsMatchingProblem(locations, IProblem.UnusedObjectAllocation))
-			return false;
-
-		ICompilationUnit cu= context.getCompilationUnit();
-
-		AssignToVariableAssistProposal localProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.LOCAL, expressionStatement, typeBinding,
-				IProposalRelevance.ASSIGN_TO_LOCAL);
-		localProposal.setCommandId(ASSIGN_TO_LOCAL_ID);
-		resultingCollections.add(localProposal);
-
-		if (QuickAssistProcessorUtil.isAutoClosable(typeBinding)) {
-			AssignToVariableAssistProposal tryWithResourcesProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.TRY_WITH_RESOURCES, expressionStatement, typeBinding,
-					IProposalRelevance.ASSIGN_IN_TRY_WITH_RESOURCES);
-			tryWithResourcesProposal.setCommandId(ASSIGN_IN_TRY_WITH_RESOURCES_ID);
-			resultingCollections.add(tryWithResourcesProposal);
-		}
-
-		ASTNode type= ASTResolving.findParentType(expression);
-		if (type != null) {
-			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(cu, AssignToVariableAssistProposal.FIELD, expressionStatement, typeBinding,
-					IProposalRelevance.ASSIGN_TO_FIELD);
-			fieldProposal.setCommandId(ASSIGN_TO_FIELD_ID);
-			resultingCollections.add(fieldProposal);
-		}
-		return true;
-
+		return LocalCorrectionsSubProcessor.getAssignToVariableProposals(context, node, locations, resultingCollections);
 	}
 
 	private static boolean containsMatchingProblem(IProblemLocation[] locations, int problemId) {
@@ -3053,7 +2999,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
+		ICleanUp cleanUp= new ConvertLoopCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_FOR_LOOP_TO_ENHANCED, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 
@@ -3076,7 +3022,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
+		ICleanUp cleanUp= new ConvertLoopCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_ITERABLE_LOOP_TO_ENHANCED, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 

@@ -46,6 +46,7 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 	 *
 	 * @param site the site providing additional context information for this action
 	 */
+	@Deprecated
 	public OpenExternalJavadocAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.OpenExternalJavadocAction_label);
@@ -78,6 +79,7 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 	 * @param editor the Java editor
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
+	@Deprecated
 	public OpenExternalJavadocAction(JavaEditor editor) {
 		super(editor);
 		setText(ActionMessages.OpenExternalJavadocAction_label);
@@ -89,6 +91,7 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 	 * No Javadoc since the method isn't meant to be public but is
 	 * since the beginning
 	 */
+	@Deprecated
 	@Override
 	public void run(IJavaElement element) {
 		super.run(element);
@@ -97,6 +100,7 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 	/*
 	 * @see org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction#forceExternalBrowser()
 	 */
+	@Deprecated
 	@Override
 	boolean forceExternalBrowser() {
 		return true;

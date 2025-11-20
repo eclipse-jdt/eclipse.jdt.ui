@@ -30,10 +30,12 @@ public class PixelConverter {
 
 	private final FontMetrics fFontMetrics;
 
+	@Deprecated
 	public PixelConverter(Control control) {
 		this(control.getFont());
 	}
 
+	@Deprecated
 	public PixelConverter(Font font) {
 		GC gc = new GC(font.getDevice());
 		gc.setFont(font);
@@ -44,6 +46,7 @@ public class PixelConverter {
 	/*
 	 * see org.eclipse.jface.dialogs.DialogPage#convertHeightInCharsToPixels(int)
 	 */
+	@Deprecated
 	public int convertHeightInCharsToPixels(int chars) {
 		return Dialog.convertHeightInCharsToPixels(fFontMetrics, chars);
 	}
@@ -51,6 +54,7 @@ public class PixelConverter {
 	/*
 	 * see org.eclipse.jface.dialogs.DialogPage#convertHorizontalDLUsToPixels(int)
 	 */
+	@Deprecated
 	public int convertHorizontalDLUsToPixels(int dlus) {
 		return Dialog.convertHorizontalDLUsToPixels(fFontMetrics, dlus);
 	}
@@ -58,6 +62,7 @@ public class PixelConverter {
 	/*
 	 * see org.eclipse.jface.dialogs.DialogPage#convertVerticalDLUsToPixels(int)
 	 */
+	@Deprecated
 	public int convertVerticalDLUsToPixels(int dlus) {
 		return Dialog.convertVerticalDLUsToPixels(fFontMetrics, dlus);
 	}
@@ -65,6 +70,7 @@ public class PixelConverter {
 	/*
 	 * see org.eclipse.jface.dialogs.DialogPage#convertWidthInCharsToPixels(int)
 	 */
+	@Deprecated
 	public int convertWidthInCharsToPixels(int chars) {
 		return Dialog.convertWidthInCharsToPixels(fFontMetrics, chars);
 	}

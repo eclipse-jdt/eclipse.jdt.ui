@@ -113,7 +113,6 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		fInitialValues= Map.copyOf(fValues);
 	}
 
-	@SuppressWarnings("deprecation") // java.util.Observer
 	protected void registerPreference(final CheckboxPreference preference) {
 		if (fCheckboxes.add(preference)) {
 			fCount++;
@@ -161,7 +160,6 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	/* Register a preference that is an option for a cleanup. Checking it does not change the number of clean ups.
 	 */
-	@SuppressWarnings("deprecation") // java.util.Observer
 	protected void registerOptionPreference(final CheckboxPreference main, final CheckboxPreference... options) {
 		registerPreference(main);
 		fCheckboxes.addAll(Arrays.asList(options));
@@ -190,7 +188,6 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	 * @param subSlaves indirect slaves, i.e. a slave is a master of its subSlave).
 	 * 		First index into array is the subSlave's master's index. subSlaves can also be <code>null</code>.
 	 */
-	@SuppressWarnings("deprecation") // java.util.Observer
 	protected void registerSlavePreference(final CheckboxPreference master, final CheckboxPreference[] slaves, final CheckboxPreference[][] subSlaves) {
 		internalRegisterSlavePreference(master, slaves);
 
@@ -241,7 +238,6 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		}
 	}
 
-	@SuppressWarnings("deprecation") // java.util.Observer
 	private void internalRegisterSlavePreference(final CheckboxPreference master, final ButtonPreference[] slaves) {
 		fCheckboxes.addAll(Arrays.asList(slaves));
     	master.addObserver( (o, arg) -> {

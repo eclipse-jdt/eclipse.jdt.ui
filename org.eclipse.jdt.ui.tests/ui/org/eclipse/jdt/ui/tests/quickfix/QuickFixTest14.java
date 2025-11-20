@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 IBM Corporation and others.
+ * Copyright (c) 2019, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,6 +25,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java14ProjectTestSetup;
@@ -269,9 +271,75 @@ public class QuickFixTest14 extends QuickFixTest {
 			            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);
 			            case TUESDAY                -> System.out.println(7);
 			            case THURSDAY, SATURDAY     -> System.out.println(8);
-						case SUNDAY -> throw new UnsupportedOperationException("Unimplemented case: " + day);
-						case WEDNESDAY -> throw new UnsupportedOperationException("Unimplemented case: " + day);
+						case SUNDAY, WEDNESDAY -> throw new UnsupportedOperationException("Unimplemented case: " + day);
 						default -> throw new IllegalArgumentException("Unexpected value: " + day);
+			        }
+			    }
+			}
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
+	public void testAddMissingCaseSwitchStatement2() throws Exception {
+		fJProject1= projectSetup.getProject();
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT, JavaCore.ENABLED);
+		fJProject1.setOptions(options);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String test= """
+			package test;
+			public class Cls {
+			    public void bar1(Day day) {
+			        switch (day) {
+			            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);
+			            case TUESDAY                -> System.out.println(7);
+			            case THURSDAY, SATURDAY     -> System.out.println(8);
+			            default -> {
+				            System.out.println(9);
+				        }
+			        }
+			    }
+			}
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String expected= """
+			package test;
+			public class Cls {
+			    public void bar1(Day day) {
+			        switch (day) {
+			            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);
+			            case TUESDAY                -> System.out.println(7);
+			            case THURSDAY, SATURDAY     -> System.out.println(8);
+						case SUNDAY, WEDNESDAY -> {
+				            System.out.println(9);
+				        }
+			            default -> {
+				            System.out.println(9);
+				        }
 			        }
 			    }
 			}
@@ -646,4 +714,62 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
+
+	@Test
+	public void testIncompleteSwitchDespiteSwitch() throws Exception {
+		fJProject1= projectSetup.getProject();
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT, JavaCore.ENABLED);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class TestSwitchEnum {
+				enum E { F, G, H }
+				static int testEnumExhaustive(E eParm) {
+					return switch(eParm) {
+						case F -> 0;
+						case G -> 1;
+						default -> -1;
+					};
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("TestSwitchEnum.java", str1, false, null);
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String expected= """
+			package test;
+			public class TestSwitchEnum {
+				enum E { F, G, H }
+				static int testEnumExhaustive(E eParm) {
+					return switch(eParm) {
+						case F -> 0;
+						case G -> 1;
+						case H -> throw new UnsupportedOperationException("Unimplemented case: " + eParm);
+						default -> -1;
+					};
+				}
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
 }

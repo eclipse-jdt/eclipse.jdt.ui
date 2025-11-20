@@ -37,7 +37,7 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		final TestRunListener testRunListener= new TestRunListeners.SequenceTest(log);
 		JUnitCore.addTestRunListener(testRunListener);
 		try {
-			return launchJUnit(typeToLaunch, log);
+			return launchJUnit(typeToLaunch, TestKindRegistry.JUNIT5_TEST_KIND_ID, log);
 		} finally {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}

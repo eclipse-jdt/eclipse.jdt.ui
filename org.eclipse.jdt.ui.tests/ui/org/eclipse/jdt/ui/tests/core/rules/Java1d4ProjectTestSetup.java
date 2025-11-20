@@ -29,11 +29,13 @@ import org.eclipse.jdt.core.IJavaProject;
 @Deprecated
 public class Java1d4ProjectTestSetup extends ProjectTestSetup {
 
+	@Deprecated
 	public Java1d4ProjectTestSetup() {
 		// Here we load Java 1.5 classes because JavaProjectHelper.RT_STUBS_14 does not exist
 		super("TestSetupProject1d4", JavaProjectHelper.RT_STUBS_15);
 	}
 
+	@Deprecated
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= super.createAndInitializeProject();

@@ -87,8 +87,10 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -100,6 +102,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
@@ -114,10 +117,12 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -1465,6 +1470,44 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	}
 
+	protected List<IMember> findMembersReferenced() throws JavaModelException {
+		final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
+		final List<IMember> members= new ArrayList<>();
+		ASTVisitor refVisitor= new ASTVisitor() {
+			@Override
+			public boolean visit(CreationReference node) {
+				return refVisit(node);
+			}
+			@Override
+			public boolean visit(ExpressionMethodReference node) {
+				return refVisit(node);
+			}
+			@Override
+			public boolean visit(SuperMethodReference node) {
+				return refVisit(node);
+			}
+			@Override
+			public boolean visit(TypeMethodReference node) {
+				return refVisit(node);
+			}
+			public boolean refVisit(MethodReference node) {
+				IMethodBinding methodBinding= node.resolveMethodBinding();
+				if (methodBinding != null) {
+					int modifiers = methodBinding.getModifiers();
+					if (Modifier.isPublic(modifiers)) {
+						return false;
+					}
+					if (methodBinding.getJavaElement() instanceof IMember memberFound) {
+						members.add(memberFound);
+					}
+				}
+				return false;
+			}
+		};
+		declaration.accept(refVisitor);
+		return members;
+	}
+
 	private class CheckOuterMethodConflictVisitor extends ASTVisitor {
 		private final IMethod fMethodMoved;
 		private final TypeDeclaration fInnerType;
@@ -1670,7 +1713,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final RefactoringStatus status= new RefactoringStatus();
 		fChangeManager= new TextChangeManager();
 		try {
-			monitor.beginTask("", 5); //$NON-NLS-1$
+			monitor.beginTask("", 6); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			if (!status.hasError()) {
@@ -1685,6 +1728,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							if (!status.hasError()) {
 								if (!type.exists() || type.isBinary() || type.isReadOnly())
 									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod)));
+								checkGenericTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingMethod(Progress.subMonitor(monitor, 1), status);
 								checkOverrideOuterMethod(Progress.subMonitor(monitor, 1), status);
@@ -1714,16 +1758,73 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the progress monitor to display progress
 	 * @param status
 	 *            the refactoring status
+	 * @throws JavaModelException
+	 *            if the method does not exist
 	 */
-	protected void checkGenericTarget(final IProgressMonitor monitor, final RefactoringStatus status) {
+	protected void checkGenericTarget(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
-			final ITypeBinding binding= fTarget.getType();
-			if (binding == null || binding.isTypeVariable())
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_generic_targets, JavaStatusContext.create(fMethod)));
+			ITypeBinding binding= fTarget.getType();
+			if (binding != null && binding.isParameterizedType()) {
+				final ITypeBinding genericBinding= binding.getTypeDeclaration();
+				ASTVisitor genericCheckVisitor= new ASTVisitor() {
+					@Override
+					public boolean visit(MethodInvocation node) {
+						IMethodBinding nodeBinding= node.resolveMethodBinding();
+						if (nodeBinding != null && !nodeBinding.isGenericMethod()) {
+							ITypeBinding nodeTypeBinding= nodeBinding.getDeclaringClass();
+							if (nodeTypeBinding != null &&
+									genericBinding.isEqualTo(nodeTypeBinding)) {
+								throw new AbortSearchException();
+							}
+						}
+						return true;
+					}
+
+					@Override
+					public boolean visit(FieldAccess node) {
+						IVariableBinding nodeBinding= node.resolveFieldBinding();
+						if (nodeBinding != null) {
+							ITypeBinding nodeTypeBinding= nodeBinding.getType();
+							if (nodeTypeBinding != null && nodeTypeBinding.isParameterizedType() &&
+									genericBinding.isEqualTo(nodeTypeBinding.getTypeDeclaration())) {
+								throw new AbortSearchException();
+							}
+						}
+						return false;
+					}
+
+					@Override
+					public boolean visit(SimpleName node) {
+						IBinding nodeBinding= node.resolveBinding();
+						if (nodeBinding instanceof IVariableBinding fieldBinding && fieldBinding.isField()) {
+							ITypeBinding nodeTypeBinding= fieldBinding.getDeclaringClass();
+							if (nodeTypeBinding != null && nodeTypeBinding.isParameterizedType() &&
+									genericBinding.isEqualTo(nodeTypeBinding.getTypeDeclaration())) {
+								throw new AbortSearchException();
+							}
+						} else if (nodeBinding instanceof IMethodBinding methodBinding) {
+							if (!methodBinding.isGenericMethod()) {
+								ITypeBinding nodeTypeBinding= methodBinding.getDeclaringClass();
+								if (nodeTypeBinding != null &&
+										genericBinding.isEqualTo(nodeTypeBinding)) {
+									throw new AbortSearchException();
+								}
+							}
+						}
+						return false;
+					}
+				};
+				try {
+					final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
+					declaration.accept(genericCheckVisitor);
+				} catch (AbortSearchException e) {
+					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_generic_type_possible_error, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(binding.getTypeDeclaration().getName())}), JavaStatusContext.create(fMethod)));
+				}
+			}
 		} finally {
 			monitor.done();
 		}
@@ -2205,6 +2306,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 			adjustor.setRewrites(rewrites);
 			adjustor.setRewrite(sourceRewrite, fSourceRewrite.getRoot());
+			// MemberVisibility search for method references doesn't find member references (e.g. this::method) so find them
+			// manually and add them to visibility adjustor
+			List<IMember> memberRefsToAdjust= findMembersReferenced();
+			adjustor.setAdditionalMembers(memberRefsToAdjust);
 			adjustor.adjustVisibility(Progress.subMonitor(monitor, 1));
 			final IDocument document= new Document(fMethod.getCompilationUnit().getBuffer().getContents());
 			createMethodCopy(document, declaration, sourceRewrite, rewrites, adjustor.getAdjustments(), status, Progress.subMonitor(monitor, 1));

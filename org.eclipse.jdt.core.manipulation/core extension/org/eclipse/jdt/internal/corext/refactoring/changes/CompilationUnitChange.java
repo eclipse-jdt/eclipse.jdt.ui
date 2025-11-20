@@ -37,6 +37,7 @@ public class CompilationUnitChange extends org.eclipse.jdt.core.refactoring.Comp
 	 * @param name the change's name, mainly used to render the change in the UI
 	 * @param cunit the compilation unit this change works on
 	 */
+	@Deprecated
 	public CompilationUnitChange(String name, ICompilationUnit cunit) {
 		super(name, cunit);
 	}
@@ -45,6 +46,7 @@ public class CompilationUnitChange extends org.eclipse.jdt.core.refactoring.Comp
 	 * @param change the change
 	 * @since 3.6
 	 */
+	@Deprecated
 	public CompilationUnitChange(org.eclipse.jdt.core.refactoring.CompilationUnitChange change) {
 		super(change.getName(), change.getCompilationUnit());
 		setDescriptor(change.getDescriptor());

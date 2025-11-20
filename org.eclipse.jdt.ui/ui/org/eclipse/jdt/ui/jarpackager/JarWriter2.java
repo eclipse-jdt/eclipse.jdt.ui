@@ -77,6 +77,7 @@ public class JarWriter2 {
 	 * 							This can also be used to return information
 	 * 							in the status object.
 	 */
+	@Deprecated
 	public JarWriter2(JarPackageData jarPackage, Shell parent) throws CoreException {
 		Assert.isNotNull(jarPackage, "The JAR specification is null"); //$NON-NLS-1$
 		fJarPackage= jarPackage;
@@ -105,6 +106,7 @@ public class JarWriter2 {
 	 * 								This can also be used to return information
 	 * 								in the status object.
 	 */
+	@Deprecated
 	public void close() throws CoreException {
 		if (fJarOutputStream != null)
 			try {
@@ -124,6 +126,7 @@ public class JarWriter2 {
 	 * 								This can also be used to return information
 	 * 								in the status object.
 	 */
+	@Deprecated
 	public void write(IFile resource, IPath destinationPath) throws CoreException {
 		try {
 			IPath fileLocation= resource.getLocation();
@@ -156,6 +159,7 @@ public class JarWriter2 {
      * @throws	IOException			if an I/O error has occurred
 	 * @throws	CoreException 		if the resource can-t be accessed
 	 */
+	@Deprecated
 	protected void addFile(IFile resource, IPath path, File correspondingFile) throws IOException, CoreException {
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
 		byte[] readBuffer= new byte[4096];
@@ -220,6 +224,7 @@ public class JarWriter2 {
 	 *  						or <code>null</code> if it doesn't exist
 	 * @throws IOException if an I/O error has occurred
 	 */
+	@Deprecated
 	protected void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
@@ -259,6 +264,7 @@ public class JarWriter2 {
 	 * 			or <code>null</code> if no dialog should be presented
 	 * @return	<code>true</code> if it is OK to create the JAR
 	 */
+	@Deprecated
 	protected boolean canCreateJar(Shell parent) {
 		File file= fJarPackage.getAbsoluteJarLocation().toFile();
 		if (file.exists()) {

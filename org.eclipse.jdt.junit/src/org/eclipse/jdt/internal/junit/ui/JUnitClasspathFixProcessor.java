@@ -50,6 +50,9 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 		@Override
 		public String getAdditionalProposalInfo() {
+			if (fJunitVersion == 6) {
+				return JUnitMessages.JUnitAddLibraryProposal_junit6_info;
+			}
 			if (fJunitVersion == 5) {
 				return JUnitMessages.JUnitAddLibraryProposal_junit5_info;
 			}
@@ -68,6 +71,9 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			try {
 				IClasspathEntry entry= null;
 				switch (fJunitVersion) {
+				case 6:
+					entry= BuildPathSupport.getJUnit6ClasspathEntry();
+					break;
 				case 5:
 					entry= BuildPathSupport.getJUnit5ClasspathEntry();
 					break;
@@ -126,6 +132,9 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 		@Override
 		public String getDisplayString() {
+			if (fJunitVersion == 6) {
+				return JUnitMessages.JUnitAddLibraryProposa_junit6_label;
+			}
 			if (fJunitVersion == 5) {
 				return JUnitMessages.JUnitAddLibraryProposa_junit5_label;
 			}
@@ -183,6 +192,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			ArrayList<JUnitClasspathFixProposal> proposals= new ArrayList<>();
 			if ((res & JUNIT5) != 0) {
 				proposals.add(new JUnitClasspathFixProposal(project, 5, 15));
+				proposals.add(new JUnitClasspathFixProposal(project, 6, 15));
 			}
 			if ((res & JUNIT4) != 0) {
 				proposals.add(new JUnitClasspathFixProposal(project, 4, 15));

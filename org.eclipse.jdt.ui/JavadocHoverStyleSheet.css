@@ -1,15 +1,22 @@
 /* Font definitions */
 html         { font-family: sans-serif; font-size: 9pt; font-style: normal; font-weight: normal; }
-body, h1, h2, h3, h4, h5, h6, p, table, td, caption, th, ul, ol, dl, li, dd, dt { font-size: 1em; }
+body, p, table, td, caption, th, ul, ol, dl, li, dd, dt { font-size: 1em; }
 pre          { font-family: monospace; }
+h1           { font-size: 1.8em; }	
+h2           { font-size: 1.2em; }
+h3           { font-size: 1.1em; }
+h4			 { font-size: 1em;	 }
+h5			 { font-size: 0.9em; }
+h6			 { font-size: 0.8em; }
 
 /* Margins */
 body	     { overflow: auto; margin-top: 0px; margin-bottom: 0.5em; margin-left: 0.3em; margin-right: 0px; }
-h1           { margin-top: 0.3em; margin-bottom: 0.04em; }	
-h2           { margin-top: 2em; margin-bottom: 0.25em; }
-h3           { margin-top: 1.7em; margin-bottom: 0.25em; }
-h4           { margin-top: 2em; margin-bottom: 0.3em; }
-h5           { margin-top: 0px; margin-bottom: 0px; }
+h1           { margin-top: 1.2em; margin-bottom: 0.5em; }	
+h2           { margin-top: 1.1em; margin-bottom: 0.4em; }
+h3           { margin-top: 1em; margin-bottom: 0.4em; 	}
+h4           { margin-top: 0.9em; margin-bottom: 0.5em; }
+h5           { margin-top: 0.8px; margin-bottom: 0.4px; }
+h6			 { margin-top: 0.7em; margin-bottom: 0.3em;	}
 p            { margin-top: 1em; margin-bottom: 1em; }
 pre          { margin-left: 0.6em; }
 ul	         { margin-top: 0px; margin-bottom: 1em; margin-left: 1em; padding-left: 1em; }
@@ -27,7 +34,6 @@ a:visited    { text-decoration: underline; }
 a.header:link    { text-decoration: none; color: InfoText }
 a.header:visited { text-decoration: none; color: InfoText }
 a.header:hover   { text-decoration: underline; color: activeHyperlinkColor; } /* get's replaced with actual color */
-h4           { font-style: italic; }
 strong	     { font-weight: bold; }
 em	         { font-style: italic; }
 var	         { font-style: italic; }

@@ -29,10 +29,12 @@ import org.eclipse.jdt.core.IJavaProject;
 @Deprecated
 public class Java1d5ProjectTestSetup extends ProjectTestSetup {
 
+	@Deprecated
 	public Java1d5ProjectTestSetup() {
 		super("TestSetupProject1d5", JavaProjectHelper.RT_STUBS_15);
 	}
 
+	@Deprecated
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= super.createAndInitializeProject();

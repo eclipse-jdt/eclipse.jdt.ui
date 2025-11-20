@@ -14,9 +14,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
@@ -441,6 +443,9 @@ public final class MemberVisibilityAdjustor {
 	/** The referencing java element */
 	private final IJavaElement fReferencing;
 
+	/** Additional members to adjust */
+	private List<IMember> fAdditionalMembers= Collections.EMPTY_LIST;
+
 	/** The AST rewrite to use for reference visibility adjustments, or <code>null</code> to use a compilation unit rewrite */
 	private ASTRewrite fRewrite= null;
 
@@ -656,6 +661,28 @@ public final class MemberVisibilityAdjustor {
 		}
 	}
 
+	/**
+	 * Adjusts the visibilities of known members referenced by the source method.
+	 *
+	 * @param members the list of IMembers to adjust visibility
+	 * @param monitor the progress monitor to use
+	 * @throws JavaModelException if the visibility could not be determined
+	 */
+	private void adjustOutgoingVisibility(final List<IMember> members, final IProgressMonitor monitor) throws JavaModelException {
+		try {
+			monitor.beginTask("", members.size()); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
+			for (IMember member : members) {
+				if (!member.isBinary() && !member.isReadOnly() && !isInsideMovedMember(member)) {
+					adjustOutgoingVisibilityChain(member, monitor);
+				}
+				monitor.worked(1);
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
 	private void adjustOutgoingVisibilityChain(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
 
 		if (!Modifier.isPublic(member.getFlags())) {
@@ -711,7 +738,7 @@ public final class MemberVisibilityAdjustor {
 	 */
 	public void adjustVisibility(final IProgressMonitor monitor) throws JavaModelException {
 		try {
-			monitor.beginTask("", 7); //$NON-NLS-1$
+			monitor.beginTask("", 8); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fReferenced, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.setScope(fScope);
@@ -742,6 +769,7 @@ public final class MemberVisibilityAdjustor {
 				engine.searchReferencedFields(fReferenced, Progress.subMonitorSupressed(monitor, 1));
 				engine.searchReferencedMethods(fReferenced, Progress.subMonitorSupressed(monitor, 1));
 				adjustOutgoingVisibility((SearchResultGroup[]) engine.getResults(), Progress.subMonitor(monitor, 1));
+				adjustOutgoingVisibility(fAdditionalMembers, Progress.subMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();
@@ -1117,6 +1145,16 @@ public final class MemberVisibilityAdjustor {
 	 */
 	public void setFailureSeverity(final int severity) {
 		Assert.isTrue(isStatusSeverity(severity));
+	}
+
+	/**
+	 * Sets additional members to adjust.
+	 * <p>
+	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is a status with value {@link RefactoringStatus#ERROR}.
+	 */
+	public void setAdditionalMembers(final List<IMember> additionalMembers) {
+		Assert.isNotNull(additionalMembers);
+		fAdditionalMembers= additionalMembers;
 	}
 
 	/**

@@ -461,6 +461,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_missing_synchronized_on_inherited_method;
 	public static String ProblemSeveritiesConfigurationBlock_pb_missing_hashcode_method;
 	public static String ProblemSeveritiesConfigurationBlock_pb_overriding_pkg_dflt_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_member_deprecation;
 	public static String ProblemSeveritiesConfigurationBlock_pb_method_naming_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_no_effect_assignment_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_incompatible_interface_method_label;
@@ -609,6 +610,7 @@ public final class PreferencesMessages extends NLS {
 	public static String MembersOrderPreferencePage_default_label;
 	public static String MembersOrderPreferencePage_usevisibilitysort_label;
 	public static String CodeTemplateBlock_templates_comment_node;
+	public static String CodeTemplateBlock_templates_markdown_comment_node;
 	public static String CodeTemplateBlock_templates_code_node;
 	public static String CodeTemplateBlock_catchblock_label;
 	public static String CodeTemplateBlock_methodstub_label;
@@ -636,6 +638,7 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeTemplateBlock_templates_export_button;
 	public static String CodeTemplateBlock_templates_exportall_button;
 	public static String CodeTemplateBlock_createcomment_label;
+	public static String CodeTemplateBlock_usemarkdown_label;
 	public static String CodeTemplateBlock_templates_label;
 	public static String CodeTemplateBlock_preview;
 	public static String CodeTemplateBlock_import_title;
@@ -821,6 +824,11 @@ public final class PreferencesMessages extends NLS {
 	public static String NullAnnotationsConfigurationDialog_error_title;
 	public static String NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogMessage;
 	public static String NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogTitle;
+	public static String NullAnnotationsConfigurationDialog_problemAnnotations_dialogMessage;
+	public static String NullAnnotationsConfigurationDialog_problemAnnotations_dialogTitle;
+	public static String NullAnnotationsConfigurationDialog_problemDialogQuestion;
+	public static String NullAnnotationsConfigurationDialog_ambiguousType;
+	public static String NullAnnotationsConfigurationDialog_notFoundType;
 	public static String NullAnnotationsConfigurationDialog_restore_defaults;
 	public static String NullAnnotationsConfigurationDialog_targetBoth;
 	public static String NullAnnotationsConfigurationDialog_targetDeclarations;
@@ -926,4 +934,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaLaunchingConfigurationBlock_applet_name_fully_qualified_label;
 	public static String JavaLaunchingConfigurationBlock_junit_name_fully_qualified_label;
 	public static String JavaLaunchingConfigurationBlock_name_description;
+
+	public static String MiscellaneousConfigurationBlock_open_type_name;
+	public static String MiscellaneousConfigurationBlock_default_wildcard_between_camel_case_parts_label;
 }

@@ -22,7 +22,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUpCore;
 
 public class CleanUpConstantsOptions extends CleanUpConstants {
 	private static void setEclipseDefaultSettings(CleanUpOptions options) {
@@ -147,7 +147,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(ADD_MISSING_NLS_TAGS, CleanUpOptions.FALSE);
 
 		options.setOption(ADD_MISSING_METHODES, CleanUpOptions.FALSE);
-		options.setOption(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT, CleanUpOptions.FALSE);
+		options.setOption(UnimplementedCodeCleanUpCore.MAKE_TYPE_ABSTRACT, CleanUpOptions.FALSE);
 
 		//Code Organizing
 		options.setOption(FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
@@ -183,6 +183,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PULL_OUT_IF_FROM_IF_ELSE, CleanUpOptions.FALSE);
 
 		// Java Features
+		options.setOption(USE_MODULE_IMPORTS, CleanUpOptions.FALSE);
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(USE_SWITCH_FOR_INSTANCEOF_PATTERN, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
@@ -336,7 +337,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(ADD_MISSING_NLS_TAGS, CleanUpOptions.FALSE);
 
 		options.setOption(ADD_MISSING_METHODES, CleanUpOptions.FALSE);
-		options.setOption(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT, CleanUpOptions.FALSE);
+		options.setOption(UnimplementedCodeCleanUpCore.MAKE_TYPE_ABSTRACT, CleanUpOptions.FALSE);
 
 		//Code Organizing
 		options.setOption(FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
@@ -374,6 +375,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PULL_OUT_IF_FROM_IF_ELSE, CleanUpOptions.FALSE);
 
 		// Java Features
+		options.setOption(USE_MODULE_IMPORTS, CleanUpOptions.FALSE);
 		options.setOption(USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(USE_SWITCH_FOR_INSTANCEOF_PATTERN, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);

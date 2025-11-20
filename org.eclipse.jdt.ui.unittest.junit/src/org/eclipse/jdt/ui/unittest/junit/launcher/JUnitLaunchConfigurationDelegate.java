@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.JUnitRuntimeClasspathEntry;
@@ -211,14 +212,15 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			String[] classpath = classpathAndModulepath[0];
 			String[] modulepath = classpathAndModulepath[1];
 
-			if (junitVersion == JUnitVersion.JUNIT5) {
+			if (junitVersion == JUnitVersion.JUNIT5 || junitVersion == JUnitVersion.JUNIT6) {
 				if (!configuration.getAttribute(
 						JUnitLaunchConfigurationConstants.ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY, false)) {
 					if (!Arrays.stream(classpath).anyMatch(
 							s -> s.contains("junit-platform-launcher") || s.contains("org.junit.platform.launcher"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
+							@SuppressWarnings("restriction")
 							JUnitRuntimeClasspathEntry x = new JUnitRuntimeClasspathEntry("org.junit.platform.launcher", //$NON-NLS-1$
-									null);
+									null, BuildPathSupport.JUNIT_PLATFORM_VERSION);
 							String entryString = new ClasspathLocalizer(Platform.inDevelopmentMode()).entryString(x);
 							int length = classpath.length;
 							System.arraycopy(classpath, 0, classpath = new String[length + 1], 0, length);
@@ -231,8 +233,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					if (!Arrays.stream(classpath).anyMatch(
 							s -> s.contains("junit-jupiter-engine") || s.contains("org.junit.jupiter.engine"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
+							@SuppressWarnings("restriction")
 							JUnitRuntimeClasspathEntry x = new JUnitRuntimeClasspathEntry("junit-jupiter-engine", //$NON-NLS-1$
-									null);
+									null, BuildPathSupport.JUNIT_JUPITER_VERSION);
 							String entryString = new ClasspathLocalizer(false).entryString(x);
 							int length = classpath.length;
 							System.arraycopy(classpath, 0, classpath = new String[length + 1], 0, length);
@@ -245,8 +248,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					if (!Arrays.stream(classpath)
 							.anyMatch(s -> s.contains("junit-jupiter-api") || s.contains("org.junit.jupiter.api"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						try {
+							@SuppressWarnings("restriction")
 							JUnitRuntimeClasspathEntry x = new JUnitRuntimeClasspathEntry("junit-jupiter-api", //$NON-NLS-1$
-									null);
+									null, BuildPathSupport.JUNIT_JUPITER_VERSION);
 							String entryString = new ClasspathLocalizer(false).entryString(x);
 							int length = classpath.length;
 							System.arraycopy(classpath, 0, classpath = new String[length + 1], 0, length);
@@ -365,7 +369,8 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 						IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
 			}
 			JUnitVersion junitVersion = getJUnitVersion(configuration);
-			if (junitVersion != JUnitVersion.JUNIT5 && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+			if (junitVersion != JUnitVersion.JUNIT5 && junitVersion != JUnitVersion.JUNIT6
+					&& !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 				abort(Messages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null,
 						IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
@@ -466,7 +471,8 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		boolean isModularProject = JavaRuntime.isModularProject(getJavaProject(configuration));
 		String addOpensTargets;
 		if (isModularProject) {
-			if (getJUnitVersion(configuration) == JUnitVersion.JUNIT5) {
+			JUnitVersion jUnitVersion = getJUnitVersion(configuration);
+			if (jUnitVersion == JUnitVersion.JUNIT5 || jUnitVersion == JUnitVersion.JUNIT6) {
 				if (isOnModulePath(getJavaProject(configuration), "org.junit.jupiter.api.Test")) { //$NON-NLS-1$
 					addOpensTargets = "org.junit.platform.commons,ALL-UNNAMED"; //$NON-NLS-1$
 				} else {

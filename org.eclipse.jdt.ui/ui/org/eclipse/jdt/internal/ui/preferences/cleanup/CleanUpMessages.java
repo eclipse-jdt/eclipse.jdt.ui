@@ -194,6 +194,9 @@ public class CleanUpMessages extends NLS {
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantIfCondition;
 	public static String DuplicateCodeTabPage_CheckboxName_PullOutIfFromIfElse;
 
+	public static String JavaFeatureTabPage_GroupName_Java25;
+	public static String JavaFeatureTabPage_CheckboxName_UseModuleImports;
+
 	public static String JavaFeatureTabPage_GroupName_Java21;
 	public static String JavaFeatureTabPage_CheckboxName_PatternInstanceofToSwitch;
 

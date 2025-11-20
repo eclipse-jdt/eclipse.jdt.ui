@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -111,6 +111,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopOperation;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
@@ -140,6 +141,7 @@ public class StubUtility {
 	public static final String CODEGEN_IS_FOR_GETTERS= "org.eclipse.jdt.ui.gettersetter.use.is"; //$NON-NLS-1$
 	public static final String CODEGEN_EXCEPTION_VAR_NAME= "org.eclipse.jdt.ui.exception.name"; //$NON-NLS-1$
 	public static final String CODEGEN_ADD_COMMENTS= "org.eclipse.jdt.ui.javadoc"; //$NON-NLS-1$
+	public static final String CODEGEN_USE_MARKDOWN= "org.eclipse.jdt.ui.usemarkdown"; //$NON-NLS-1$
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
@@ -271,7 +273,8 @@ public class StubUtility {
 	 * @see CodeGeneration#getFileComment(ICompilationUnit, String)
 	 */
 	public static String getFileComment(ICompilationUnit cu, String lineDelimiter) throws CoreException {
-		Template template= getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, cu.getJavaProject());
+		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		Template template= getCodeTemplate(useMarkdown ? CodeTemplateContextType.MARKDOWNFILECOMMENT_ID : CodeTemplateContextType.FILECOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}
@@ -288,7 +291,8 @@ public class StubUtility {
 	 * @see CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
 	 */
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String[] params, String lineDelim) throws CoreException {
-		Template template= getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, cu.getJavaProject());
+		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		Template template= getCodeTemplate(useMarkdown ? CodeTemplateContextType.MARKDOWNTYPECOMMENT_ID : CodeTemplateContextType.TYPECOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}
@@ -424,12 +428,13 @@ public class StubUtility {
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames,
 			IMethod target, boolean delegate, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.METHODCOMMENT_ID;
+		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		String templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID : CodeTemplateContextType.METHODCOMMENT_ID;
 		if (retTypeSig == null) {
-			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
+			templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNCONSTRUCTORCOMMENT_ID : CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
 		} else if (target != null) {
 			if (delegate)
-				templateName= CodeTemplateContextType.DELEGATECOMMENT_ID;
+				templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID : CodeTemplateContextType.DELEGATECOMMENT_ID;
 			else
 				templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
 		}
@@ -521,7 +526,8 @@ public class StubUtility {
 	 */
 	public static String getModuleComment(ICompilationUnit cu, String moduleName, String[] providesNames,
 			String[] usesNames, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.MODULECOMMENT_ID;
+		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		String templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNMODULECOMMENT_ID : CodeTemplateContextType.MODULECOMMENT_ID;
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
@@ -596,7 +602,8 @@ public class StubUtility {
 	 * Don't use this method directly, use CodeGeneration.
 	 */
 	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
-		Template template= getCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, cu.getJavaProject());
+		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		Template template= getCodeTemplate(useMarkdown ? CodeTemplateContextType.MARKDOWNFIELDCOMMENT_ID : CodeTemplateContextType.FIELDCOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
 		}
@@ -615,7 +622,8 @@ public class StubUtility {
 	 */
 	public static String getSetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter)
 			throws CoreException {
-		String templateName= CodeTemplateContextType.SETTERCOMMENT_ID;
+		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		String templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNSETTERCOMMENT_ID : CodeTemplateContextType.SETTERCOMMENT_ID;
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
@@ -638,7 +646,8 @@ public class StubUtility {
 	 * @see CodeGeneration#getGetterComment(ICompilationUnit, String, String, String, String, String, String)
 	 */
 	public static String getGetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
-		String templateName= CodeTemplateContextType.GETTERCOMMENT_ID;
+		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		String templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNGETTERCOMMENT_ID : CodeTemplateContextType.GETTERCOMMENT_ID;
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
@@ -695,12 +704,13 @@ public class StubUtility {
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isDeprecated, String targetName, String targetMethodDeclaringTypeName,
 			String[] targetMethodParameterTypeNames, boolean delegate, String lineDelimiter) throws CoreException {
 		boolean needsTarget= targetMethodDeclaringTypeName != null && targetMethodParameterTypeNames != null;
-		String templateName= CodeTemplateContextType.METHODCOMMENT_ID;
+		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		String templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID : CodeTemplateContextType.METHODCOMMENT_ID;
 		if (decl.isConstructor()) {
-			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
+			templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNCONSTRUCTORCOMMENT_ID : CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
 		} else if (needsTarget) {
 			if (delegate)
-				templateName= CodeTemplateContextType.DELEGATECOMMENT_ID;
+				templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID : CodeTemplateContextType.DELEGATECOMMENT_ID;
 			else
 				templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
 		}
@@ -1629,6 +1639,10 @@ public class StubUtility {
 
 	public static boolean doAddComments(IJavaProject project) {
 		return Boolean.parseBoolean(JavaManipulation.getPreference(CODEGEN_ADD_COMMENTS, project));
+	}
+
+	public static boolean useMarkdown(IJavaProject project) {
+		return JavaModelUtil.is23OrHigher(project) && Boolean.parseBoolean(JavaManipulation.getPreference(CODEGEN_USE_MARKDOWN, project));
 	}
 
 	/**

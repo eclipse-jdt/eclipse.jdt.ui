@@ -104,7 +104,7 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.jdt.ui.examples.projects",
 			"org.eclipse.jdt.ui.tests.refactoring",
 			"org.eclipse.jface.databinding",
-			"org.eclipse.jface.text",
+//			"org.eclipse.jface.text", https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2503
 			"org.eclipse.jface.text.tests",
 			"org.eclipse.ltk.core.refactoring.tests",
 			"org.eclipse.ltk.ui.refactoring.tests",

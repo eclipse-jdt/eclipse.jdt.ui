@@ -68,6 +68,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 		super(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 	}
 
+	@Deprecated
 	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
@@ -83,6 +84,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 	 * @param unit
 	 *            the compilation unit to set
 	 */
+	@Deprecated
 	public void setCompilationUnit(final ICompilationUnit unit) {
 		Assert.isNotNull(unit);
 		fUnit= unit;
@@ -94,6 +96,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 	 * @param name
 	 *            the non-empty new name to set
 	 */
+	@Deprecated
 	public void setNewName(final String name) {
 		Assert.isNotNull(name);
 		Assert.isLegal(!"".equals(name), "Name must not be empty"); //$NON-NLS-1$//$NON-NLS-2$
@@ -107,6 +110,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 	 * @param selection
 	 *            the selection to set
 	 */
+	@Deprecated
 	public void setSelection(final ISourceRange selection) {
 		Assert.isNotNull(selection);
 		fSelection= selection;
@@ -122,10 +126,12 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 	 *            <code>true</code> to update references, <code>false</code>
 	 *            otherwise
 	 */
+	@Deprecated
 	public void setUpdateReferences(final boolean update) {
 		fReferences= update;
 	}
 
+	@Deprecated
 	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();

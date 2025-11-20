@@ -23,9 +23,16 @@ public class JUnitRuntimeClasspathEntry {
 
 	private final String fPluginRelativePath;
 
+	private final String fVersion;
+
 	public JUnitRuntimeClasspathEntry(String pluginId, String jarFile) {
+		this(pluginId, jarFile, null);
+	}
+
+	public JUnitRuntimeClasspathEntry(String pluginId, String jarFile, String version) {
 		fPluginId = pluginId;
 		fPluginRelativePath = jarFile;
+		fVersion = version;
 	}
 
 	public String getPluginId() {
@@ -36,13 +43,17 @@ public class JUnitRuntimeClasspathEntry {
 		return fPluginRelativePath;
 	}
 
+	public String getVersion() {
+		return fVersion;
+	}
+
 	public JUnitRuntimeClasspathEntry developmentModeEntry() {
-		return new JUnitRuntimeClasspathEntry(getPluginId(), "bin"); //$NON-NLS-1$
+		return new JUnitRuntimeClasspathEntry(getPluginId(), "bin", getVersion()); //$NON-NLS-1$
 	}
 
 	@Override
 	public String toString() {
-		return "ClasspathEntry(" + fPluginId + "/" + fPluginRelativePath + ")"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		return "ClasspathEntry(" + fPluginId + "/" + fPluginRelativePath + "[" + fVersion + "])"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	@Override
@@ -52,11 +63,17 @@ public class JUnitRuntimeClasspathEntry {
 		JUnitRuntimeClasspathEntry other = (JUnitRuntimeClasspathEntry) obj;
 		if (!fPluginId.equals(other.getPluginId()))
 			return false;
-		return Objects.equals(fPluginRelativePath,other.getPluginRelativePath());
+		if (!Objects.equals(fPluginRelativePath,other.getPluginRelativePath())) {
+			return false;
+		}
+		if (!Objects.equals(fVersion,other.getVersion())) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(fPluginId,fPluginRelativePath);
+		return Objects.hash(fPluginId,fPluginRelativePath,fVersion);
 	}
 }

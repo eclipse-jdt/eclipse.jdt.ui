@@ -1333,6 +1333,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_descriptor_description_short;
 
+	public static String MoveInstanceMethodProcessor_generic_type_possible_error;
+
 	public static String MoveInstanceMethodProcessor_inline_inaccurate;
 
 	public static String MoveInstanceMethodProcessor_inline_method_invocation;

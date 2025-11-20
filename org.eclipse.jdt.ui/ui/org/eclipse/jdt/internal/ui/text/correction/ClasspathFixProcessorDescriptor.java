@@ -175,7 +175,8 @@ public final class ClasspathFixProcessorDescriptor {
 		final ArrayList<ClasspathFixProposal> proposals= new ArrayList<>();
 
 		final HashSet<String> overriddenIds= new HashSet<>();
-		for (ClasspathFixProcessorDescriptor curr : getCorrectionProcessors()) {
+		ClasspathFixProcessorDescriptor[] correctionProcessors= getCorrectionProcessors();
+		for (ClasspathFixProcessorDescriptor curr : correctionProcessors) {
 			if (!overriddenIds.contains(curr.getID())) {
 				SafeRunner.run(new ISafeRunnable() {
 					@Override

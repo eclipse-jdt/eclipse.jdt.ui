@@ -240,7 +240,7 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 	}
 
 	private void performSmartIndentAfterNewLine() {
-		fAccessor.invoke("clearCachedValues", null, null);
+		fAccessor.invoke("clearCachedValues", (Class<?>[]) null, (Object[]) null);
 		fAccessor.invoke("smartIndentAfterNewLine", new Class[] { IDocument.class, DocumentCommand.class }, new Object[] { fDocument, fDocumentCommand });
 		fCommandAccessor.invoke("execute", new Class[] { IDocument.class }, new Object[] { fDocument });
 	}

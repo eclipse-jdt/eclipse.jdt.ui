@@ -86,6 +86,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * @param root the workspace root
 	 * @param mainpage the main page of the wizard
 	 */
+	@Deprecated
 	public NewJavaProjectWizardPage(IWorkspaceRoot root, WizardNewProjectCreationPage mainpage) {
 		super(PAGE_NAME);
 
@@ -106,6 +107,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
      * @see org.eclipse.jface.dialogs.DialogPage#dispose()
      * @since 3.3
      */
+	@Deprecated
     @Override
 	public void dispose() {
     	try {
@@ -134,6 +136,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 *
 	 * @param path the folder to be taken as the default output path
 	 */
+	@Deprecated
 	public void setDefaultOutputFolder(IPath path) {
 		fOutputLocation= path;
 		setProjectModified();
@@ -157,6 +160,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * @param appendDefaultJRE <code>true</code> a variable entry for the
 	 *  default JRE (specified in the preferences) will be added to the classpath.
 	 */
+	@Deprecated
 	public void setDefaultClassPath(IClasspathEntry[] entries, boolean appendDefaultJRE) {
 		if (entries != null && appendDefaultJRE) {
 			IClasspathEntry[] jreEntry= NewJavaProjectPreferencePage.getDefaultJRELibrary();
@@ -175,6 +179,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 *
 	 * @since 2.0
 	 */
+	@Deprecated
 	public void setProjectModified() {
 		fProjectModified= true;
 	}
@@ -186,6 +191,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 *
 	 * @return the project handle
 	 */
+	@Deprecated
 	protected IProject getProjectHandle() {
 		Assert.isNotNull(fMainPage);
 		return fMainPage.getProjectHandle();
@@ -198,6 +204,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 *
 	 * @return the project location path
 	 */
+	@Deprecated
 	protected IPath getLocationPath() {
 		Assert.isNotNull(fMainPage);
 		return fMainPage.getLocationPath();
@@ -210,10 +217,12 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * @return the Java project handle
 	 * @see #getProjectHandle()
 	 */
+	@Deprecated
 	public IJavaProject getNewJavaProject() {
 		return JavaCore.create(getProjectHandle());
 	}
 
+	@Deprecated
 	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
@@ -235,6 +244,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 *
 	 * @since 2.0
 	 */
+	@Deprecated
 	protected void initBuildPaths() {
 		fBuildPathsBlock.init(getNewJavaProject(), fOutputLocation, fClasspathEntries);
 	}
@@ -247,6 +257,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * @param visible if <code>true</code> the page becomes visible; otherwise
 	 * it becomes invisible
 	 */
+	@Deprecated
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -274,6 +285,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 *
 	 * @since 2.0
 	 */
+	@Deprecated
 	public IPath getOutputLocation() {
 		return fBuildPathsBlock.getOutputLocation();
 	}
@@ -286,6 +298,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 *
 	 * @since 2.0
 	 */
+	@Deprecated
 	public IClasspathEntry[] getRawClassPath() {
 		return fBuildPathsBlock.getRawClassPath();
 	}
@@ -301,6 +314,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 *
 	 * @return the runnable
 	 */
+	@Deprecated
 	public IRunnableWithProgress getRunnable() {
 		return monitor -> {
 			if (monitor == null) {

@@ -317,7 +317,8 @@ public class JavaTextTools {
 	 * @return the partition managing position categories or <code>null</code> if there is none
 	 * @deprecated As of 3.0, replaced by {@link org.eclipse.jface.text.TextUtilities#computePartitionManagingCategories(IDocument)}
 	 */
-	@Deprecated
+	@SuppressWarnings("removal")
+	@Deprecated(forRemoval= true, since="2025-12")
 	public String[] getPartitionManagingPositionCategories() {
 		return new String[] { org.eclipse.jface.text.rules.DefaultPartitioner.CONTENT_TYPES_CATEGORY };
 	}

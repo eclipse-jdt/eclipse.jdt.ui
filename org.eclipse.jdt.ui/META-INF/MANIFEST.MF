@@ -108,7 +108,7 @@ Require-Bundle:
  org.eclipse.jface.text;bundle-version="[3.20.0,4.0.0)",
  org.eclipse.ui;bundle-version="[3.117.0,4.0.0)",
  org.eclipse.ui.console;bundle-version="[3.4.0,4.0.0)",
- org.eclipse.ui.workbench;bundle-version="[3.131.0,4.0.0)",
+ org.eclipse.ui.workbench;bundle-version="[3.136.0,4.0.0)",
  org.eclipse.ui.workbench.texteditor;bundle-version="[3.10.0,4.0.0)",
  org.eclipse.ui.ide;bundle-version="[3.15.0,4.0.0)",
  org.eclipse.ui.views;bundle-version="[3.3.100,4.0.0)",

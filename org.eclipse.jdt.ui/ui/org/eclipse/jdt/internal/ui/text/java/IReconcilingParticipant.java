@@ -27,5 +27,6 @@ public interface IReconcilingParticipant {
 	/**
 	 * Called after reconciling has been finished.
 	 */
+	@Deprecated
 	void reconciled();
 }

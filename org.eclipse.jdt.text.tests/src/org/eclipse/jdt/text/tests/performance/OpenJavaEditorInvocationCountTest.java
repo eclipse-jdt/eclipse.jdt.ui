@@ -38,6 +38,7 @@ public class OpenJavaEditorInvocationCountTest extends OpenEditorTest {
 
 	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
 
+	@Deprecated
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -45,12 +46,14 @@ public class OpenJavaEditorInvocationCountTest extends OpenEditorTest {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Deprecated
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
 	}
 
+	@Deprecated
 	public void test() throws Exception {
 		InvocationCountPerformanceMeter performanceMeter= createInvocationCountPerformanceMeter(new Method[] {
 			PresentationReconciler.class.getDeclaredMethod("createPresentation", IRegion.class, IDocument.class),

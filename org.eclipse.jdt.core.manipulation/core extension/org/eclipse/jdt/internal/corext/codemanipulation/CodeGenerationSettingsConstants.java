@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,14 @@ public class CodeGenerationSettingsConstants {
 	 * </p>
 	 */
 	public static final String CODEGEN_USE_OVERRIDE_ANNOTATION= "org.eclipse.jdt.ui.overrideannotation"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether to use markdown comments (Java 23 and up)
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String CODEGEN_USE_MARKDOWN= "org.eclipse.jdt.ui.usemarkdown"; //$NON-NLS-1$
 
 	/**
 	 * A named preferences that controls if types that start with a lower case letters get added by the

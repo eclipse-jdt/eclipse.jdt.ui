@@ -62,11 +62,15 @@ public class JUnitTestPlugin extends AbstractUIPlugin {
 	public enum JUnitVersion {
 		JUNIT3("org.eclipse.jdt.junit.loader.junit3"), //$NON-NLS-1$
 		JUNIT4("org.eclipse.jdt.junit.loader.junit4"), //$NON-NLS-1$
-		JUNIT5("org.eclipse.jdt.junit.loader.junit5"); //$NON-NLS-1$
+		JUNIT5("org.eclipse.jdt.junit.loader.junit5"), //$NON-NLS-1$
+		/**
+		 * @since 1.3
+		 */
+		JUNIT6("org.eclipse.jdt.junit.loader.junit6"); //$NON-NLS-1$
 
 		public final String junitTestKindId;
 
-		private JUnitVersion(String junitTestKindId) {
+		JUnitVersion(String junitTestKindId) {
 			this.junitTestKindId = junitTestKindId;
 		}
 
@@ -132,6 +136,9 @@ public class JUnitTestPlugin extends AbstractUIPlugin {
 			IJavaProject project = element.getJavaProject();
 			if (isRunWithJUnitPlatform(element)) {
 				return JUnitVersion.JUNIT4;
+			}
+			if (CoreTestSearchEngine.hasJUnit6TestAnnotation(project)) {
+				return JUnitVersion.JUNIT6;
 			}
 			if (CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
 				return JUnitVersion.JUNIT5;

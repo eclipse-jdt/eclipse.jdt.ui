@@ -28,7 +28,7 @@
             id="org.eclipse.jdt.junit.containerComparator">
       </launchConfigurationComparator>
    </extension>
-   
+
    <extension
          point="org.eclipse.jdt.core.classpathVariableInitializer">
       <classpathVariableInitializer
@@ -44,7 +44,7 @@
             readOnly="true">
       </classpathVariableInitializer>
    </extension>
-         
+
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
@@ -60,9 +60,9 @@
          point="org.eclipse.core.runtime.preferences">
       <initializer class="org.eclipse.jdt.internal.junit.JunitPreferenceInitializer"/>
    </extension>
-   
+
     <!-- JUnit Container -->
-   
+
    <extension
       point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
@@ -70,7 +70,7 @@
             id="org.eclipse.jdt.junit.JUNIT_CONTAINER">
       </classpathContainerInitializer>
    </extension>
-   
+
    <extension
          point="org.eclipse.jdt.junit.internal_testKinds">
       <kind
@@ -79,19 +79,19 @@
             finderClass="org.eclipse.jdt.internal.junit.launcher.JUnit3TestFinder"
             loaderPluginId="org.eclipse.jdt.junit.runtime"
             loaderClass="org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader">
-         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime"/>     	
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime"/>
       </kind>
    </extension>
    <extension
          point="org.eclipse.jdt.junit.internal_testKinds">
       <kind
             id="org.eclipse.jdt.junit.loader.junit4"
-            displayName="%testKind.junit4" 
+            displayName="%testKind.junit4"
             finderClass="org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder"
             loaderPluginId="org.eclipse.jdt.junit4.runtime"
             loaderClass="org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader">
          <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit4.runtime" />
-         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime"/>     	
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime"/>
       </kind>
    </extension>
       <extension
@@ -103,6 +103,18 @@
             loaderPluginId="org.eclipse.jdt.junit5.runtime"
             loaderClass="org.eclipse.jdt.internal.junit5.runner.JUnit5TestLoader">
          <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit5.runtime" />
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" />
+      </kind>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.junit.internal_testKinds">
+      <kind
+            id="org.eclipse.jdt.junit.loader.junit6"
+            displayName="%testKind.junit6"
+            finderClass="org.eclipse.jdt.internal.junit.launcher.JUnit5TestFinder"
+            loaderPluginId="org.eclipse.jdt.junit6.runtime"
+            loaderClass="org.eclipse.jdt.internal.junit6.runner.JUnit6TestLoader">
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit6.runtime" />
          <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" />
       </kind>
    </extension>
@@ -130,5 +142,5 @@
             </parameter>
          </describer>
       </content-type>
-   </extension>   
+   </extension>
 </plugin>

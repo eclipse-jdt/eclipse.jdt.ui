@@ -128,7 +128,8 @@ public class TestKind implements ITestKind {
 			IConfigurationElement element= children[i];
 			String pluginID= element.getAttribute(ITestKind.CLASSPATH_PLUGIN_ID);
 			String pathToJar= element.getAttribute(ITestKind.CLASSPATH_PATH_TO_JAR);
-			returnThis[i]= new JUnitRuntimeClasspathEntry(pluginID, pathToJar);
+			String version= element.getAttribute(ITestKind.CLASSPATH_JAR_VERSION);
+			returnThis[i]= new JUnitRuntimeClasspathEntry(pluginID, pathToJar, version);
 		}
 		return returnThis;
 	}

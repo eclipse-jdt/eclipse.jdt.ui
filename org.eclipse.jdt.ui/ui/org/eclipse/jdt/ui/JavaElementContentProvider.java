@@ -53,16 +53,20 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavaElementContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
 
 	/** The tree viewer */
+	@Deprecated
 	protected TreeViewer fViewer;
 	/** The input object */
+	@Deprecated
 	protected Object fInput;
 
+	@Deprecated
 	@Override
 	public void dispose() {
 		super.dispose();
 		JavaCore.removeElementChangedListener(this);
 	}
 
+	@Deprecated
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
@@ -77,6 +81,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
+	@Deprecated
 	public JavaElementContentProvider() {
 	}
 
@@ -91,10 +96,12 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	 *
 	 * @since 2.0
 	 */
+	@Deprecated
 	public JavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
 		super(provideMembers, provideWorkingCopy);
 	}
 
+	@Deprecated
 	@Override
 	public void elementChanged(final ElementChangedEvent event) {
 		try {
@@ -113,6 +120,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	 *
 	 * @throws JavaModelException if an error occurs while processing the delta
 	 */
+	@Deprecated
 	protected void processDelta(IJavaElementDelta delta) throws JavaModelException {
 		int kind= delta.getKind();
 		int flags= delta.getFlags();

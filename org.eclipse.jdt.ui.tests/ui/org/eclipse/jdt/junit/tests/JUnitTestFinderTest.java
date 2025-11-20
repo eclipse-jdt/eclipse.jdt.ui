@@ -55,6 +55,9 @@ import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
 @RunWith(Parameterized.class)
 public class JUnitTestFinderTest {
+
+	private static final String JUNIT6= "JUnit6";
+
 	private static record TestScenario(String name, IPath containerEntry, Consumer<IJavaProject> setCompilerOptions, String testKindId) {
 
 		@Override
@@ -69,7 +72,8 @@ public class JUnitTestFinderTest {
 	@Parameters(name = "{0}")
 	public static Collection<TestScenario> getTestScenarios() {
 		return List.of(new TestScenario("JUnit4", JUnitCore.JUNIT4_CONTAINER_PATH, JavaProjectHelper::set18CompilerOptions, TestKindRegistry.JUNIT4_TEST_KIND_ID), //
-				new TestScenario("JUnit5", JUnitCore.JUNIT5_CONTAINER_PATH, JavaProjectHelper::set18CompilerOptions, TestKindRegistry.JUNIT5_TEST_KIND_ID));
+				new TestScenario("JUnit5", JUnitCore.JUNIT5_CONTAINER_PATH, JavaProjectHelper::set18CompilerOptions, TestKindRegistry.JUNIT5_TEST_KIND_ID), //
+				new TestScenario(JUNIT6, JUnitCore.JUNIT6_CONTAINER_PATH, JavaProjectHelper::set18CompilerOptions, TestKindRegistry.JUNIT6_TEST_KIND_ID));
 	}
 
 	@Parameter
@@ -78,7 +82,12 @@ public class JUnitTestFinderTest {
 	@Before
 	public void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
-		JavaProjectHelper.addRTJar(fProject);
+		if (JUNIT6.equals(fScenario.name)) {
+			// JUnit 6 requires minimum JRE 17
+			JavaProjectHelper.addRTJar_17(fProject, false);
+		} else {
+			JavaProjectHelper.addRTJar(fProject);
+		}
 		IClasspathEntry cpe= JavaCore.newContainerEntry(fScenario.containerEntry());
 		JavaProjectHelper.addToClasspath(fProject, cpe);
 
@@ -98,6 +107,7 @@ public class JUnitTestFinderTest {
 	 */
 	@Test
 	public void testTestCase() throws Exception {
+		Assume.assumeFalse("Vintage engine is deprecated in JUnit6, JDT doesn't support it", JUNIT6.equals(fScenario.name));
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String str= """
 			package p;
@@ -159,7 +169,8 @@ public class JUnitTestFinderTest {
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.Outer.InnerTest" });
 
 		// Only private classes are invisible for JUnit5
-		String innerClassVisibility= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fScenario.testKindId()) ? "private" : "";
+		String testKindId= fScenario.testKindId();
+		String innerClassVisibility= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId) ? "private" : "";
 		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
@@ -246,6 +257,7 @@ public class JUnitTestFinderTest {
 
 	@Test
 	public void testRunWith() throws Exception {
+		Assume.assumeFalse("Vintage engine is deprecated in JUnit6, JDT doesn't support it", JUNIT6.equals(fScenario.name));
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String str= """
 			package p;
@@ -380,6 +392,7 @@ public class JUnitTestFinderTest {
 
 	@Test
 	public void testTestAnnotation() throws Exception {
+		Assume.assumeFalse("Vintage engine is deprecated in JUnit6, JDT doesn't support it", JUNIT6.equals(fScenario.name));
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String str= """
 			package p;
@@ -475,7 +488,7 @@ public class JUnitTestFinderTest {
 
 	@Test
 	public void testTestAnnotation2() throws Exception {
-
+		Assume.assumeFalse("Vintage engine is deprecated in JUnit6, JDT doesn't support it", JUNIT6.equals(fScenario.name));
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String str= """
 			package p;
@@ -499,7 +512,7 @@ public class JUnitTestFinderTest {
 	@Test
 	public void testInnerClassWithNestedAnnotationIsFound() throws Exception {
 
-		Assume.assumeTrue("@Nested only works with JUnit5", fScenario.testKindId().equals(TestKindRegistry.JUNIT5_TEST_KIND_ID));
+		Assume.assumeTrue("@Nested only works with JUnit Jupiter", fScenario.testKindId().equals(TestKindRegistry.JUNIT5_TEST_KIND_ID) || fScenario.testKindId().equals(TestKindRegistry.JUNIT6_TEST_KIND_ID));
 
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String content= """

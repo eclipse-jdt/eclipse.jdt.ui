@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2025 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -961,7 +961,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testDoNotConvertToSwitchExpressionNoAssignment() throws Exception {
+	public void testConvertToSwitchExpressionNoAssignment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
@@ -989,11 +989,29 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+		sample= """
+				package test1;
+
+				public class E1 {
+				    public int foo(int j) {
+				        // return value
+				        int i = 0;
+				        switch (j) {
+				            case 1 -> System.out.println("here");
+				            case 2 -> i = 7; // value 7
+				            default -> i = 8; // value 8
+				        };
+				        return i;
+				    }
+				}
+				""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
-	public void testDoNotConvertToSwitchExpressionNoLastAssignment() throws Exception {
+	public void testConvertToSwitchExpressionNoLastAssignment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
@@ -1022,7 +1040,29 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+		sample= """
+				package test1;
+
+				public class E1 {
+				    public int foo(int j) {
+				        // return value
+				        int i = 0;
+				        switch (j) {
+				            case 1 -> {
+				                i = 6; // assignment not last statement
+				                System.out.println("here");
+				            }
+				            case 2 -> i = 7; // value 7
+				            default -> i = 8; // value 8
+				        };
+				        return i;
+				    }
+				}
+				""";
+
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1098,7 +1138,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testDoNotConvertToSwitchExpressionReturn() throws Exception {
+	public void testConvertToSwitchExpressionReturn() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
@@ -1125,11 +1165,31 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+		sample= """
+				package test1;
+
+				public class E1 {
+				    public int foo(int j) {
+				        // return value
+				        int i;
+				        switch (j) {
+				            case 1 -> {
+				                return 6; // we don't support return
+				            }
+				            case 2 -> i = 7; // value 7
+				            default -> i = 8; // value 8
+				        };
+				        return i;
+				    }
+				}
+				""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
-	public void testDoNotConvertToSwitchExpressionBug578128() throws Exception {
+	public void testConvertToSwitchExpressionBug578128() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
@@ -1161,7 +1221,26 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+		sample= """
+			package test1;
+
+			public class E1 {
+			    public static void main(String[] args) {
+			        boolean rulesOK = true;
+			        switch (args[0].charAt(0)) {
+			            case '+' -> args[0] = "+";
+			            case '~' -> args[0] = "~";
+			            case '-' -> args[0] = "-";
+			            case '?' -> args[0] = "?";
+			            default -> rulesOK = false;
+			        };
+			        System.out.println(rulesOK);
+			    }
+			}
+			""";
+			String expected1= sample;
+
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -1189,4 +1268,101 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
+	public void testDoNotRemoveParenthesesIssue2451_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+				public Integer getInteger(int i) {
+					return (switch (i) {
+						case 0 -> Integer.valueOf(4);
+						case 1 -> Integer.valueOf(5);
+						default -> Integer.valueOf(0);
+					}).intValue();
+				}
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotRemoveParenthesesIssue2451_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+				public int getInteger(int i) {
+					return (switch (i) {
+						case 0 -> Integer.valueOf(4);
+						case 1 -> Integer.valueOf(5);
+						default -> Integer.valueOf(0);
+					}).MAX_VALUE;
+				}
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testRemoveParenthesesIssue2451_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+
+				public int getInt(Integer i) {
+					return i.intValue();
+				}
+
+				public int getInteger(int i) {
+					return getInt((switch (i) {
+						case 0 -> Integer.valueOf(4);
+						case 1 -> Integer.valueOf(5);
+						default -> Integer.valueOf(0);
+					}));
+				}
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		String expected= """
+				package test1;
+
+				public class E1 {
+
+					public int getInt(Integer i) {
+						return i.intValue();
+					}
+
+					public int getInteger(int i) {
+						return getInt(switch (i) {
+							case 0 -> Integer.valueOf(4);
+							case 1 -> Integer.valueOf(5);
+							default -> Integer.valueOf(0);
+						});
+					}
+				}
+				"""; //
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
 }

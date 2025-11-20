@@ -38,6 +38,7 @@ public class JavaElementSorter extends ViewerSorter {
 	/**
 	 * Constructor.
 	 */
+	@Deprecated
 	public JavaElementSorter() {
 		super(null); // delay initialization of collator
 		fComparator= new JavaElementComparator();
@@ -59,6 +60,7 @@ public class JavaElementSorter extends ViewerSorter {
 	/*
 	 * @see ViewerSorter#category
 	 */
+	@Deprecated
 	@Override
 	public int category(Object element) {
 		return fComparator.category(element);
@@ -67,6 +69,7 @@ public class JavaElementSorter extends ViewerSorter {
 	/*
 	 * @see ViewerSorter#compare
 	 */
+	@Deprecated
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		return fComparator.compare(viewer, e1, e2);

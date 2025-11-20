@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -105,7 +105,19 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 
 				if (returnStatement != null) {
 					bodyExpression= returnStatement.getExpression();
-					actionType= ActionType.REMOVE_RETURN;
+					if (bodyExpression == null) {
+						// do not remove empty returns if they are the only statement in the lambda
+						// and they are commented
+						CompilationUnit cu= (CompilationUnit)visited.getRoot();
+						if (cu.getExtendedStartPosition(returnStatement) < returnStatement.getStartPosition() ||
+								cu.getExtendedLength(returnStatement) > returnStatement.getLength()) {
+							actionType= ActionType.DO_NOTHING;
+						} else {
+							actionType= ActionType.REMOVE_RETURN;
+						}
+					} else {
+						actionType= ActionType.REMOVE_RETURN;
+					}
 				}
 			} else if (visited.getBody() instanceof Expression) {
 				bodyExpression= (Expression) visited.getBody();
@@ -393,7 +405,9 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 						copyOfLambdaExpression2.setParentheses(false);
 					}
 
-					copyOfLambdaExpression2.setBody(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, bodyExpression)));
+					if (bodyExpression != null) {
+						copyOfLambdaExpression2.setBody(ASTNodeFactory.parenthesizeIfNeeded(ast, ASTNodes.createMoveTarget(rewrite, bodyExpression)));
+					}
 					ASTNodes.replaceButKeepComment(rewrite, visited, copyOfLambdaExpression2, group);
 					break;
 

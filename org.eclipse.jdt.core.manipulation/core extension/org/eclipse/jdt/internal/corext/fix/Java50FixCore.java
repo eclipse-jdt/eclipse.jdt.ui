@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -166,9 +166,11 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 	}
 
 	public static boolean isMissingDeprecationProblem(int id) {
-		return id == IProblem.FieldMissingDeprecatedAnnotation
-				|| id == IProblem.MethodMissingDeprecatedAnnotation
-				|| id == IProblem.TypeMissingDeprecatedAnnotation;
+		return switch(id) {
+			case IProblem.FieldMissingDeprecatedAnnotation, IProblem.MethodMissingDeprecatedAnnotation,
+				IProblem.TypeMissingDeprecatedAnnotation, IProblem.MemberOfDeprecatedTypeNotDeprecated -> true;
+			default -> false;
+		};
 	}
 
 	private static Java50FixCore createFix(CompilationUnit compilationUnit, IProblemLocation problem, String annotation, String label) {

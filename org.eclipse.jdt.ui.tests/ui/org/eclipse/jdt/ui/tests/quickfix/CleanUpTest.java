@@ -78,7 +78,7 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 public class CleanUpTest extends CleanUpTestCase {
@@ -4107,6 +4107,42 @@ public class CleanUpTest extends CleanUpTestCase {
 			JavaProjectHelper.delete(project);
 		}
 
+	}
+
+	@Test
+	public void testCodeStyleIssue2494() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+			public class E1 {
+				public void foo(int a) {
+					if (a == 3) // is 3
+						System.out.println("3");
+					else // value is 2
+						System.out.println("2");
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+
+		sample= """
+			package test1;
+			public class E1 {
+				public void foo(int a) {
+					if (a == 3) { // is 3
+			        	System.out.println("3");
+			        } else { // value is 2
+			        	System.out.println("2");
+			        }
+				}
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
@@ -17080,6 +17116,18 @@ public class CleanUpTest extends CleanUpTestCase {
 			            return;
 			        }
 			    }
+
+				private interface I1 {
+					void run(int i);
+				}
+
+				public void doNotRemoveCommentLambdaReturn() {
+					I1 i1= i -> {
+						return; // do nothing
+					};
+					i1.run(3);
+				}
+
 			}
 			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
@@ -28035,6 +28083,52 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testAddFinalIssue2492() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= """
+			package test;
+			public class E<R> {
+				interface K {
+					void run();
+				}
+				private R key;
+
+				private K k = () -> {
+					System.out.println(key);
+				};
+
+				public FinalIssue(R key) {
+					this.key= key;
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+
+		String expected= """
+				package test;
+				public class E<R> {
+					interface K {
+						void run();
+					}
+					private R key;
+
+					private final K k = () -> {
+						System.out.println(key);
+					};
+
+					public FinalIssue(R key) {
+						this.key= key;
+					}
+				}
+				""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected}, null);
+	}
+
+	@Test
 	public void testAddFinalBug129807() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
@@ -30219,7 +30313,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("E02.java", sample, false, null);
 
-		enable(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT);
+		enable(UnimplementedCodeCleanUpCore.MAKE_TYPE_ABSTRACT);
 
 		sample= """
 			package test;

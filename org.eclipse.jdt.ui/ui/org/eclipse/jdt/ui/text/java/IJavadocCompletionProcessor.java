@@ -36,6 +36,7 @@ public interface IJavadocCompletionProcessor {
 	 * Specifies that only proposals should be returned that match
 	 * the case of the prefix in the code (value: <code>1</code>).
 	 */
+	@Deprecated
 	int RESTRICT_TO_MATCHING_CASE= 1;
 
 
@@ -50,6 +51,7 @@ public interface IJavadocCompletionProcessor {
 	 * @return	an array of context information objects or <code>null</code>
 	 * 				if no context could be found
 	 */
+	@Deprecated
 	IContextInformation[] computeContextInformation(ICompilationUnit cu, int offset);
 
 
@@ -67,6 +69,7 @@ public interface IJavadocCompletionProcessor {
 	 * @return an array of completion proposals or <code>null</code> if
 	 *				no proposals could be found
      */
+	@Deprecated
 	IJavaCompletionProposal[] computeCompletionProposals(ICompilationUnit cu, int offset, int length, int flags);
 
 
@@ -76,5 +79,6 @@ public interface IJavadocCompletionProcessor {
 	 *
 	 * @return an error message or <code>null</code> if no error occurred
 	 */
+	@Deprecated
 	String getErrorMessage();
 }

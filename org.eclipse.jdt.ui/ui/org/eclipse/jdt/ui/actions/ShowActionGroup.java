@@ -56,6 +56,7 @@ public class ShowActionGroup extends ActionGroup {
 	 *
 	 * @param page the page that owns this action group
 	 */
+	@Deprecated
 	public ShowActionGroup(Page page) {
 		this(page.getSite());
 	}
@@ -67,6 +68,7 @@ public class ShowActionGroup extends ActionGroup {
 	 *
 	 * @param part the view part that owns this action group
 	 */
+	@Deprecated
 	public ShowActionGroup(IViewPart part) {
 		this(part.getSite());
 		fIsPackageExplorer= part instanceof PackageExplorerPart;
@@ -78,6 +80,7 @@ public class ShowActionGroup extends ActionGroup {
 	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
+	@Deprecated
 	public ShowActionGroup(JavaEditor part) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(part);
 		fShowInPackagesViewAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
@@ -103,12 +106,14 @@ public class ShowActionGroup extends ActionGroup {
 		}
 	}
 
+	@Deprecated
 	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
 	}
 
+	@Deprecated
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
@@ -120,6 +125,7 @@ public class ShowActionGroup extends ActionGroup {
 	/*
 	 * @see ActionGroup#dispose()
 	 */
+	@Deprecated
 	@Override
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();

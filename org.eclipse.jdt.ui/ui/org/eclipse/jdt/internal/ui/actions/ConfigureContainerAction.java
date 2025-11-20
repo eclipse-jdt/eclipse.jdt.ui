@@ -53,6 +53,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 	/*
 	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 	 */
+	@Deprecated
 	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		fPart= targetPart;
@@ -61,6 +62,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#run(IAction)
 	 */
+	@Deprecated
 	@Override
 	public void run(IAction action) {
 		if (fCurrentSelection instanceof IStructuredSelection) {
@@ -112,6 +114,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 		}
 	}
 
+	@Deprecated
 	protected static int indexInClasspath(IClasspathEntry[] entries, IClasspathEntry entry) {
 		for (int i= 0; i < entries.length; i++) {
 			if (entries[i] == entry) {
@@ -124,6 +127,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
+	@Deprecated
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fCurrentSelection= selection;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -124,8 +124,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		@Override
 		public Object[] getChildren(TreeListDialogField<String> field, Object element) {
-			if (element == COMMENT_NODE || element == CODE_NODE) {
-				return getTemplateOfCategory(element == COMMENT_NODE);
+			if (element == COMMENT_NODE || element == MARKDOWN_COMMENT_NODE || element == CODE_NODE) {
+				return getTemplateOfCategory(element == COMMENT_NODE, element == MARKDOWN_COMMENT_NODE);
 			}
 			return NO_CHILDREN;
 		}
@@ -134,6 +134,9 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		public Object getParent(TreeListDialogField<String> field, Object element) {
 			if (element instanceof TemplatePersistenceData) {
 				TemplatePersistenceData data= (TemplatePersistenceData) element;
+				if (data.getTemplate().getName().startsWith(CodeTemplateContextType.MARKDOWN_COMMENT_PREFIX)) {
+					return MARKDOWN_COMMENT_NODE;
+				}
 				if (data.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
 					return COMMENT_NODE;
 				}
@@ -144,13 +147,15 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		@Override
 		public boolean hasChildren(TreeListDialogField<String> field, Object element) {
-			return (element == COMMENT_NODE || element == CODE_NODE);
+			return (element == COMMENT_NODE || element == CODE_NODE  || element == MARKDOWN_COMMENT_NODE);
 		}
 
 		@Override
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fGenerateComments) {
 				setValue(PREF_GENERATE_COMMENTS, fGenerateComments.isSelected());
+			} else if (field == fUseMarkdown) {
+				setValue(PREF_USE_MARKDOWN, fUseMarkdown.isSelected());
 			}
 		}
 
@@ -162,8 +167,10 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		public int category(Object element) {
 			if (element == COMMENT_NODE) {
 				return 1;
-			} else if (element == CODE_NODE) {
+			} else if (element == MARKDOWN_COMMENT_NODE) {
 				return 2;
+			} else if (element == CODE_NODE) {
+				return 3;
 			}
 
 			TemplatePersistenceData data= (TemplatePersistenceData) element;
@@ -213,6 +220,24 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 						return 9;
 					case CodeTemplateContextType.MODULECOMMENT_ID:
 						return 10;
+					case CodeTemplateContextType.MARKDOWNFILECOMMENT_ID:
+						return 11;
+					case CodeTemplateContextType.MARKDOWNTYPECOMMENT_ID:
+						return 12;
+					case CodeTemplateContextType.MARKDOWNFIELDCOMMENT_ID:
+						return 13;
+					case CodeTemplateContextType.MARKDOWNCONSTRUCTORCOMMENT_ID:
+						return 14;
+					case CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID:
+						return 15;
+					case CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID:
+						return 17;
+					case CodeTemplateContextType.MARKDOWNGETTERCOMMENT_ID:
+						return 18;
+					case CodeTemplateContextType.MARKDOWNSETTERCOMMENT_ID:
+						return 19;
+					case CodeTemplateContextType.MARKDOWNMODULECOMMENT_ID:
+						return 20;
 					default:
 						break;
 				}
@@ -231,7 +256,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		@Override
 		public String getText(Object element) {
-			if (element == COMMENT_NODE || element == CODE_NODE) {
+			if (element == COMMENT_NODE || element == CODE_NODE || element == MARKDOWN_COMMENT_NODE) {
 				return (String) element;
 			}
 			TemplatePersistenceData data= (TemplatePersistenceData) element;
@@ -261,24 +286,33 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 					case CodeTemplateContextType.ANNOTATIONBODY_ID:
 						return PreferencesMessages.CodeTemplateBlock_annotationbody_label;
 					case CodeTemplateContextType.FILECOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNFILECOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_filecomment_label;
 					case CodeTemplateContextType.TYPECOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNTYPECOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_typecomment_label;
 					case CodeTemplateContextType.FIELDCOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNFIELDCOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_fieldcomment_label;
 					case CodeTemplateContextType.METHODCOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_methodcomment_label;
 					case CodeTemplateContextType.OVERRIDECOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_overridecomment_label;
 					case CodeTemplateContextType.DELEGATECOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_delegatecomment_label;
 					case CodeTemplateContextType.CONSTRUCTORCOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNCONSTRUCTORCOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_constructorcomment_label;
 					case CodeTemplateContextType.GETTERCOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNGETTERCOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_gettercomment_label;
 					case CodeTemplateContextType.SETTERCOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNSETTERCOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_settercomment_label;
 					case CodeTemplateContextType.MODULECOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNMODULECOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_modulecomment_label;
 					default:
 						break;
@@ -289,10 +323,11 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	private static final Key PREF_GENERATE_COMMENTS= getJDTUIKey(PreferenceConstants.CODEGEN_ADD_COMMENTS);
+	private static final Key PREF_USE_MARKDOWN= getJDTUIKey(PreferenceConstants.CODEGEN_USE_MARKDOWN);
 
 	private static Key[] getAllKeys() {
 		return new Key[] {
-			PREF_GENERATE_COMMENTS
+			PREF_GENERATE_COMMENTS, PREF_USE_MARKDOWN
 		};
 	}
 
@@ -302,10 +337,12 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	private final static int IDX_EXPORTALL= 4;
 
 	protected final static String COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_comment_node;
+	protected final static String MARKDOWN_COMMENT_NODE= PreferencesMessages.CodeTemplateBlock_templates_markdown_comment_node;
 	protected final static String CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node;
 
 	private TreeListDialogField<String> fCodeTemplateTree;
 	private SelectionButtonDialogField fGenerateComments;
+	private SelectionButtonDialogField fUseMarkdown;
 
 	protected ProjectTemplateStore fTemplateStore;
 
@@ -347,6 +384,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		fCodeTemplateTree.enableButton(IDX_EDIT, false);
 
 		fCodeTemplateTree.addElement(COMMENT_NODE);
+		fCodeTemplateTree.addElement(MARKDOWN_COMMENT_NODE);
 		fCodeTemplateTree.addElement(CODE_NODE);
 
 		fCodeTemplateTree.selectFirstElement();
@@ -354,6 +392,10 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		fGenerateComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
 		fGenerateComments.setDialogFieldListener(adapter);
 		fGenerateComments.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_label);
+
+		fUseMarkdown= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
+		fUseMarkdown.setDialogFieldListener(adapter);
+		fUseMarkdown.setLabelText(PreferencesMessages.CodeTemplateBlock_usemarkdown_label);
 
 		updateControls();
 	}
@@ -406,6 +448,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		addActionsToPatternViewer(fPatternViewer);
 
 		fGenerateComments.doFillIntoGrid(composite, 2);
+		fUseMarkdown.doFillIntoGrid(composite, 2);
 
 		return composite;
 	}
@@ -413,6 +456,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	@Override
 	protected void updateControls() {
 		fGenerateComments.setSelection(getBooleanValue(PREF_GENERATE_COMMENTS));
+		fUseMarkdown.setSelection(getBooleanValue(PREF_USE_MARKDOWN));
 	}
 
 	private SourceViewer createViewer(Composite parent, int nColumns) {
@@ -487,11 +531,21 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			fPatternViewerCopyAction.update();
 	}
 
-	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment) {
+	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment, boolean isMarkdownComment) {
 		ArrayList<TemplatePersistenceData> res=  new ArrayList<>();
 		for (TemplatePersistenceData curr : fTemplateStore.getTemplateData()) {
-			if (isComment == curr.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
-				res.add(curr);
+			if (curr.getTemplate().getName().startsWith(CodeTemplateContextType.MARKDOWN_COMMENT_PREFIX)) {
+				if (isMarkdownComment) {
+					res.add(curr);
+				}
+			} else if (curr.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
+				if (isComment) {
+					res.add(curr);
+				}
+			} else {
+				if (!isComment && !isMarkdownComment) {
+					res.add(curr);
+				}
 			}
 		}
 		return res.toArray(new TemplatePersistenceData[res.size()]);
@@ -501,6 +555,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		return selected.size() == 1 && (selected.get(0) instanceof TemplatePersistenceData);
 	}
 
+	@SuppressWarnings("deprecation")
 	protected void updateSourceViewerInput(List<Object> selection) {
 		if (fPatternViewer == null || fPatternViewer.getTextWidget().isDisposed()) {
 			return;
@@ -595,7 +650,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			if (curr instanceof TemplatePersistenceData) {
 				datas.add(curr);
 			} else {
-				TemplatePersistenceData[] cat= getTemplateOfCategory(curr == COMMENT_NODE);
+				TemplatePersistenceData[] cat= getTemplateOfCategory(curr == COMMENT_NODE, curr == MARKDOWN_COMMENT_NODE);
 				datas.addAll(Arrays.asList(cat));
 			}
 		}

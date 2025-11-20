@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,17 +39,22 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IModuleBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -77,6 +82,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
 
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddImportCorrectionProposalCore;
 
 
 /**
@@ -220,6 +226,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		private Set<String> fOldSingleImports;
 		private Set<String> fOldDemandImports;
+		private Map<String, Set<String>> fOldModuleImports;
 
 		private Set<String> fImplicitImports;
 
@@ -232,19 +239,24 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private IPackageFragment fCurrPackage;
 
 		private ScopeAnalyzer fAnalyzer;
+		private CompilationUnit fRoot;
 
 		private Map<String, UnresolvedTypeData> fUnresolvedTypes;
 		private Set<String> fImportsAdded;
+		private Set<String> fModuleImportsAdded;
 		private TypeNameMatch[][] fOpenChoices;
 		private SourceRange[] fSourceRanges;
 
 
-		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher) {
+		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, Map<String, Set<String>> oldModuleImports,
+				CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
+			fOldModuleImports= oldModuleImports;
 			fImpStructure= impStructure;
 			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
 			fUnresolvableImportMatcher= unresolvableImportMatcher;
+			fRoot= root;
 
 			ICompilationUnit cu= impStructure.getCompilationUnit();
 
@@ -253,11 +265,32 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fImplicitImports.add("java.lang"); //$NON-NLS-1$
 			fImplicitImports.add(cu.getParent().getElementName());
 
+			if (root.getAST().apiLevel() >= AST.JLS25) {
+				try {
+					IType[] types= cu.getAllTypes();
+					if (types.length > 0 && types[0].isImplicitlyDeclared()) {
+						IJavaProject javaProject= cu.getJavaProject();
+						if (javaProject != null) {
+							IModuleDescription module= javaProject.findModule(AddImportCorrectionProposalCore.JAVA_BASE, cu.getOwner());
+							if (module != null) {
+								for (String packageName: module.getExportedPackageNames(null)) {
+									fImplicitImports.add(packageName);
+								}
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
+			}
+
+
 			fAnalyzer= new ScopeAnalyzer(root);
 
 			fCurrPackage= (IPackageFragment) cu.getParent();
 
 			fImportsAdded= new HashSet<>();
+			fModuleImportsAdded= new HashSet<>();
 			fUnresolvedTypes= new HashMap<>();
 		}
 
@@ -323,6 +356,26 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				typeBinding= typeBinding.getTypeDeclaration();
 				if (!typeBinding.isRecovered()) {
+					String qualifiedTypeName= typeBinding.getQualifiedName();
+					if (qualifiedTypeName.indexOf('.') > 0) {
+						String qualifier= qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf('.'));
+						Entry<String, Set<String>> entry= getModuleImportsEntryForQualifier(qualifier);
+						if (entry != null) {
+							if (fModuleImportsAdded.contains(entry.getKey())) {
+								fImportsAdded.add(typeName);
+							} else {
+								fImpStructure.addModuleImport(entry.getKey(), new ArrayList<>(entry.getValue()));
+								fModuleImportsAdded.add(entry.getKey());
+							}
+							if (!fOldModuleImports.isEmpty() && typeNameAmbiguousForImportedModules(typeName)) {
+								fImpStructure.addImport(typeBinding, UNRESOLVABLE_IMPORT_CONTEXT);
+							}
+							return;
+						}
+						if (fImplicitImports.contains(qualifier)) {
+							return;
+						}
+					}
 					if (needsImport(typeBinding, ref)) {
 						fImpStructure.addImport(typeBinding);
 						fImportsAdded.add(typeName);
@@ -340,6 +393,29 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			fImportsAdded.add(typeName);
 			fUnresolvedTypes.put(typeName, new UnresolvedTypeData(ref));
+		}
+
+		private boolean typeNameAmbiguousForImportedModules(String typeName) {
+			IJavaProject project= fCurrPackage.getJavaProject();
+			List<ImportDeclaration> imports= fRoot.imports();
+			ITypeBinding typeBinding= null;
+			for (ImportDeclaration importDecl : imports) {
+				if (Modifier.isModule(importDecl.getModifiers())) {
+					if (importDecl.resolveBinding() instanceof IModuleBinding binding) {
+						List<IPackageBinding> packageBindings= ImportRewrite.getPackageBindingsForModule(binding, project);
+						for (IPackageBinding packageBinding : packageBindings) {
+							ITypeBinding foundTypeBinding= packageBinding.findTypeBinding(typeName);
+							if (foundTypeBinding != null) {
+								if (typeBinding != null) {
+									return true;
+								}
+								typeBinding= foundTypeBinding;
+							}
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 		public boolean process(IProgressMonitor monitor) throws JavaModelException {
@@ -408,11 +484,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return null;
 			} else if (nFound == 1) {
 				TypeNameMatch typeRef= typeRefsFound.get(0);
-				fImpStructure.addImport(typeRef.getFullyQualifiedName());
+				if (getModuleImportsEntryForQualifier(typeRef.getTypeContainerName()) == null) {
+					fImpStructure.addImport(typeRef.getFullyQualifiedName());
+				}
 				return null;
 			} else {
 				String typeToImport= null;
 				boolean ambiguousImports= false;
+				boolean foundInModule= false;
 
 				// multiple found, use old imports to find an entry
 				for (int i= 0; i < nFound; i++) {
@@ -429,17 +508,40 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						} else {  // more than one import-on-demand
 							ambiguousImports= true;
 						}
+					} else {
+						Entry<String, Set<String>> entry= getModuleImportsEntryForQualifier(containerName);
+						foundInModule= true;
+						if (entry != null) {
+							if (typeToImport == null) {
+								typeToImport= fullName;
+							} else { // more than one import module
+								ambiguousImports= true;
+							}
+						}
 					}
 				}
 
 				if (typeToImport != null && !ambiguousImports) {
-					fImpStructure.addImport(typeToImport);
+					if (!foundInModule) { // we only add an import if not already covered by an import module
+						fImpStructure.addImport(typeToImport);
+					}
 					return null;
 				}
 				// return the open choices
 				return typeRefsFound.toArray(new TypeNameMatch[nFound]);
 			}
 		}
+
+		private Entry<String, Set<String>> getModuleImportsEntryForQualifier(String qualifier) {
+			for (Entry<String, Set<String>> entry : fOldModuleImports.entrySet()) {
+				Set<String> packageNames= entry.getValue();
+				if (packageNames.contains(qualifier)) {
+					return entry;
+				}
+			}
+			return null;
+		}
+
 
 		private boolean isOfKind(TypeNameMatch curr, int typeKinds) {
 			int flags= curr.getModifiers();
@@ -587,10 +689,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		Set<String> oldSingleImports= new HashSet<>();
 		Set<String> oldDemandImports= new HashSet<>();
+		Map<String, Set<String>> oldModulePackages= new HashMap<>();
 		List<SimpleName> typeReferences= new ArrayList<>();
 		List<SimpleName> staticReferences= new ArrayList<>();
 
-		if (!collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports))
+		if (!collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports, oldModulePackages))
 			return null;
 
 		subMonitor.split(1);
@@ -600,6 +703,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		TypeReferenceProcessor processor= new TypeReferenceProcessor(
 				oldSingleImports,
 				oldDemandImports,
+				oldModulePackages,
 				astRoot,
 				importsRewrite,
 				fIgnoreLowerCaseNames,
@@ -650,6 +754,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		List<String> importsAdded= new ArrayList<>(importsStructure.getCreatedImports().length + importsStructure.getCreatedStaticImports().length);
 		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedImports()));
 		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedStaticImports()));
+		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedModuleImports()));
 
 		for (Object element : oldSingleImports.toArray()) {
 			String importName= (String) element;
@@ -734,7 +839,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 
 	// find type references in a compilation unit
-	private boolean collectReferences(CompilationUnit astRoot, List<SimpleName> typeReferences, List<SimpleName> staticReferences, Set<String> oldSingleImports, Set<String> oldDemandImports) {
+	private boolean collectReferences(CompilationUnit astRoot, List<SimpleName> typeReferences, List<SimpleName> staticReferences, Set<String> oldSingleImports,
+			Set<String> oldDemandImports, Map<String, Set<String>> oldModuleImports) {
 		if (!fAllowSyntaxErrors) {
 			for (IProblem curr : astRoot.getProblems()) {
 				if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0) {
@@ -744,16 +850,24 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 		List<ImportDeclaration> imports= astRoot.imports();
+		IJavaProject project= fCompilationUnit.getJavaProject();
 		for (ImportDeclaration curr : imports) {
 			String id= ASTResolving.getFullName(curr.getName());
-			if (curr.isOnDemand()) {
+			if (Modifier.isModule(curr.getModifiers())) {
+				Set<String> oldModulePackages= new HashSet<>();
+				oldModuleImports.put(id, oldModulePackages);
+				if (curr.resolveBinding() instanceof IModuleBinding binding) {
+					List<String> exportedPackageNames=
+							ImportRewrite.getPackageNamesForModule(binding, project);
+					oldModulePackages.addAll(exportedPackageNames);
+				}
+			} else if (curr.isOnDemand()) {
 				oldDemandImports.add(id);
 			} else {
 				oldSingleImports.add(id);
 			}
 		}
 
-		IJavaProject project= fCompilationUnit.getJavaProject();
 		ImportReferencesCollector.collect(astRoot, project, null, typeReferences, staticReferences);
 
 		return true;

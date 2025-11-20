@@ -221,7 +221,7 @@ public class WorkingSetDropAdapterTest {
 	private void setWorkingSets(IWorkingSet[] workingSets) {
 		WorkingSetModel model= fPackageExplorer.getWorkingSetModel();
 		if (model == null) {
-			fPackageExplorerPartAccessor.invoke("createWorkingSetModel", null);
+			fPackageExplorerPartAccessor.invoke("createWorkingSetModel", (Object[]) null);
 			model= fPackageExplorer.getWorkingSetModel();
 		}
 		model.setActiveWorkingSets(workingSets);

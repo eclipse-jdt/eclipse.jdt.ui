@@ -39,11 +39,13 @@ public class CleanUpOptionsCore {
 	/**
 	 * True value
 	 */
+	@Deprecated
 	public static final String TRUE= "true"; //$NON-NLS-1$
 
 	/**
 	 * False value
 	 */
+	@Deprecated
 	public static final String FALSE= "false"; //$NON-NLS-1$
 
 	/**
@@ -52,6 +54,7 @@ public class CleanUpOptionsCore {
 	 * @param options map that maps clean ups keys (<code>String</code>) to a non-<code>null</code>
 	 *            string value
 	 */
+	@Deprecated
 	public CleanUpOptionsCore(Map<String, String> options) {
 		fOptions= options;
 	}
@@ -59,6 +62,7 @@ public class CleanUpOptionsCore {
 	/**
 	 * Creates a new instance.
 	 */
+	@Deprecated
 	public CleanUpOptionsCore() {
 		fOptions= new Hashtable<>();
 	}
@@ -71,6 +75,7 @@ public class CleanUpOptionsCore {
 	 * @throws IllegalArgumentException if the key is <code>null</code>
 	 * @see CleanUpConstants
 	 */
+	@Deprecated
 	public boolean isEnabled(String key) {
 		Assert.isLegal(key != null);
 		Object value= fOptions.get(key);
@@ -84,6 +89,7 @@ public class CleanUpOptionsCore {
 	 * @return the value associated with the key
 	 * @throws IllegalArgumentException if the key is null or unknown
 	 */
+	@Deprecated
 	public String getValue(String key) {
 		Assert.isLegal(key != null);
 		String value= fOptions.get(key);
@@ -100,6 +106,7 @@ public class CleanUpOptionsCore {
 	 * @see CleanUpOptionsCore#TRUE
 	 * @see CleanUpOptionsCore#FALSE
 	 */
+	@Deprecated
 	public void setOption(String key, String value) {
 		Assert.isLegal(key != null);
 		Assert.isLegal(value != null);
@@ -111,6 +118,7 @@ public class CleanUpOptionsCore {
 	 *
 	 * @return an unmodifiable set of all keys
 	 */
+	@Deprecated
 	public Set<String> getKeys() {
 		return Collections.unmodifiableSet(fOptions.keySet());
 	}

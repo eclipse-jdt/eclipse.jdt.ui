@@ -48,6 +48,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 		return fgTemplates;
 	}
 
+	@Deprecated
 	public Templates() {
 		super("template", JavaPlugin.getDefault().getTemplateContextRegistry()); //$NON-NLS-1$
 		create();
@@ -74,6 +75,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	 *
 	 * @throws CoreException in case the reset operation fails
 	 */
+	@Deprecated
 	public void reset() throws CoreException {
 	}
 
@@ -82,6 +84,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	 *
 	 * @throws CoreException in case the restore operation fails
 	 */
+	@Deprecated
 	public void restoreDefaults() throws CoreException {
 	}
 
@@ -90,6 +93,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	 *
 	 * @throws CoreException in case the save operation fails
 	 */
+	@Deprecated
 	public void save() throws CoreException {
 	}
 

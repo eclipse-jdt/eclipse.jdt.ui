@@ -29,11 +29,14 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
@@ -173,8 +176,31 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 			buf.append("();"); //$NON-NLS-1$
 			buf.append(lineDelim);
 		} else {
-			buf.append("() {"); //$NON-NLS-1$
+			buf.append("("); //$NON-NLS-1$
+			if (fType.isRecord() && fReturnTypeSig == null) {
+				IField[] components= fType.getRecordComponents();
+				String separator= ""; //$NON-NLS-1$
+				for (IField component : components) {
+					buf.append(separator + Signature.toString(component.getTypeSignature()));
+					buf.append(" " + component.getElementName()); //$NON-NLS-1$
+					separator= ", "; //$NON-NLS-1$
+				}
+			}
+			buf.append(") {"); //$NON-NLS-1$
 			buf.append(lineDelim);
+			if (fType.isRecord() && fReturnTypeSig == null) {
+				IJavaProject javaProject= impRewrite.getCompilationUnit().getJavaProject();
+				StringBuilder sb= new StringBuilder();
+				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
+					sb.append(' ');
+				sb.append('=');
+				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
+					sb.append(' ');
+				IField[] components= fType.getRecordComponents();
+				for (IField component : components) {
+					buf.append("\tthis." + component.getElementName() + sb.toString() + component.getElementName() + ";" + lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
 
 			String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", lineDelim); //$NON-NLS-1$
 			if (body != null) {

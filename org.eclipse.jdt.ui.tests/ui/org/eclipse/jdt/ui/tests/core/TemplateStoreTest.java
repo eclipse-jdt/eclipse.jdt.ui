@@ -64,6 +64,15 @@ public class TemplateStoreTest extends CoreTests {
 		CodeTemplateContextType.GETTERCOMMENT_ID,
 		CodeTemplateContextType.SETTERCOMMENT_ID,
 		CodeTemplateContextType.MODULECOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNFILECOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNTYPECOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNFIELDCOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNCONSTRUCTORCOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNGETTERCOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNSETTERCOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNMODULECOMMENT_ID,
 	};
 
 	private TemplatePersistenceData find(String id, TemplatePersistenceData[] templateData) {

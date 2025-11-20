@@ -49,13 +49,16 @@ public class JavaTypingInvocationCountTest extends TypingInvocationCountTest {
 
 	private static final Class<TypingInvocationCountTest> THIS= TypingInvocationCountTest.class;
 
+	@Deprecated
 	public JavaTypingInvocationCountTest() {
 		super();
 	}
+	@Deprecated
 	public JavaTypingInvocationCountTest(String name) {
 		super(name);
 	}
 
+	@Deprecated
 	public static Test suite() {
 		TestSuite suite= new TestSuite(THIS.getName());
 		suite.addTest(new JavaTypingInvocationCountTest("test00"));

@@ -773,6 +773,17 @@ public class CleanUpConstants {
 	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
 
 	/**
+	 * Replaces regular imports with module imports where possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.18
+	 */
+	public static final String USE_MODULE_IMPORTS= "cleanup.module_imports"; //$NON-NLS-1$
+
+	/**
 	 * Replace unnecessary primitive wrappers instance creations by using static factory {@code valueOf()} method.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

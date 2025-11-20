@@ -53,6 +53,7 @@ public class TestOptions {
 		store.setValue(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, true);
 		store.setValue(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME, "e"); //$NON-NLS-1$
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
+		store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, false);
 		store.setValue(PreferenceConstants.ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
 		store.setValue(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
 		store.setValue(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
