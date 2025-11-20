@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.wizards;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
@@ -123,7 +124,7 @@ public class NewModuleInfoWizardPage extends NewTypeWizardPage{
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= createScrollableContainer(parent);
 		composite.setFont(parent.getFont());
 		int nColumns= 2;
 
@@ -134,9 +135,10 @@ public class NewModuleInfoWizardPage extends NewTypeWizardPage{
 		createModuleInfoControls(composite, nColumns);
 		createCommentWithLinkControls(composite, nColumns, true);
 		enableCommentControl(true);
-
-		setControl(composite);
+		ScrolledComposite sc= (ScrolledComposite) composite.getParent();
+		setControl(sc);
 		Dialog.applyDialogFont(composite);
+	    sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 	}
 
