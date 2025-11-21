@@ -182,6 +182,7 @@ public class JUnitPreferencesConstants {
 		"org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit4.runner.*", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit5.runner.*", //$NON-NLS-1$
+		"org.eclipse.jdt.internal.junit6.runner.*", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit.ui.*", //$NON-NLS-1$
 		"junit.framework.TestCase", //$NON-NLS-1$
 		"junit.framework.TestResult", //$NON-NLS-1$
