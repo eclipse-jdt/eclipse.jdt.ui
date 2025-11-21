@@ -52,9 +52,6 @@ public class JavaPasteTest {
 
 	private static final int SRC_START_LINE= 5;
 
-	private static final int DEST_OFFSET= 70;
-	private static final int DEST_OFFSET2= 85;
-
 	private AbstractTextEditor fEditor;
 
 	private IJavaProject fJavaProject;
@@ -89,13 +86,25 @@ public class JavaPasteTest {
 
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(new Path("/Q/src/testA/B.java"));
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(file, true);
-		copyToClipboard(SRC_START_LINE);
-		performPaste(DEST_OFFSET);
-		performPaste(DEST_OFFSET2);
 		IDocument document= EditorTestHelper.getDocument(fEditor);
-		System.out.println(document.get());
-		String s= document.get(54, 103 - 54);
-		assertEquals(s, "    String x = \"\t\tint a = 3;\";\n        int a = 3;");
+		copyToClipboard(SRC_START_LINE);
+		String buffer= document.get();
+		String find= "String x = ";
+		int index= buffer.indexOf(find);
+		performPaste(index + find.length() + 1); // copy after opening quote of string
+		// verify tabs were not changed to spaces when pasted in a string
+		buffer= document.get();
+		String expectedString= "String x = \"\t\tint a = 3;\";";
+		String s= buffer.substring(index, index + expectedString.length());
+		assertEquals(expectedString, s);
+		int newlineIndex= buffer.substring(index).indexOf("\n");
+		int nextLineIndex= index + newlineIndex + 1;
+		performPaste(nextLineIndex); // copy after statement
+		// verify tabs were changed to spaces in second paste
+		buffer= document.get();
+		String expectedString2= "        int a = 3;";
+		String s2= buffer.substring(nextLineIndex, nextLineIndex + expectedString2.length());
+		assertEquals(expectedString2, s2);
 		EditorTestHelper.closeAllEditors();
 		store.setToDefault(PreferenceConstants.EDITOR_SMART_PASTE);
 		store.setToDefault(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE);
@@ -110,7 +119,6 @@ public class JavaPasteTest {
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(new Path("/P/src/testA/testB/A.java"));
 		ITextEditor editor= (ITextEditor) EditorTestHelper.openInEditor(file, true);
 		IDocument document= EditorTestHelper.getDocument(editor);
-		System.out.println(document.get());
 		int offset= document.getLineOffset(startLine);
 		editor.selectAndReveal(offset, document.getLineOffset(startLine + 1) - offset - 1);
 		runAction(editor.getAction(ITextEditorActionConstants.COPY));
@@ -119,7 +127,6 @@ public class JavaPasteTest {
 
 	private void performPaste(int destOffset) throws Exception {
 		IDocument document= EditorTestHelper.getDocument(fEditor);
-		System.out.println(document.get());
 		IAction paste= fEditor.getAction(ITextEditorActionConstants.PASTE);
 		dirty(document);
 		fEditor.selectAndReveal(destOffset, 0);
