@@ -161,7 +161,9 @@ public class CoreTestSearchEngine {
 
 	public static boolean hasJUnit5TestAnnotation(IJavaProject project) {
 		return hasJUnitJupiterTestAnnotation(project, 1, // we check JUnit 5 platform bundles, they range in [1.0,2.0)
-				JUnitCore.JUNIT3_CONTAINER_PATH, JUnitCore.JUNIT4_CONTAINER_PATH, JUnitCore.JUNIT6_CONTAINER_PATH);
+				JUnitCore.JUNIT3_CONTAINER_PATH, JUnitCore.JUNIT4_CONTAINER_PATH, JUnitCore.JUNIT6_CONTAINER_PATH)
+				|| hasJUnitJupiterTestAnnotation(project, 6,
+						JUnitCore.JUNIT3_CONTAINER_PATH, JUnitCore.JUNIT4_CONTAINER_PATH, JUnitCore.JUNIT6_CONTAINER_PATH);
 	}
 
 	public static boolean hasJUnit6TestAnnotation(IJavaProject project) {
