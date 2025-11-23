@@ -1237,14 +1237,14 @@ public class SemanticHighlightings {
 					ITypeBinding declaringClass= methodBinding.getDeclaringClass();
 					if (declaringClass == null)
 						return false;
-					if (declaringClass.isAnonymous()) {
+					if (declaringClass.isAnonymous() && methodBinding.isConstructor()) {
 						ITypeBinding[] interfaces= declaringClass.getInterfaces();
 						if (interfaces.length > 0)
 							return interfaces[0].isDeprecated();
 						else
 							return declaringClass.getSuperclass().isDeprecated();
 					}
-					return declaringClass.isDeprecated() && !(token.getNode().getParent() instanceof MethodDeclaration);
+					return declaringClass.isDeprecated() && (methodBinding.isDefaultConstructor() || methodBinding.isCanonicalConstructor());
 				} else if (binding instanceof IVariableBinding) {
 					IVariableBinding variableBinding= (IVariableBinding) binding;
 					ITypeBinding declaringClass= variableBinding.getDeclaringClass();

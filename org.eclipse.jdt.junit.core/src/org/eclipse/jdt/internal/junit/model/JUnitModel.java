@@ -144,10 +144,7 @@ public final class JUnitModel {
 		}
 	}
 
-	/**
-	 * @deprecated to prevent deprecation warnings
-	 */
-	@Deprecated
+	@SuppressWarnings("deprecation")
 	private static final class LegacyTestRunSessionListener implements ITestRunSessionListener {
 		private TestRunSession fActiveTestRunSession;
 		private ITestSessionListener fTestSessionListener;

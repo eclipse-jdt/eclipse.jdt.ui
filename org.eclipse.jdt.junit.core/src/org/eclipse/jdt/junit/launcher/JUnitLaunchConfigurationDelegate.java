@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.JUnitRuntimeClasspathEntry;
@@ -193,11 +194,21 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			String[] classpath= classpathAndModulepath[0];
 			String[] modulepath= classpathAndModulepath[1];
 
-			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId())) {
+			String testKindId= getTestRunnerKind(configuration).getId();
+			boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId);
+			boolean isJUnit6= TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
+			boolean isJUnitJupiter= isJUnit5 || isJUnit6;
+			if (isJUnitJupiter) {
+				String junitPlatformVersion = BuildPathSupport.JUNIT6_VERSION;
+				String junitJupiterVersion = BuildPathSupport.JUNIT6_VERSION;
+				if (isJUnit5) {
+					junitPlatformVersion = BuildPathSupport.JUNIT_PLATFORM_VERSION;
+					junitJupiterVersion = BuildPathSupport.JUNIT_JUPITER_VERSION;
+				}
 				if (!configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY, false)) {
-					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-platform-launcher") || s.contains("org.junit.platform.launcher"))) { //$NON-NLS-1$ //$NON-NLS-2$
+					if (!Arrays.stream(classpath).anyMatch(s -> s.contains(BuildPathSupport.JUNIT_PLATFORM_LAUNCHER) || s.contains("org.junit.platform.launcher"))) { //$NON-NLS-1$
 						try {
-							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("junit-platform-launcher", null); //$NON-NLS-1$
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry(BuildPathSupport.JUNIT_PLATFORM_LAUNCHER, null, junitPlatformVersion);
 							String entryString= new ClasspathLocalizer(Platform.inDevelopmentMode()).entryString(x);
 							int length= classpath.length;
 							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);
@@ -206,9 +217,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 							throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
 						}
 					}
-					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-jupiter-engine") || s.contains("org.junit.jupiter.engine"))) { //$NON-NLS-1$ //$NON-NLS-2$
+					if (!Arrays.stream(classpath).anyMatch(s -> s.contains(BuildPathSupport.JUNIT_JUPITER_ENGINE) || s.contains("org.junit.jupiter.engine"))) { //$NON-NLS-1$
 						try {
-							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("junit-jupiter-engine", null); //$NON-NLS-1$
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry(BuildPathSupport.JUNIT_JUPITER_ENGINE, null, junitJupiterVersion);
 							String entryString= new ClasspathLocalizer(false).entryString(x);
 							int length= classpath.length;
 							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);
@@ -217,9 +228,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 							throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
 						}
 					}
-					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-jupiter-api") || s.contains("org.junit.jupiter.api"))) { //$NON-NLS-1$ //$NON-NLS-2$
+					if (!Arrays.stream(classpath).anyMatch(s -> s.contains(BuildPathSupport.JUNIT_JUPITER_API) || s.contains("org.junit.jupiter.api"))) { //$NON-NLS-1$
 						try {
-							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("junit-jupiter-api", null); //$NON-NLS-1$
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry(BuildPathSupport.JUNIT_JUPITER_API, null, BuildPathSupport.JUNIT_JUPITER_VERSION);
 							String entryString= new ClasspathLocalizer(false).entryString(x);
 							int length= classpath.length;
 							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);
@@ -319,16 +330,23 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
 			}
 			ITestKind testKind= getTestRunnerKind(configuration);
-			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
-			boolean isJUnit5Configuration= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId());
-			if (!isJUnit5Configuration && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+			String testKindId= testKind.getId();
+			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId);
+			boolean isJUnit5Configuration= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId);
+			boolean isJUnit6Configuration= TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
+			boolean isJUnitJupiterConfiguration= isJUnit5Configuration || isJUnit6Configuration;
+			if (!isJUnitJupiterConfiguration && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 			if (isJUnit4Configuration && !CoreTestSearchEngine.hasJUnit4TestAnnotation(javaProject)) {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 			if (isJUnit5Configuration && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
-				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit5notonpath, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
+				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitjupiternotonpath, new Object[] {JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME, String.valueOf(5)});
+				abort(msg, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+			}
+			if (isJUnit6Configuration && !CoreTestSearchEngine.hasJUnit6TestAnnotation(javaProject)) {
+				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitjupiternotonpath, new Object[] {JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME, String.valueOf(6)});
 				abort(msg, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 		} finally {
@@ -398,11 +416,12 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		vmArguments.addAll(Arrays.asList(execArgs.getVMArgumentsArray()));
 		programArguments.addAll(Arrays.asList(execArgs.getProgramArgumentsArray()));
 
-		boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId());
+		String testKindId= getTestRunnerKind(configuration).getId();
+		boolean isJUnitJupiter= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
 		boolean isModularProject= JavaRuntime.isModularProject(getJavaProject(configuration));
 		String addOpensTargets;
 		if (isModularProject) {
-			if (isJUnit5) {
+			if (isJUnitJupiter) {
 				if (isOnModulePath(getJavaProject(configuration), "org.junit.jupiter.api.Test")) { //$NON-NLS-1$
 					addOpensTargets= "org.junit.platform.commons,ALL-UNNAMED"; //$NON-NLS-1$
 				} else {
@@ -766,16 +785,19 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		}
 
 		private String localURL(JUnitRuntimeClasspathEntry jar) throws IOException, MalformedURLException, URISyntaxException {
-			Bundle bundle= JUnitCorePlugin.getDefault().getBundle(jar.getPluginId());
-			URL url;
-			if (jar.getPluginRelativePath() == null) {
-				String bundleClassPath= bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH);
-				url= bundleClassPath != null ? bundle.getEntry(bundleClassPath) : null;
-				if (url == null) {
-					url= bundle.getEntry("/"); //$NON-NLS-1$
+			Bundle[] bundles= Platform.getBundles(jar.getPluginId(), jar.getVersion());
+			URL url = null;
+			if (bundles != null && bundles.length > 0) {
+				Bundle bundle = bundles[0];
+				if (jar.getPluginRelativePath() == null) {
+					String bundleClassPath= bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH);
+					url= bundleClassPath != null ? bundle.getEntry(bundleClassPath) : null;
+					if (url == null) {
+						url= bundle.getEntry("/"); //$NON-NLS-1$
+					}
+				} else {
+					url= bundle.getEntry(jar.getPluginRelativePath());
 				}
-			} else {
-				url= bundle.getEntry(jar.getPluginRelativePath());
 			}
 
 			if (url == null)

@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -35,11 +37,13 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java25ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class JavadocQuickFixTest25 extends QuickFixTest {
@@ -72,13 +76,24 @@ public class JavadocQuickFixTest25 extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, res, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, res, null);
 
+		String resMarkdown= """
+			/// A comment.
+			/// ${tags}""";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.MARKDOWNCONSTRUCTORCOMMENT_ID, resMarkdown, null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID, resMarkdown, null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.MARKDOWNTYPECOMMENT_ID, resMarkdown, null);
+
 		String str= """
 			/**
 			 * A field comment for ${field}.
 			 */""";
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, str, null);
 
-		String str1= """
+		String strMarkdown= """
+				 /// A field comment for ${field}.""";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.MARKDOWNFIELDCOMMENT_ID, strMarkdown, null);
+
+			String str1= """
 			/**
 			 * A override comment.
 			 * ${see_to_overridden}
@@ -593,8 +608,7 @@ public class JavadocQuickFixTest25 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			/**
-			 */
+			///
 			public class E<S, T> {
 			}
 			""";
@@ -605,10 +619,9 @@ public class JavadocQuickFixTest25 extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			/**
-			 * @param <S>\s
-			 * @param <T>\s
-			 */
+			///
+			/// @param <S>\s
+			/// @param <T>\s
 			public class E<S, T> {
 			}
 			""";
@@ -1100,8 +1113,52 @@ public class JavadocQuickFixTest25 extends QuickFixTest {
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
-		}
+	}
 
+	@Test
+	public void testMissingMethodComment5() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, true);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			String str= """
+					package test1;
+					import java.io.IOException;
+					/**
+					 */
+					public class E {
+					    public <A> void foo(int a) throws IOException {
+					    }
+					}
+					""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal);
+
+			String expected= """
+					package test1;
+					import java.io.IOException;
+					/**
+					 */
+					public class E {
+					    /// A comment.
+					    /// @param <A>
+					    /// @param a
+					    /// @throws IOException
+					    public <A> void foo(int a) throws IOException {
+					    }
+					}
+					""";
+			assertEqualString(preview1, expected);
+		} finally {
+			store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, false);
+		}
+	}
 
 	@Test
 	public void testMissingConstructorComment() throws Exception {
@@ -1144,6 +1201,50 @@ public class JavadocQuickFixTest25 extends QuickFixTest {
 	}
 
 	@Test
+	public void testMissingConstructorComment2() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, true);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			String str= """
+					package test1;
+					import java.io.IOException;
+					/**
+					 */
+					public class E {
+					    public E(int a) throws IOException {
+					    }
+					}
+					""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal);
+
+			String expected= """
+					package test1;
+					import java.io.IOException;
+					/**
+					 */
+					public class E {
+					    /// A comment.
+					    /// @param a
+					    /// @throws IOException
+					    public E(int a) throws IOException {
+					    }
+					}
+					""";
+			assertEqualString(preview1, expected);
+		} finally {
+			store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, false);
+		}
+	}
+
+	@Test
 	public void testMissingTypeComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
@@ -1171,6 +1272,40 @@ public class JavadocQuickFixTest25 extends QuickFixTest {
 			}
 			""";
 		assertEqualString(preview1, expected);
+	}
+
+	@Test
+	public void testMissingTypeComment2() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, true);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			String str= """
+					package test1;
+					public class E<A, B> {
+					}
+					""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal);
+
+			String expected= """
+					package test1;
+					/// A comment.
+					/// @param <A>
+					/// @param <B>
+					public class E<A, B> {
+					}
+					""";
+			assertEqualString(preview1, expected);
+		} finally {
+			store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, false);
+		}
 	}
 
 	@Test
@@ -1205,6 +1340,44 @@ public class JavadocQuickFixTest25 extends QuickFixTest {
 			}
 			""";
 		assertEqualString(preview1, expected);
+	}
+
+	@Test
+	public void testMissingFieldComment2() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, true);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			String str= """
+					package test1;
+					/**
+					 */
+					public class E {
+					    public static final int COLOR= 1;
+					}
+					""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal);
+
+			String expected= """
+					package test1;
+					/**
+					 */
+					public class E {
+					    /// A field comment for COLOR.
+					    public static final int COLOR= 1;
+					}
+					""";
+			assertEqualString(preview1, expected);
+		} finally {
+			store.setValue(PreferenceConstants.CODEGEN_USE_MARKDOWN, false);
+		}
 	}
 
 	@Test

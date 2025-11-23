@@ -444,22 +444,31 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	@Override
 	protected String getPatternText() {
 		String text= super.getPatternText();
-		fTypeItemsComparator.setOriginalPattern(text);
 		StringBuilder builder= new StringBuilder();
 		boolean canAddAnyStringNext= false;
+		boolean allUpperCase= true;
 		for (int i= 0; i < text.length(); ++i) {
 			char ch= text.charAt(i);
-			if (canAddAnyStringNext && Character.isUpperCase(ch)) {
+			boolean upperCase= Character.isUpperCase(ch);
+			allUpperCase &= upperCase;
+			if (canAddAnyStringNext && upperCase) {
 				builder.append('*');
 			}
 			builder.append(ch);
 			canAddAnyStringNext= canAddAnyStringNext(ch);
 		}
+		fTypeItemsComparator.setOriginalPattern(text);
+		// Default search is Camel Case but if there are any * or ? chars,
+		// it is a pattern search that is not case sensitive so if we are
+		// all caps (e.g. OOME or NPE), just pass the string along directly
+		if (allUpperCase) {
+			return text;
+		}
 		return builder.toString();
 	}
 
 	private boolean canAddAnyStringNext(char c) {
-		return !Character.isUpperCase(c) && c != '.' && c != '*';
+		return c != '.' && c != '*';
 	}
 
 	/**

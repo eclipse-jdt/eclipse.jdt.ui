@@ -142,7 +142,7 @@ public class JavadocTagsSubProcessor extends JavadocTagsBaseSubProcessor<IComman
 		}
 	}
 
-	private JavadocTagsSubProcessor() {
+	public JavadocTagsSubProcessor() {
 		super();
 	}
 

@@ -30,12 +30,16 @@ import org.eclipse.jdt.core.JavaCore;
 @Deprecated(forRemoval=true, since="2024-06")
 final public class CleanUpRequirementsCore {
 
+	@Deprecated
 	protected final boolean fRequiresAST;
 
+	@Deprecated
 	protected final Map<String, String> fCompilerOptions;
 
+	@Deprecated
 	protected final boolean fRequiresFreshAST;
 
+	@Deprecated
 	protected final boolean fRequiresChangedRegions;
 
 
@@ -47,6 +51,7 @@ final public class CleanUpRequirementsCore {
 	 * @param requiresChangedRegions <code>true</code> if changed regions are required
 	 * @param compilerOptions map of compiler options or <code>null</code> if no requirements
 	 */
+	@Deprecated
 	public CleanUpRequirementsCore(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map<String, String> compilerOptions) {
 		Assert.isLegal(!requiresFreshAST || requiresAST, "Must not request fresh AST if no AST is required"); //$NON-NLS-1$
 		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
@@ -69,6 +74,7 @@ final public class CleanUpRequirementsCore {
 	 *
 	 * @return <code>true</code> if the CleanUpContext context must provide an AST
 	 */
+	@Deprecated
 	public boolean requiresAST() {
 		return fRequiresAST;
 	}
@@ -79,6 +85,7 @@ final public class CleanUpRequirementsCore {
 	 *
 	 * @return <code>true</code> if the caller needs an up to date AST
 	 */
+	@Deprecated
 	public boolean requiresFreshAST() {
 		return fRequiresFreshAST;
 	}
@@ -89,6 +96,7 @@ final public class CleanUpRequirementsCore {
 	 * @return the compiler options map or <code>null</code> if none
 	 * @see JavaCore
 	 */
+	@Deprecated
 	public Map<String, String> getCompilerOptions() {
 		return fCompilerOptions;
 	}
@@ -108,6 +116,7 @@ final public class CleanUpRequirementsCore {
 	 * @return <code>true</code> if the CleanUpContext context must provide changed
 	 *         regions
 	 */
+	@Deprecated
 	public boolean requiresChangedRegions() {
 		return fRequiresChangedRegions;
 	}

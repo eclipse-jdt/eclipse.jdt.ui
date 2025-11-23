@@ -128,12 +128,12 @@ public class TestSearchEngine extends CoreTestSearchEngine {
 				methodNames.add(methodName);
 			}
 			boolean isJUnit3= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKindId);
-			boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId);
+			boolean isJUnitJupiter= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
 			if (!isJUnit3 && !Modifier.isPrivate(flags) && !Modifier.isStatic(flags)) {
 				IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
 				if (annotation.exists()) {
 					methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
-				} else if (isJUnit5) {
+				} else if (isJUnitJupiter) {
 					boolean hasAnyTestAnnotation= method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
 							|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
 							|| method.getAnnotation("TestTemplate").exists() //$NON-NLS-1$

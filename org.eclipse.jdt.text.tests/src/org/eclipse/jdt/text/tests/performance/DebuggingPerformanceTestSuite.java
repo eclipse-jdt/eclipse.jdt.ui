@@ -24,10 +24,12 @@ import junit.framework.TestSuite;
 @Deprecated
 public class DebuggingPerformanceTestSuite extends TestSuite {
 
+	@Deprecated
 	public static Test suite() {
 		return new PerformanceTestSetup(new DebuggingPerformanceTestSuite());
 	}
 
+	@Deprecated
 	public DebuggingPerformanceTestSuite() {
 		addTest(TextTypingInvocationCountTest.suite());
 		addTest(JavaTypingInvocationCountTest.suite());

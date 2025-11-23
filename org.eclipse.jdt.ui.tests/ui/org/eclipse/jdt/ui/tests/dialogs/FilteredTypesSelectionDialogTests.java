@@ -103,7 +103,8 @@ public class FilteredTypesSelectionDialogTests {
 		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2505
 		"java.lang.String, java.lang.String",
 		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2538
-		"OOME, java.lang.OutOfMemoryError"
+		"OOME, java.lang.OutOfMemoryError",
+		"OOfM, java.lang.OutOfMemoryError"
 	})
 	public void testWithSearchString(String pattern, String expectedType) {
 		dialog.setInitialPattern(pattern);

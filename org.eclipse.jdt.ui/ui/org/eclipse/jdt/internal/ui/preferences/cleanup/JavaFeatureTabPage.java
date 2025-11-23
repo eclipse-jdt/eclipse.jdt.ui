@@ -21,10 +21,10 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TryWithResourceCleanUp;
-import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
+import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VarCleanUpCore;
 
@@ -51,19 +51,19 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 				new SwitchExpressionsCleanUpCore(values),
 				new VarCleanUpCore(values),
 				new LambdaExpressionsCleanUpCore(values),
-				new ComparingOnCriteriaCleanUp(values),
+				new ComparingOnCriteriaCleanUpCore(values),
 				new JoinCleanUp(values),
 				new TryWithResourceCleanUp(values),
 				new StringConcatToTextBlockCleanUpCore(values),
 				new MultiCatchCleanUpCore(values),
-				new TypeParametersCleanUp(values),
+				new TypeParametersCleanUpCore(values),
 				new HashCleanUp(values),
 				new ObjectsEqualsCleanUp(values),
-				new ConvertLoopCleanUp(values),
-				new AutoboxingCleanUp(values),
+				new ConvertLoopCleanUpCore(values),
+				new AutoboxingCleanUpCore(values),
 				new UnboxingCleanUp(values),
 				new PatternInstanceofToSwitchCleanUpCore(values),
-				new ConstantsForSystemPropertyCleanUp(values)
+				new ConstantsForSystemPropertyCleanUpCore(values)
 		};
 	}
 

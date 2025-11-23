@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
 import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.OperandFactorizationCleanUp;
@@ -41,7 +41,7 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 				new TernaryOperatorCleanUp(values),
 				new StrictlyEqualOrDifferentCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
-				new ControlFlowMergeCleanUp(values),
+				new ControlFlowMergeCleanUpCore(values),
 				new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUpCore(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
 				new RedundantIfConditionCleanUp(values),

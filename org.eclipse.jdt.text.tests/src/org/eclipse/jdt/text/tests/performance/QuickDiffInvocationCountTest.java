@@ -48,6 +48,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 
 	private AbstractTextEditor fEditor;
 
+	@Deprecated
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -55,6 +56,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Deprecated
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -86,6 +88,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 	 *
 	 * @throws Exception in case of problems
 	 */
+	@Deprecated
 	public void test() throws Exception {
 		PerformanceMeter performanceMeter= createInvocationCountPerformanceMeter(QuickDiffRangeDifference.class.getConstructors());
 		performanceMeter.start();
@@ -100,6 +103,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Deprecated
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();

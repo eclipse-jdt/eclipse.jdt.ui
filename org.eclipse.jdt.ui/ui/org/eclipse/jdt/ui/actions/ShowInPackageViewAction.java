@@ -57,6 +57,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 *
 	 * @param site the site providing context information for this action
 	 */
+	@Deprecated
 	public ShowInPackageViewAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.ShowInPackageViewAction_label);
@@ -71,16 +72,19 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
+	@Deprecated
 	public ShowInPackageViewAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
+	@Deprecated
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
+	@Deprecated
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
@@ -92,6 +96,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		return selection.getFirstElement() instanceof IJavaElement;
 	}
 
+	@Deprecated
 	@Override
 	public void run(ITextSelection selection) {
 		try {
@@ -105,6 +110,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		}
 	}
 
+	@Deprecated
 	@Override
 	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
@@ -117,6 +123,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 *
 	 * @param element the element to reveal
 	 */
+	@Deprecated
 	public void run(IJavaElement element) {
 		if (element == null)
 			return;

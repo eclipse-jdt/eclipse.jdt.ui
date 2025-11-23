@@ -13,12 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
+
+import org.osgi.framework.Version;
 
 import org.eclipse.jdt.junit.JUnitCore;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
@@ -46,6 +50,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
@@ -54,6 +59,10 @@ import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
  * Custom Search engine for suite() methods
  */
 public class CoreTestSearchEngine {
+
+	private static final String JUNIT_PLATFORM_SUITE_API_PREFIX= BuildPathSupport.JUNIT_PLATFORM_SUITE_API;
+	private static final String JUNIT_PLATFORM_COMMONS_PREFIX= BuildPathSupport.JUNIT_PLATFORM_COMMONS;
+	private static final String JAR_EXTENSION= ".jar"; //$NON-NLS-1$
 
 	public static boolean isTestOrTestSuite(IType declaringType) throws CoreException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(declaringType);
@@ -143,18 +152,40 @@ public class CoreTestSearchEngine {
 	}
 
 	public static boolean hasJUnit5TestAnnotation(IJavaProject project) {
+		return hasJUnitJupiterTestAnnotation(project, 1, // we check JUnit 5 platform bundles, they range in [1.0,2.0)
+				JUnitCore.JUNIT3_CONTAINER_PATH, JUnitCore.JUNIT4_CONTAINER_PATH, JUnitCore.JUNIT6_CONTAINER_PATH);
+	}
+
+	public static boolean hasJUnit6TestAnnotation(IJavaProject project) {
+		return hasJUnitJupiterTestAnnotation(project, 6,
+				JUnitCore.JUNIT3_CONTAINER_PATH, JUnitCore.JUNIT4_CONTAINER_PATH, JUnitCore.JUNIT5_CONTAINER_PATH);
+	}
+
+	private static boolean hasJUnitJupiterTestAnnotation(IJavaProject project, int junitMajorVersion, IPath... disallowedJunitContainerPaths) {
 		try {
 			if (project != null) {
+				String junitBundlePrefix = JUNIT_PLATFORM_COMMONS_PREFIX;
 				IType type= project.findType(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
 				if (type == null) {
+					junitBundlePrefix = JUNIT_PLATFORM_SUITE_API_PREFIX;
 					type= project.findType(JUnitCorePlugin.JUNIT5_SUITE_ANNOTATION_NAME);
 				}
 				if (type != null) {
+					// check if we have the right JUnit JUpiter version
+					String filename= type.getPath().lastSegment();
+					if ((filename.startsWith(junitBundlePrefix + "_") || filename.startsWith(junitBundlePrefix + "-")) && filename.endsWith(JAR_EXTENSION)) { //$NON-NLS-1$ //$NON-NLS-2$
+						String versionString = filename.substring(junitBundlePrefix.length() + 1, filename.length() - JAR_EXTENSION.length());
+						Version version = new Version(versionString);
+						if (version.getMajor() != junitMajorVersion) {
+							return false;
+						}
+					}
 					// @Testable/@Suite annotations are not accessible if the JUnit classpath container is set to JUnit 3 or JUnit 4
 					// (although it may resolve to a JUnit 5 JAR)
 					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					IClasspathEntry cpEntry= root.getRawClasspathEntry();
-					return ! JUnitCore.JUNIT3_CONTAINER_PATH.equals(cpEntry.getPath()) && ! JUnitCore.JUNIT4_CONTAINER_PATH.equals(cpEntry.getPath());
+					IPath entryPath= cpEntry.getPath();
+					return !Arrays.asList(disallowedJunitContainerPaths).contains(entryPath);
 				}
 			}
 		} catch (JavaModelException e) {

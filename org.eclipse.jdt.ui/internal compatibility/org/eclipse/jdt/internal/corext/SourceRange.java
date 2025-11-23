@@ -31,15 +31,18 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	private final int fOffset;
 	private final int fLength;
 
+	@Deprecated
 	public SourceRange(int offset, int length){
 		fLength= length;
 		fOffset= offset;
 	}
 
+	@Deprecated
 	public SourceRange(ASTNode node) {
 		this(node.getStartPosition(), node.getLength());
 	}
 
+	@Deprecated
 	public SourceRange(IProblem problem) {
 		this(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1);
 	}
@@ -47,6 +50,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	/*
 	 * @see ISourceRange#getLength()
 	 */
+	@Deprecated
 	@Override
 	public int getLength() {
 		return fLength;
@@ -55,15 +59,18 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	/*
 	 * @see ISourceRange#getOffset()
 	 */
+	@Deprecated
 	@Override
 	public int getOffset() {
 		return fOffset;
 	}
 
+	@Deprecated
 	public int getEndExclusive() {
 		return getOffset() + getLength();
 	}
 
+	@Deprecated
 	public int getEndInclusive() {
 		return getEndExclusive() - 1;
 	}
@@ -71,6 +78,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	/*non java doc
 	 * for debugging only
 	 */
+	@Deprecated
 	@Override
 	public String toString(){
 		return "<offset: " + fOffset +" length: " + fLength + "/>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -82,6 +90,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	 * @param ranges the ranges to sort
 	 * @return the sorted ranges, which are identical to the parameter ranges
 	 */
+	@Deprecated
 	public static ISourceRange[] reverseSortByOffset(ISourceRange[] ranges){
 		Arrays.sort(ranges, Comparator.comparing(ISourceRange::getOffset).reversed());
 		return ranges;
@@ -90,6 +99,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
     /*
      * @see Object#equals(Object)
      */
+	@Deprecated
     @Override
 	public boolean equals(Object obj) {
     	if (! (obj instanceof ISourceRange))
@@ -100,15 +110,18 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
     /*
      * @see Object#hashCode()
      */
+	@Deprecated
     @Override
 	public int hashCode() {
         return fLength ^ fOffset;
     }
 
+	@Deprecated
     public boolean covers(ASTNode node) {
     	return covers(new SourceRange(node));
     }
 
+	@Deprecated
     public boolean covers(SourceRange range) {
     	return    getOffset() <= range.getOffset()
     	       	&& getEndInclusive() >= range.getEndInclusive();
@@ -121,6 +134,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
      * @param range a source range, can be <code>null</code>
      * @return <code>true</code> iff range is not null and range.getOffset() is not -1
      */
+	@Deprecated
     public static boolean isAvailable(ISourceRange range) {
     		return range != null && range.getOffset() != -1;
     }
