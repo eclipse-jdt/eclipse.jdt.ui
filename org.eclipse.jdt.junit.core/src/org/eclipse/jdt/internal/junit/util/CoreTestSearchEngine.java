@@ -24,6 +24,7 @@ import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -175,9 +176,14 @@ public class CoreTestSearchEngine {
 					String filename= type.getPath().lastSegment();
 					if ((filename.startsWith(junitBundlePrefix + "_") || filename.startsWith(junitBundlePrefix + "-")) && filename.endsWith(JAR_EXTENSION)) { //$NON-NLS-1$ //$NON-NLS-2$
 						String versionString = filename.substring(junitBundlePrefix.length() + 1, filename.length() - JAR_EXTENSION.length());
-						Version version = new Version(versionString);
-						if (version.getMajor() != junitMajorVersion) {
-							return false;
+						try {
+							Version version = Version.parseVersion(versionString);
+							if (version.getMajor() != junitMajorVersion) {
+								return false;
+							}
+						} catch (IllegalArgumentException e) {
+							// Some JUnit distributions use different naming, ignore those. See: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2665
+							JUnitCorePlugin.log(Status.error("Failed to parse determine JUnit version: " + filename, e)); //$NON-NLS-1$
 						}
 					}
 					// @Testable/@Suite annotations are not accessible if the JUnit classpath container is set to JUnit 3 or JUnit 4
