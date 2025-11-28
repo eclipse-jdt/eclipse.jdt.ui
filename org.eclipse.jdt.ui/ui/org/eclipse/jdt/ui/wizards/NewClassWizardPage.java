@@ -15,6 +15,7 @@
 package org.eclipse.jdt.ui.wizards;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -157,7 +158,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= createScrollableContainer(parent);
 		composite.setFont(parent.getFont());
 
 		int nColumns= 4;
@@ -184,11 +185,12 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 
 		createCommentControls(composite, nColumns);
 		enableCommentControl(true);
-
-		setControl(composite);
+		ScrolledComposite sc= (ScrolledComposite) composite.getParent();
+		setControl(sc);
 
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_CLASS_WIZARD_PAGE);
+		sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	/*

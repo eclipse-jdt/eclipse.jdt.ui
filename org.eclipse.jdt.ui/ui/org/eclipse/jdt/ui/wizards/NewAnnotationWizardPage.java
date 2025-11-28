@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -493,7 +494,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= createScrollableContainer(parent);
 
 		int nColumns= 4;
 
@@ -518,11 +519,12 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 
 		createCommentControls(composite, nColumns);
 		enableCommentControl(true);
-
-		setControl(composite);
+		ScrolledComposite sc= (ScrolledComposite) composite.getParent();
+		setControl(sc);
 
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_ANNOTATION_WIZARD_PAGE);
+		sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	private void createAddAnnotationControls(Composite composite, int nColumns) {

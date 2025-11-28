@@ -21,6 +21,7 @@ import java.net.URI;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -204,7 +205,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= createScrollableContainer(parent);
 		composite.setFont(parent.getFont());
 		int nColumns= 3;
 
@@ -227,10 +228,11 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 		if(fLinkControl!=null)
 			fLinkControl.setEnabled(fInitialCommentState);
 		enableCommentControl(true);
-
-		setControl(composite);
+		ScrolledComposite sc = (ScrolledComposite) composite.getParent();
+		setControl(sc);
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_PACKAGE_WIZARD_PAGE);
+	    sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	/**
