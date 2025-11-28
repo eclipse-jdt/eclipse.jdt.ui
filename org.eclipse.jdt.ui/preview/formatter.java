@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2024 Mateusz Matela and others.
+ * Copyright (c) 2018, 2025 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1183,6 +1183,22 @@ int foo3();
 	* <ul><li>Formatting of header comments.</li><li>Formatting of Javadoc tags</li></ul>
 	*/
  int bar2(); // This is a long comment that should be split in multiple line comments in case the line comment formatting is enabled
+ 
+ 
+/// The following is some sample code which illustrates source formatting within markdown comments. Descriptions of parameters and return values are best appended at end of the markdown comment.
+/// * Method Overview
+///    1. Description
+///     * Performs a calculation using two integer inputs
+///      - Ensures the first input is an odd number between 0 and 100
+///   2. Behavior
+///      * Returns an even integer between 0 and 1000
+///     - Throws an exception if inputs are invalid or computation fails
+/// @param first  The first parameter. For an optimum result, this should be an odd number between 0 and 100.
+/// @param second The second parameter.
+/// @throws Exception when the foo operation cannot be performed for one reason or another.
+/// @return The result of the foo operation, usually an even number within 0 and 1000.
+  int foo2(int first, int second) throws Exception;
+ 
  /**
  * The following is some sample code which illustrates source formatting within javadoc comments:
  * <pre>public class Example {final int a= 1;final boolean b= true;}</pre>
