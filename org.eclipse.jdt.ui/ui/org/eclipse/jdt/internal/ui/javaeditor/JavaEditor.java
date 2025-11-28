@@ -1878,8 +1878,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * This is a performance optimization to reduce the computation of
 		 * the text presentation triggered by {@link #setVisibleDocument(IDocument)}
 		 */
-		if (sourceViewer instanceof JavaSourceViewer && isFoldingEnabled() && (store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
-			((JavaSourceViewer)sourceViewer).prepareDelayedProjection();
+		if (sourceViewer instanceof JavaSourceViewer javaSourceViewer && isFoldingEnabled())
+			javaSourceViewer.prepareDelayedProjection();
 
 		if (sourceViewer instanceof ProjectionViewer) {
 			fProjectionSupport= new ProjectionSupport((ProjectionViewer)sourceViewer, getAnnotationAccess(), getSharedColors());
@@ -2562,8 +2562,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (sourceViewer instanceof JavaSourceViewer)
 			javaSourceViewer= (JavaSourceViewer)sourceViewer;
 
-		IPreferenceStore store= getPreferenceStore();
-		if (javaSourceViewer != null && isFoldingEnabled() &&(store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
+		if (javaSourceViewer != null && isFoldingEnabled())
 			javaSourceViewer.prepareDelayedProjection();
 
 		super.doSetInput(input);
