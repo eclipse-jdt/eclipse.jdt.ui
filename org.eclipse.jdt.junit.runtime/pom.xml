@@ -14,11 +14,11 @@
   <parent>
     <artifactId>eclipse.jdt.ui</artifactId>
     <groupId>eclipse.jdt.ui</groupId>
-    <version>4.38.0-SNAPSHOT</version>
+    <version>4.39.0-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.jdt</groupId>
   <artifactId>org.eclipse.jdt.junit.runtime</artifactId>
-  <version>3.7.700-SNAPSHOT</version>
+  <version>3.8.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 	<plugins>

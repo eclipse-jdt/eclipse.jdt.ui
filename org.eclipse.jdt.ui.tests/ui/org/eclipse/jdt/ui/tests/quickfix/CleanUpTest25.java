@@ -463,4 +463,72 @@ public class CleanUpTest25 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
+	@Test
+	public void testAddModuleCleanUp6() throws Exception {
+		IPackageFragment defaultPkg= fSourceFolder.createPackageFragment("", false, null);
+		String moduleInfo= """
+				module module1 {
+					requires java.base;
+				}
+				""";
+		defaultPkg.createCompilationUnit("module-info.java", moduleInfo, false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			// header comment
+			import java.math.BigInteger;
+			import java.util.List;
+			import java.util.ArrayList;
+			import java.util.Map;
+			// header comment 2
+			import static java.lang.Math.*; // comment
+
+			public class E {
+
+				List<String> list;
+				ArrayList<String> list2;
+				Map<String, String> map;
+				BigInteger b;
+
+				public void foo() {
+					sqrt(1.0);
+					abs(6.4);
+					pow(2,2);
+				}
+
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_MODULE_IMPORTS);
+
+		sample= """
+			package test1;
+
+			// header comment 2
+			import static java.lang.Math.*; // comment
+
+			import module java.base;
+
+			public class E {
+
+				List<String> list;
+				ArrayList<String> list2;
+				Map<String, String> map;
+				BigInteger b;
+
+				public void foo() {
+					sqrt(1.0);
+					abs(6.4);
+					pow(2,2);
+				}
+
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
 }

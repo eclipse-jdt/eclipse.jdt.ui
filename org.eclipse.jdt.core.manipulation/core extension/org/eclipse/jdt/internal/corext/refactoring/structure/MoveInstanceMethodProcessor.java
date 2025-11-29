@@ -1713,7 +1713,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final RefactoringStatus status= new RefactoringStatus();
 		fChangeManager= new TextChangeManager();
 		try {
-			monitor.beginTask("", 5); //$NON-NLS-1$
+			monitor.beginTask("", 6); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			if (!status.hasError()) {
@@ -1728,6 +1728,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							if (!status.hasError()) {
 								if (!type.exists() || type.isBinary() || type.isReadOnly())
 									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod)));
+								checkGenericTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingMethod(Progress.subMonitor(monitor, 1), status);
 								checkOverrideOuterMethod(Progress.subMonitor(monitor, 1), status);
@@ -1757,16 +1758,73 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the progress monitor to display progress
 	 * @param status
 	 *            the refactoring status
+	 * @throws JavaModelException
+	 *            if the method does not exist
 	 */
-	protected void checkGenericTarget(final IProgressMonitor monitor, final RefactoringStatus status) {
+	protected void checkGenericTarget(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
-			final ITypeBinding binding= fTarget.getType();
-			if (binding == null || binding.isTypeVariable())
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_generic_targets, JavaStatusContext.create(fMethod)));
+			ITypeBinding binding= fTarget.getType();
+			if (binding != null && binding.isParameterizedType()) {
+				final ITypeBinding genericBinding= binding.getTypeDeclaration();
+				ASTVisitor genericCheckVisitor= new ASTVisitor() {
+					@Override
+					public boolean visit(MethodInvocation node) {
+						IMethodBinding nodeBinding= node.resolveMethodBinding();
+						if (nodeBinding != null && !nodeBinding.isGenericMethod()) {
+							ITypeBinding nodeTypeBinding= nodeBinding.getDeclaringClass();
+							if (nodeTypeBinding != null &&
+									genericBinding.isEqualTo(nodeTypeBinding)) {
+								throw new AbortSearchException();
+							}
+						}
+						return true;
+					}
+
+					@Override
+					public boolean visit(FieldAccess node) {
+						IVariableBinding nodeBinding= node.resolveFieldBinding();
+						if (nodeBinding != null) {
+							ITypeBinding nodeTypeBinding= nodeBinding.getType();
+							if (nodeTypeBinding != null && nodeTypeBinding.isParameterizedType() &&
+									genericBinding.isEqualTo(nodeTypeBinding.getTypeDeclaration())) {
+								throw new AbortSearchException();
+							}
+						}
+						return false;
+					}
+
+					@Override
+					public boolean visit(SimpleName node) {
+						IBinding nodeBinding= node.resolveBinding();
+						if (nodeBinding instanceof IVariableBinding fieldBinding && fieldBinding.isField()) {
+							ITypeBinding nodeTypeBinding= fieldBinding.getDeclaringClass();
+							if (nodeTypeBinding != null && nodeTypeBinding.isParameterizedType() &&
+									genericBinding.isEqualTo(nodeTypeBinding.getTypeDeclaration())) {
+								throw new AbortSearchException();
+							}
+						} else if (nodeBinding instanceof IMethodBinding methodBinding) {
+							if (!methodBinding.isGenericMethod()) {
+								ITypeBinding nodeTypeBinding= methodBinding.getDeclaringClass();
+								if (nodeTypeBinding != null &&
+										genericBinding.isEqualTo(nodeTypeBinding)) {
+									throw new AbortSearchException();
+								}
+							}
+						}
+						return false;
+					}
+				};
+				try {
+					final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
+					declaration.accept(genericCheckVisitor);
+				} catch (AbortSearchException e) {
+					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_generic_type_possible_error, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(binding.getTypeDeclaration().getName())}), JavaStatusContext.create(fMethod)));
+				}
+			}
 		} finally {
 			monitor.done();
 		}
