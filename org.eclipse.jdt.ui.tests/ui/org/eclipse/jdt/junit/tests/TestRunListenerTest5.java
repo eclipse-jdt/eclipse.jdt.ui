@@ -14,6 +14,9 @@
 
 package org.eclipse.jdt.junit.tests;
 
+import java.nio.file.Files;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +27,13 @@ import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -170,6 +180,57 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			"sessionFinished-" + TestRunListeners.sessionAsString("ATestCase", ProgressState.COMPLETED, Result.OK, 0)
 		};
 		String[] actual= runSequenceTest(aTestCase);
+		assertEqualLog(expectedSequence, actual);
+	}
+
+	// Test for: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2667
+	@Test
+	public void testCorrectLaunchTypeWithoutVersionInJUnitLibraryFileNames() throws Exception {
+		JavaProjectHelper.removeFromClasspath(fProject, JUnitCore.JUNIT5_CONTAINER_PATH);
+		IClasspathEntry[] entries = {
+				BuildPathSupport.getJUnitJupiterApiLibraryEntry(),
+				BuildPathSupport.getJUnitPlatformCommonsLibraryEntry(),
+				BuildPathSupport.getJUnitPlatformEngineLibraryEntry(),
+				BuildPathSupport.getJUnitJupiterEngineLibraryEntry(),
+				BuildPathSupport.getJUnitOpentest4jLibraryEntry(),
+				BuildPathSupport.getJUnitApiGuardianLibraryEntry(),
+		};
+		IProject project= fProject.getProject();
+		for (int i = 0; i < entries.length; ++i) {
+			IClasspathEntry entry = entries[i];
+			String name = "lib" + i + ".jar";
+			IPath entryPath= entry.getPath();
+			IFile copy= project.getFile(name);
+			Files.copy(entryPath.toPath(), copy.getLocation().toPath());
+			copy.refreshLocal(IResource.DEPTH_INFINITE, null);
+			JavaProjectHelper.addToClasspath(fProject, JavaCore.newLibraryEntry(project.getLocation().append(name), null, null));
+		}
+		List<String> lines = Files.readAllLines(fProject.getProject().getLocation().append(".classpath").toPath());
+		lines.stream().forEach(System.out::println);
+		String source=
+				"""
+			package pack;
+			import org.junit.jupiter.api.Test;
+			public class ATestCase {
+			    @Test public void testSucceed() { }
+			}""";
+		IType aTestCase= createType(source, "pack", "ATestCase.java");
+
+		String[] expectedSequence= new String[] {
+			"sessionStarted-" + TestRunListeners.sessionAsString("ATestCase", ProgressState.RUNNING, Result.UNDEFINED, 0),
+			"testCaseStarted-" + TestRunListeners.testCaseAsString("testSucceed", "pack.ATestCase", ProgressState.RUNNING, Result.UNDEFINED, null, 0),
+			"testCaseFinished-" + TestRunListeners.testCaseAsString("testSucceed", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 0),
+			"sessionFinished-" + TestRunListeners.sessionAsString("ATestCase", ProgressState.COMPLETED, Result.OK, 0)
+		};
+		TestRunLog log= new TestRunLog();
+		final TestRunListener testRunListener= new TestRunListeners.SequenceTest(log);
+		JUnitCore.addTestRunListener(testRunListener);
+		String[] actual = {};
+		try {
+			actual = launchJUnit(aTestCase, null, log);
+		} finally {
+			JUnitCore.removeTestRunListener(testRunListener);
+		}
 		assertEqualLog(expectedSequence, actual);
 	}
 }
