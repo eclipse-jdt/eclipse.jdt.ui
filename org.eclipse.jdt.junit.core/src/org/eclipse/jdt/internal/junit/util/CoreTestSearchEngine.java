@@ -13,12 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.util;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 import java.util.jar.Attributes;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.osgi.framework.Version;
@@ -29,9 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -57,6 +52,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.PackageFragmentRoot;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
@@ -196,17 +192,12 @@ public class CoreTestSearchEngine {
 						}
 					}
 					if (isJar && version == null) {
-						File jarFilePath = null;
-						IPath jarPathFromType = type.getPath();
-						IFile jarFileInWs = ResourcesPlugin.getWorkspace().getRoot().getFile(jarPathFromType);
-						if (jarFileInWs.exists()) {
-							jarFilePath= jarFileInWs.getLocation().toFile();
-						} else {
-							jarFilePath= jarPathFromType.toFile();
-						}
-
-						try (JarFile jarFile= new JarFile(jarFilePath)) {
-							Manifest manifest= jarFile.getManifest();
+						try {
+							PackageFragmentRoot root= (PackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+							Manifest manifest= null;
+							if (root != null) {
+								manifest= root.getManifest();
+							}
 							if (manifest != null) {
 								Attributes attributes= manifest.getMainAttributes();
 								String versionString= attributes.getValue("Specification-Version"); //$NON-NLS-1$
@@ -215,7 +206,7 @@ public class CoreTestSearchEngine {
 								}
 							}
 						} catch (Throwable e) {
-							JUnitCorePlugin.log(Status.warning("Failed to determine JUnit version: " + jarFilePath, e)); //$NON-NLS-1$
+							JUnitCorePlugin.log(Status.warning("Failed to determine JUnit version", e)); //$NON-NLS-1$
 						}
 					}
 					if (version != null && version.getMajor() != junitMajorVersion) {
