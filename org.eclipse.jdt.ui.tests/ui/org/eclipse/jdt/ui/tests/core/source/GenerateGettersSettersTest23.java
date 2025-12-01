@@ -44,6 +44,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -868,6 +871,15 @@ public class GenerateGettersSettersTest23 {
 				}""";
 
 		assertInsertAt2(expectedSetter, false);
+	}
+
+	// test for: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2679
+	@Test
+	public void testMarkdownComment() throws Exception {
+		IScanner scanner= ToolFactory.createScanner(true, false, false, "23", "23");
+		scanner.setSource("/// @return".toCharArray());
+		int token= scanner.getNextToken();
+		assertEquals("Unexpected starting token", ITerminalSymbols.TokenNameCOMMENT_LINE, token);
 	}
 
 	private void assertInsertAt(String expectedMethod, boolean isGetter) throws CoreException {
