@@ -825,6 +825,11 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 			if (parent instanceof Type && parent.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY && binding.isInterface()) { //bug 351853
 				return;
 			}
+			if (parent instanceof Type && parent.getLocationInParent() != VariableDeclarationStatement.TYPE_PROPERTY
+					&& parent.getLocationInParent() != SingleVariableDeclaration.TYPE_PROPERTY
+					&& parent.getLocationInParent() != FieldDeclaration.TYPE_PROPERTY) {
+				return;
+			}
 			ITypeBinding simpleBinding= binding;
 			if (simpleBinding.isArray()) {
 				simpleBinding= simpleBinding.getElementType();
