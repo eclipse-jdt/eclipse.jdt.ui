@@ -106,7 +106,6 @@ import org.eclipse.jdt.internal.core.manipulation.dom.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -857,37 +856,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	static ArrayList<ASTNode> getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
-		final ArrayList<ASTNode> coveredNodes= new ArrayList<>();
-		final int selectionBegin= context.getSelectionOffset();
-		final int selectionEnd= selectionBegin + context.getSelectionLength();
-		coveringNode.accept(new GenericVisitor() {
-			@Override
-			protected boolean visitNode(ASTNode node) {
-				int nodeStart= node.getStartPosition();
-				int nodeEnd= nodeStart + node.getLength();
-				// if node does not intersects with selection, don't visit children
-				if (nodeEnd < selectionBegin || selectionEnd < nodeStart) {
-					return false;
-				}
-				// if node is fully covered, we don't need to visit children
-				if (isCovered(node)) {
-					ASTNode parent= node.getParent();
-					if (parent == null || !isCovered(parent)) {
-						coveredNodes.add(node);
-						return false;
-					}
-				}
-				// if node only partly intersects with selection, we try to find fully covered children
-				return true;
-			}
-
-			private boolean isCovered(ASTNode node) {
-				int begin= node.getStartPosition();
-				int end= begin + node.getLength();
-				return begin >= selectionBegin && end <= selectionEnd;
-			}
-		});
-		return coveredNodes;
+		return QuickAssistProcessorUtil.getFullyCoveredNodes(context, coveringNode);
 	}
 
 	private static boolean getJoinAndIfStatementsProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
@@ -999,74 +968,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getSplitAndConditionProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
-		Operator andOperator= InfixExpression.Operator.CONDITIONAL_AND;
-		// check that user invokes quick assist on infix expression
-		if (!(node instanceof InfixExpression)) {
-			return false;
-		}
-		InfixExpression infixExpression= (InfixExpression) node;
-		if (infixExpression.getOperator() != andOperator) {
-			return false;
-		}
-		int offset= isOperatorSelected(infixExpression, context.getSelectionOffset(), context.getSelectionLength());
-		if (offset == -1) {
-			return false;
-		}
-
-		// check that infix expression belongs to IfStatement
-		Statement statement= ASTResolving.findParentStatement(node);
-		if (!(statement instanceof IfStatement)) {
-			return false;
-		}
-		IfStatement ifStatement= (IfStatement) statement;
-
-		// check that infix expression is part of first level && condition of IfStatement
-		InfixExpression topInfixExpression= infixExpression;
-		while (topInfixExpression.getParent() instanceof InfixExpression && ((InfixExpression) topInfixExpression.getParent()).getOperator() == andOperator) {
-			topInfixExpression= (InfixExpression) topInfixExpression.getParent();
-		}
-		if (ifStatement.getExpression() != topInfixExpression) {
-			return false;
-		}
-		//
-		if (resultingCollections == null) {
-			return true;
-		}
-		AST ast= ifStatement.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
-		// prepare left and right conditions
-		Expression[] newOperands= { null, null };
-		breakInfixOperationAtOperation(rewrite, topInfixExpression, andOperator, offset, true, newOperands);
-
-		Expression leftCondition= newOperands[0];
-		Expression rightCondition= newOperands[1];
-
-		// replace conditions in outer IfStatement
-		rewrite.set(ifStatement, IfStatement.EXPRESSION_PROPERTY, leftCondition, null);
-
-		// prepare inner IfStatement
-		IfStatement innerIf= ast.newIfStatement();
-
-		innerIf.setExpression(rightCondition);
-		innerIf.setThenStatement((Statement) rewrite.createMoveTarget(ifStatement.getThenStatement()));
-		Block innerBlock= ast.newBlock();
-		innerBlock.statements().add(innerIf);
-
-		Statement elseStatement= ifStatement.getElseStatement();
-		if (elseStatement != null) {
-			innerIf.setElseStatement((Statement) rewrite.createCopyTarget(elseStatement));
-		}
-
-		// replace outer thenStatement
-		rewrite.replace(ifStatement.getThenStatement(), innerBlock, null);
-
-		// add correction proposal
-		String label= CorrectionMessages.AdvancedQuickAssistProcessor_splitAndCondition_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.SPLIT_AND_CONDITION, image);
-		resultingCollections.add(proposal);
-		return true;
+		return LocalCorrectionsSubProcessor.getSplitAndConditionProposals(context, node, resultingCollections);
 	}
 
 	private static boolean isSelectingOperator(ASTNode n1, ASTNode n2, int offset, int length) {
@@ -1187,69 +1089,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getSplitOrConditionProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
-		Operator orOperator= InfixExpression.Operator.CONDITIONAL_OR;
-		// check that user invokes quick assist on infix expression
-		if (!(node instanceof InfixExpression)) {
-			return false;
-		}
-		InfixExpression infixExpression= (InfixExpression) node;
-		if (infixExpression.getOperator() != orOperator) {
-			return false;
-		}
-		int offset= isOperatorSelected(infixExpression, context.getSelectionOffset(), context.getSelectionLength());
-		if (offset == -1) {
-			return false;
-		}
-		// check that infix expression belongs to IfStatement
-		Statement statement= ASTResolving.findParentStatement(node);
-		if (!(statement instanceof IfStatement)) {
-			return false;
-		}
-		IfStatement ifStatement= (IfStatement) statement;
-
-		// check that infix expression is part of first level || condition of IfStatement
-		InfixExpression topInfixExpression= infixExpression;
-		while (topInfixExpression.getParent() instanceof InfixExpression && ((InfixExpression) topInfixExpression.getParent()).getOperator() == orOperator) {
-			topInfixExpression= (InfixExpression) topInfixExpression.getParent();
-		}
-		if (ifStatement.getExpression() != topInfixExpression) {
-			return false;
-		}
-		//
-		if (resultingCollections == null) {
-			return true;
-		}
-		AST ast= ifStatement.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
-		// prepare left and right conditions
-		Expression[] newOperands= { null, null };
-		breakInfixOperationAtOperation(rewrite, topInfixExpression, orOperator, offset, true, newOperands);
-
-		Expression leftCondition= newOperands[0];
-		Expression rightCondition= newOperands[1];
-
-		// prepare first statement
-		rewrite.replace(ifStatement.getExpression(), leftCondition, null);
-
-		IfStatement secondIf= ast.newIfStatement();
-		secondIf.setExpression(rightCondition);
-		secondIf.setThenStatement((Statement) rewrite.createCopyTarget(ifStatement.getThenStatement()));
-
-		Statement elseStatement= ifStatement.getElseStatement();
-		if (elseStatement == null) {
-			rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, secondIf, null);
-		} else {
-			rewrite.replace(elseStatement, secondIf, null);
-			secondIf.setElseStatement((Statement) rewrite.createMoveTarget(elseStatement));
-		}
-
-		// add correction proposal
-		String label= CorrectionMessages.AdvancedQuickAssistProcessor_splitOrCondition_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.SPLIT_OR_CONDITION, image);
-		resultingCollections.add(proposal);
-		return true;
+		return LocalCorrectionsSubProcessor.getSplitOrConditionProposals(context, node, resultingCollections);
 	}
 
 	private static boolean getInverseConditionalExpressionProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
@@ -1438,37 +1278,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.EXCHANGE_OPERANDS, image);
 		resultingCollections.add(proposal);
 		return true;
-	}
-
-	/*
-	 * Breaks an infix operation with possible extended operators at the given operator and returns the new left and right operands.
-	 * a & b & c   ->  [[a' & b' ] & c' ]   (c' == copy of c)
-	 */
-	private static void breakInfixOperationAtOperation(ASTRewrite rewrite, Expression expression, Operator operator, int operatorOffset, boolean removeParentheses, Expression[] res) {
-		if (expression.getStartPosition() + expression.getLength() <= operatorOffset) {
-			// add to the left
-			res[0]= combineOperands(rewrite, res[0], expression, removeParentheses, operator);
-			return;
-		}
-		if (operatorOffset <= expression.getStartPosition()) {
-			// add to the right
-			res[1]= combineOperands(rewrite, res[1], expression, removeParentheses, operator);
-			return;
-		}
-		if (!(expression instanceof InfixExpression)) {
-			throw new IllegalArgumentException("Cannot break up non-infix expression"); //$NON-NLS-1$
-		}
-		InfixExpression infixExpression= (InfixExpression) expression;
-		if (infixExpression.getOperator() != operator) {
-			throw new IllegalArgumentException("Incompatible operator"); //$NON-NLS-1$
-		}
-		breakInfixOperationAtOperation(rewrite, infixExpression.getLeftOperand(), operator, operatorOffset, removeParentheses, res);
-		breakInfixOperationAtOperation(rewrite, infixExpression.getRightOperand(), operator, operatorOffset, removeParentheses, res);
-
-		List<Expression> extended= infixExpression.extendedOperands();
-		for (Expression element : extended) {
-			breakInfixOperationAtOperation(rewrite, element, operator, operatorOffset, removeParentheses, res);
-		}
 	}
 
 	private static Expression combineOperands(ASTRewrite rewrite, Expression existing, Expression originalNode, boolean removeParentheses, Operator operator) {
