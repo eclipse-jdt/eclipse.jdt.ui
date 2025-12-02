@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
@@ -929,6 +930,40 @@ public class QuickAssistProcessorUtil {
 			}
 		}
 		return true;
+	}
+
+	public static ArrayList<ASTNode> getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
+		final ArrayList<ASTNode> coveredNodes= new ArrayList<>();
+		final int selectionBegin= context.getSelectionOffset();
+		final int selectionEnd= selectionBegin + context.getSelectionLength();
+		coveringNode.accept(new GenericVisitor() {
+			@Override
+			protected boolean visitNode(ASTNode node) {
+				int nodeStart= node.getStartPosition();
+				int nodeEnd= nodeStart + node.getLength();
+				// if node does not intersects with selection, don't visit children
+				if (nodeEnd < selectionBegin || selectionEnd < nodeStart) {
+					return false;
+				}
+				// if node is fully covered, we don't need to visit children
+				if (isCovered(node)) {
+					ASTNode parent= node.getParent();
+					if (parent == null || !isCovered(parent)) {
+						coveredNodes.add(node);
+						return false;
+					}
+				}
+				// if node only partly intersects with selection, we try to find fully covered children
+				return true;
+			}
+
+			private boolean isCovered(ASTNode node) {
+				int begin= node.getStartPosition();
+				int end= begin + node.getLength();
+				return begin >= selectionBegin && end <= selectionEnd;
+			}
+		});
+		return coveredNodes;
 	}
 
 }
