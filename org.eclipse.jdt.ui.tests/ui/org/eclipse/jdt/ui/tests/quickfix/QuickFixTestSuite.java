@@ -58,6 +58,7 @@ import org.junit.platform.suite.api.Suite;
 	JavadocQuickFixTest.class,
 	JavadocQuickFixTest9.class,
 	JavadocQuickFixTest16.class,
+	JavadocQuickFixTest25.class,
 	ConvertForLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest1d7.class,
