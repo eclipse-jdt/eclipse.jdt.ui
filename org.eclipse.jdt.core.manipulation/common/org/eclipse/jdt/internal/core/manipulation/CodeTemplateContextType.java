@@ -25,7 +25,6 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -420,7 +419,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	}
 
 	private boolean isValidComment(String template) {
-		IScanner scanner = ToolFactory.createScanner(true, false, false, JavaCore.VERSION_23, JavaCore.VERSION_23);
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(template.toCharArray());
 		try {
 			int next= scanner.getNextToken();
