@@ -46,6 +46,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IEncodedStorage;
@@ -127,7 +128,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantReg
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
-import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class CompilationUnitDocumentProvider extends TextFileDocumentProvider implements ICompilationUnitDocumentProvider, IAnnotationModelFactory {
@@ -1312,123 +1312,103 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	}
 
 
-	/**
-	 * Creates and returns a new sub-progress monitor for the
-	 * given parent monitor.
-	 *
-	 * @param monitor the parent progress monitor
-	 * @param ticks the number of work ticks allocated from the parent monitor
-	 * @return the new sub-progress monitor
-	 */
-	private IProgressMonitor getSubProgressMonitor(IProgressMonitor monitor, int ticks) {
-		if (monitor != null)
-			return Progress.subMonitorPrepend(monitor, ticks);
-
-		return new NullProgressMonitor();
-	}
 
 	protected void commitWorkingCopy(IProgressMonitor monitor, Object element, final CompilationUnitInfo info, boolean overwrite) throws CoreException {
 
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 
-		monitor.beginTask("", 100); //$NON-NLS-1$
+		SubMonitor subMonitor = SubMonitor.convert(monitor, "", 100); //$NON-NLS-1$
 
+		IDocument document= info.fTextFileBuffer.getDocument();
+		IResource resource= info.fCopy.getResource();
+
+		Assert.isTrue(resource instanceof IFile);
+
+		boolean isSynchronized= resource.isSynchronized(IResource.DEPTH_ZERO);
+
+		/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=98327
+		 * Make sure file gets save in commit() if the underlying file has been deleted */
+		if (!isSynchronized && isDeleted(element))
+			info.fTextFileBuffer.setDirty(true);
+
+		if (!resource.exists()) {
+			// underlying resource has been deleted, just recreate file, ignore the rest
+			createFileFromDocument(subMonitor, (IFile) resource, document);
+			return;
+		}
+
+		if (fSavePolicy != null)
+			fSavePolicy.preSave(info.fCopy);
+
+		IProgressMonitor workMonitor= null;
 		try {
-			IDocument document= info.fTextFileBuffer.getDocument();
-			IResource resource= info.fCopy.getResource();
+			fIsAboutToSave= true;
 
-			Assert.isTrue(resource instanceof IFile);
+			IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(info.fCopy.getJavaProject().getProject());
 
-			boolean isSynchronized= resource.isSynchronized(IResource.DEPTH_ZERO);
-
-			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=98327
-			 * Make sure file gets save in commit() if the underlying file has been deleted */
-			if (!isSynchronized && isDeleted(element))
-				info.fTextFileBuffer.setDirty(true);
-
-			if (!resource.exists()) {
-				// underlying resource has been deleted, just recreate file, ignore the rest
-				createFileFromDocument(monitor, (IFile) resource, document);
-				return;
+			CoreException changedRegionException= null;
+			boolean needsChangedRegions= false;
+			try {
+				if (listeners.length > 0)
+					needsChangedRegions= SaveParticipantRegistry.isChangedRegionsRequired(info.fCopy);
+			} catch (CoreException ex) {
+				changedRegionException= ex;
 			}
 
-			if (fSavePolicy != null)
-				fSavePolicy.preSave(info.fCopy);
-
-			IProgressMonitor subMonitor= null;
- 			try {
- 				fIsAboutToSave= true;
-
-				IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(info.fCopy.getJavaProject().getProject());
-
-				CoreException changedRegionException= null;
-				boolean needsChangedRegions= false;
+			IRegion[] changedRegions= null;
+			if (needsChangedRegions) {
 				try {
-					if (listeners.length > 0)
-						needsChangedRegions= SaveParticipantRegistry.isChangedRegionsRequired(info.fCopy);
+					changedRegions= EditorUtility.calculateChangedLineRegions(info.fTextFileBuffer, subMonitor.split(20));
 				} catch (CoreException ex) {
 					changedRegionException= ex;
+				} finally {
+					workMonitor= subMonitor.split(50);
 				}
+			} else
+				workMonitor= subMonitor.split(listeners.length > 0 ? 70 : 100);
 
-				IRegion[] changedRegions= null;
-				if (needsChangedRegions) {
-					try {
-						changedRegions= EditorUtility.calculateChangedLineRegions(info.fTextFileBuffer, getSubProgressMonitor(monitor, 20));
-					} catch (CoreException ex) {
-						changedRegionException= ex;
-					} finally {
-						subMonitor= getSubProgressMonitor(monitor, 50);
-					}
-				} else
-					subMonitor= getSubProgressMonitor(monitor, listeners.length > 0 ? 70 : 100);
+			info.fCopy.commitWorkingCopy(overwrite || isSynchronized, workMonitor);
+			if (listeners.length > 0)
+				notifyPostSaveListeners(info, changedRegions, listeners, subMonitor.split(30));
 
-				info.fCopy.commitWorkingCopy(overwrite || isSynchronized, subMonitor);
-				if (listeners.length > 0)
-					notifyPostSaveListeners(info, changedRegions, listeners, getSubProgressMonitor(monitor, 30));
-
-				if (changedRegionException != null) {
-					throw changedRegionException;
-				}
-			} catch (JavaModelException x) {
-				// inform about the failure
-				fireElementStateChangeFailed(element);
-				if (IJavaModelStatusConstants.UPDATE_CONFLICT == x.getStatus().getCode())
-					// convert JavaModelException to CoreException
-					throw new CoreException(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, IResourceStatus.OUT_OF_SYNC_LOCAL, JavaEditorMessages.CompilationUnitDocumentProvider_error_outOfSync, null));
-				throw x;
-			} catch (CoreException | RuntimeException x) {
-				// inform about the failure
-				fireElementStateChangeFailed(element);
-				throw x;
-			} finally {
-				fIsAboutToSave= false;
-				if (subMonitor != null)
-					subMonitor.done();
+			if (changedRegionException != null) {
+				throw changedRegionException;
 			}
-
-			// If here, the dirty state of the editor will change to "not dirty".
-			// Thus, the state changing flag will be reset.
-			if (info.fModel instanceof AbstractMarkerAnnotationModel) {
-				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-				model.updateMarkers(document);
-			}
-
-			if (fSavePolicy != null) {
-				ICompilationUnit unit= fSavePolicy.postSave(info.fCopy);
-				if (unit != null && info.fModel instanceof AbstractMarkerAnnotationModel) {
-					IResource r= unit.getResource();
-					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
-					if (markers != null && markers.length > 0) {
-						AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-						for (IMarker marker : markers) {
-							model.updateMarker(document, marker, null);
-						}
-					}
-				}
-			}
+		} catch (JavaModelException x) {
+			// inform about the failure
+			fireElementStateChangeFailed(element);
+			if (IJavaModelStatusConstants.UPDATE_CONFLICT == x.getStatus().getCode())
+				// convert JavaModelException to CoreException
+				throw new CoreException(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, IResourceStatus.OUT_OF_SYNC_LOCAL, JavaEditorMessages.CompilationUnitDocumentProvider_error_outOfSync, null));
+			throw x;
+		} catch (CoreException | RuntimeException x) {
+			// inform about the failure
+			fireElementStateChangeFailed(element);
+			throw x;
 		} finally {
-			monitor.done();
+			fIsAboutToSave= false;
+		}
+
+		// If here, the dirty state of the editor will change to "not dirty".
+		// Thus, the state changing flag will be reset.
+		if (info.fModel instanceof AbstractMarkerAnnotationModel) {
+			AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
+			model.updateMarkers(document);
+		}
+
+		if (fSavePolicy != null) {
+			ICompilationUnit unit= fSavePolicy.postSave(info.fCopy);
+			if (unit != null && info.fModel instanceof AbstractMarkerAnnotationModel) {
+				IResource r= unit.getResource();
+				IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+				if (markers != null && markers.length > 0) {
+					AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
+					for (IMarker marker : markers) {
+						model.updateMarker(document, marker, null);
+					}
+				}
+			}
 		}
 	}
 
@@ -1597,7 +1577,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		String message= JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantProblem;
 		final MultiStatus errorStatus= new MultiStatus(JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, message, null);
 
-		monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_progressNotifyingSaveParticipants, listeners.length * 5);
+		final SubMonitor subMonitor = SubMonitor.convert(monitor, JavaEditorMessages.CompilationUnitDocumentProvider_progressNotifyingSaveParticipants, listeners.length * 5);
 		try {
 			for (IPostSaveListener listener : listeners) {
 				final String participantName= listener.getName();
@@ -1607,7 +1587,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						try {
 							long stamp= unit.getResource().getModificationStamp();
 
-							listener.saved(unit, changedRegions, getSubProgressMonitor(monitor, 4));
+							listener.saved(unit, changedRegions, subMonitor.split(4));
 
 							if (stamp != unit.getResource().getModificationStamp()) {
 								String msg= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantSavedFile, participantName);
@@ -1615,15 +1595,13 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 							}
 
 							if (buffer.hasUnsavedChanges())
-								buffer.save(getSubProgressMonitor(monitor, 1), true);
+								buffer.save(subMonitor.split(1), true);
 
 							if (stamp != unit.getResource().getModificationStamp()) {
 								unit.updateTimeStamp();
 							}
 						} catch (CoreException ex) {
 							handleException(ex);
-						} finally {
-							monitor.worked(1);
 						}
 					}
 
@@ -1638,7 +1616,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						// Revert the changes
 						if (buffer.hasUnsavedChanges()) {
 							try {
-								info.fTextFileBuffer.revert(getSubProgressMonitor(monitor, 1));
+								info.fTextFileBuffer.revert(subMonitor.split(1));
 							} catch (CoreException e) {
 								msg= Messages.format("Error on revert after failure of save participant ''{0}''.", participantName);  //$NON-NLS-1$
 								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, ex);
@@ -1654,7 +1632,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						// XXX: Work in progress 'Save As' case
 //						else if (buffer.hasUnsavedChanges()) {
 //							try {
-//								buffer.save(getSubProgressMonitor(monitor, 1), true);
+//								buffer.save(subMonitor.split(1), true);
 //							} catch (JavaModelException e) {
 //								message= Messages.format("Error reverting changes after failure of save participant ''{0}''.", participantName); //$NON-NLS-1$
 //								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
@@ -1664,10 +1642,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					}
 				});
 			}
-		} finally {
-			monitor.done();
 			if (!errorStatus.isOK())
 				throw new CoreException(errorStatus);
+		} finally {
+			subMonitor.done();
 		}
 	}
 }
