@@ -50,4 +50,14 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		super("", cu, null, IProposalRelevance.GENERATE_FOR_LOOP, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), //$NON-NLS-1$
 				new GenerateForLoopAssistProposalCore(cu, currentStatement, loopTypeToGenerate));
 	}
+
+	/**
+	 * Creates an instance of a {@link GenerateForLoopAssistProposal}.
+	 *
+	 * @param core the instance of GenerateForLoopAssistProposalCore
+	 */
+	public GenerateForLoopAssistProposal(GenerateForLoopAssistProposalCore core) {
+		super("", core.getCompilationUnit(), null, IProposalRelevance.GENERATE_FOR_LOOP, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), //$NON-NLS-1$
+				core);
+	}
 }

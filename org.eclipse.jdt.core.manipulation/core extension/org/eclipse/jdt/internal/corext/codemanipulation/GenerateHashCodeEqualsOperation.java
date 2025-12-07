@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -829,13 +829,13 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		body.statements().add(
 				createReturningIfStatement(fAst.newThisExpression(), fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), Operator.EQUALS, true));
 
-		if (needsNoSuperCall(fType, METHODNAME_EQUALS, new ITypeBinding[] {fAst.resolveWellKnownType(JAVA_LANG_OBJECT)})) {
-			if (!fUseInstanceOf) {
-				// if (obj == null) return false;
-				body.statements().add(
-						createReturningIfStatement(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), fAst.newNullLiteral(), Operator.EQUALS, false));
-			}
-		} else {
+		if (!fUseInstanceOf) {
+			// if (obj == null) return false;
+			body.statements().add(
+					createReturningIfStatement(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), fAst.newNullLiteral(), Operator.EQUALS, false));
+		}
+
+		if (!needsNoSuperCall(fType, METHODNAME_EQUALS, new ITypeBinding[] {fAst.resolveWellKnownType(JAVA_LANG_OBJECT)})) {
 			// if (!super.equals(obj)) return false;
 			SuperMethodInvocation superEqualsCall= fAst.newSuperMethodInvocation();
 			superEqualsCall.setName(fAst.newSimpleName(METHODNAME_EQUALS));

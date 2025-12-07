@@ -428,7 +428,7 @@ public class TokenScanner {
 
 	public static boolean isComment(int token) {
 		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC
-			|| token == ITerminalSymbols.TokenNameCOMMENT_LINE;
+			|| token == ITerminalSymbols.TokenNameCOMMENT_LINE || token == ITerminalSymbols.TokenNameCOMMENT_MARKDOWN;
 	}
 
 	public static boolean isModifier(int token) {
