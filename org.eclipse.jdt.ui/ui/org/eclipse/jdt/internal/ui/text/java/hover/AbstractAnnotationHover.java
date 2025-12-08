@@ -26,6 +26,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -53,6 +54,7 @@ import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -88,12 +90,18 @@ import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 
 
 /**
@@ -155,6 +163,11 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		private Control fFocusControl;
 		private AnnotationInfo fInput;
 		private Composite fParent;
+		
+		private IInformationControl javaDocControl;
+		private boolean javaDocControlCreted = false;
+
+		private boolean javaDocControlFocus = false;
 
 		public AnnotationInformationControl(Shell parentShell, String statusFieldText) {
 			super(parentShell, statusFieldText);
@@ -218,6 +231,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		public final void setVisible(boolean visible) {
 			if (!visible)
 				disposeDeferredCreatedContent();
+			if (!visible && !javaDocControlFocus && javaDocControl != null) {
+				javaDocControl.dispose();
+				javaDocControl= null;
+			}
 			super.setVisible(visible);
 		}
 
@@ -305,6 +322,20 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				createCompletionProposalsControl(fParent, proposals);
 
 			fParent.layout(true);
+
+			// JavaDocHover should appear when you hover on QuickFixHover.
+			if (!javaDocControlCreted) {
+				Shell shell = getShell();
+				if (shell != null && !shell.isDisposed()) {
+					shell.addMouseTrackListener(new MouseTrackAdapter() {
+						@Override
+						public void mouseEnter(MouseEvent e) {
+							showJavadocPopup();
+						}
+					});
+					javaDocControlCreted = true;
+				}
+			}
 		}
 
 		private void setColorAndFont(Control control, Color foreground, Color background, Font font) {
@@ -569,6 +600,79 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				if (target != null)
 					target.endCompoundChange();
 			}
+		}
+
+		private void showJavadocPopup() {
+				if (javaDocControl != null)
+					return;
+
+				IJavaElement javaElement = null;
+				Annotation annotation = getAnnotationInfo().annotation;
+				if (annotation instanceof IJavaAnnotation) {
+					ICompilationUnit cu = ((IJavaAnnotation) annotation).getCompilationUnit();
+					if (cu != null) {
+						try {
+							int offset = getAnnotationInfo().position.getOffset();
+							IJavaElement[] elements = cu.codeSelect(offset, 0);
+							if (elements != null && elements.length > 0) {
+								javaElement = elements[0];
+							}
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e.getStatus());
+						}
+					}
+				}
+				if (javaElement != null) {
+					try {
+						String javadocHtml = JavadocContentAccess2.getHTMLContent(javaElement, true);
+						if (javadocHtml != null && !javadocHtml.isEmpty()) {
+							JavadocBrowserInformationControlInput infoInput =
+								new JavadocBrowserInformationControlInput(null, javaElement, javadocHtml, 0);
+								IInformationControlCreator presenterCreator = new JavadocHover.PresenterControlCreator(null);
+								Shell shell= getShell();
+								javaDocControl = presenterCreator.createInformationControl(shell);
+							if (javaDocControl instanceof BrowserInformationControl) {
+								((BrowserInformationControl) javaDocControl).setInput(infoInput);
+							}
+
+							javaDocControl.addFocusListener(new FocusListener() {
+								@Override
+								public void focusLost(FocusEvent e) {
+									javaDocControlFocus = false;
+									javaDocControl.dispose();
+									javaDocControl= null;
+								}
+
+								@Override
+								public void focusGained(FocusEvent e) {
+									javaDocControlFocus = true;
+								}
+							});
+
+						Rectangle mainBounds = shell.getBounds();
+						Point pref = null;
+						pref = javaDocControl.computeSizeHint();
+
+						int x = mainBounds.x + mainBounds.width;
+						int y = mainBounds.y;
+
+						Rectangle clientArea = shell.getDisplay().getClientArea();
+
+						if (x + pref.x > clientArea.x + clientArea.width) {
+							x = Math.max(clientArea.x, mainBounds.x - pref.x);
+						}
+						if (y + pref.y > clientArea.y + clientArea.height) {
+							y = Math.max(clientArea.y, clientArea.y + clientArea.height - pref.y);
+						}
+						javaDocControl.setLocation(new Point(x, y));
+						javaDocControl.setSize(pref.x, pref.y);
+						javaDocControl.setVisible(true);
+						}
+					} catch (CoreException e) {
+						JavaPlugin.log(e.getStatus());
+					}
+				}
+
 		}
 	}
 
