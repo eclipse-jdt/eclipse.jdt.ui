@@ -145,14 +145,16 @@ public class EnumConstructorTargetFinder extends ASTVisitor {
 					nodeTypeArgument= ((ClassInstanceCreation) nodeArgument).resolveTypeBinding();
 				} else if (nodeArgument.getParent().getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION) {
 					IMethodBinding resolveConstructorBinding= ((EnumConstantDeclaration) nodeArgument.getParent()).resolveConstructorBinding();
-					ITypeBinding[] parameterTypes= resolveConstructorBinding.getParameterTypes();
-					if (parameterTypes.length != enumBodyDeclarationNodeParameters.size()) {
-						continue declarationLoop;
-					}
-					if (singleVariableDeclaration.isVarargs()) {
-						nodeTypeArgument= parameterTypes[i].getElementType();
-					} else {
-						nodeTypeArgument= parameterTypes[i];
+					if( resolveConstructorBinding != null ) {
+						ITypeBinding[] parameterTypes= resolveConstructorBinding.getParameterTypes();
+						if (parameterTypes.length != enumBodyDeclarationNodeParameters.size()) {
+							continue declarationLoop;
+						}
+						if (singleVariableDeclaration.isVarargs()) {
+							nodeTypeArgument= parameterTypes[i].getElementType();
+						} else {
+							nodeTypeArgument= parameterTypes[i];
+						}
 					}
 				}
 				if (nodeTypeArgument == null) {
