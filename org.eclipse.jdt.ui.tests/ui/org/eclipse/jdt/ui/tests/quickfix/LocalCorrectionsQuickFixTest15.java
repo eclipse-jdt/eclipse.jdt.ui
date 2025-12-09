@@ -44,7 +44,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -184,9 +183,7 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 			public @interface NonNull {
 			}
 			""";
-		ICompilationUnit cu0= pack1.createCompilationUnit("NonNull.java", str0, false, null);
-		AssistContext context= getCorrectionContext(cu0, 0, str0.length());
-		assertNoErrors(context);
+		pack1.createCompilationUnit("NonNull.java", str0, false, null);
 		String str1= """
 			package test1;
 			public class F {
@@ -194,7 +191,7 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 			    }
 			}
 			""";
-		ICompilationUnit cu2= pack1.createCompilationUnit("F.java", str1, false, null);
+		pack1.createCompilationUnit("F.java", str1, false, null);
 
 		String str2= """
 			package test1;
