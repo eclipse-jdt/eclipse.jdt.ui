@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -160,6 +161,7 @@ public class JavadocHoverTests extends CoreTests {
 		JavadocHover.getHoverInfo(elements, myEnumCu, new Region(range.getOffset(), range.getLength()), null);
 	}
 
+	@Ignore("Temporarily disabled due to https://github.com/eclipse-jdt/eclipse.jdt.core/issues/4683")
 	@Test
 	public void testCodeTagWithPre() throws Exception {
 		String source=
@@ -276,6 +278,7 @@ public class JavadocHoverTests extends CoreTests {
 	}
 
 	@Test
+	@Ignore("Temporarily disabled due to https://github.com/eclipse-jdt/eclipse.jdt.core/issues/4683")
 	public void testUnicode() throws Exception {
 		String source=
 				"""
