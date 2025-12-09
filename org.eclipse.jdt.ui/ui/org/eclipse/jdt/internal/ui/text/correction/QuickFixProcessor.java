@@ -691,6 +691,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DuplicateMethod:
 			case IProblem.DuplicateTypeVariable:
 			case IProblem.DuplicateNestedType:
+			case IProblem.PatternVariableRedeclared:
 				LocalCorrectionsSubProcessor.addInvalidVariableNameProposals(context, problem, proposals);
 				break;
 			case IProblem.NoMessageSendOnArrayType:
