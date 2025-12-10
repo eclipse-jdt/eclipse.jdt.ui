@@ -126,6 +126,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationTab_error_testannotationnotonpath;
 
+	public static String JUnitLaunchConfigurationTab_error_mixedJUnitJupiterVersions;
+
 	public static String JUnitLaunchConfigurationTab_error_testcasenotonpath;
 
 	public static String JUnitLaunchConfigurationTab_error_testnotdefined;
