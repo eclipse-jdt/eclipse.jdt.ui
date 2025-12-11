@@ -975,13 +975,29 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 
 		if (isReturn)
 			fBuf.append(JavaDocMessages.JavadocContentAccess2_returns_post);
-		if (isCode || (isLink && addCodeTagOnLink()))
-			fBuf.append("</code>"); //$NON-NLS-1$
+		if (isCode || (isLink && addCodeTagOnLink())) {
+			if (isCode) {
+				ASTNode sibling = getNextSiblingElement((TagElement)node.getParent(), node);
+				if (sibling == null)
+					fBuf.append("\n </code>"); //$NON-NLS-1$
+			}
+				else
+					fBuf.append("</code>"); //$NON-NLS-1$
+		} else
 		if (isSnippet)
 			fBuf.append("</code></pre>"); //$NON-NLS-1$
 		if (isLiteral || isCode)
 			fLiteralContent--;
 
+	}
+
+	protected ASTNode getNextSiblingElement(TagElement parent, TagElement child) {
+		List<?> fragments = parent.fragments();
+		int index = fragments.indexOf(child);
+		if (index == -1 || index + 1 >= fragments.size()) {
+	        return null; // no next sibling
+	    }
+		return (ASTNode) fragments.get(index + 1);
 	}
 
 	protected boolean addCodeTagOnLink() {
