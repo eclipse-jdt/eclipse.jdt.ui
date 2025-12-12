@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,10 @@
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -94,6 +96,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedOpenDeclarationProposal;
 
 
 /**
@@ -365,7 +368,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			layoutData.horizontalIndent= 4;
 			quickFixLabel.setLayoutData(layoutData);
 			String text;
-			if (proposals.length == 1) {
+			Optional<ICompletionProposal> showDeclaration = Arrays.asList(proposals).stream().filter(e -> e instanceof LinkedOpenDeclarationProposal).findFirst();
+			int proposalsLen = showDeclaration.isPresent() ? proposals.length - 1 : proposals.length;
+			if (proposalsLen == 1) {
 				text= JavaHoverMessages.AbstractAnnotationHover_message_singleQuickFix;
 			} else {
 				text= Messages.format(JavaHoverMessages.AbstractAnnotationHover_message_multipleQuickFix, new Object[] { String.valueOf(proposals.length) });

@@ -515,4 +515,5 @@ public final class CorrectionMessages extends NLS {
 	public static String PreviewFeaturesSubProcessor_open_compliance_page_enable_preview_features_info;
 	public static String PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
 	public static String PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features_info;
+	public static String OpenExistingDeclaration;
 }
