@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -46,14 +47,13 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
  * Quick Navigation proposal.
  */
-public class LinkedNamesAssistShowDuplicateProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICommandAccess {
+public class LinkedOpenDeclarationProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICommandAccess {
 
 	public static final String ASSIST_ID= "org.eclipse.jdt.ui.correction.showOriginalDeclaration.assist"; //$NON-NLS-1$
-
 	private SimpleName fNode;
 	private String fLabel;
 
-	public LinkedNamesAssistShowDuplicateProposal(String label, SimpleName node) {
+	public LinkedOpenDeclarationProposal(String label, SimpleName node) {
 		fLabel= label;
 		fNode= node;
 	}
@@ -71,7 +71,7 @@ public class LinkedNamesAssistShowDuplicateProposal implements IJavaCompletionPr
 			while (scopeOwner != null && !(scopeOwner instanceof MethodDeclaration
 					|| scopeOwner instanceof Initializer
 					|| scopeOwner instanceof LambdaExpression
-					|| scopeOwner instanceof TypeDeclaration)) {
+					|| scopeOwner instanceof TypeDeclaration )) {
 				scopeOwner = scopeOwner.getParent();
 			}
 			if(scopeOwner == null) {
@@ -100,8 +100,10 @@ public class LinkedNamesAssistShowDuplicateProposal implements IJavaCompletionPr
 					return true;
 				}
 			});
-			int start= result[0].getStartPosition();
-			int length= result[0].getLength();
+			ASTNode decl = result[0];
+			SimpleName name = ((VariableDeclaration) decl).getName();
+			int start = name.getStartPosition();
+			int length = name.getLength();
 			textEditor.selectAndReveal(start, length);
 		}
 	}

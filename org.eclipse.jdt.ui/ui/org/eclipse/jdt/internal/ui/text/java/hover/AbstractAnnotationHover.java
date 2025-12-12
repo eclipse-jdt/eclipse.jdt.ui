@@ -96,7 +96,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistShowDeclarationProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedOpenDeclarationProposal;
 
 
 /**
@@ -368,7 +368,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			layoutData.horizontalIndent= 4;
 			quickFixLabel.setLayoutData(layoutData);
 			String text;
-			Optional<ICompletionProposal> showDeclaration = Arrays.asList(proposals).stream().filter(e -> e instanceof LinkedNamesAssistShowDeclarationProposalCore).findFirst();
+			Optional<ICompletionProposal> showDeclaration = Arrays.asList(proposals).stream().filter(e -> e instanceof LinkedOpenDeclarationProposal).findFirst();
 			int proposalsLen = showDeclaration.isPresent() ? proposals.length - 1 : proposals.length;
 			if (proposalsLen == 1) {
 				text= JavaHoverMessages.AbstractAnnotationHover_message_singleQuickFix;

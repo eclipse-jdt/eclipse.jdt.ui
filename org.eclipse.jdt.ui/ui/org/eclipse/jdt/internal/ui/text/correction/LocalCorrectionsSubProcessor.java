@@ -125,8 +125,8 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionPro
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposalCore;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistShowDeclarationProposalCore;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistShowDuplicateProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedOpenDeclarationProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedOpenDeclarationProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposal;
@@ -818,7 +818,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 		return new LinkedNamesAssistProposal(core.getLabel(), core.getContext(), core.getNode(), core.getValueSuggestion());
 	}
 	@Override
-	protected ICommandAccess LinkedNamesAssistShowDuplicateProposalToT(LinkedNamesAssistShowDeclarationProposalCore core) {
-		return new LinkedNamesAssistShowDuplicateProposal(core.getLabel(), core.getNode());
+	protected ICommandAccess LinkedNamesAssistShowDuplicateProposalToT(LinkedOpenDeclarationProposalCore core) {
+		return new LinkedOpenDeclarationProposal(core.getLabel(), core.getNode());
 	}
 }

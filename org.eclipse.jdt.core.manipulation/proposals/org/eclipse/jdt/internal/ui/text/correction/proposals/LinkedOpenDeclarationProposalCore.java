@@ -24,14 +24,14 @@ import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 /**
  * A template proposal.
  */
-public class LinkedNamesAssistShowDeclarationProposalCore extends CUCorrectionProposalCore {
+public class LinkedOpenDeclarationProposalCore extends CUCorrectionProposalCore {
 
 	public static final String ASSIST_ID= "org.eclipse.jdt.ui.correction.showOriginalDeclaration.assist"; //$NON-NLS-1$
 
 	private SimpleName fNode;
 	private String fLabel;
 
-	public LinkedNamesAssistShowDeclarationProposalCore(String label, IInvocationContext context, SimpleName node) {
+	public LinkedOpenDeclarationProposalCore(String label, IInvocationContext context, SimpleName node) {
 		super(label, context.getCompilationUnit(), IProposalRelevance.LINKED_NAMES_ASSIST);
 		fLabel= label;
 		fNode= node;

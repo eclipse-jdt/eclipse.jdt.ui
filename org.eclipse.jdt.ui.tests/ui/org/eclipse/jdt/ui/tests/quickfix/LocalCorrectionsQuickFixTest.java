@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistShowDuplicateProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedOpenDeclarationProposal;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
@@ -13620,6 +13620,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
-		assertTrue(proposals.get(1) instanceof LinkedNamesAssistShowDuplicateProposal);
+		assertTrue(proposals.get(1) instanceof LinkedOpenDeclarationProposal);
 	}
 }
