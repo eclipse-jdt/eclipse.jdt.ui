@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java15ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -95,7 +96,7 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        String x = \"""
@@ -115,7 +116,7 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        String x = \"""
@@ -138,7 +139,7 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        System.out.println(\"""
@@ -157,7 +158,7 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        System.out.println(\"""
@@ -168,6 +169,55 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testUndefinedConstructorInDefaultConstructor() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str0= """
+			package test1;
+			import static java.lang.annotation.ElementType.*;
+			import java.lang.annotation.*;
+			@Retention(RetentionPolicy.CLASS)
+			@Target({METHOD,PARAMETER,LOCAL_VARIABLE,TYPE_USE})
+			public @interface NonNull {
+			}
+			""";
+		pack1.createCompilationUnit("NonNull.java", str0, false, null);
+		String str1= """
+			package test1;
+			public class F {
+			    public F(@NonNull Object runnable) {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("F.java", str1, false, null);
+
+		String str2= """
+			package test1;
+			public class E extends F {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str2, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String str3= """
+			package test1;
+			public class E extends F {
+
+			    public E(@NonNull Object runnable) {
+			        super(runnable);
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,12 +21,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -136,8 +140,26 @@ public class ConstructorFromSuperclassProposalCore extends LinkedCorrectionPropo
 			ITypeBinding[] params= binding.getParameterTypes();
 			for (int i= 0; i < params.length; i++) {
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-				var.setType(getImportRewrite().addImport(params[i], ast, importRewriteContext, TypeLocation.LOCAL_VARIABLE));
+				Type varType= getImportRewrite().addImport(params[i], ast, importRewriteContext, TypeLocation.LOCAL_VARIABLE);
+				var.setType(varType);
 				var.setName(ast.newSimpleName(paramNames[i]));
+				if (!(varType instanceof AnnotatableType annotatedType) ||
+						annotatedType.annotations().size() == 0) {
+					ITypeBinding[] paramTypes= binding.getParameterTypes();
+					IAnnotationBinding[] annotations= paramTypes[i].getTypeAnnotations();
+					for (IAnnotationBinding annotation : annotations) {
+						if (annotation.getDeclaredMemberValuePairs().length == 0) {
+							String annotationName= annotation.getName();
+							ITypeBinding annotationBinding= annotation.getAnnotationType();
+							String qualifiedName= annotationBinding.getQualifiedName();
+							getImportRewrite().addImport(qualifiedName, importRewriteContext);
+							MarkerAnnotation markerAnnotation= ast.newMarkerAnnotation();
+							markerAnnotation.setTypeName(ast.newName(annotationName));
+							List<IExtendedModifier> varModifiers= var.modifiers();
+							varModifiers.add(markerAnnotation);
+						}
+					}
+				}
 				parameters.add(var);
 			}
 
