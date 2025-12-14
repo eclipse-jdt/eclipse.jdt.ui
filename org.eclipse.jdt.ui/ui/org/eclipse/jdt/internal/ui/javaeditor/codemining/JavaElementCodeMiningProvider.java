@@ -15,8 +15,17 @@ package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -66,6 +75,10 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 	private final boolean showImplementations;
 
 	private final boolean editorEnabled;
+	
+	private Map<ITextViewer, List<ICodeMining>> lastCalculatedMiningsByViewer = new HashMap<>();
+
+	private final Set<ITextViewer> listenersAdded = Collections.synchronizedSet(new HashSet<>());
 
 	public JavaElementCodeMiningProvider() {
 		editorEnabled= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_CODEMINING_ENABLED);
@@ -75,6 +88,42 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 		showReferencesOnFields= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS);
 		showReferencesOnMethods= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS);
 		showImplementations= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS);
+	}
+
+	private void addToMap(ITextViewer viewer, List<ICodeMining> minings) {
+		// Synchronize on the viewer to ensure thread-safe listener addition
+		synchronized (viewer) {
+			if (!listenersAdded.contains(viewer)) {
+				StyledText st = viewer.getTextWidget();
+				if (st != null) {
+					Display.getDefault().asyncExec(() -> {
+						// Double-check locking pattern: verify listener wasn't added by another thread
+						synchronized (viewer) {
+							if (!listenersAdded.contains(viewer)) {
+								st.addDisposeListener(new DisposeListener() {
+									@Override
+									public void widgetDisposed(DisposeEvent e) {
+										lastCalculatedMiningsByViewer.remove(viewer);
+										listenersAdded.remove(viewer);
+									}
+								});
+								listenersAdded.add(viewer);
+							}
+						}
+					});
+				}
+			}
+		}
+		// Safe to put since HashMap operations are atomic for single put
+		lastCalculatedMiningsByViewer.put(viewer, minings);
+	}
+
+	private List<ICodeMining> getFromMap(ITextViewer viewer) {
+		List<ICodeMining> minings = lastCalculatedMiningsByViewer.get(viewer);
+		if (minings == null) {
+			return Collections.emptyList();
+		}
+		return minings;
 	}
 
 	@Override
@@ -87,7 +136,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 			ISourceViewerExtension5 codeMiningViewer = (ISourceViewerExtension5)viewer;
 			if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
 				// the provider isn't able to return code minings for non-reconciled viewers
-				return CompletableFuture.completedFuture(Collections.emptyList());
+				return CompletableFuture.completedFuture(getFromMap(viewer));
 			}
 		}
 		return CompletableFuture.supplyAsync(() -> {
@@ -109,6 +158,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 					}
 				}
 				monitor.isCanceled();
+				addToMap(viewer, minings);
 				return minings;
 			} catch (JavaModelException e) {
 				// Should never occur
