@@ -978,7 +978,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		if (isCode || (isLink && addCodeTagOnLink())) {
 			if (isCode) {
 				ASTNode sibling = getNextSiblingElement((TagElement)node.getParent(), node);
-				if (sibling == null)
+				if (sibling != null)
 					fBuf.append("\n </code>"); //$NON-NLS-1$
 			}
 				else
