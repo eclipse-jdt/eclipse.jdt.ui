@@ -68,7 +68,6 @@ public class FoldingWithShowSelectedElementTests {
 
 	@After
 	public void tearDown() throws CoreException {
-		JavaProjectHelper.delete(jProject);
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS);
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED);
 	}
