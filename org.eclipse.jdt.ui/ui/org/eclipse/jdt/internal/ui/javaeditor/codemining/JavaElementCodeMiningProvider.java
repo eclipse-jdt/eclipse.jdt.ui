@@ -83,15 +83,23 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 		if (!editorEnabled) {
 			return CompletableFuture.completedFuture(Collections.emptyList());
 		}
-		if (viewer instanceof ISourceViewerExtension5) {
-			ISourceViewerExtension5 codeMiningViewer = (ISourceViewerExtension5)viewer;
-			if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
-				// the provider isn't able to return code minings for non-reconciled viewers
-				return CompletableFuture.completedFuture(Collections.emptyList());
-			}
-		}
 		return CompletableFuture.supplyAsync(() -> {
 			monitor.isCanceled();
+			if (viewer instanceof ISourceViewerExtension5 codeMiningViewer) {
+				final Object lock= JavaCodeMiningReconciler.getReconcileLock();
+				synchronized (lock) {
+					while (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
+						if (monitor.isCanceled()) { // Check if monitor was canceled
+							return Collections.emptyList();
+						}
+						try {
+							lock.wait(30_000L);
+						} catch (InterruptedException e) {
+							return Collections.emptyList();
+						}
+					}
+				}
+			}
 			ITextEditor textEditor= super.getAdapter(ITextEditor.class);
 			ITypeRoot unit= EditorUtility.getEditorInputJavaElement(textEditor, true);
 			if (unit == null) {

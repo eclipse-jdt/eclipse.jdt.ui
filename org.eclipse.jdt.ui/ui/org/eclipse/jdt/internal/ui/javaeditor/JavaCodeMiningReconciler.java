@@ -36,6 +36,8 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	 */
 	private static final Set<ISourceViewerExtension5> reconciledViewers= new HashSet<>();
 
+	private static final Object RECONCILE_LOCK = new Object();
+
 	/** The Java editor this Java code mining reconciler is installed on */
 	private JavaEditor fEditor;
 
@@ -47,15 +49,20 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 		final ISourceViewerExtension5 sourceViewer= fSourceViewer; // take a copy as this can be null-ed in the meantime
 		if (sourceViewer != null) {
-			reconciledViewers.add(sourceViewer);
+			synchronized (RECONCILE_LOCK) {
+				reconciledViewers.add(sourceViewer);
+				RECONCILE_LOCK.notifyAll();
+			}
 			sourceViewer.updateCodeMinings();
 		}
 	}
 
 	@Override
 	public void aboutToBeReconciled() {
+		synchronized (RECONCILE_LOCK) {
 		// interrupt code minings if modification occurs
-		reconciledViewers.remove(fSourceViewer);
+			reconciledViewers.remove(fSourceViewer);
+		}
 	}
 
 	/**
@@ -83,7 +90,9 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	 * Uninstall this reconciler from the editor.
 	 */
 	public void uninstall() {
-		reconciledViewers.remove(fSourceViewer);
+		synchronized (RECONCILE_LOCK) {
+			reconciledViewers.remove(fSourceViewer);
+		}
 		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor) fEditor).removeReconcileListener(this);
 		}
@@ -92,7 +101,12 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	}
 
 	public static boolean isReconciled(ISourceViewerExtension5 viewer) {
-		return reconciledViewers.contains(viewer);
+		synchronized (RECONCILE_LOCK) {
+			return reconciledViewers.contains(viewer);
+		}
 	}
 
+	public static Object getReconcileLock() {
+		return RECONCILE_LOCK;
+	}
 }
