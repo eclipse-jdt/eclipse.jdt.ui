@@ -163,11 +163,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		private Control fFocusControl;
 		private AnnotationInfo fInput;
 		private Composite fParent;
-		
-		private IInformationControl javaDocControl;
-		private boolean javaDocControlCreted = false;
 
-		private boolean javaDocControlFocus = false;
+		private IInformationControl javaDocControl;
+
+		private boolean javaDocControlFocus;
 
 		public AnnotationInformationControl(Shell parentShell, String statusFieldText) {
 			super(parentShell, statusFieldText);
@@ -229,8 +228,11 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 */
 		@Override
 		public final void setVisible(boolean visible) {
-			if (!visible)
+			if (!visible) {
 				disposeDeferredCreatedContent();
+			} else if (javaDocControl == null) {
+				tryToShowJavadocPopup();
+			}
 			if (!visible && !javaDocControlFocus && javaDocControl != null) {
 				javaDocControl.dispose();
 				javaDocControl= null;
@@ -324,16 +326,15 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			fParent.layout(true);
 
 			// JavaDocHover should appear when you hover on QuickFixHover.
-			if (!javaDocControlCreted) {
+			if (javaDocControl == null) {
 				Shell shell = getShell();
 				if (shell != null && !shell.isDisposed()) {
 					shell.addMouseTrackListener(new MouseTrackAdapter() {
 						@Override
 						public void mouseEnter(MouseEvent e) {
-							showJavadocPopup();
+							tryToShowJavadocPopup();
 						}
 					});
-					javaDocControlCreted = true;
 				}
 			}
 		}
@@ -602,77 +603,90 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 		}
 
-		private void showJavadocPopup() {
-				if (javaDocControl != null)
-					return;
+		private void tryToShowJavadocPopup() {
+			if (javaDocControl != null) {
+				return;
+			}
+			IJavaElement javaElement= findJavaElementWithProblem();
+			if (javaElement == null) {
+				// no problems available
+				return;
+			}
+			String javadocHtml;
+			try {
+				javadocHtml= JavadocContentAccess2.getHTMLContent(javaElement, true);
+			} catch (CoreException e) {
+				JavaPlugin.log(e.getStatus());
+				return;
+			}
+			if (javadocHtml == null || javadocHtml.isBlank()) {
+				return;
+			}
 
-				IJavaElement javaElement = null;
-				Annotation annotation = getAnnotationInfo().annotation;
-				if (annotation instanceof IJavaAnnotation) {
-					ICompilationUnit cu = ((IJavaAnnotation) annotation).getCompilationUnit();
-					if (cu != null) {
-						try {
-							int offset = getAnnotationInfo().position.getOffset();
-							IJavaElement[] elements = cu.codeSelect(offset, 0);
-							if (elements != null && elements.length > 0) {
-								javaElement = elements[0];
-							}
-						} catch (JavaModelException e) {
-							JavaPlugin.log(e.getStatus());
-						}
-					}
-				}
-				if (javaElement != null) {
+			showJavadocPopup(javaElement, javadocHtml);
+		}
+
+		private IJavaElement findJavaElementWithProblem() {
+			Annotation annotation = getAnnotationInfo().annotation;
+			if (annotation instanceof IJavaAnnotation javaAnnotation) {
+				ICompilationUnit cu = javaAnnotation.getCompilationUnit();
+				if (cu != null) {
 					try {
-						String javadocHtml = JavadocContentAccess2.getHTMLContent(javaElement, true);
-						if (javadocHtml != null && !javadocHtml.isEmpty()) {
-							JavadocBrowserInformationControlInput infoInput =
-								new JavadocBrowserInformationControlInput(null, javaElement, javadocHtml, 0);
-								IInformationControlCreator presenterCreator = new JavadocHover.PresenterControlCreator(null);
-								Shell shell= getShell();
-								javaDocControl = presenterCreator.createInformationControl(shell);
-							if (javaDocControl instanceof BrowserInformationControl) {
-								((BrowserInformationControl) javaDocControl).setInput(infoInput);
-							}
-
-							javaDocControl.addFocusListener(new FocusListener() {
-								@Override
-								public void focusLost(FocusEvent e) {
-									javaDocControlFocus = false;
-									javaDocControl.dispose();
-									javaDocControl= null;
-								}
-
-								@Override
-								public void focusGained(FocusEvent e) {
-									javaDocControlFocus = true;
-								}
-							});
-
-						Rectangle mainBounds = shell.getBounds();
-						Point pref = null;
-						pref = javaDocControl.computeSizeHint();
-
-						int x = mainBounds.x + mainBounds.width;
-						int y = mainBounds.y;
-
-						Rectangle clientArea = shell.getDisplay().getClientArea();
-
-						if (x + pref.x > clientArea.x + clientArea.width) {
-							x = Math.max(clientArea.x, mainBounds.x - pref.x);
+						int offset = getAnnotationInfo().position.getOffset();
+						IJavaElement[] elements = cu.codeSelect(offset, 0);
+						if (elements != null && elements.length > 0) {
+							return elements[0];
 						}
-						if (y + pref.y > clientArea.y + clientArea.height) {
-							y = Math.max(clientArea.y, clientArea.y + clientArea.height - pref.y);
-						}
-						javaDocControl.setLocation(new Point(x, y));
-						javaDocControl.setSize(pref.x, pref.y);
-						javaDocControl.setVisible(true);
-						}
-					} catch (CoreException e) {
+					} catch (JavaModelException e) {
 						JavaPlugin.log(e.getStatus());
 					}
 				}
+			}
+			return null;
+		}
 
+		private void showJavadocPopup(IJavaElement javaElement, String javadocHtml) {
+			JavadocBrowserInformationControlInput infoInput= new JavadocBrowserInformationControlInput(null, javaElement, javadocHtml, 0);
+			IInformationControlCreator presenterCreator= new JavadocHover.PresenterControlCreator(null);
+			Shell shell= getShell();
+			javaDocControl= presenterCreator.createInformationControl(shell);
+			if (javaDocControl instanceof BrowserInformationControl bic) {
+				bic.setInput(infoInput);
+			}
+
+			javaDocControl.addFocusListener(new FocusListener() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					javaDocControlFocus = false;
+					javaDocControl.dispose();
+					javaDocControl= null;
+				}
+
+				@Override
+				public void focusGained(FocusEvent e) {
+					javaDocControlFocus = true;
+				}
+			});
+
+			Rectangle mainBounds = shell.getBounds();
+			javaDocControl.setSizeConstraints(800, 600);
+			Point pref = javaDocControl.computeSizeHint();
+
+			int x = mainBounds.x + mainBounds.width;
+			int y = mainBounds.y;
+
+			Rectangle clientArea = shell.getDisplay().getClientArea();
+
+			if (x + pref.x > clientArea.x + clientArea.width) {
+				x= Math.max(clientArea.x, mainBounds.x - pref.x);
+			}
+			if (y + pref.y > clientArea.y + clientArea.height) {
+				y= Math.max(clientArea.y, clientArea.y + clientArea.height - pref.y);
+			}
+			System.out.println("Location: " + new Point(x, y) + ", size: " + pref); //$NON-NLS-1$ //$NON-NLS-2$
+			javaDocControl.setLocation(new Point(x, y));
+			javaDocControl.setSize(pref.x, pref.y);
+			javaDocControl.setVisible(true);
 		}
 	}
 
