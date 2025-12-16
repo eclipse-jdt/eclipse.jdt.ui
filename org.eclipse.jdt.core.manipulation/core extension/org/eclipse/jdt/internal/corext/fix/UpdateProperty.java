@@ -194,9 +194,9 @@ public enum UpdateProperty {
 			UpdateProperty::defaultRewrite),
 	/**
 	 * Change
-	 * <code>System.getProperty("java.runtime.version");</code>
+	 * <code>System.getProperty("java.specification.version");</code>
 	 * to
-	 * <code>Runtime.version().feature();</code>
+	 * <code>String.valueOf(Runtime.version().feature());</code>
 	 */
 	JAVA_SPEC_VERSION("java.specification.version", //$NON-NLS-1$
 			Runtime.class,
@@ -205,7 +205,7 @@ public enum UpdateProperty {
 			null,
 			null,
 			UpdateProperty::defaultvisitor,
-			UpdateProperty::defaultRewrite);
+			UpdateProperty::int2StringRewrite);
 
 	public static Object UNUSED= new Object();
 
@@ -476,6 +476,45 @@ public enum UpdateProperty {
 			replace_with_Call= secondCall;
 		}
 		ASTNodes.replaceAndRemoveNLS(rewrite, visited, replace_with_Call, group, cuRewrite);
+	}
+
+	@SuppressWarnings("unused")
+	private static void int2StringRewrite(UpdateProperty upp, final MethodInvocation visited, final String propertykey, Expression expression,
+			final CompilationUnitRewrite cuRewrite,final TextEditGroup group, Object object) throws CoreException {
+		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		AST ast= cuRewrite.getRoot().getAST();
+
+		/**
+		 * Add import
+		 */
+		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+		importRewrite.addImport(upp.cl.getCanonicalName());
+		/**
+		 * Add first method call
+		 */
+		MethodInvocation firstCall= ast.newMethodInvocation();
+		firstCall.setExpression(ASTNodeFactory.newName(ast, upp.cl.getSimpleName()));
+		firstCall.setName(ast.newSimpleName(upp.simplename));
+
+		MethodInvocation innerCall;
+		if(upp.simplename2==null) {
+			innerCall= firstCall;
+		} else {
+			/**
+			 * Add second method call
+			 */
+			MethodInvocation secondCall= ast.newMethodInvocation();
+			secondCall.setExpression(firstCall);
+			secondCall.setName(ast.newSimpleName(upp.simplename2));
+			innerCall= secondCall;
+		}
+		// Surround with String.valueOf() method
+		MethodInvocation outerCall= ast.newMethodInvocation();
+		outerCall.setExpression(ASTNodeFactory.newName(ast, "String")); //$NON-NLS-1$
+		outerCall.setName(ast.newSimpleName("valueOf")); //$NON-NLS-1$
+		List<Expression> outerArguments= outerCall.arguments();
+		outerArguments.add(innerCall);
+		ASTNodes.replaceAndRemoveNLS(rewrite, visited, outerCall, group, cuRewrite);
 	}
 
 	@SuppressWarnings("unused") // unused parameter to implement IRewriter

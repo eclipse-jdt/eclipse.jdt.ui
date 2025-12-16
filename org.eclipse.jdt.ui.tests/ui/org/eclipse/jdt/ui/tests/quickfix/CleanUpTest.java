@@ -30413,7 +30413,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			        System.out.println("out:"+longvalue3); //$NON-NLS-1$
 			        String jrv = Runtime.version().toString();
 			        System.out.println("out:"+jrv); //$NON-NLS-1$
-			        String jsv = Runtime.version().feature();
+			        String jsv = String.valueOf(Runtime.version().feature());
 			        System.out.println("out:"+jsv); //$NON-NLS-1$
 			    }
 			}
