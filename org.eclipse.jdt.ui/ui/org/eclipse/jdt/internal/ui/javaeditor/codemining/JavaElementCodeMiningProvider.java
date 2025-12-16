@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -83,46 +84,43 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 		if (!editorEnabled) {
 			return CompletableFuture.completedFuture(Collections.emptyList());
 		}
+		if (viewer instanceof ISourceViewerExtension5 v) {
+			CompletableFuture<CompilationUnit> future= JavaCodeMiningReconciler.getFuture(v);
+			if (future != null) {
+				return future.thenApplyAsync(ast -> {
+					return computeCodeMinings(viewer,monitor);
+				});
+			}
+		}
 		return CompletableFuture.supplyAsync(() -> {
-			monitor.isCanceled();
-			if (viewer instanceof ISourceViewerExtension5 codeMiningViewer) {
-				final Object lock= JavaCodeMiningReconciler.getReconcileLock();
-				synchronized (lock) {
-					while (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
-						if (monitor.isCanceled()) { // Check if monitor was canceled
-							return Collections.emptyList();
-						}
-						try {
-							lock.wait(30_000L);
-						} catch (InterruptedException e) {
-							return Collections.emptyList();
-						}
-					}
-				}
-			}
-			ITextEditor textEditor= super.getAdapter(ITextEditor.class);
-			ITypeRoot unit= EditorUtility.getEditorInputJavaElement(textEditor, true);
-			if (unit == null) {
-				return Collections.emptyList();
-			}
-			try {
-				IJavaElement[] elements= unit.getChildren();
-				List<ICodeMining> minings= new ArrayList<>(elements.length);
-				collectMinings(unit, textEditor, unit.getChildren(), minings, viewer, monitor);
-				// interrupt if editor was marked to be reconciled in the meantime
-				if (viewer instanceof ISourceViewerExtension5) {
-					ISourceViewerExtension5 codeMiningViewer= (ISourceViewerExtension5)viewer;
-					if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
-						monitor.setCanceled(true);
-					}
-				}
-				monitor.isCanceled();
-				return minings;
-			} catch (JavaModelException e) {
-				// Should never occur
-			}
-			return Collections.emptyList();
+			return computeCodeMinings(viewer, monitor);
 		});
+	}
+
+	private List<? extends ICodeMining> computeCodeMinings(ITextViewer viewer, IProgressMonitor monitor) {
+		monitor.isCanceled();
+		ITextEditor textEditor= super.getAdapter(ITextEditor.class);
+		ITypeRoot unit= EditorUtility.getEditorInputJavaElement(textEditor, true);
+		if (unit == null) {
+			return Collections.emptyList();
+		}
+		try {
+			IJavaElement[] elements= unit.getChildren();
+			List<ICodeMining> minings= new ArrayList<>(elements.length);
+			collectMinings(unit, textEditor, unit.getChildren(), minings, viewer, monitor);
+			// interrupt if editor was marked to be reconciled in the meantime
+			if (viewer instanceof ISourceViewerExtension5) {
+				ISourceViewerExtension5 codeMiningViewer= (ISourceViewerExtension5) viewer;
+				if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
+					monitor.setCanceled(true);
+				}
+			}
+			monitor.isCanceled();
+			return minings;
+		} catch (JavaModelException e) {
+			// Should never occur
+		}
+		return Collections.emptyList();
 	}
 
 	/**

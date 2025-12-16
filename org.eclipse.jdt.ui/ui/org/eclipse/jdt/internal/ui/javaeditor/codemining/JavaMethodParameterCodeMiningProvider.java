@@ -48,38 +48,43 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 
 	@Override
 	public CompletableFuture<List<? extends ICodeMining>> provideCodeMinings(ITextViewer viewer, IProgressMonitor monitor) {
-		if (viewer instanceof ISourceViewerExtension5) {
-			ISourceViewerExtension5 codeMiningViewer= (ISourceViewerExtension5)viewer;
-			if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
-				// the provider isn't able to return code minings for non-reconciled viewers
-				return CompletableFuture.completedFuture(Collections.emptyList());
+		if (viewer instanceof ISourceViewerExtension5 v) {
+			CompletableFuture<CompilationUnit> future= JavaCodeMiningReconciler.getFuture(v);
+			if (future != null) {
+				return future.thenApplyAsync(ast -> {
+					return computeCodeMinings(viewer,monitor);
+				});
 			}
 		}
 		return CompletableFuture.supplyAsync(() -> {
-			monitor.isCanceled();
-			ITextEditor textEditor= super.getAdapter(ITextEditor.class);
-			ITypeRoot unit= EditorUtility.getEditorInputJavaElement(textEditor, true);
-			if (unit == null) {
-				return null;
-			}
-			try {
-				IJavaElement[] elements= unit.getChildren();
-				List<ICodeMining> minings= new ArrayList<>(elements.length);
-				collectLineContentCodeMinings(unit, minings);
-				if (viewer instanceof ISourceViewerExtension5) {
-					ISourceViewerExtension5 codeMiningViewer= (ISourceViewerExtension5)viewer;
-					if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
-						// the provider isn't able to return code minings for non-reconciled viewers
-						monitor.setCanceled(true);
-					}
-				}
-				monitor.isCanceled();
-				return minings;
-			} catch (JavaModelException e) {
-				// TODO: what should we done when there are some errors?
-			}
-			return null;
+			return computeCodeMinings(viewer, monitor);
 		});
+	}
+
+	private List<? extends ICodeMining> computeCodeMinings(ITextViewer viewer, IProgressMonitor monitor) {
+		monitor.isCanceled();
+		ITextEditor textEditor= super.getAdapter(ITextEditor.class);
+		ITypeRoot unit= EditorUtility.getEditorInputJavaElement(textEditor, true);
+		if (unit == null) {
+			return Collections.emptyList();
+		}
+		try {
+			IJavaElement[] elements= unit.getChildren();
+			List<ICodeMining> minings= new ArrayList<>(elements.length);
+			collectLineContentCodeMinings(unit, minings);
+			if (viewer instanceof ISourceViewerExtension5) {
+				ISourceViewerExtension5 codeMiningViewer= (ISourceViewerExtension5)viewer;
+				if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
+					// the provider isn't able to return code minings for non-reconciled viewers
+					monitor.setCanceled(true);
+				}
+			}
+			monitor.isCanceled();
+			return minings;
+		} catch (JavaModelException e) {
+			// TODO: what should we done when there are some errors?
+		}
+		return Collections.emptyList();
 	}
 
 	private void collectLineContentCodeMinings(ITypeRoot unit, List<ICodeMining> minings) {
