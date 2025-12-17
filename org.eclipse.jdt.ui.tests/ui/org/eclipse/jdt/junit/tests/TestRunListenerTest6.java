@@ -14,6 +14,9 @@
 
 package org.eclipse.jdt.junit.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.nio.file.Files;
 import java.util.List;
 
@@ -25,13 +28,19 @@ import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
+import org.eclipse.jdt.junit.tests.TestRunListenerTest5.ScheduledJobsListener;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IType;
@@ -39,6 +48,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 
 public class TestRunListenerTest6 extends AbstractTestRunListenerTest {
 
@@ -232,5 +242,43 @@ public class TestRunListenerTest6 extends AbstractTestRunListenerTest {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
 		assertEqualLog(expectedSequence, actual);
+	}
+
+	@Test
+	public void testTerminateLaunch() throws Exception {
+		String source=
+				"""
+			package pack;
+			import org.junit.jupiter.api.Test;
+			public class ATestCase {
+			    @Test public void testSleep() throws Exception { Thread.sleep(30_000); }
+			}""";
+		IType aTestCase= createType(source, "pack", "ATestCase.java");
+
+		buildTestCase(aTestCase);
+
+		IJobManager jm= Job.getJobManager();
+		ScheduledJobsListener jobListener= new ScheduledJobsListener(JUnitMessages.TestRunnerViewPart_jobName);
+		jm.addJobChangeListener(jobListener);
+		LaunchesListener launchesListener= new LaunchesListener();
+		ILaunchConfigurationWorkingCopy configuration= createLaunchConfiguration(aTestCase, TestKindRegistry.JUNIT6_TEST_KIND_ID, null, launchesListener);
+		try {
+			configuration.launch(ILaunchManager.RUN_MODE, null);
+			waitForCondition(launchesListener.fLaunchChanged::get, 30 * 1000, 1000);
+
+			long scheduledJobsCount = jobListener.scheduledCount.get();
+			boolean jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCount, 1 * 1000, 100);
+			assertTrue("Expected JUnit update jobs to be scheduled", jobCountIncrease);
+
+			TestRunListenerTest5.terminateLaunches();
+			waitForCondition(launchesListener.fLaunchHasTerminated::get, 30 * 1000, 1000);
+			long scheduledJobsCountAfterTermination = jobListener.scheduledCount.get();
+
+			jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCountAfterTermination, 1 * 1000, 100);
+			assertFalse("Expected no new JUnit update jobs to be scheduled", jobCountIncrease);
+		} finally {
+			jm.removeJobChangeListener(jobListener);
+			cleanUp(configuration, launchesListener);
+		}
 	}
 }
