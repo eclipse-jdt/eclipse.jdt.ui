@@ -193,7 +193,7 @@ public class TestRunSession implements ITestRunSession {
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap<>();
 
-		fTestRunnerClient= new RemoteTestRunnerClient();
+		fTestRunnerClient= new RemoteTestRunnerClient(fTestRunnerKind);
 		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() }, port);
 
 		final ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
