@@ -88,7 +88,8 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 			CompletableFuture<CompilationUnit> future= JavaCodeMiningReconciler.getFuture(v);
 			if (future != null) {
 				return future.thenApplyAsync(ast -> {
-					return computeCodeMinings(viewer,monitor);
+					ITypeRoot unit= ast.getTypeRoot();
+					return computeCodeMinings(viewer, monitor, unit);
 				});
 			}
 		}
@@ -101,12 +102,18 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 		monitor.isCanceled();
 		ITextEditor textEditor= super.getAdapter(ITextEditor.class);
 		ITypeRoot unit= EditorUtility.getEditorInputJavaElement(textEditor, true);
+		return computeCodeMinings(viewer, monitor, unit);
+	}
+
+
+	private List<? extends ICodeMining> computeCodeMinings(ITextViewer viewer, IProgressMonitor monitor, ITypeRoot unit) {
 		if (unit == null) {
 			return Collections.emptyList();
 		}
 		try {
 			IJavaElement[] elements= unit.getChildren();
 			List<ICodeMining> minings= new ArrayList<>(elements.length);
+			ITextEditor textEditor= super.getAdapter(ITextEditor.class);
 			collectMinings(unit, textEditor, unit.getChildren(), minings, viewer, monitor);
 			// interrupt if editor was marked to be reconciled in the meantime
 			if (viewer instanceof ISourceViewerExtension5) {

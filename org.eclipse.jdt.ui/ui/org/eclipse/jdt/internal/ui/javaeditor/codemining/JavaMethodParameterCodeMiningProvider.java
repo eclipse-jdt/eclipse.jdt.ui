@@ -52,7 +52,8 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 			CompletableFuture<CompilationUnit> future= JavaCodeMiningReconciler.getFuture(v);
 			if (future != null) {
 				return future.thenApplyAsync(ast -> {
-					return computeCodeMinings(viewer,monitor);
+					ITypeRoot unit= ast.getTypeRoot();
+					return computCodeMinings(viewer, monitor, unit);
 				});
 			}
 		}
@@ -65,6 +66,10 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 		monitor.isCanceled();
 		ITextEditor textEditor= super.getAdapter(ITextEditor.class);
 		ITypeRoot unit= EditorUtility.getEditorInputJavaElement(textEditor, true);
+		return computCodeMinings(viewer, monitor, unit);
+	}
+
+	private List<? extends ICodeMining> computCodeMinings(ITextViewer viewer, IProgressMonitor monitor, ITypeRoot unit) {
 		if (unit == null) {
 			return Collections.emptyList();
 		}

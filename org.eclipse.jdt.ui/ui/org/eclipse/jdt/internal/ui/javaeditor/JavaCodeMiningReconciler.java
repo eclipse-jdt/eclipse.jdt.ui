@@ -48,11 +48,11 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 		final ISourceViewerExtension5 sourceViewer= fSourceViewer; // take a copy as this can be null-ed in the meantime
 		if (sourceViewer != null) {
+			sourceViewer.updateCodeMinings();
 			CompletableFuture<CompilationUnit> future= toBeReconciledViewers.remove(sourceViewer);
 			if (future!=null) {
 				future.complete(ast);
 			}
-			sourceViewer.updateCodeMinings();
 		}
 	}
 
@@ -63,7 +63,9 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 
 	@Override
 	public void aboutToBeReconciled() {
-		toBeReconciledViewers.computeIfAbsent(fSourceViewer, unused->{return new CompletableFuture<CompilationUnit>();});
+		toBeReconciledViewers.computeIfAbsent(fSourceViewer, unused -> {
+			return new CompletableFuture<CompilationUnit>();
+		});
 	}
 
 	/**
