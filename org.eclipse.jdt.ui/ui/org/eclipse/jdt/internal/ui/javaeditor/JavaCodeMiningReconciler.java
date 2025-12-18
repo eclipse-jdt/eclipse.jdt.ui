@@ -58,8 +58,7 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 		final ISourceViewerExtension5 sourceViewer= fSourceViewer;
 		if (editor != null && sourceViewer != null) {
 			sourceViewer.updateCodeMinings();
-			// Use remove() to ensure atomicity
-			CompletableFuture<ITypeRoot> future= typeRootFutureByEditor.remove(editor);
+			CompletableFuture<ITypeRoot> future= typeRootFutureByEditor.get(editor);
 			if (future != null && !future.isDone() && ast.getTypeRoot() != null) {
 				future.complete(ast.getTypeRoot());
 			}
@@ -124,10 +123,5 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 		}
 		fEditor= null;
 		fSourceViewer= null;
-	}
-
-	public static boolean isReconciled(ITextEditor editor) {
-		CompletableFuture<ITypeRoot> future= getFuture(editor);
-		return future.isDone() && !future.isCompletedExceptionally();
 	}
 }

@@ -106,7 +106,7 @@ public class ParameterNamesCodeMiningTest {
 		assertTrue(new DisplayHelper() {
 			@Override
 			protected boolean condition() {
-				return JavaCodeMiningReconciler.isReconciled(editor);
+				return JavaCodeMiningReconciler.getFuture(editor).isDone();
 			}
 		}.waitForCondition(viewer.getTextWidget().getDisplay(), 2000), "Editor not reconciled");
 	}

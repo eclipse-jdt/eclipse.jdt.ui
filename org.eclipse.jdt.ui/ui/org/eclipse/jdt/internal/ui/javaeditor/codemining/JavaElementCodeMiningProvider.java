@@ -104,11 +104,6 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 			IJavaElement[] elements= unit.getChildren();
 			List<ICodeMining> minings= new ArrayList<>(elements.length);
 			collectMinings(unit, textEditor, unit.getChildren(), minings, viewer, monitor);
-			// interrupt if editor was marked to be reconciled in the meantime
-			if (!JavaCodeMiningReconciler.isReconciled(textEditor)) {
-				monitor.setCanceled(true);
-			}
-			monitor.isCanceled();
 			return minings;
 		} catch (JavaModelException e) {
 			// Should never occur

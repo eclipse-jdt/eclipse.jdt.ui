@@ -51,7 +51,7 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 		ITextEditor textEditor= super.getAdapter(ITextEditor.class);
 		CompletableFuture<ITypeRoot> future= JavaCodeMiningReconciler.getFuture(textEditor);
 		return future.thenApplyAsync(typeRoot -> {
-			return computeCodeMinings(textEditor, monitor, typeRoot);
+			return computeCodeMinings(typeRoot);
 		}).handle((result, ex) -> {
 			if (ex instanceof CompletionException ce &&
 					ce.getCause() instanceof CancellationException) {
@@ -61,7 +61,7 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 		});
 	}
 
-	private List<? extends ICodeMining> computeCodeMinings(ITextEditor textEditor, IProgressMonitor monitor, ITypeRoot unit) {
+	private List<? extends ICodeMining> computeCodeMinings(ITypeRoot unit) {
 		if (unit == null) {
 			return Collections.emptyList();
 		}
@@ -69,11 +69,6 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 			IJavaElement[] elements= unit.getChildren();
 			List<ICodeMining> minings= new ArrayList<>(elements.length);
 			collectLineContentCodeMinings(unit, minings);
-			if (!JavaCodeMiningReconciler.isReconciled(textEditor)) {
-				// the provider isn't able to return code minings for non-reconciled viewers
-				monitor.setCanceled(true);
-			}
-			monitor.isCanceled();
 			return minings;
 		} catch (JavaModelException e) {
 			// TODO: what should we done when there are some errors?
