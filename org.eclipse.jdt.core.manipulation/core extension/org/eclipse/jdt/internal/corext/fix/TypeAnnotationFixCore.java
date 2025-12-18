@@ -19,14 +19,14 @@ import org.eclipse.jdt.internal.corext.fix.TypeAnnotationRewriteOperations.MoveT
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-public class TypeAnnotationFix extends CompilationUnitRewriteOperationsFix {
-	public TypeAnnotationFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange operation) {
+public class TypeAnnotationFixCore extends CompilationUnitRewriteOperationsFixCore {
+	public TypeAnnotationFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange operation) {
 		super(name, compilationUnit, operation);
 	}
 
-	public static TypeAnnotationFix createMoveAnnotationsToTypeAnnotationsFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+	public static TypeAnnotationFixCore createMoveAnnotationsToTypeAnnotationsFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		MoveTypeAnnotationRewriteOperation operation= new MoveTypeAnnotationRewriteOperation(compilationUnit, problem);
-		return new TypeAnnotationFix(operation.isMove() ? FixMessages.TypeAnnotationFix_move : FixMessages.TypeAnnotationFix_remove, compilationUnit, operation);
+		return new TypeAnnotationFixCore(operation.isMove() ? FixMessages.TypeAnnotationFix_move : FixMessages.TypeAnnotationFix_remove, compilationUnit, operation);
 	}
 
 }

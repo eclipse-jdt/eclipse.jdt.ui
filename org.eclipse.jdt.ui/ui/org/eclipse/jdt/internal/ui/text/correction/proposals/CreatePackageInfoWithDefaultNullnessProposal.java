@@ -40,7 +40,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFix;
+import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 public final class CreatePackageInfoWithDefaultNullnessProposal extends ChangeCorrectionProposal {
 	public static CreatePackageInfoWithDefaultNullnessProposal createFor(int problemId, String name, IPackageFragment pack) throws CoreException {
 		int relevance= IProposalRelevance.ADD_MISSING_NULLNESS_ANNOTATION;
-		String nonNullByDefaultAnnotationName= NullAnnotationsFix.getNonNullByDefaultAnnotationName(pack, false);
+		String nonNullByDefaultAnnotationName= NullAnnotationsFixCore.getNonNullByDefaultAnnotationName(pack, false);
 
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 		StringBuilder content= new StringBuilder();

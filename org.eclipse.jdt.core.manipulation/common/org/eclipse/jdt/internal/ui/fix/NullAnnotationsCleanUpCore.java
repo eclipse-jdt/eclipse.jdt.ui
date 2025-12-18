@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 GK Software AG and others.
+ * Copyright (c) 2011, 2025 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     Stephan Herrmann - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
  *     IBM Corporation - bug fixes
+ *     IBM Corporation - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -26,7 +27,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFix;
+import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -37,11 +38,11 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  *
  * Crafted after the lead of Java50CleanUp
  */
-public class NullAnnotationsCleanUp extends AbstractMultiFix {
+public class NullAnnotationsCleanUpCore extends AbstractMultiFix {
 
 	private int handledProblemID;
 
-	public NullAnnotationsCleanUp(Map<String, String> options, int handledProblemID) {
+	public NullAnnotationsCleanUpCore(Map<String, String> options, int handledProblemID) {
 		super(options);
 		this.handledProblemID= handledProblemID;
 	}
@@ -72,7 +73,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			}
 			locations= filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]);
 		}
-		return NullAnnotationsFix.createCleanUp(compilationUnit, locations, this.handledProblemID);
+		return NullAnnotationsFixCore.createCleanUp(compilationUnit, locations, this.handledProblemID);
 	}
 
 	private Map<String, String> getRequiredOptions() {
