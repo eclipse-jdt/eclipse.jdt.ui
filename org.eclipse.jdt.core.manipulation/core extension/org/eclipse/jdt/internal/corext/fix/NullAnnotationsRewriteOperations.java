@@ -11,6 +11,7 @@
  * Contributors:
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
  *     IBM Corporation - bug fixes
+ *     IBM Corporation - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -66,6 +67,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.RedundantNullnessTypeAnnotationsFilter;
@@ -77,8 +79,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class NullAnnotationsRewriteOperations {
 
@@ -371,7 +371,7 @@ public class NullAnnotationsRewriteOperations {
 						MarkerAnnotation annotation= (MarkerAnnotation) modifier;
 						IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();
 						String name= annotationBinding.getName();
-						if (name.equals(NullAnnotationsFix.getNonNullAnnotationName(fCompilationUnit.getJavaElement(), true))) {
+						if (name.equals(NullAnnotationsFixCore.getNonNullAnnotationName(fCompilationUnit.getJavaElement(), true))) {
 							astRewrite.remove(annotation, group);
 							remover.registerRemovedNode(annotation);
 						}
@@ -383,7 +383,7 @@ public class NullAnnotationsRewriteOperations {
 				Annotation annotation= (Annotation) selectedNode;
 				IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();
 				String name= annotationBinding.getName();
-				if (name.equals(NullAnnotationsFix.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), true))) {
+				if (name.equals(NullAnnotationsFixCore.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), true))) {
 					astRewrite.remove(annotation, group);
 				}
 			}
@@ -406,7 +406,7 @@ public class NullAnnotationsRewriteOperations {
 			if (fProblem.getProblemId() == IProblem.MissingNonNullByDefaultAnnotationOnPackage) {
 				PackageDeclaration packageDeclaration= fCompilationUnit.getPackage();
 				if (packageDeclaration != null) {
-					String nonNullByDefaultAnnotationname= NullAnnotationsFix.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), true);
+					String nonNullByDefaultAnnotationname= NullAnnotationsFixCore.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), true);
 					String label= Messages.format(FixMessages.NullAnnotationsRewriteOperations_add_missing_default_nullness_annotation, new String[] { nonNullByDefaultAnnotationname });
 					TextEditGroup group= createTextEditGroup(label, cuRewrite);
 					ASTRewrite astRewrite= cuRewrite.getASTRewrite();
@@ -414,7 +414,7 @@ public class NullAnnotationsRewriteOperations {
 					ListRewrite listRewrite= astRewrite.getListRewrite(packageDeclaration, PackageDeclaration.ANNOTATIONS_PROPERTY);
 					Annotation newAnnotation= ast.newMarkerAnnotation();
 					// NOTE: to be consistent with completion proposals, don't use import in package-info.java
-					String annotationToAdd= NullAnnotationsFix.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), false);
+					String annotationToAdd= NullAnnotationsFixCore.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), false);
 					newAnnotation.setTypeName(ast.newName(annotationToAdd));
 					listRewrite.insertLast(newAnnotation, group);
 					return;
@@ -496,7 +496,7 @@ public class NullAnnotationsRewriteOperations {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaManipulationPlugin.log(e);
 			}
 			return false;
 		}
@@ -557,7 +557,7 @@ public class NullAnnotationsRewriteOperations {
 					break; // do propose changes even if we already have an annotation
 				default:
 					// if this method has annotations, don't change'em
-					if (!fAllowRemove && NullAnnotationsFix.hasExplicitNullAnnotation(cu, fProblem.getOffset()))
+					if (!fAllowRemove && NullAnnotationsFixCore.hasExplicitNullAnnotation(cu, fProblem.getOffset()))
 						return null;
 			}
 
@@ -792,8 +792,8 @@ public class NullAnnotationsRewriteOperations {
 
 		private boolean hasNullAnnotation(MethodDeclaration decl) {
 			List<IExtendedModifier> modifiers= decl.modifiers();
-			String nonnull= NullAnnotationsFix.getNonNullAnnotationName(decl.resolveBinding().getJavaElement(), false);
-			String nullable= NullAnnotationsFix.getNullableAnnotationName(decl.resolveBinding().getJavaElement(), false);
+			String nonnull= NullAnnotationsFixCore.getNonNullAnnotationName(decl.resolveBinding().getJavaElement(), false);
+			String nullable= NullAnnotationsFixCore.getNullableAnnotationName(decl.resolveBinding().getJavaElement(), false);
 			for (Object mod : modifiers) {
 				if (mod instanceof Annotation) {
 					Name annotationName= ((Annotation) mod).getTypeName();

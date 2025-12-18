@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2023 GK Software AG and others.
+ * Copyright (c) 2012, 2025 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -77,6 +77,10 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 	public ExtractToNullCheckedLocalProposal(ICompilationUnit cu, CompilationUnit compilationUnit, SimpleName fieldReference, ASTNode enclosingMethod) {
 		super(FixMessages.ExtractToNullCheckedLocalProposal_extractToCheckedLocal_proposalName, cu, null, 100, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE),
 				new ExtractToNullCheckedLocalProposalCore(cu, compilationUnit, fieldReference, enclosingMethod));
+	}
+
+	public ExtractToNullCheckedLocalProposal(ExtractToNullCheckedLocalProposalCore core) {
+		this(core.getCompilationUnit(), core.getCU(), core.getFieldReference(), core.getEnclosingMethod());
 	}
 
 	/**
