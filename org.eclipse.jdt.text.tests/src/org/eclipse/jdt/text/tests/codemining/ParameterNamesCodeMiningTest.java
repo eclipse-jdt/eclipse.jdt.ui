@@ -102,11 +102,11 @@ public class ParameterNamesCodeMiningTest {
 		}
 	}
 
-	private void waitReconciled(JavaSourceViewer viewer) {
+	private void waitReconciled(JavaEditor editor, JavaSourceViewer viewer) {
 		assertTrue(new DisplayHelper() {
 			@Override
 			protected boolean condition() {
-				return JavaCodeMiningReconciler.isReconciled(viewer);
+				return JavaCodeMiningReconciler.isReconciled(editor);
 			}
 		}.waitForCondition(viewer.getTextWidget().getDisplay(), 2000), "Editor not reconciled");
 	}
@@ -122,7 +122,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 
 		assertEquals(3, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
@@ -138,7 +138,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
@@ -162,7 +162,7 @@ public class ParameterNamesCodeMiningTest {
 		viewer.setCodeMiningProviders(new ICodeMiningProvider[] {
 				fParameterNameCodeMiningProvider
 		});
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 		StyledText widget= viewer.getTextWidget();
 		//
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
@@ -192,7 +192,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 		// Only code mining on "printf" parameters
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
@@ -221,7 +221,7 @@ public class ParameterNamesCodeMiningTest {
 		viewer.setCodeMiningProviders(new ICodeMiningProvider[] {
 			fParameterNameCodeMiningProvider
 		});
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 
 		AtomicReference<IStatus> errorInLog= new AtomicReference<>();
 		ILogListener logListener= (status, plugin) -> {
@@ -254,7 +254,7 @@ public class ParameterNamesCodeMiningTest {
 		viewer.setCodeMiningProviders(new ICodeMiningProvider[] {
 			fParameterNameCodeMiningProvider
 		});
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 		//
 		StyledText widget= viewer.getTextWidget();
 		int charWidth= widget.getTextBounds(0, 1).width;
@@ -324,7 +324,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
@@ -351,7 +351,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
@@ -374,7 +374,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
@@ -405,7 +405,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 
 		assertEquals(expectedShownNames, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
@@ -440,7 +440,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor, viewer);
 
 		// 6 parameter names from Edge
 		// 4 parameter names from the 2 Map.entry(int, int) calls
@@ -484,7 +484,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		waitReconciled(viewer);
+		waitReconciled(editor,viewer);
 		assertEquals(0, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
