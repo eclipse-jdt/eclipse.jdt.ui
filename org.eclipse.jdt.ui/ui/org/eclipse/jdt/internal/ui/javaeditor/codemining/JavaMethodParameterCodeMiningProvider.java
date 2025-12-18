@@ -16,14 +16,15 @@ package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.codemining.AbstractCodeMiningProvider;
 import org.eclipse.jface.text.codemining.ICodeMining;
-import org.eclipse.jface.text.source.ISourceViewerExtension5;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -36,7 +37,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaCodeMiningReconciler;
 
 /**
@@ -48,28 +48,20 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 
 	@Override
 	public CompletableFuture<List<? extends ICodeMining>> provideCodeMinings(ITextViewer viewer, IProgressMonitor monitor) {
-		if (viewer instanceof ISourceViewerExtension5 v) {
-			CompletableFuture<CompilationUnit> future= JavaCodeMiningReconciler.getFuture(v);
-			if (future != null) {
-				return future.thenApplyAsync(ast -> {
-					ITypeRoot unit= ast.getTypeRoot();
-					return computCodeMinings(viewer, monitor, unit);
-				});
+		ITextEditor textEditor= super.getAdapter(ITextEditor.class);
+		CompletableFuture<ITypeRoot> future= JavaCodeMiningReconciler.getFuture(textEditor);
+		return future.thenApplyAsync(typeRoot -> {
+			return computeCodeMinings(textEditor, monitor, typeRoot);
+		}).handle((result, ex) -> {
+			if (ex instanceof CompletionException ce &&
+					ce.getCause() instanceof CancellationException) {
+				monitor.setCanceled(true);
 			}
-		}
-		return CompletableFuture.supplyAsync(() -> {
-			return computeCodeMinings(viewer, monitor);
+			return result;
 		});
 	}
 
-	private List<? extends ICodeMining> computeCodeMinings(ITextViewer viewer, IProgressMonitor monitor) {
-		monitor.isCanceled();
-		ITextEditor textEditor= super.getAdapter(ITextEditor.class);
-		ITypeRoot unit= EditorUtility.getEditorInputJavaElement(textEditor, true);
-		return computCodeMinings(viewer, monitor, unit);
-	}
-
-	private List<? extends ICodeMining> computCodeMinings(ITextViewer viewer, IProgressMonitor monitor, ITypeRoot unit) {
+	private List<? extends ICodeMining> computeCodeMinings(ITextEditor textEditor, IProgressMonitor monitor, ITypeRoot unit) {
 		if (unit == null) {
 			return Collections.emptyList();
 		}
@@ -77,12 +69,9 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 			IJavaElement[] elements= unit.getChildren();
 			List<ICodeMining> minings= new ArrayList<>(elements.length);
 			collectLineContentCodeMinings(unit, minings);
-			if (viewer instanceof ISourceViewerExtension5) {
-				ISourceViewerExtension5 codeMiningViewer= (ISourceViewerExtension5)viewer;
-				if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
-					// the provider isn't able to return code minings for non-reconciled viewers
-					monitor.setCanceled(true);
-				}
+			if (!JavaCodeMiningReconciler.isReconciled(textEditor)) {
+				// the provider isn't able to return code minings for non-reconciled viewers
+				monitor.setCanceled(true);
 			}
 			monitor.isCanceled();
 			return minings;
