@@ -250,10 +250,10 @@ public class TestRunListenerTest6 extends AbstractTestRunListenerTest {
 				"""
 			package pack;
 			import org.junit.jupiter.api.Test;
-			public class ATestCase {
+			public class ATestCaseTerminate {
 			    @Test public void testSleep() throws Exception { Thread.sleep(30_000); }
 			}""";
-		IType aTestCase= createType(source, "pack", "ATestCase.java");
+		IType aTestCase= createType(source, "pack", "ATestCaseTerminate.java");
 
 		buildTestCase(aTestCase);
 
@@ -267,7 +267,7 @@ public class TestRunListenerTest6 extends AbstractTestRunListenerTest {
 			waitForCondition(launchesListener.fLaunchChanged::get, 30 * 1000, 1000);
 
 			long scheduledJobsCount = jobListener.scheduledCount.get();
-			boolean jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCount, 1 * 1000, 100);
+			boolean jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCount, 5 * 1000, 100);
 			assertTrue("Expected JUnit update jobs to be scheduled", jobCountIncrease);
 
 			TestRunListenerTest5.terminateLaunches();
@@ -278,6 +278,7 @@ public class TestRunListenerTest6 extends AbstractTestRunListenerTest {
 			assertFalse("Expected no new JUnit update jobs to be scheduled", jobCountIncrease);
 		} finally {
 			jm.removeJobChangeListener(jobListener);
+			TestRunListenerTest5.terminateLaunches();
 			cleanUp(configuration, launchesListener);
 		}
 	}
