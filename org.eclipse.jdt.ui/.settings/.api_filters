@@ -129,14 +129,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/NullAnnotationsCorrectionProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.NullAnnotationsCorrectionProcessor">
-        <filter id="574664731">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.internal.ui.text.correction.NullAnnotationsCorrectionProcessor.addNullAnnotationInSignatureProposal(IInvocationContext, IProblemLocation, Collection&lt;ICommandAccess&gt;, NullAnnotationsRewriteOperationsChangeKind, boolean)"/>
-                <message_argument value="IInvocationContext"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/typehierarchy/HierarchyInformationControl.java" type="org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl">
         <filter id="571519004">
             <message_arguments>

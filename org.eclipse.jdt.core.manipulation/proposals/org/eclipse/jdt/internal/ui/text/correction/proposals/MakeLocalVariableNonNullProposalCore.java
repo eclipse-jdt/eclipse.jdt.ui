@@ -63,6 +63,18 @@ public class MakeLocalVariableNonNullProposalCore extends ASTRewriteCorrectionPr
 		setDisplayName(Messages.format(CorrectionMessages.NullAnnotationsCorrectionProcessor_change_local_variable_to_nonNull, args));
 	}
 
+	public IVariableBinding getVarBinding() {
+		return fBinding;
+	}
+
+	public CompilationUnit getRoot() {
+		return fAstRoot;
+	}
+
+	public String getNonNullAnnotationName() {
+		return fNonNullAnnotationName;
+	}
+
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode declNode= fAstRoot.findDeclaringNode(fBinding);

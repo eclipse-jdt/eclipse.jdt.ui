@@ -14,8 +14,12 @@
 
 package org.eclipse.jdt.junit.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,10 +32,20 @@ import org.eclipse.jdt.junit.model.ITestElement.Result;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IType;
@@ -39,6 +53,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 
 public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 
@@ -232,5 +247,73 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
 		assertEqualLog(expectedSequence, actual);
+	}
+
+	@Test
+	public void testTerminateLaunch() throws Exception {
+		String source=
+				"""
+			package pack;
+			import org.junit.jupiter.api.Test;
+			public class ATestCaseTerminate {
+			    @Test public void testSleep() throws Exception { Thread.sleep(30_000); }
+			}""";
+		IType aTestCase= createType(source, "pack", "ATestCaseTerminate.java");
+
+		buildTestCase(aTestCase);
+
+		IJobManager jm= Job.getJobManager();
+		ScheduledJobsListener jobListener= new ScheduledJobsListener(JUnitMessages.TestRunnerViewPart_jobName);
+		jm.addJobChangeListener(jobListener);
+		LaunchesListener launchesListener= new LaunchesListener();
+		ILaunchConfigurationWorkingCopy configuration= createLaunchConfiguration(aTestCase, TestKindRegistry.JUNIT5_TEST_KIND_ID, null, launchesListener);
+		try {
+			configuration.launch(ILaunchManager.RUN_MODE, null);
+			waitForCondition(launchesListener.fLaunchChanged::get, 30 * 1000, 1000);
+
+			long scheduledJobsCount = jobListener.scheduledCount.get();
+			boolean jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCount, 5 * 1000, 100);
+			assertTrue("Expected JUnit update jobs to be scheduled", jobCountIncrease);
+
+			terminateLaunches();
+			waitForCondition(launchesListener.fLaunchHasTerminated::get, 30 * 1000, 1000);
+			long scheduledJobsCountAfterTermination = jobListener.scheduledCount.get();
+
+			jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCountAfterTermination, 1 * 1000, 100);
+			assertFalse("Expected no new JUnit update jobs to be scheduled", jobCountIncrease);
+		} finally {
+			jm.removeJobChangeListener(jobListener);
+			terminateLaunches();
+			cleanUp(configuration, launchesListener);
+		}
+	}
+
+	static void terminateLaunches() throws DebugException {
+		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+		ILaunch[] launches= lm.getLaunches();
+		for (ILaunch launch : launches) {
+			if (isJUnitLaunch(launch)) {
+				launch.terminate();
+			}
+		}
+	}
+
+	static class ScheduledJobsListener extends JobChangeAdapter {
+
+		private final String jobName;
+		final AtomicLong scheduledCount;
+
+		ScheduledJobsListener(String jobName) {
+			this.jobName = jobName;
+			scheduledCount = new AtomicLong(0L);
+		}
+
+		@Override
+		public void scheduled(IJobChangeEvent event) {
+			String name= event.getJob().getName();
+			if (jobName.equals(name)) {
+				scheduledCount.incrementAndGet();
+			}
+		}
 	}
 }

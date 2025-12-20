@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation and others.
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UpdateProperty;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
@@ -82,13 +83,16 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUp {
 		}
 
 		EnumSet<UpdateProperty> computeFixSet= computeFixSet();
-		if(!isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY) || computeFixSet.isEmpty()) {
+		EnumSet<UpdateProperty> computeFixSet2= computeFixSet2(compilationUnit);
+		if((!isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY) || computeFixSet.isEmpty())
+				&& computeFixSet2.isEmpty()) {
 			return null;
 		}
 
 		Set<CompilationUnitRewriteOperation> operations= new LinkedHashSet<>();
 		Set<ASTNode> nodesprocessed= new HashSet<>();
 		computeFixSet.forEach(i->i.findOperations(compilationUnit,operations,nodesprocessed));
+		computeFixSet2.forEach(i -> i.findOperations(compilationUnit, operations, nodesprocessed));
 
 		if (operations.isEmpty()) {
 			return null;
@@ -120,8 +124,16 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUp {
 		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION)) {
 			fixSet.add(JAVA_RUNTIME_VERSION);
 		}
-		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION)) {
-			fixSet.add(JAVA_SPEC_VERSION);
+		return fixSet;
+	}
+
+	private EnumSet<UpdateProperty> computeFixSet2(CompilationUnit compilationUnit) {
+		EnumSet<UpdateProperty> fixSet= EnumSet.noneOf(UpdateProperty.class);
+
+		if (compilationUnit == null || JavaModelUtil.is10OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+			if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION)) {
+				fixSet.add(JAVA_SPEC_VERSION);
+			}
 		}
 		return fixSet;
 	}
@@ -136,6 +148,8 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUp {
 			result= Collections.emptyList();
 		}
 
+		result.addAll(computeFixSet2(null).stream().map(e->(Messages.format(ConstantsCleanUp_description,e.toString()))).collect(Collectors.toList()));
+
 		return result.toArray(new String[0]);
 	}
 
@@ -144,6 +158,7 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUp {
 		StringBuilder sb= new StringBuilder();
 		boolean isEnabled= isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY);
 		EnumSet<UpdateProperty> computeFixSet= computeFixSet();
+		EnumSet<UpdateProperty> computeFixSet2= computeFixSet2(null);
 
 		if (isEnabled && computeFixSet.contains(UpdateProperty.FILE_SEPARATOR)) {
 			sb.append("String fs = FileSystems.getDefault().getSeparator(); /* on JVM 1.6 this will be File.separator; */ \n"); //$NON-NLS-1$
@@ -223,8 +238,8 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUp {
 			sb.append("String jv = System.getProperty(\"java.runtime.version\");\n"); //$NON-NLS-1$
 		}
 
-		if (isEnabled && computeFixSet.contains(UpdateProperty.JAVA_SPEC_VERSION)) {
-			sb.append("String jsv = Runtime.version().feature();\n"); //$NON-NLS-1$
+		if (computeFixSet2.contains(UpdateProperty.JAVA_SPEC_VERSION)) {
+			sb.append("String jsv = String.valueOf(Runtime.version().feature());\n"); //$NON-NLS-1$
 		} else {
 			sb.append("String jsv = System.getProperty(\"java.specification.version\");\n"); //$NON-NLS-1$
 		}

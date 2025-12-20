@@ -178,6 +178,17 @@ public class ExtractToNullCheckedLocalProposalCore extends LinkedCorrectionPropo
 		this.enclosingMethod= enclosingMethod;
 	}
 
+	public CompilationUnit getCU() {
+		return compilationUnit;
+	}
+
+	public SimpleName getFieldReference() {
+		return fieldReference;
+	}
+
+	public ASTNode getEnclosingMethod() {
+		return enclosingMethod;
+	}
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
