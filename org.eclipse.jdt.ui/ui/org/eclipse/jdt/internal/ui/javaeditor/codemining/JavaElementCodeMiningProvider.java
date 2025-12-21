@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -87,7 +88,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 		CompletableFuture<ITypeRoot> future= JavaCodeMiningReconciler.getFuture(textEditor);
 		return future.thenApplyAsync(typeRoot -> {
 			return computeCodeMinings(viewer, textEditor, monitor, typeRoot);
-		}).handle((result, ex) -> {
+		}).orTimeout(15, TimeUnit.SECONDS).handle((result, ex) -> {
 			if (ex instanceof CompletionException ce &&
 					ce.getCause() instanceof CancellationException) {
 				monitor.setCanceled(true);
