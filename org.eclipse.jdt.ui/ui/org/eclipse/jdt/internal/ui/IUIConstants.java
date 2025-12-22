@@ -30,4 +30,7 @@ public interface IUIConstants {
 
 	String DIALOGSTORE_TYPECOMMENT_DEPRECATED= JavaUI.ID_PLUGIN + ".typecomment.deprecated";	 //$NON-NLS-1$
 
+	// The preference is defined in the org.eclipse.debug.ui plugin.xml file
+	String INSTRUCTION_POINTER_COLOR_PREFERENCE_KEY= "currentIPColor"; //$NON-NLS-1$
+
 }
