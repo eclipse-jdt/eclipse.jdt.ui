@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 
@@ -112,8 +111,12 @@ public class AbstractTestRunListenerTest {
 		}
 	}
 
-	protected IType createType(String source, String packageName, String typeName) throws CoreException, JavaModelException {
-		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "src");
+	protected IType createType(String source, String packageName, String typeName) throws CoreException {
+		return createType(fProject, source, packageName, typeName);
+	}
+
+	protected static IType createType(IJavaProject project, String source, String packageName, String typeName) throws CoreException {
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(project, "src");
 		IPackageFragment pack= root.createPackageFragment(packageName, true, null);
 		ICompilationUnit aTestCaseCU= pack.createCompilationUnit(typeName, source, true, null);
 		IType aTestCase= aTestCaseCU.findPrimaryType();
@@ -138,7 +141,7 @@ public class AbstractTestRunListenerTest {
 		assertTrue("Launch has not terminated", listener.fLaunchHasTerminated.get());
 	}
 
-	protected ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement aTest, String testKindID, String testName, LaunchesListener launchesListener) throws CoreException {
+	protected static ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement aTest, String testKindID, String testName, LaunchesListener launchesListener) throws CoreException {
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		lm.removeLaunches(lm.getLaunches());
 		lm.addLaunchListener(launchesListener);
@@ -149,14 +152,14 @@ public class AbstractTestRunListenerTest {
 		return configuration;
 	}
 
-	protected void cleanUp(ILaunchConfigurationWorkingCopy configuration, LaunchesListener launchesListener) throws CoreException {
+	protected static void cleanUp(ILaunchConfigurationWorkingCopy configuration, LaunchesListener launchesListener) throws CoreException {
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		lm.removeLaunchListener(launchesListener);
 		lm.removeLaunches(lm.getLaunches());
 		configuration.delete();
 	}
 
-	protected void buildTestCase(IJavaElement aTest) throws CoreException {
+	protected static void buildTestCase(IJavaElement aTest) throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		IMarker[] markers= aTest.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 		for (IMarker marker : markers) {
