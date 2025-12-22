@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,10 +17,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -54,6 +57,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -585,6 +589,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @since 3.3
 	 */
 	private StyledText fNoSourceTextWidget;
+	private StyleRange currentSelection;
 	private volatile boolean disposed;
 
 	/**
@@ -964,6 +969,80 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		}
 	}
 
+	public void unhighlight() {
+		if (disposed) {
+			return;
+		}
+		if (currentSelection != null) {
+			fNoSourceTextWidget.replaceStyleRanges(currentSelection.start, currentSelection.length, new StyleRange[0]);
+			currentSelection= null;
+		}
+	}
+
+	public void highlightInstruction(String methodName, String signature, long codeIndex, String colorPreferenceKey) {
+		unhighlight();
+		StyledTextContent content= fNoSourceTextWidget.getContent();
+
+		int currentLine= findMethodStart(methodName, signature, content);
+		Region instructionPosition= findInstruction(currentLine, content, codeIndex);
+		if (instructionPosition == null) {
+			return;
+		}
+		currentSelection= new StyleRange(instructionPosition.getOffset(), instructionPosition.getLength(), fNoSourceTextWidget.getForeground(), getColorPreference(colorPreferenceKey));
+		fNoSourceTextWidget.setStyleRange(currentSelection);
+
+		// move cursor to ensure scrolling
+		fNoSourceTextWidget.setSelection(instructionPosition.getOffset());
+	}
+
+	private int findMethodStart(String methodName, String signature, StyledTextContent content) {
+		int currentLine;
+		Pattern methodDescriptorPattern = Pattern.compile("\\s+// Method descriptor #\\d+ " + Pattern.quote(signature)); //$NON-NLS-1$
+		for(currentLine = 0; currentLine < content.getLineCount() - 2; currentLine++) {
+			String line= content.getLine(currentLine);
+			if (methodDescriptorPattern.matcher(line).matches()) {
+				for(; currentLine < content.getLineCount(); currentLine++) {
+					// skip lines with leading slashes
+					line = content.getLine(currentLine);
+					if (!line.trim().startsWith("//")) { //$NON-NLS-1$
+						break;
+					}
+				}
+				if (line.contains(" " + methodName + "(")) {//$NON-NLS-1$//$NON-NLS-2$
+					break;
+				}
+			}
+		}
+		return currentLine;
+	}
+
+	private Region findInstruction(int currentLine, StyledTextContent content, long codeIndex) {
+		for(currentLine++; currentLine < content.getLineCount(); currentLine++) {
+			String line= content.getLine(currentLine);
+			if (line.trim().startsWith("// Method descriptor")) { //$NON-NLS-1$
+				// stop when reaching another method
+				return null;
+			}
+			if (line.trim().startsWith(String.valueOf(codeIndex))) {
+				return new Region(content.getOffsetAtLine(currentLine), line.length());
+			}
+		}
+		return null;
+	}
+
+	private Color getColorPreference(String key) {
+		String color= getPreferenceStore().getString(key);
+		String[] splitColor = color.split(","); //$NON-NLS-1$
+		if (splitColor.length != 3) {
+			return new Color(0, 255, 0);
+		}
+		try {
+			return new Color(Integer.parseInt(splitColor[0]), Integer.parseInt(splitColor[1]), Integer.parseInt(splitColor[2]));
+		} catch (NumberFormatException e) {
+			return new Color(0, 255, 0);
+		}
+	}
+
 	/*
 	 * @see ClassFileDocumentProvider.InputChangeListener#inputChanged(IClassFileEditorInput)
 	 */
@@ -1031,5 +1110,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		if (fSourceAttachmentForm != null && !fSourceAttachmentForm.isDisposed()) {
 			fSourceAttachmentForm.setFocus();
 		}
+	}
+
+	/*
+	 * Used for testing.
+	 */
+	public StyledText getNoSourceTextWidget() {
+		return fNoSourceTextWidget;
 	}
 }
