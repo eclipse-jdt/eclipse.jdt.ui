@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,10 +17,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -585,6 +588,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @since 3.3
 	 */
 	private StyledText fNoSourceTextWidget;
+	private StyleRange currentSelection;
 	private volatile boolean disposed;
 
 	/**
@@ -961,6 +965,44 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		} catch (JavaModelException e) {
 			//assume no source then...
 			return false;
+		}
+	}
+
+	public void unselect() {
+		if (currentSelection != null) {
+			fNoSourceTextWidget.replaceStyleRanges(currentSelection.start, currentSelection.length, new StyleRange[0]);
+		}
+	}
+
+	public void selectInstruction(String methodName, String signature, long codeIndex) {
+		unselect();
+		StyledTextContent content= fNoSourceTextWidget.getContent();
+
+		int currentLine;
+		// find method start
+		Pattern methodDescriptorPattern = Pattern.compile("\\s+// Method descriptor #\\d+ " + Pattern.quote(signature)); //$NON-NLS-1$
+		for(currentLine = 0; currentLine < content.getLineCount() - 2; currentLine++) {
+			String line= content.getLine(currentLine);
+			if (methodDescriptorPattern.matcher(line).matches() &&
+					content.getLine(currentLine + 2).contains(" " + methodName + "(")) {  //$NON-NLS-1$//$NON-NLS-2$
+				break;
+			}
+		}
+		// find correct instruction
+		for(currentLine += 2; currentLine < content.getLineCount(); currentLine++) {
+			String line= content.getLine(currentLine);
+			if (line.trim().startsWith("// Method descriptor")) { //$NON-NLS-1$
+				// stop when reaching another method
+				return;
+			}
+			if (line.trim().startsWith(String.valueOf(codeIndex))) {
+				currentSelection= new StyleRange(content.getOffsetAtLine(currentLine), line.length(), fNoSourceTextWidget.getForeground(), new Color(0, 255, 0));
+				fNoSourceTextWidget.setStyleRange(currentSelection);
+
+				// move cursor to ensure scrolling
+				fNoSourceTextWidget.setSelection(content.getOffsetAtLine(currentLine));
+				return;
+			}
 		}
 	}
 
