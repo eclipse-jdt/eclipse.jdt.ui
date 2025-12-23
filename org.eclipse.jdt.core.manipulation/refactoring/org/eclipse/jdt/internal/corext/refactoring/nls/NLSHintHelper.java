@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -66,10 +67,9 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public class NLSHintHelper {
 
@@ -283,14 +283,29 @@ public class NLSHintHelper {
 				if (initializer instanceof StringLiteral)
 					return ((StringLiteral)initializer).getLiteralValue();
 
+				if (initializer instanceof InfixExpression infix) {
+					InfixExpression.Operator op = infix.getOperator();
+					if (InfixExpression.Operator.PLUS.equals(op)) {
+						String leftOperand = getBundleName(infix.getLeftOperand());
+						String rightOperand = getBundleName(infix.getRightOperand());
+						if (leftOperand != null && rightOperand != null) {
+							return leftOperand + rightOperand;
+						}
+						return null;
+					}
+				}
 				if (initializer instanceof MethodInvocation) {
 					MethodInvocation methInvocation= (MethodInvocation)initializer;
 					Expression exp= methInvocation.getExpression();
 					if ((exp != null) && (exp instanceof TypeLiteral)) {
 						SimpleType simple= (SimpleType)((TypeLiteral) exp).getType();
 						ITypeBinding typeBinding= simple.resolveBinding();
-						if (typeBinding != null)
+						if (typeBinding != null) {
+							if ("getPackageName".equals(methInvocation.getName().getFullyQualifiedName())) { //$NON-NLS-1$
+								return typeBinding.getPackage().getName();
+							}
 							return typeBinding.getQualifiedName();
+						}
 					}
 				}
 				return null;

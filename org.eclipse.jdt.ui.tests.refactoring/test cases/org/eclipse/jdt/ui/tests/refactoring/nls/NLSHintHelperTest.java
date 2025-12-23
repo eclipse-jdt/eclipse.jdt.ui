@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -452,6 +452,21 @@ public class NLSHintHelperTest {
 			""";
 
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
+	}
+
+	/**
+	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2711
+	 */
+	@Test
+	public void findResourceBundleName7() throws Exception {
+		String source = """
+				package test;
+
+				public class TestMessages {
+					private static final String BUNDLE_NAME = TestMessages.class.getPackageName() + ".messages"; //$NON-NLS-1$
+				}
+				""";
+		assertEquals("test.messages", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
 	private String getResourceBundleName(String source, String className, String packageName) throws Exception {
