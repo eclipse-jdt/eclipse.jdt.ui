@@ -329,16 +329,6 @@ public class RemoteTestRunnerClient {
 		if (fServerSocket != null  && ! fServerSocket.isClosed() && fSocket == null) {
 			shutDown(); // will throw a SocketException in Threads that wait in ServerSocket#accept()
 		}
-
-		if (stopped || !ended) {
-			// JUnit 3 and 4 RemoteTestRunnerClient properly handle notifying stopped/terminated
-			String testKind= testRunnerKind.getId();
-			if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind)
-					|| TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind)) {
-				return;
-			}
-			notifyTestRunStopped(0);
-		}
 	}
 
 	private synchronized void shutDown() {
@@ -369,6 +359,15 @@ public class RemoteTestRunnerClient {
 				fServerSocket= null;
 			}
 		} catch(IOException e) {
+		}
+		if (stopped || !ended) {
+			// JUnit 3 and 4 RemoteTestRunnerClient properly handle notifying stopped/terminated
+			String testKind= testRunnerKind.getId();
+			if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind)
+					|| TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind)) {
+				return;
+			}
+			notifyTestRunStopped(0);
 		}
 	}
 
