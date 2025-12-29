@@ -13,14 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension5;
 
+import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -31,10 +35,12 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 
 	/**
-	 * Stores the set of viewers for which source is reconciled and requests
-	 * for references can be performed.
+	 * Maps Java editors to futures representing their associated {@link ITypeRoot}.
+	 * <p>
+	 * The future is completed when a reconciled {@link ITypeRoot} becomes available for the editor,
+	 * or cancelled/replaced when a new reconciliation cycle starts.
 	 */
-	private static final Set<ISourceViewerExtension5> reconciledViewers= new HashSet<>();
+	private static final Map<ITextEditor, CompletableFuture<ITypeRoot>> typeRootFutureByEditor= new ConcurrentHashMap<>();
 
 	/** The Java editor this Java code mining reconciler is installed on */
 	private JavaEditor fEditor;
@@ -45,17 +51,45 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 
 	@Override
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
-		final ISourceViewerExtension5 sourceViewer= fSourceViewer; // take a copy as this can be null-ed in the meantime
-		if (sourceViewer != null) {
-			reconciledViewers.add(sourceViewer);
+		final JavaEditor editor= fEditor; // take a copy as this can be null-ed in the meantime
+		final ISourceViewerExtension5 sourceViewer= fSourceViewer;
+		if (editor != null && sourceViewer != null) {
 			sourceViewer.updateCodeMinings();
+			CompletableFuture<ITypeRoot> future= typeRootFutureByEditor.get(editor);
+			if (future != null && !future.isDone()) {
+				if (ast != null && ast.getTypeRoot() != null) {
+					future.complete(ast.getTypeRoot());
+				} else {
+					future.cancel(false);
+				}
+			}
 		}
+	}
+
+	public static CompletableFuture<ITypeRoot> getFuture(ITextEditor editor) {
+		return typeRootFutureByEditor.computeIfAbsent(editor, JavaCodeMiningReconciler::typeRootFor);
+	}
+
+	private static CompletableFuture<ITypeRoot> typeRootFor(ITextEditor editor) {
+		CompletableFuture<ITypeRoot> future= new CompletableFuture<>();
+		ITypeRoot unit= EditorUtility.getEditorInputJavaElement(editor, true);
+		if (unit != null) {
+			future.complete(unit);
+		}
+		return future;
 	}
 
 	@Override
 	public void aboutToBeReconciled() {
-		// interrupt code minings if modification occurs
-		reconciledViewers.remove(fSourceViewer);
+		if (fEditor == null) {
+			return;
+		}
+		typeRootFutureByEditor.compute(fEditor, (editor, existingFuture) -> {
+			if (existingFuture != null) {
+				existingFuture.cancel(false);
+			}
+			return new CompletableFuture<ITypeRoot>();
+		});
 	}
 
 	/**
@@ -83,16 +117,14 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	 * Uninstall this reconciler from the editor.
 	 */
 	public void uninstall() {
-		reconciledViewers.remove(fSourceViewer);
+		CompletableFuture<ITypeRoot> future= typeRootFutureByEditor.remove(fEditor);
+		if (future != null) {
+			future.cancel(false);
+		}
 		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor) fEditor).removeReconcileListener(this);
 		}
 		fEditor= null;
 		fSourceViewer= null;
 	}
-
-	public static boolean isReconciled(ISourceViewerExtension5 viewer) {
-		return reconciledViewers.contains(viewer);
-	}
-
 }
