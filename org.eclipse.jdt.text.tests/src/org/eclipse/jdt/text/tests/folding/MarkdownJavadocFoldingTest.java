@@ -111,6 +111,6 @@ public class MarkdownJavadocFoldingTest {
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(fPackageFragment, "TestFolding.java", str);
 		assertEquals(2, regions.size());
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // Javadoc
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // foo method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 7); // foo method
 	}
 }
