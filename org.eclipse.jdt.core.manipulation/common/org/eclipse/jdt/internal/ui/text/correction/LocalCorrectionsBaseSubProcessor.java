@@ -190,6 +190,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedOpenDeclarationProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewLocalVariableCorrectionProposalCore;
@@ -1130,6 +1131,10 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 
 		LinkedNamesAssistProposalCore proposalCore= new LinkedNamesAssistProposalCore(name, context, nameNode, valueSuggestion);
 		proposals.add(linkedNamesAssistProposalToT(proposalCore));
+		if(nameNode.getParent() instanceof VariableDeclaration) {
+			LinkedOpenDeclarationProposalCore showExisting= new LinkedOpenDeclarationProposalCore(CorrectionMessages.OpenExistingDeclaration,context, nameNode);
+			proposals.add(LinkedNamesAssistShowDuplicateProposalToT(showExisting));
+		}
 	}
 
 	private void addRemoveProposal(IInvocationContext context, ASTNode selectedNode, Collection<T> proposals) {
@@ -3423,6 +3428,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 	protected abstract T replaceCorrectionProposalToT(ReplaceCorrectionProposalCore core, int uid);
 	protected abstract T cuCorrectionProposalToT(CUCorrectionProposalCore core, int uid);
 	protected abstract T linkedNamesAssistProposalToT(LinkedNamesAssistProposalCore core);
+	protected abstract T LinkedNamesAssistShowDuplicateProposalToT(LinkedOpenDeclarationProposalCore core);
 	protected abstract T assignToVariableAssistProposalToT(AssignToVariableAssistProposalCore core);
 	protected abstract T newVariableCorrectionProposalToT(NewVariableCorrectionProposalCore core, int uid);
 	protected abstract T newLocalVariableCorrectionProposalToT(NewLocalVariableCorrectionProposalCore core, int uid);
