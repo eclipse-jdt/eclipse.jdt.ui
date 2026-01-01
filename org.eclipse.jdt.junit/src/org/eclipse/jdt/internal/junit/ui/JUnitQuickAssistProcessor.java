@@ -38,7 +38,6 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static final String JUNIT4_IGNORE_ANNOTATION = "org.junit.Ignore"; //$NON-NLS-1$
 	private static final String JUNIT5_DISABLED_ANNOTATION = "org.junit.jupiter.api.Disabled"; //$NON-NLS-1$
-	private static final String JUNIT4_TEST_ANNOTATION = "org.junit.Test"; //$NON-NLS-1$
 	private static final String JUNIT5_TEST_ANNOTATION = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 
 	@Override
@@ -86,7 +85,7 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 			if (hasAnnotation(methodDecl, JUNIT5_TEST_ANNOTATION)) {
 				// JUnit 5 test
 				proposals.add(new AddAnnotationProposal(context, methodDecl, JUNIT5_DISABLED_ANNOTATION, "Disabled"));
-			} else if (hasAnnotation(methodDecl, JUNIT4_TEST_ANNOTATION)) {
+			} else if (hasAnnotation(methodDecl, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME)) {
 				// JUnit 4 test
 				proposals.add(new AddAnnotationProposal(context, methodDecl, JUNIT4_IGNORE_ANNOTATION, "Ignore"));
 			}
