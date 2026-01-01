@@ -45,6 +45,8 @@ JUnit4TestFinderTest16.class,
 JUnit5TestFinderJupiterTest.class,
 JUnit6TestFinderJupiterTest.class,
 
+JUnitQuickAssistTest.class,
+
 TestSorting.class
 //LegacyTestRunListenerTest.class
 })
