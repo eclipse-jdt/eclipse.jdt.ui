@@ -38,6 +38,10 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 	private static final String JUNIT4_IGNORE_ANNOTATION = "org.junit.Ignore"; //$NON-NLS-1$
 	private static final String JUNIT5_DISABLED_ANNOTATION = "org.junit.jupiter.api.Disabled"; //$NON-NLS-1$
 	private static final String JUNIT5_TEST_ANNOTATION = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
+	private static final String JUNIT5_PARAMETERIZED_TEST_ANNOTATION = "org.junit.jupiter.params.ParameterizedTest"; //$NON-NLS-1$
+	private static final String JUNIT5_REPEATED_TEST_ANNOTATION = "org.junit.jupiter.api.RepeatedTest"; //$NON-NLS-1$
+	private static final String JUNIT5_TEST_FACTORY_ANNOTATION = "org.junit.jupiter.api.TestFactory"; //$NON-NLS-1$
+	private static final String JUNIT5_TEST_TEMPLATE_ANNOTATION = "org.junit.jupiter.api.TestTemplate"; //$NON-NLS-1$
 
 	@Override
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
@@ -81,7 +85,7 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 			proposals.add(new RemoveAnnotationProposal(context, methodDecl, annotationToRemove));
 		} else {
 			// Offer to add the appropriate annotation based on JUnit version
-			if (hasAnnotation(methodDecl, JUNIT5_TEST_ANNOTATION)) {
+			if (isJUnit5TestMethod(methodDecl)) {
 				// JUnit 5 test
 				proposals.add(new AddAnnotationProposal(context, methodDecl, JUNIT5_DISABLED_ANNOTATION, "Disabled"));
 			} else if (hasAnnotation(methodDecl, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME)) {
@@ -116,13 +120,41 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 			if (annotationType != null) {
 				String qualifiedName = annotationType.getQualifiedName();
 				if (JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(qualifiedName) || 
-					JUNIT5_TEST_ANNOTATION.equals(qualifiedName)) {
+					isJUnit5TestAnnotation(qualifiedName)) {
 					return true;
 				}
 			}
 		}
 
 		return false;
+	}
+
+	private boolean isJUnit5TestMethod(MethodDeclaration methodDecl) {
+		IMethodBinding binding = methodDecl.resolveBinding();
+		if (binding == null) {
+			return false;
+		}
+
+		IAnnotationBinding[] annotations = binding.getAnnotations();
+		for (IAnnotationBinding annotation : annotations) {
+			ITypeBinding annotationType = annotation.getAnnotationType();
+			if (annotationType != null) {
+				String qualifiedName = annotationType.getQualifiedName();
+				if (isJUnit5TestAnnotation(qualifiedName)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private boolean isJUnit5TestAnnotation(String qualifiedName) {
+		return JUNIT5_TEST_ANNOTATION.equals(qualifiedName) ||
+			   JUNIT5_PARAMETERIZED_TEST_ANNOTATION.equals(qualifiedName) ||
+			   JUNIT5_REPEATED_TEST_ANNOTATION.equals(qualifiedName) ||
+			   JUNIT5_TEST_FACTORY_ANNOTATION.equals(qualifiedName) ||
+			   JUNIT5_TEST_TEMPLATE_ANNOTATION.equals(qualifiedName);
 	}
 
 	private boolean hasAnnotation(MethodDeclaration methodDecl, String annotationQualifiedName) {

@@ -294,6 +294,112 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		assertEquals("Should not have 'Disable test with @Ignore' proposal for non-test method", null, ignoreProposal);
 	}
 
+	@Test
+	public void testAddDisabledAnnotationToParameterizedTest() throws Exception {
+		// Test adding @Disabled to a JUnit 5 parameterized test
+		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
+		String original = """
+			package test1;
+			
+			import org.junit.jupiter.params.ParameterizedTest;
+			import org.junit.jupiter.params.provider.ValueSource;
+			
+			public class MyTest {
+			    @ParameterizedTest
+			    @ValueSource(strings = {"test1", "test2"})
+			    public void testMethod(String param) {
+			        // test code
+			    }
+			}
+			""";
+
+		ICompilationUnit cu = pack1.createCompilationUnit("MyTest.java", original, false, null);
+
+		String str = "testMethod";
+		AssistContext context = getCorrectionContext(cu, original.indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals = collectAssists(context, false);
+
+		// Should have at least one proposal
+		assertTrue("Should have proposals", proposals.size() > 0);
+
+		// Find the "Disable test with @Disabled" proposal
+		IJavaCompletionProposal disableProposal = findProposalByName(proposals, "Disable test with @Disabled");
+		assertNotNull("Should have 'Disable test with @Disabled' proposal for parameterized test", disableProposal);
+
+		// Apply the proposal
+		disableProposal.apply(null);
+
+		String expected = """
+			package test1;
+			
+			import org.junit.jupiter.api.Disabled;
+			import org.junit.jupiter.params.ParameterizedTest;
+			import org.junit.jupiter.params.provider.ValueSource;
+			
+			public class MyTest {
+			    @Disabled
+			    @ParameterizedTest
+			    @ValueSource(strings = {"test1", "test2"})
+			    public void testMethod(String param) {
+			        // test code
+			    }
+			}
+			""";
+
+		assertEqualString(cu.getSource(), expected);
+	}
+
+	@Test
+	public void testAddDisabledAnnotationToRepeatedTest() throws Exception {
+		// Test adding @Disabled to a JUnit 5 repeated test
+		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
+		String original = """
+			package test1;
+			
+			import org.junit.jupiter.api.RepeatedTest;
+			
+			public class MyTest {
+			    @RepeatedTest(5)
+			    public void testMethod() {
+			        // test code
+			    }
+			}
+			""";
+
+		ICompilationUnit cu = pack1.createCompilationUnit("MyTest.java", original, false, null);
+
+		String str = "testMethod";
+		AssistContext context = getCorrectionContext(cu, original.indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals = collectAssists(context, false);
+
+		// Should have at least one proposal
+		assertTrue("Should have proposals", proposals.size() > 0);
+
+		// Find the "Disable test with @Disabled" proposal
+		IJavaCompletionProposal disableProposal = findProposalByName(proposals, "Disable test with @Disabled");
+		assertNotNull("Should have 'Disable test with @Disabled' proposal for repeated test", disableProposal);
+
+		// Apply the proposal
+		disableProposal.apply(null);
+
+		String expected = """
+			package test1;
+			
+			import org.junit.jupiter.api.Disabled;
+			import org.junit.jupiter.api.RepeatedTest;
+			
+			public class MyTest {
+			    @Disabled
+			    @RepeatedTest(5)
+			    public void testMethod() {
+			        // test code
+			    }
+			}
+			""";
+
+		assertEqualString(cu.getSource(), expected);
+	}
+
 	/**
 	 * Helper method to find a proposal by its display name.
 	 */
