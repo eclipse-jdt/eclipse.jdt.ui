@@ -32,10 +32,26 @@ public class TestSessionTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof TestSuiteElement)
-			return ((TestSuiteElement) parentElement).getChildren();
-		else
+		if (parentElement instanceof TestSuiteElement) {
+			TestSuiteElement suite = (TestSuiteElement) parentElement;
+			Object[] children = suite.getChildren();
+			
+			// If getChildren() returns empty but we have a single dynamic child,
+			// show that child in the tree viewer. This handles the case where a
+			// parameterized test has only one parameter value remaining (e.g., after
+			// excluding all but one enum value with @EnumSource mode=EXCLUDE).
+			// See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/945
+			if (children.length == 0) {
+				org.eclipse.jdt.internal.junit.model.TestCaseElement singleChild = suite.getSingleDynamicChild();
+				if (singleChild != null) {
+					return new Object[] { singleChild };
+				}
+			}
+			
+			return children;
+		} else {
 			return NO_CHILDREN;
+		}
 	}
 
 	@Override
@@ -50,10 +66,20 @@ public class TestSessionTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof TestSuiteElement)
-			return ((TestSuiteElement) element).getChildren().length != 0;
-		else
+		if (element instanceof TestSuiteElement) {
+			TestSuiteElement suite = (TestSuiteElement) element;
+			
+			// Check if there are visible children
+			if (suite.getChildren().length != 0) {
+				return true;
+			}
+			
+			// Even if getChildren() returns empty, check for single dynamic child
+			// This ensures the tree shows expansion arrow for suites with one parameter value
+			return suite.getSingleDynamicChild() != null;
+		} else {
 			return false;
+		}
 	}
 
 	@Override

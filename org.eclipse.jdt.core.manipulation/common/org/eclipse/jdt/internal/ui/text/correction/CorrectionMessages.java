@@ -407,6 +407,9 @@ public final class CorrectionMessages extends NLS {
 	public static String AdvancedQuickAssistProcessor_joinWithOr_description;
 	public static String AdvancedQuickAssistProcessor_splitOrCondition_description;
 	public static String AdvancedQuickAssistProcessor_exchangeOperands_description;
+	public static String AdvancedQuickAssistProcessor_addEnumSourceNamesFilter_description;
+	public static String AdvancedQuickAssistProcessor_addEnumSourceNamesFilterExclude_description;
+	public static String AdvancedQuickAssistProcessor_toggleEnumSourceMode_description;
 	public static String AddGetterSetter_creategetterssettersfortype_description;
 	public static String AddGettersSetters_additional_info;
 	public static String AddHashCodeEquals_createhashcodeequalsfortype_description;

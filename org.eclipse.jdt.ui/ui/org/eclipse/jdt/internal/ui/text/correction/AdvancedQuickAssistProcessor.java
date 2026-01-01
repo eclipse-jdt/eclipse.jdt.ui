@@ -174,6 +174,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getGettersSettersForTypeProposals(coveringNode, null)
 					|| getHashCodeEqualsForTypeProposals(coveringNode, null)
 					|| getToStringForTypeProposals(coveringNode, null)
+					|| getEnumSourceFilterProposals(context, coveringNode, null)
 					|| ExternalNullAnnotationQuickAssistProcessor.canAssist(context);
 		}
 		return false;
@@ -220,6 +221,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getGettersSettersForTypeProposals(coveringNode, resultingCollections);
 				getHashCodeEqualsForTypeProposals(coveringNode, resultingCollections);
 				getToStringForTypeProposals(coveringNode, resultingCollections);
+				getEnumSourceFilterProposals(context, coveringNode, resultingCollections);
 
 				ExternalNullAnnotationQuickAssistProcessor.getAnnotateProposals(context, resultingCollections);
 			}
@@ -3027,6 +3029,365 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		return switchCaseStatements;
+	}
+
+	/**
+	 * Add Quick Assist proposals for filtering JUnit 5 @EnumSource parameterized tests.
+	 * This allows users to add or modify the 'names' attribute on @EnumSource annotations
+	 * to selectively include or exclude enum values from parameterized tests.
+	 * 
+	 * @param context the invocation context
+	 * @param covering the covering AST node
+	 * @param resultingCollections the collection to add proposals to (null for checking only)
+	 * @return true if proposals can be/were added
+	 */
+	private static boolean getEnumSourceFilterProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		// Navigate to find if we're on a method declaration with @ParameterizedTest
+		MethodDeclaration methodDecl= ASTResolving.findParentMethodDeclaration(covering);
+		if (methodDecl == null) {
+			return false;
+		}
+
+		// Check if method has @ParameterizedTest annotation and find @EnumSource
+		List<?> modifiers= methodDecl.modifiers();
+		boolean hasParameterizedTest= false;
+		org.eclipse.jdt.core.dom.Annotation enumSourceAnnotation= null;
+
+		for (Object modifier : modifiers) {
+			if (modifier instanceof org.eclipse.jdt.core.dom.Annotation) {
+				org.eclipse.jdt.core.dom.Annotation annotation= (org.eclipse.jdt.core.dom.Annotation) modifier;
+				String annotationName= annotation.getTypeName().getFullyQualifiedName();
+				
+				if ("ParameterizedTest".equals(annotationName) ||  //$NON-NLS-1$
+					"org.junit.jupiter.params.ParameterizedTest".equals(annotationName)) { //$NON-NLS-1$
+					hasParameterizedTest= true;
+				}
+				
+				if ("EnumSource".equals(annotationName) ||  //$NON-NLS-1$
+					"org.junit.jupiter.params.provider.EnumSource".equals(annotationName)) { //$NON-NLS-1$
+					enumSourceAnnotation= annotation;
+				}
+			}
+		}
+
+		// We need both @ParameterizedTest and @EnumSource
+		if (!hasParameterizedTest || enumSourceAnnotation == null) {
+			return false;
+		}
+
+		// Check if user clicked on or near the @EnumSource annotation
+		boolean isOnAnnotation= false;
+		ASTNode currentNode= covering;
+		while (currentNode != null && !isOnAnnotation) {
+			if (currentNode == enumSourceAnnotation) {
+				isOnAnnotation= true;
+				break;
+			}
+			// Check if we're within the annotation's source range
+			if (currentNode == methodDecl) {
+				break; // Don't go beyond the method
+			}
+			currentNode= currentNode.getParent();
+		}
+		
+		if (!isOnAnnotation) {
+			return false;
+		}
+
+		// Extract enum type from @EnumSource annotation
+		ITypeBinding enumTypeBinding= extractEnumTypeFromAnnotation(enumSourceAnnotation);
+		if (enumTypeBinding == null || !enumTypeBinding.isEnum()) {
+			return false;
+		}
+
+		// Check if we can add proposals
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		// Get enum constants
+		List<String> enumConstants= getEnumConstants(enumTypeBinding);
+		if (enumConstants.isEmpty()) {
+			return false;
+		}
+
+		// Create proposals for adding/modifying the names filter
+		createEnumSourceFilterProposals(context, enumSourceAnnotation, enumConstants, resultingCollections);
+
+		return true;
+	}
+
+	/**
+	 * Extract the enum type from an @EnumSource annotation.
+	 * 
+	 * @param annotation the @EnumSource annotation
+	 * @return the enum type binding, or null if not found
+	 */
+	private static ITypeBinding extractEnumTypeFromAnnotation(org.eclipse.jdt.core.dom.Annotation annotation) {
+		if (annotation instanceof org.eclipse.jdt.core.dom.SingleMemberAnnotation) {
+			// @EnumSource(EnumClass.class)
+			org.eclipse.jdt.core.dom.SingleMemberAnnotation singleMember= (org.eclipse.jdt.core.dom.SingleMemberAnnotation) annotation;
+			Expression value= singleMember.getValue();
+			return getTypeFromExpression(value);
+		} else if (annotation instanceof org.eclipse.jdt.core.dom.NormalAnnotation) {
+			// @EnumSource(value = EnumClass.class, ...)
+			org.eclipse.jdt.core.dom.NormalAnnotation normalAnnotation= (org.eclipse.jdt.core.dom.NormalAnnotation) annotation;
+			List<?> values= normalAnnotation.values();
+			for (Object obj : values) {
+				if (obj instanceof org.eclipse.jdt.core.dom.MemberValuePair) {
+					org.eclipse.jdt.core.dom.MemberValuePair pair= (org.eclipse.jdt.core.dom.MemberValuePair) obj;
+					if ("value".equals(pair.getName().getIdentifier())) { //$NON-NLS-1$
+						return getTypeFromExpression(pair.getValue());
+					}
+				}
+			}
+		} else if (annotation instanceof org.eclipse.jdt.core.dom.MarkerAnnotation) {
+			// @EnumSource without arguments - need to infer from method parameter
+			// For simplicity, we won't support this case in the initial implementation
+			return null;
+		}
+		return null;
+	}
+
+	/**
+	 * Extract type binding from a TypeLiteral expression (e.g., EnumClass.class).
+	 * 
+	 * @param expr the expression
+	 * @return the type binding, or null if not a type literal
+	 */
+	private static ITypeBinding getTypeFromExpression(Expression expr) {
+		if (expr instanceof org.eclipse.jdt.core.dom.TypeLiteral) {
+			org.eclipse.jdt.core.dom.TypeLiteral typeLiteral= (org.eclipse.jdt.core.dom.TypeLiteral) expr;
+			Type type= typeLiteral.getType();
+			return type.resolveBinding();
+		}
+		return null;
+	}
+
+	/**
+	 * Get all enum constant names from an enum type.
+	 * 
+	 * @param enumType the enum type binding
+	 * @return list of enum constant names
+	 */
+	private static List<String> getEnumConstants(ITypeBinding enumType) {
+		List<String> constants= new ArrayList<>();
+		if (enumType != null && enumType.isEnum()) {
+			IVariableBinding[] fields= enumType.getDeclaredFields();
+			for (IVariableBinding field : fields) {
+				if (field.isEnumConstant()) {
+					constants.add(field.getName());
+				}
+			}
+		}
+		return constants;
+	}
+
+	/**
+	 * Create proposals for adding/modifying the names filter on @EnumSource.
+	 * 
+	 * @param context the invocation context
+	 * @param annotation the @EnumSource annotation
+	 * @param enumConstants list of enum constant names
+	 * @param resultingCollections collection to add proposals to
+	 */
+	private static void createEnumSourceFilterProposals(IInvocationContext context, org.eclipse.jdt.core.dom.Annotation annotation, List<String> enumConstants, Collection<ICommandAccess> resultingCollections) {
+		// Check if annotation already has a names filter
+		boolean hasNamesFilter= hasNamesAttribute(annotation);
+		
+		if (!hasNamesFilter) {
+			// Offer proposal to add names filter with all enum constants (user can then edit)
+			createAddNamesFilterProposal(context, annotation, enumConstants, resultingCollections, false);
+			// Offer proposal to add names filter with EXCLUDE mode
+			createAddNamesFilterProposal(context, annotation, enumConstants, resultingCollections, true);
+		} else {
+			// Offer proposal to toggle between INCLUDE and EXCLUDE mode
+			createToggleModeProposal(context, annotation, resultingCollections);
+		}
+	}
+
+	/**
+	 * Check if annotation has a names attribute.
+	 * 
+	 * @param annotation the annotation
+	 * @return true if names attribute exists
+	 */
+	private static boolean hasNamesAttribute(org.eclipse.jdt.core.dom.Annotation annotation) {
+		if (annotation instanceof org.eclipse.jdt.core.dom.NormalAnnotation) {
+			org.eclipse.jdt.core.dom.NormalAnnotation normalAnnotation= (org.eclipse.jdt.core.dom.NormalAnnotation) annotation;
+			List<?> values= normalAnnotation.values();
+			for (Object obj : values) {
+				if (obj instanceof org.eclipse.jdt.core.dom.MemberValuePair) {
+					org.eclipse.jdt.core.dom.MemberValuePair pair= (org.eclipse.jdt.core.dom.MemberValuePair) obj;
+					if ("names".equals(pair.getName().getIdentifier())) { //$NON-NLS-1$
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Create a proposal to add names filter to @EnumSource annotation.
+	 * 
+	 * @param context the invocation context
+	 * @param annotation the @EnumSource annotation
+	 * @param enumConstants list of enum constant names
+	 * @param resultingCollections collection to add proposals to
+	 * @param excludeMode whether to use EXCLUDE mode
+	 */
+	private static void createAddNamesFilterProposal(IInvocationContext context, org.eclipse.jdt.core.dom.Annotation annotation, List<String> enumConstants, Collection<ICommandAccess> resultingCollections, boolean excludeMode) {
+		AST ast= annotation.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(annotation), importRewrite);
+		// Use tight source range computer to prevent unwanted line wrapping
+		rewrite.setTargetSourceRangeComputer(new TightSourceRangeComputer());
+
+		// Create new NormalAnnotation with value, names, and optionally mode parameters
+		org.eclipse.jdt.core.dom.NormalAnnotation newAnnotation= ast.newNormalAnnotation();
+		newAnnotation.setTypeName(ast.newName(annotation.getTypeName().getFullyQualifiedName()));
+
+		// Copy existing value attribute
+		Expression valueExpr= null;
+		if (annotation instanceof org.eclipse.jdt.core.dom.SingleMemberAnnotation) {
+			valueExpr= ((org.eclipse.jdt.core.dom.SingleMemberAnnotation) annotation).getValue();
+		} else if (annotation instanceof org.eclipse.jdt.core.dom.NormalAnnotation) {
+			List<?> values= ((org.eclipse.jdt.core.dom.NormalAnnotation) annotation).values();
+			for (Object obj : values) {
+				if (obj instanceof org.eclipse.jdt.core.dom.MemberValuePair) {
+					org.eclipse.jdt.core.dom.MemberValuePair pair= (org.eclipse.jdt.core.dom.MemberValuePair) obj;
+					if ("value".equals(pair.getName().getIdentifier())) { //$NON-NLS-1$
+						valueExpr= pair.getValue();
+						break;
+					}
+				}
+			}
+		}
+
+		if (valueExpr != null) {
+			org.eclipse.jdt.core.dom.MemberValuePair valuePair= ast.newMemberValuePair();
+			valuePair.setName(ast.newSimpleName("value")); //$NON-NLS-1$
+			valuePair.setValue((Expression) rewrite.createCopyTarget(valueExpr));
+			newAnnotation.values().add(valuePair);
+		}
+
+		// Add mode parameter if EXCLUDE mode
+		if (excludeMode) {
+			org.eclipse.jdt.core.dom.MemberValuePair modePair= ast.newMemberValuePair();
+			modePair.setName(ast.newSimpleName("mode")); //$NON-NLS-1$
+			// Use importRewrite to add import and get simple name reference
+			String enumSourceMode= importRewrite.addImport("org.junit.jupiter.params.provider.EnumSource.Mode", importRewriteContext); //$NON-NLS-1$
+			QualifiedName modeName= ast.newQualifiedName(
+				ast.newName(enumSourceMode),
+				ast.newSimpleName("EXCLUDE") //$NON-NLS-1$
+			);
+			modePair.setValue(modeName);
+			newAnnotation.values().add(modePair);
+		}
+
+		// Add names parameter
+		// For INCLUDE mode: pre-populate with all enum constants (user removes what they don't want)
+		// For EXCLUDE mode: start with empty array to prevent runtime errors (user adds what they want to exclude)
+		// Note: If EXCLUDE mode pre-populated all values, the test would have no arguments left and fail at runtime
+		org.eclipse.jdt.core.dom.MemberValuePair namesPair= ast.newMemberValuePair();
+		namesPair.setName(ast.newSimpleName("names")); //$NON-NLS-1$
+		org.eclipse.jdt.core.dom.ArrayInitializer arrayInit= ast.newArrayInitializer();
+		if (!excludeMode) {
+			// Only pre-populate for INCLUDE mode
+			for (String constant : enumConstants) {
+				StringLiteral literal= ast.newStringLiteral();
+				literal.setLiteralValue(constant);
+				arrayInit.expressions().add(literal);
+			}
+		}
+		// For EXCLUDE mode, arrayInit remains empty
+		namesPair.setValue(arrayInit);
+		newAnnotation.values().add(namesPair);
+
+		// Replace old annotation with new one
+		rewrite.replace(annotation, newAnnotation, null);
+
+		String label= excludeMode ? 
+			CorrectionMessages.AdvancedQuickAssistProcessor_addEnumSourceNamesFilterExclude_description :
+			CorrectionMessages.AdvancedQuickAssistProcessor_addEnumSourceNamesFilter_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_ENUM_SOURCE_NAMES_FILTER, image);
+		proposal.setImportRewrite(importRewrite);
+		resultingCollections.add(proposal);
+	}
+
+	/**
+	 * Create a proposal to toggle mode between INCLUDE and EXCLUDE.
+	 * 
+	 * @param context the invocation context
+	 * @param annotation the @EnumSource annotation
+	 * @param resultingCollections collection to add proposals to
+	 */
+	private static void createToggleModeProposal(IInvocationContext context, org.eclipse.jdt.core.dom.Annotation annotation, Collection<ICommandAccess> resultingCollections) {
+		if (!(annotation instanceof org.eclipse.jdt.core.dom.NormalAnnotation)) {
+			return;
+		}
+
+		AST ast= annotation.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(annotation), importRewrite);
+		org.eclipse.jdt.core.dom.NormalAnnotation normalAnnotation= (org.eclipse.jdt.core.dom.NormalAnnotation) annotation;
+
+		// Find current mode
+		boolean hasMode= false;
+		boolean isExcludeMode= false;
+		org.eclipse.jdt.core.dom.MemberValuePair modePair= null;
+
+		List<?> values= normalAnnotation.values();
+		for (Object obj : values) {
+			if (obj instanceof org.eclipse.jdt.core.dom.MemberValuePair) {
+				org.eclipse.jdt.core.dom.MemberValuePair pair= (org.eclipse.jdt.core.dom.MemberValuePair) obj;
+				if ("mode".equals(pair.getName().getIdentifier())) { //$NON-NLS-1$
+					hasMode= true;
+					modePair= pair;
+					Expression modeValue= pair.getValue();
+					if (modeValue instanceof QualifiedName) {
+						QualifiedName qn= (QualifiedName) modeValue;
+						isExcludeMode= "EXCLUDE".equals(qn.getName().getIdentifier()); //$NON-NLS-1$
+					}
+					break;
+				}
+			}
+		}
+
+		// Use importRewrite to add import and get simple name reference
+		String enumSourceMode= importRewrite.addImport("org.junit.jupiter.params.provider.EnumSource.Mode", importRewriteContext); //$NON-NLS-1$
+
+		// Toggle mode or add mode parameter
+		if (hasMode && modePair != null) {
+			// Toggle existing mode
+			QualifiedName newMode= ast.newQualifiedName(
+				ast.newName(enumSourceMode),
+				ast.newSimpleName(isExcludeMode ? "INCLUDE" : "EXCLUDE") //$NON-NLS-1$ //$NON-NLS-2$
+			);
+			rewrite.replace(modePair.getValue(), newMode, null);
+		} else {
+			// Add mode parameter as EXCLUDE
+			org.eclipse.jdt.core.dom.MemberValuePair newModePair= ast.newMemberValuePair();
+			newModePair.setName(ast.newSimpleName("mode")); //$NON-NLS-1$
+			QualifiedName modeName= ast.newQualifiedName(
+				ast.newName(enumSourceMode),
+				ast.newSimpleName("EXCLUDE") //$NON-NLS-1$
+			);
+			newModePair.setValue(modeName);
+			
+			ListRewrite listRewrite= rewrite.getListRewrite(normalAnnotation, org.eclipse.jdt.core.dom.NormalAnnotation.VALUES_PROPERTY);
+			listRewrite.insertLast(newModePair, null);
+		}
+
+		String label= CorrectionMessages.AdvancedQuickAssistProcessor_toggleEnumSourceMode_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.TOGGLE_ENUM_SOURCE_MODE, image);
+		proposal.setImportRewrite(importRewrite);
+		resultingCollections.add(proposal);
 	}
 
 }

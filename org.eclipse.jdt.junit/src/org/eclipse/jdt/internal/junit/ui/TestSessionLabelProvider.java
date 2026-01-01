@@ -84,6 +84,11 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 	}
 
 	private String getTextForFlatLayout(TestCaseElement testCaseElement, String label) {
+		// Populate metadata on demand if not already populated
+		if (!testCaseElement.isParameterizedTest() && testCaseElement.getParameterSourceType() == null) {
+			ParameterizedTestMetadataExtractor.populateMetadata(testCaseElement);
+		}
+		
 		String parentName;
 		String parentDisplayName= testCaseElement.getParent().getDisplayName();
 		if (parentDisplayName != null) {
@@ -95,7 +100,26 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				parentName= testCaseElement.getTestClassName();
 			}
 		}
-		return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, BasicElementLabels.getJavaElementName(parentName) });
+		
+		// Add parameterized test information if available
+		StringBuilder result= new StringBuilder();
+		result.append(Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, BasicElementLabels.getJavaElementName(parentName) }));
+		
+		if (testCaseElement.isParameterizedTest()) {
+			String sourceType= testCaseElement.getParameterSourceType();
+			if (sourceType != null) {
+				result.append(" [@").append(sourceType); //$NON-NLS-1$
+				if ("EnumSource".equals(sourceType) && testCaseElement.getParameterEnumType() != null) { //$NON-NLS-1$
+					String enumType= testCaseElement.getParameterEnumType();
+					int lastDot= enumType.lastIndexOf('.');
+					String shortName= lastDot >= 0 ? enumType.substring(lastDot + 1) : enumType;
+					result.append("(").append(shortName).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				result.append("]"); //$NON-NLS-1$
+			}
+		}
+		
+		return result.toString();
 	}
 
 	private StyledString addElapsedTime(StyledString styledString, double time) {

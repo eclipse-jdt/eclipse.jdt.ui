@@ -24,6 +24,9 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 
 	private boolean fIgnored;
 	private boolean fIsDynamicTest;
+	private boolean fIsParameterizedTest;
+	private String fParameterSourceType; // e.g., "EnumSource", "ValueSource", "MethodSource", etc.
+	private String fParameterEnumType; // For @EnumSource, the enum class name
 
 	public TestCaseElement(TestSuiteElement parent, String id, String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId) {
 		super(parent, id, testName, displayName, parameterTypes, uniqueId);
@@ -85,5 +88,65 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 
 	public boolean isDynamicTest() {
 		return fIsDynamicTest;
+	}
+
+	/**
+	 * Returns whether this test is a parameterized test.
+	 * 
+	 * @return <code>true</code> if this is a parameterized test, <code>false</code> otherwise
+	 * @since 3.15
+	 */
+	public boolean isParameterizedTest() {
+		return fIsParameterizedTest;
+	}
+
+	/**
+	 * Sets whether this test is a parameterized test.
+	 * 
+	 * @param isParameterized <code>true</code> if this is a parameterized test
+	 * @since 3.15
+	 */
+	public void setParameterizedTest(boolean isParameterized) {
+		fIsParameterizedTest= isParameterized;
+	}
+
+	/**
+	 * Returns the parameter source type for parameterized tests.
+	 * 
+	 * @return the parameter source type (e.g., "EnumSource", "ValueSource"), or <code>null</code> if not a parameterized test
+	 * @since 3.15
+	 */
+	public String getParameterSourceType() {
+		return fParameterSourceType;
+	}
+
+	/**
+	 * Sets the parameter source type for parameterized tests.
+	 * 
+	 * @param sourceType the parameter source type (e.g., "EnumSource", "ValueSource")
+	 * @since 3.15
+	 */
+	public void setParameterSourceType(String sourceType) {
+		fParameterSourceType= sourceType;
+	}
+
+	/**
+	 * Returns the enum type for @EnumSource parameterized tests.
+	 * 
+	 * @return the fully qualified enum class name, or <code>null</code> if not an EnumSource test
+	 * @since 3.15
+	 */
+	public String getParameterEnumType() {
+		return fParameterEnumType;
+	}
+
+	/**
+	 * Sets the enum type for @EnumSource parameterized tests.
+	 * 
+	 * @param enumType the fully qualified enum class name
+	 * @since 3.15
+	 */
+	public void setParameterEnumType(String enumType) {
+		fParameterEnumType= enumType;
 	}
 }
