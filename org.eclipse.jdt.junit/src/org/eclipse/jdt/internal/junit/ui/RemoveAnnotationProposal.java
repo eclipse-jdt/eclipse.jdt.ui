@@ -64,23 +64,24 @@ public class RemoveAnnotationProposal implements IJavaCompletionProposal {
 			ASTRewrite rewrite = ASTRewrite.create(ast);
 
 			// Find and remove the annotation
-			@SuppressWarnings("unchecked")
-			List<Annotation> modifiers = (List<Annotation>) fMethodDecl.getStructuralProperty(MethodDeclaration.MODIFIERS2_PROPERTY);
-			
-			for (Annotation annotation : modifiers) {
-				IMethodBinding methodBinding = fMethodDecl.resolveBinding();
-				if (methodBinding != null) {
-					IAnnotationBinding[] annotations = methodBinding.getAnnotations();
-					for (IAnnotationBinding annotationBinding : annotations) {
-						ITypeBinding annotationType = annotationBinding.getAnnotationType();
-						if (annotationType != null && fAnnotationQualifiedName.equals(annotationType.getQualifiedName())) {
-							ListRewrite listRewrite = rewrite.getListRewrite(fMethodDecl, MethodDeclaration.MODIFIERS2_PROPERTY);
-							// Find the matching annotation node
+			IMethodBinding methodBinding = fMethodDecl.resolveBinding();
+			if (methodBinding != null) {
+				IAnnotationBinding[] annotations = methodBinding.getAnnotations();
+				for (IAnnotationBinding annotationBinding : annotations) {
+					ITypeBinding annotationType = annotationBinding.getAnnotationType();
+					if (annotationType != null && fAnnotationQualifiedName.equals(annotationType.getQualifiedName())) {
+						// Find the matching annotation node in the modifiers
+						@SuppressWarnings("unchecked")
+						List<Annotation> modifiers = (List<Annotation>) fMethodDecl.getStructuralProperty(MethodDeclaration.MODIFIERS2_PROPERTY);
+						
+						for (Annotation annotation : modifiers) {
 							if (annotation.resolveAnnotationBinding() == annotationBinding) {
+								ListRewrite listRewrite = rewrite.getListRewrite(fMethodDecl, MethodDeclaration.MODIFIERS2_PROPERTY);
 								listRewrite.remove(annotation, null);
 								break;
 							}
 						}
+						break;
 					}
 				}
 			}

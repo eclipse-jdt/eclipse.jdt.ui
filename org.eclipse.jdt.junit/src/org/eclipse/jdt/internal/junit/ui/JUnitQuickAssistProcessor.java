@@ -117,9 +117,8 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 			ITypeBinding annotationType = annotation.getAnnotationType();
 			if (annotationType != null) {
 				String qualifiedName = annotationType.getQualifiedName();
-				if (JUNIT4_TEST_ANNOTATION.equals(qualifiedName) || 
-					JUNIT5_TEST_ANNOTATION.equals(qualifiedName) ||
-					JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(qualifiedName)) {
+				if (JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(qualifiedName) || 
+					JUNIT5_TEST_ANNOTATION.equals(qualifiedName)) {
 					return true;
 				}
 			}
