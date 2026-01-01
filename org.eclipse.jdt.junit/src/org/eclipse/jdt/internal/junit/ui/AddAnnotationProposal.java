@@ -72,12 +72,12 @@ public class AddAnnotationProposal implements IJavaCompletionProposal {
 			ImportRewrite importRewrite = CodeStyleConfiguration.createImportRewrite(astRoot, true);
 			importRewrite.addImport(fAnnotationQualifiedName);
 
-			// Apply changes
-			TextEdit importEdit = importRewrite.rewriteImports(null);
+			// Apply changes - rewrite AST first, then imports
 			TextEdit rewriteEdit = rewrite.rewriteAST(document, cu.getOptions(true));
+			TextEdit importEdit = importRewrite.rewriteImports(null);
 
-			importEdit.apply(document);
 			rewriteEdit.apply(document);
+			importEdit.apply(document);
 
 		} catch (CoreException | BadLocationException e) {
 			JUnitPlugin.log(e);

@@ -71,14 +71,16 @@ public class RemoveAnnotationProposal implements IJavaCompletionProposal {
 					ITypeBinding annotationType = annotationBinding.getAnnotationType();
 					if (annotationType != null && fAnnotationQualifiedName.equals(annotationType.getQualifiedName())) {
 						// Find the matching annotation node in the modifiers
-						@SuppressWarnings("unchecked")
-						List<Annotation> modifiers = (List<Annotation>) fMethodDecl.getStructuralProperty(MethodDeclaration.MODIFIERS2_PROPERTY);
+						List<?> modifiers = fMethodDecl.modifiers();
 						
-						for (Annotation annotation : modifiers) {
-							if (annotation.resolveAnnotationBinding() == annotationBinding) {
-								ListRewrite listRewrite = rewrite.getListRewrite(fMethodDecl, MethodDeclaration.MODIFIERS2_PROPERTY);
-								listRewrite.remove(annotation, null);
-								break;
+						for (Object modifier : modifiers) {
+							if (modifier instanceof Annotation) {
+								Annotation annotation = (Annotation) modifier;
+								if (annotation.resolveAnnotationBinding() == annotationBinding) {
+									ListRewrite listRewrite = rewrite.getListRewrite(fMethodDecl, MethodDeclaration.MODIFIERS2_PROPERTY);
+									listRewrite.remove(annotation, null);
+									break;
+								}
 							}
 						}
 						break;
