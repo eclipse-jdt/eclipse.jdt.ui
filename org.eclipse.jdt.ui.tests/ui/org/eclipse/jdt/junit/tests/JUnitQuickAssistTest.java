@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 IBM Corporation and others.
+ * Copyright (c) 2025 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Carsten Hammer - initial implementation
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
@@ -66,9 +66,9 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Test;
-			
+
 			public class MyTest {
 			    @Test
 			    public void testMethod() {
@@ -95,10 +95,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Disabled;
 			import org.junit.jupiter.api.Test;
-			
+
 			public class MyTest {
 			    @Disabled
 			    @Test
@@ -117,10 +117,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Disabled;
 			import org.junit.jupiter.api.Test;
-			
+
 			public class MyTest {
 			    @Disabled
 			    @Test
@@ -148,10 +148,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Disabled;
 			import org.junit.jupiter.api.Test;
-			
+
 			public class MyTest {
 			    @Test
 			    public void testMethod() {
@@ -169,9 +169,9 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.Test;
-			
+
 			public class MyTest {
 			    @Test
 			    public void testMethod() {
@@ -198,10 +198,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.Ignore;
 			import org.junit.Test;
-			
+
 			public class MyTest {
 			    @Ignore
 			    @Test
@@ -220,10 +220,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.Ignore;
 			import org.junit.Test;
-			
+
 			public class MyTest {
 			    @Ignore
 			    @Test
@@ -251,10 +251,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.Ignore;
 			import org.junit.Test;
-			
+
 			public class MyTest {
 			    @Test
 			    public void testMethod() {
@@ -272,7 +272,7 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			public class MyTest {
 			    public void normalMethod() {
 			        // not a test
@@ -300,10 +300,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.jupiter.params.ParameterizedTest;
 			import org.junit.jupiter.params.provider.ValueSource;
-			
+
 			public class MyTest {
 			    @ParameterizedTest
 			    @ValueSource(strings = {"test1", "test2"})
@@ -331,11 +331,11 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Disabled;
 			import org.junit.jupiter.params.ParameterizedTest;
 			import org.junit.jupiter.params.provider.ValueSource;
-			
+
 			public class MyTest {
 			    @Disabled
 			    @ParameterizedTest
@@ -355,9 +355,9 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.RepeatedTest;
-			
+
 			public class MyTest {
 			    @RepeatedTest(5)
 			    public void testMethod() {
@@ -384,10 +384,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Disabled;
 			import org.junit.jupiter.api.RepeatedTest;
-			
+
 			public class MyTest {
 			    @Disabled
 			    @RepeatedTest(5)
