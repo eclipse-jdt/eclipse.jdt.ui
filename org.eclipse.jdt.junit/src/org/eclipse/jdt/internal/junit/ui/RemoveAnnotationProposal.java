@@ -18,8 +18,6 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -72,7 +70,7 @@ public class RemoveAnnotationProposal implements IJavaCompletionProposal {
 					if (annotationType != null && fAnnotationQualifiedName.equals(annotationType.getQualifiedName())) {
 						// Find the matching annotation node in the modifiers
 						List<?> modifiers = fMethodDecl.modifiers();
-						
+
 						for (Object modifier : modifiers) {
 							if (modifier instanceof Annotation) {
 								Annotation annotation = (Annotation) modifier;
@@ -92,7 +90,7 @@ public class RemoveAnnotationProposal implements IJavaCompletionProposal {
 			TextEdit rewriteEdit = rewrite.rewriteAST(document, cu.getOptions(true));
 			rewriteEdit.apply(document);
 
-		} catch (CoreException | BadLocationException e) {
+		} catch (BadLocationException e) {
 			JUnitPlugin.log(e);
 		}
 	}

@@ -19,8 +19,6 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -87,10 +85,10 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 			// Offer to add the appropriate annotation based on JUnit version
 			if (isJUnit5TestMethod(methodDecl)) {
 				// JUnit 5 test
-				proposals.add(new AddAnnotationProposal(context, methodDecl, JUNIT5_DISABLED_ANNOTATION, "Disabled"));
+				proposals.add(new AddAnnotationProposal(context, methodDecl, JUNIT5_DISABLED_ANNOTATION, "Disabled")); //$NON-NLS-1$
 			} else if (hasAnnotation(methodDecl, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME)) {
 				// JUnit 4 test
-				proposals.add(new AddAnnotationProposal(context, methodDecl, JUNIT4_IGNORE_ANNOTATION, "Ignore"));
+				proposals.add(new AddAnnotationProposal(context, methodDecl, JUNIT4_IGNORE_ANNOTATION, "Ignore")); //$NON-NLS-1$
 			}
 		}
 
@@ -119,7 +117,7 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 			ITypeBinding annotationType = annotation.getAnnotationType();
 			if (annotationType != null) {
 				String qualifiedName = annotationType.getQualifiedName();
-				if (JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(qualifiedName) || 
+				if (JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(qualifiedName) ||
 					isJUnit5TestAnnotation(qualifiedName)) {
 					return true;
 				}
