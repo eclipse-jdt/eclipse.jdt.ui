@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -102,6 +102,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			final List<SwitchCase> throwList= new ArrayList<>();
 			final List<SwitchCase> returnList= new ArrayList<>();
 			boolean defaultFound= false;
+			boolean useSwitchStatement= false;
 			List<Statement> currentBlock= null;
 			SwitchCase currentCase= null;
 			Map<SwitchCase, List<Statement>> caseMap= new LinkedHashMap<>();
@@ -234,12 +235,16 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					// case must end in an assignment
 					if (!(lastStatement instanceof ExpressionStatement) || !(((ExpressionStatement)lastStatement).getExpression() instanceof Assignment)) {
 						assignmentBinding= null;
+						commonAssignmentName= null;
+						useSwitchStatement= true;
 						break;
 					}
 					Assignment assignment= (Assignment)((ExpressionStatement) lastStatement).getExpression();
 					// must be simple assign operator
 					if (assignment.getOperator() != Assignment.Operator.ASSIGN) {
 						assignmentBinding= null;
+						commonAssignmentName= null;
+						useSwitchStatement= true;
 						break;
 					}
 					if (commonAssignmentName == null) {
@@ -257,11 +262,13 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							if (!name.getFullyQualifiedName().equals(commonAssignmentName)) {
 								commonAssignmentName= null;
 								assignmentBinding= null;
+								useSwitchStatement= true;
 								break;
 							}
 						} else {
 							commonAssignmentName= null;
 							assignmentBinding= null;
+							useSwitchStatement= true;
 							break;
 						}
 					}
@@ -297,7 +304,8 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			if (forceOldStyle && !createReturnStatement && assignmentBinding == null) {
 				return null;
 			}
-			return new SwitchExpressionsFixOperation(switchStatement, caseMap, createReturnStatement, commonAssignmentName, assignmentBinding, forceOldStyle);
+			return new SwitchExpressionsFixOperation(switchStatement, caseMap, createReturnStatement, commonAssignmentName,
+					assignmentBinding, forceOldStyle, useSwitchStatement);
 		}
 	}
 
@@ -309,15 +317,18 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		private final String varName;
 		private final IBinding assignmentBinding;
 		private final boolean forceOldStyle;
+		private final boolean useSwitchStatement;
 
 		public SwitchExpressionsFixOperation(SwitchStatement switchStatement, Map<SwitchCase, List<Statement>> caseMap,
-				boolean createReturnStatement, String varName, IBinding assignmentBinding, boolean forceOldStyle) {
+				boolean createReturnStatement, String varName, IBinding assignmentBinding, boolean forceOldStyle,
+				boolean useSwitchStatement) {
 			this.switchStatement= switchStatement;
 			this.caseMap= caseMap;
 			this.createReturnStatement= createReturnStatement;
 			this.varName= varName;
 			this.assignmentBinding= assignmentBinding;
 			this.forceOldStyle= forceOldStyle;
+			this.useSwitchStatement= useSwitchStatement;
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -327,10 +338,23 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			final AST ast= rewrite.getAST();
 
+			List<Statement> statements= new ArrayList<>();
+			SwitchStatement newSwitchStatement= null;
+			SwitchExpression newSwitchExpression= null;
+
 			TextEditGroup group= createTextEditGroup(FixMessages.SwitchExpressionsFix_convert_to_switch_expression, cuRewrite);
-			SwitchExpression newSwitchExpression= ast.newSwitchExpression();
-			Expression newSwitchExpressionExpression= (Expression)rewrite.createCopyTarget(switchStatement.getExpression());
-			newSwitchExpression.setExpression(newSwitchExpressionExpression);
+			if (useSwitchStatement) {
+				newSwitchStatement= ast.newSwitchStatement();
+				Expression newSwitchExpressionExpression= (Expression)rewrite.createCopyTarget(switchStatement.getExpression());
+				newSwitchStatement.setExpression(newSwitchExpressionExpression);
+				statements= newSwitchStatement.statements();
+
+			} else {
+				newSwitchExpression= ast.newSwitchExpression();
+				Expression newSwitchExpressionExpression= (Expression)rewrite.createCopyTarget(switchStatement.getExpression());
+				newSwitchExpression.setExpression(newSwitchExpressionExpression);
+				statements= newSwitchExpression.statements();
+			}
 			SwitchCase lastSwitchCase= null;
 
 
@@ -342,7 +366,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				if (oldStatements.isEmpty()) {
 					if (forceOldStyle) {
 						SwitchCase newSwitchCase= (SwitchCase)rewrite.createCopyTarget(oldSwitchCase);
-						newSwitchExpression.statements().add(newSwitchCase);
+						statements.add(newSwitchCase);
 					} else {
 						// fall-through, want all fall-through labels in single case
 						if (oldSwitchCase.expressions().isEmpty()) {
@@ -355,7 +379,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							if (lastSwitchCase == null) {
 								lastSwitchCase= ast.newSwitchCase();
 								lastSwitchCase.setSwitchLabeledRule(true);
-								newSwitchExpression.statements().add(lastSwitchCase);
+								statements.add(lastSwitchCase);
 							}
 							for (Object obj : oldSwitchCase.expressions()) {
 								Expression oldExpression= (Expression)obj;
@@ -370,11 +394,11 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				boolean needDuplicateDefault= false;
 				if (forceOldStyle) {
 					SwitchCase newSwitchCase= (SwitchCase)rewrite.createCopyTarget(oldSwitchCase);
-					newSwitchExpression.statements().add(newSwitchCase);
+					statements.add(newSwitchCase);
 				} else {
 					if (lastSwitchCase == null) {
 						SwitchCase newSwitchCase= ast.newSwitchCase();
-						newSwitchExpression.statements().add(newSwitchCase);
+						statements.add(newSwitchCase);
 						newSwitchCase.setSwitchLabeledRule(true);
 						switchCase= newSwitchCase;
 					} else {
@@ -439,12 +463,12 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 								}
 							}
 						}
-						newSwitchExpression.statements().add(newStatement);
+						statements.add(newStatement);
 						if (defaultFallThrough) {
 							SwitchCase newSwitchCase= ast.newSwitchCase();
 							newSwitchCase.setSwitchLabeledRule(true);
-							newSwitchExpression.statements().add(newSwitchCase);
-							newSwitchExpression.statements().add(newStatement2);
+							statements.add(newSwitchCase);
+							statements.add(newStatement2);
 							defaultFallThrough= false;
 						}
 					} else {
@@ -467,19 +491,19 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							newStatement= (Statement)rewrite.createCopyTarget(lastStatement);
 						}
 						newBlock.statements().add(newStatement);
-						newSwitchExpression.statements().add(newBlock);
+						statements.add(newBlock);
 						if (defaultFallThrough) {
 							SwitchCase newSwitchCase= ast.newSwitchCase();
 							newSwitchCase.setSwitchLabeledRule(true);
 							newSwitchCase.expressions().add(ast.newCaseDefaultExpression());
-							newSwitchExpression.statements().add(newSwitchCase);
-							newSwitchExpression.statements().add(newBlock);
+							statements.add(newSwitchCase);
+							statements.add(newBlock);
 						}
 					}
 					if (needDuplicateDefault) {
 						needDuplicateDefault= false;
 						SwitchCase newSwitchCase= ast.newSwitchCase();
-						newSwitchExpression.statements().add(newSwitchCase);
+						statements.add(newSwitchCase);
 						newSwitchCase.setSwitchLabeledRule(true);
 						switchCase= newSwitchCase;
 					} else {
@@ -504,10 +528,10 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						ASTNode parent= switchStatement.getParent();
 						if (parent instanceof Block) {
 							Block block= (Block)parent;
-							List statements= block.statements();
+							List blockStatements= block.statements();
 							ListRewrite listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-							for (int i= 0; i < statements.size(); ++i) {
-								Statement statement= (Statement)statements.get(i);
+							for (int i= 0; i < blockStatements.size(); ++i) {
+								Statement statement= (Statement)blockStatements.get(i);
 								if (statement instanceof VariableDeclarationStatement) {
 									VariableDeclarationStatement decl= (VariableDeclarationStatement)statement;
 									List fragments= decl.fragments();
@@ -552,7 +576,11 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					newAssignment.setLeftHandSide(ast.newName(varName));
 					newAssignment.setRightHandSide(newSwitchExpression);
 				} else {
-					newExpressionStatement= ast.newExpressionStatement(newSwitchExpression);
+					if (newSwitchStatement == null) {
+						newExpressionStatement= ast.newExpressionStatement(newSwitchExpression);
+					} else {
+						newExpressionStatement= newSwitchStatement;
+					}
 				}
 			}
 

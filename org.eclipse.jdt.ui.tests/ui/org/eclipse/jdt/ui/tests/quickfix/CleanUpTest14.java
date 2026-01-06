@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1000,7 +1000,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				            case 1 -> System.out.println("here");
 				            case 2 -> i = 7; // value 7
 				            default -> i = 8; // value 8
-				        };
+				        }
 				        return i;
 				    }
 				}
@@ -1054,7 +1054,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				            }
 				            case 2 -> i = 7; // value 7
 				            default -> i = 8; // value 8
-				        };
+				        }
 				        return i;
 				    }
 				}
@@ -1178,7 +1178,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				            }
 				            case 2 -> i = 7; // value 7
 				            default -> i = 8; // value 8
-				        };
+				        }
 				        return i;
 				    }
 				}
