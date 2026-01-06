@@ -701,6 +701,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		boolean isMethodPrivate= JdtFlags.isPrivate(method);
 
 		for (IType clazz : classes) {
+			// try and find the method declaration -.don't look at anonymous types as
+			// we will find the method in the real type and there is a current bug scenario where accessing
+			// may cause a model exception when the class is created in a lambda expression and the file is unopen
 			if (!clazz.isAnonymous()) {
 				boolean isSubclass= subtypes.contains(clazz);
 				for (IMethod m : clazz.getMethods()) {

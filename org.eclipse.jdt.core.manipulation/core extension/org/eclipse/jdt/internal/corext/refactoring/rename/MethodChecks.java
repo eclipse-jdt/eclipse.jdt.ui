@@ -109,7 +109,7 @@ public class MethodChecks {
 			IType[] classes= hierarchy.getAllClasses();
 			subMonitor.beginTask("", classes.length); //$NON-NLS-1$
 			for (IType clazz : classes) {
-				if (!clazz.isAnonymous()) {
+				if (!clazz.isAnonymous()) { // no need to look at an anonymous instance
 					IType[] superinterfaces= null;
 					if (clazz.equals(hierarchy.getType()))
 						superinterfaces= hierarchy.getAllSuperInterfaces(clazz);
