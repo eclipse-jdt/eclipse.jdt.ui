@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -109,15 +109,17 @@ public class MethodChecks {
 			IType[] classes= hierarchy.getAllClasses();
 			subMonitor.beginTask("", classes.length); //$NON-NLS-1$
 			for (IType clazz : classes) {
-				IType[] superinterfaces= null;
-				if (clazz.equals(hierarchy.getType()))
-					superinterfaces= hierarchy.getAllSuperInterfaces(clazz);
-				else
-					superinterfaces= clazz.newSupertypeHierarchy(Progress.subMonitor(subMonitor, 1)).getAllSuperInterfaces(clazz);
-				for (IType superinterface : superinterfaces) {
-					IMethod found= Checks.findSimilarMethod(method, superinterface);
-					if (found != null && !found.equals(method))
-						return found;
+				if (!clazz.isAnonymous()) {
+					IType[] superinterfaces= null;
+					if (clazz.equals(hierarchy.getType()))
+						superinterfaces= hierarchy.getAllSuperInterfaces(clazz);
+					else
+						superinterfaces= clazz.newSupertypeHierarchy(Progress.subMonitor(subMonitor, 1)).getAllSuperInterfaces(clazz);
+					for (IType superinterface : superinterfaces) {
+						IMethod found= Checks.findSimilarMethod(method, superinterface);
+						if (found != null && !found.equals(method))
+							return found;
+					}
 				}
 				subMonitor.worked(1);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -701,15 +701,17 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		boolean isMethodPrivate= JdtFlags.isPrivate(method);
 
 		for (IType clazz : classes) {
-			boolean isSubclass= subtypes.contains(clazz);
-			for (IMethod m : clazz.getMethods()) {
-				IMethod foundMethod= Checks.findMethod(newName, parameterCount, false, new IMethod[]{m});
-				if (foundMethod == null)
-					continue;
-				if (isSubclass
-						|| type.equals(clazz)
-						|| (!isMethodPrivate && !JdtFlags.isPrivate(m))) {
-					result.add(foundMethod);
+			if (!clazz.isAnonymous()) {
+				boolean isSubclass= subtypes.contains(clazz);
+				for (IMethod m : clazz.getMethods()) {
+					IMethod foundMethod= Checks.findMethod(newName, parameterCount, false, new IMethod[]{m});
+					if (foundMethod == null)
+						continue;
+					if (isSubclass
+							|| type.equals(clazz)
+							|| (!isMethodPrivate && !JdtFlags.isPrivate(m))) {
+						result.add(foundMethod);
+					}
 				}
 			}
 		}
