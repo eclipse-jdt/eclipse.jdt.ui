@@ -247,10 +247,12 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	//---- Class checks -------------------------------------
 
 	private boolean classesDeclareOverridingNativeMethod(IType[] classes) throws CoreException {
- 		for (IType type : classes) {
-			for (IMethod method : type.getMethods()) {
-				if ((!method.equals(getMethod())) && (JdtFlags.isNative(method)) && (null != Checks.findSimilarMethod(getMethod(), new IMethod[]{method}))) {
-					return true;
+		for (IType type : classes) {
+			if (!type.isAnonymous()) {
+				for (IMethod method : type.getMethods()) {
+					if ((!method.equals(getMethod())) && (JdtFlags.isNative(method)) && (null != Checks.findSimilarMethod(getMethod(), new IMethod[]{method}))) {
+						return true;
+					}
 				}
 			}
 		}
