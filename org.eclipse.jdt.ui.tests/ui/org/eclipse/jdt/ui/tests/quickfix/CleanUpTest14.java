@@ -1320,6 +1320,30 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotConvertToSwitchExpressionIssue2728() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+			    public void f(int i) {
+				    int j;
+			        switch (i) {
+				        case 0 -> j = 3;
+				        default -> throw new AssertionError();
+			        }
+			    }
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testDoNotRemoveParenthesesIssue2451_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """

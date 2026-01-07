@@ -103,6 +103,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			final List<SwitchCase> returnList= new ArrayList<>();
 			boolean defaultFound= false;
 			boolean useSwitchStatement= false;
+			boolean isSwitchLabeledRule= false;
 			List<Statement> currentBlock= null;
 			SwitchCase currentCase= null;
 			Map<SwitchCase, List<Statement>> caseMap= new LinkedHashMap<>();
@@ -110,6 +111,9 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				Statement statement= iter.next();
 				if (statement instanceof SwitchCase) {
 					SwitchCase switchCase= (SwitchCase)statement;
+					if (switchCase.isSwitchLabeledRule()) {
+						isSwitchLabeledRule= true;
+					}
 					if (switchCase.isDefault()) {
 						defaultFound= true;
 					}
@@ -301,8 +305,8 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					break;
 				}
 			}
-			if (forceOldStyle && !createReturnStatement && assignmentBinding == null) {
-				return null;
+			if ((forceOldStyle || isSwitchLabeledRule) && !createReturnStatement && assignmentBinding == null) {
+				return null; // nothing to change
 			}
 			return new SwitchExpressionsFixOperation(switchStatement, caseMap, createReturnStatement, commonAssignmentName,
 					assignmentBinding, forceOldStyle, useSwitchStatement);
