@@ -288,8 +288,21 @@ public class NLSHintHelper {
 					if (InfixExpression.Operator.PLUS.equals(op)) {
 						String leftOperand = getBundleName(infix.getLeftOperand());
 						String rightOperand = getBundleName(infix.getRightOperand());
+						String result= null;
 						if (leftOperand != null && rightOperand != null) {
-							return leftOperand + rightOperand;
+							result= leftOperand + rightOperand;
+							if (infix.hasExtendedOperands()) {
+								List<Expression> extendedOperands= infix.extendedOperands();
+								for (Expression extendedOperand : extendedOperands) {
+									String extendedString= getBundleName(extendedOperand);
+									if (extendedString != null) {
+										result += extendedString;
+									} else {
+										break;
+									}
+								}
+							}
+							return result;
 						}
 						return null;
 					}
@@ -303,8 +316,9 @@ public class NLSHintHelper {
 						if (typeBinding != null) {
 							if ("getPackageName".equals(methInvocation.getName().getFullyQualifiedName())) { //$NON-NLS-1$
 								return typeBinding.getPackage().getName();
+							} else if ("getName".equals(methInvocation.getName().getFullyQualifiedName())) { //$NON-NLS-1$
+								return typeBinding.getQualifiedName();
 							}
-							return typeBinding.getQualifiedName();
 						}
 					}
 				}
