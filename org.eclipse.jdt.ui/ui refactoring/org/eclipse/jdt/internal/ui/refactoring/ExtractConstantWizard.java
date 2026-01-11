@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -60,9 +60,6 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.ExtractConstantWizard_defaultPageTitle);
 	}
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */
 	@Override
 	protected void addUserInputPages() {
 
@@ -259,9 +256,6 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
-		 */
 		@Override
 		protected RefactoringStatus validateTextField(String text) {
 			try {
@@ -297,17 +291,11 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			return checkBox;
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
-		 */
 		@Override
 		protected boolean isInitialInputValid() {
 			return fInitialValid;
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#restoreMessage()
-		 */
 		@Override
 		protected void restoreMessage() {
 			setMessage(fOriginalMessage, fOriginalMessageType);

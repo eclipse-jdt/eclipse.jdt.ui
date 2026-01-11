@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +35,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-
 /**
  * Class file considered as editor input.
  */
@@ -50,9 +48,6 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		fClassFile= classFile;
 	}
 
-	/*
-	 * @see Object#equals(Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -63,48 +58,33 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		return fClassFile.equals(other.fClassFile);
 	}
 
-	/*
-	 * @see Object#hashCode
-	 */
 	@Override
 	public int hashCode() {
 		return fClassFile.hashCode();
 	}
 
-	/*
-	 * @see IClassFileEditorInput#getClassFile()
-	 */
 	@Override
 	public IClassFile getClassFile() {
 		return fClassFile;
 	}
 
-	/*
-	 * @see IEditorInput#getPersistable()
-	 */
 	@Override
 	public IPersistableElement getPersistable() {
 		return this;
 	}
 
-	/*
-	 * @see IEditorInput#getName()
-	 */
 	@Override
 	public String getName() {
 		return fClassFile.getElementName();
 	}
 
-	/*
-	 * @see IEditorInput#getToolTipText()
-	 */
 	@Override
 	public String getToolTipText() {
 		if (fClassFile instanceof IOrdinaryClassFile) {
 			return ((IOrdinaryClassFile) fClassFile).getType().getFullyQualifiedName();
 		} else if (fClassFile instanceof IModularClassFile) {
 			try {
-				return ((IModularClassFile) fClassFile).getModule().getElementName();
+				return fClassFile.getModule().getElementName();
 			} catch (JavaModelException e) {
 				return e.getMessage();
 			}
@@ -112,9 +92,6 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		throw new IllegalStateException("input must be either IClassFile or IModularClassFile");  //$NON-NLS-1$
 	}
 
-	/*
-	 * @see IEditorInput#getImageDescriptor()
-	 */
 	@Override
 	public ImageDescriptor getImageDescriptor() {
 		try {
@@ -127,9 +104,6 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		return JavaPluginImages.DESC_OBJS_CFILE;
 	}
 
-	/*
-	 * @see IEditorInput#exists()
-	 */
 	@Override
 	public boolean exists() {
 		return fClassFile.exists();
@@ -145,26 +119,16 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		return null;
 	}
 
-	/*
-	 * @see IPersistableElement#saveState(IMemento)
-	 */
 	@Override
 	public void saveState(IMemento memento) {
 		ClassFileEditorInputFactory.saveState(memento, this);
 	}
 
-	/*
-	 * @see IPersistableElement#getFactoryId()
-	 */
 	@Override
 	public String getFactoryId() {
 		return ClassFileEditorInputFactory.ID;
 	}
 
-	/*
-	 * @see org.eclipse.ui.IPathEditorInput#getPath()
-	 * @since 3.7
-	 */
 	@Override
 	public IPath getPath() {
 		if (fPath == null)

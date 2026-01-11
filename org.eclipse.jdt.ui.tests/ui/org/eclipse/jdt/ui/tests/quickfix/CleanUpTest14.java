@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2025 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1000,7 +1000,58 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				            case 1 -> System.out.println("here");
 				            case 2 -> i = 7; // value 7
 				            default -> i = 8; // value 8
-				        };
+				        }
+				        return i;
+				    }
+				}
+				""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testConvertToSwitchExpressionNoDefaultAssignment() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+			    public int foo(int j) {
+			        // return value
+			        int i = 0;
+			        switch (j) {
+			            case 1:
+			                i = 8; // value 8
+			                break; // can't refactor with no assignment to i
+			            case 2:
+			                i = 7; // value 7
+				            break;
+			            default:
+			                return -1; // invalid
+			        }
+			        return i;
+			    }
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= """
+				package test1;
+
+				public class E1 {
+				    public int foo(int j) {
+				        // return value
+				        int i = 0;
+				        switch (j) {
+				            case 1 -> i = 8; // value 8
+				            case 2 -> i = 7; // value 7
+				            default -> {
+				                return -1; // invalid
+				            }
+				        }
 				        return i;
 				    }
 				}
@@ -1054,7 +1105,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				            }
 				            case 2 -> i = 7; // value 7
 				            default -> i = 8; // value 8
-				        };
+				        }
 				        return i;
 				    }
 				}
@@ -1178,7 +1229,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 				            }
 				            case 2 -> i = 7; // value 7
 				            default -> i = 8; // value 8
-				        };
+				        }
 				        return i;
 				    }
 				}
@@ -1256,6 +1307,30 @@ public class CleanUpTest14 extends CleanUpTestCase {
 			            return;
 			        default:
 			            throw new AssertionError();
+			        }
+			    }
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotConvertToSwitchExpressionIssue2728() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E1 {
+			    public void f(int i) {
+				    int j;
+			        switch (i) {
+				        case 0 -> j = 3;
+				        default -> throw new AssertionError();
 			        }
 			    }
 			}

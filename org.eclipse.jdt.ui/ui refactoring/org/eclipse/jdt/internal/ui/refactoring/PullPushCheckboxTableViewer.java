@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,9 +28,6 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 		super(table);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.StructuredViewer#doUpdateItem(org.eclipse.swt.widgets.Widget, java.lang.Object, boolean)
-	 */
 	@Override
 	protected void doUpdateItem(Widget widget, Object element, boolean fullMap) {
 		super.doUpdateItem(widget, element, fullMap);
@@ -42,9 +39,6 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 		Assert.isTrue(item.getChecked() == PullPushCheckboxTableViewer.getCheckState(info));
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
-	 */
 	@Override
 	protected void inputChanged(Object input, Object oldInput) {
 		super.inputChanged(input, oldInput);
@@ -64,9 +58,6 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 		return info.isActive();
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.Viewer#refresh()
-	 */
 	@Override
 	public void refresh() {
 		int topIndex = getTable().getTopIndex();

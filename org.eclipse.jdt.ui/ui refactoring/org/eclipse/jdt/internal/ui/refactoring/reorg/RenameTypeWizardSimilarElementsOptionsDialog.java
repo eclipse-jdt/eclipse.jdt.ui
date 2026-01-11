@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,10 +52,6 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 		fSelectedStrategy= defaultStrategy;
 	}
 
-	/*
-	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
-	 * @since 3.4
-	 */
 	@Override
 	protected boolean isResizable() {
 		return true;
