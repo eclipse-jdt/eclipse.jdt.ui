@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -124,25 +124,16 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isEmptyInputValid()
-		 */
 		@Override
 		protected boolean isEmptyInputValid() {
 			return !getMoveRefactoring().isCreatingInstanceFieldMandatory();
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
-		 */
 		@Override
 		protected boolean isInitialInputValid() {
 			return fInitialInputValid;
 		}
 
-		/*
-		 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-		 */
 		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
@@ -155,9 +146,6 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
-		 */
 		@Override
 		protected RefactoringStatus validateTextField(String text) {
 			final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
@@ -174,9 +162,6 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.MoveInnerToTopWizard_Move_Inner);
 	}
 
-	/*
-	 * @see RefactoringWizard#addUserInputPages
-	 */
 	@Override
 	protected void addUserInputPages() {
 		final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();

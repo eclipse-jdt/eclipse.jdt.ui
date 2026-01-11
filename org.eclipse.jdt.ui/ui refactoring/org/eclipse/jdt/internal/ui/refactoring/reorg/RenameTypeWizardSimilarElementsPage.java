@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -130,10 +130,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			fNameField.setText(newName);
 		}
 
-		/*
-		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
-		 * @since 3.4
-		 */
 		@Override
 		protected boolean isResizable() {
 			return true;
@@ -200,9 +196,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		private Map<IJavaElement, Set<IJavaElement>> fTreeElementMap;
 		private Set<ICompilationUnit> fTopLevelElements;
 
-		/*
-		 * @see ITreeContentProvider#getChildren(Object)
-		 */
 		@Override
 		public Object[] getChildren(Object parentElement) {
 			final Set<IJavaElement> children= fTreeElementMap.get(parentElement);
@@ -212,9 +205,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 				return new Object[0];
 		}
 
-		/*
-		 * @see ITreeContentProvider#getParent(Object)
-		 */
 		@Override
 		public Object getParent(Object element) {
 			if (element instanceof IMember || element instanceof ILocalVariable) {
@@ -226,26 +216,17 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			return null;
 		}
 
-		/*
-		 * @see ITreeContentProvider#hasChildren(Object)
-		 */
 		@Override
 		public boolean hasChildren(Object element) {
 			return fTreeElementMap.containsKey(element);
 		}
 
-		/*
-		 * @see IStructuredContentProvider#getElements(Object)
-		 */
 		@Override
 		public Object[] getElements(Object inputElement) {
 			Assert.isTrue(inputElement == null || inputElement instanceof Map);
 			return fTopLevelElements.toArray();
 		}
 
-		/*
-		 * @see IContentProvider#dispose()
-		 */
 		@Override
 		public void dispose() {
 			fTreeElementMap.clear();
@@ -253,9 +234,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			fTopLevelElements= null;
 		}
 
-		/*
-		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
-		 */
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			Assert.isTrue(newInput == null || newInput instanceof Map);
@@ -657,9 +635,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 	// ------------ Navigation
 
-	/*
-	 * @see IWizardPage#getNextPage()
-	 */
 	@Override
 	public IWizardPage getNextPage() {
 		if (fWasInitialized)
@@ -672,10 +647,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		return nextPage;
 	}
 
-
-	/*
-	 * @see IWizardPage#getPreviousPage()
-	 */
 	@Override
 	public IWizardPage getPreviousPage() {
 		if (fWasInitialized)
@@ -683,9 +654,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		return super.getPreviousPage();
 	}
 
-	/*
-	 * @see RefactoringWizardPage#performFinish()
-	 */
 	@Override
 	protected boolean performFinish() {
 		initializeRefFromUI();

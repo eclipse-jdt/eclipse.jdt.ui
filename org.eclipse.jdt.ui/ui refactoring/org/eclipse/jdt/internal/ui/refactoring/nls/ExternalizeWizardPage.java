@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -142,9 +142,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private class CellModifier implements ICellModifier {
 
-		/**
-		 * @see ICellModifier#canModify(Object, String)
-		 */
 		@Override
 		public boolean canModify(Object element, String property) {
 			if (property == null)
@@ -161,9 +158,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return true;
 		}
 
-		/**
-		 * @see ICellModifier#getValue(Object, String)
-		 */
 		@Override
 		public Object getValue(Object element, String property) {
 			if (element instanceof NLSSubstitution) {
@@ -184,9 +178,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return ""; //$NON-NLS-1$
 		}
 
-		/**
-		 * @see ICellModifier#modify(Object, String, Object)
-		 */
 		@Override
 		public void modify(Object element, String property, Object value) {
 			if (element instanceof TableItem) {
@@ -490,9 +481,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		createDefaultExternalization(fSubstitutions);
 	}
 
-	/*
-	 * @see IDialogPage#createControl(Composite)
-	 */
 	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);

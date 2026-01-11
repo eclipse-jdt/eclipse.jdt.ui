@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,9 +52,6 @@ public class ExtractTempWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.ExtractTempWizard_defaultPageTitle);
 	}
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */
 	@Override
 	protected void addUserInputPages(){
 		addPage(new ExtractTempInputPage(getExtractTempRefactoring().guessTempNamesWithContext()));
@@ -201,19 +198,12 @@ public class ExtractTempWizard extends RefactoringWizard {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#textModified(java.lang.String)
-		 */
 		@Override
 		protected void textModified(String text) {
 			getExtractTempRefactoring().setTempName(text);
 			super.textModified(text);
 		}
 
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
-		 */
 		@Override
 		protected RefactoringStatus validateTextField(String text) {
 			return getExtractTempRefactoring().checkTempName(text);
@@ -242,9 +232,6 @@ public class ExtractTempWizard extends RefactoringWizard {
 			return checkBox;
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
-		 */
 		@Override
 		protected boolean isInitialInputValid() {
 			return fInitialValid;

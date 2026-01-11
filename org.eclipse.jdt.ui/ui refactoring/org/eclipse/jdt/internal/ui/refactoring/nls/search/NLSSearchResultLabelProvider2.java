@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,16 +18,17 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.search.TextSearchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements IStyledLabelProvider {
@@ -75,9 +76,6 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 		return new StyledString(propertiesName).append(JavaElementLabels.CONCAT_STRING + path, StyledString.QUALIFIER_STYLER);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
-	 */
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof FileEntry)
@@ -88,9 +86,6 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 		return fLabelProvider.getImage(element);
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.LabelProvider#dispose()
-	 */
 	@Override
 	public void dispose() {
 		fLabelProvider.dispose();
