@@ -230,7 +230,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					}
 					if (!Arrays.stream(classpath).anyMatch(s -> s.contains(BuildPathSupport.JUNIT_JUPITER_API) || s.contains("org.junit.jupiter.api"))) { //$NON-NLS-1$
 						try {
-							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry(BuildPathSupport.JUNIT_JUPITER_API, null, BuildPathSupport.JUNIT_JUPITER_VERSION);
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry(BuildPathSupport.JUNIT_JUPITER_API, null, junitJupiterVersion);
 							String entryString= new ClasspathLocalizer(false).entryString(x);
 							int length= classpath.length;
 							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);
