@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -84,9 +84,6 @@ public class DeleteAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.DELETE_ACTION);
 	}
 
-	/*
-	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		if (ReorgUtilsCore.containsOnlyProjects(selection.toList())) {
@@ -122,10 +119,6 @@ public class DeleteAction extends SelectionDispatchAction {
 			dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_single, null, dialogMessage, MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide,
 					ReorgMessages.DeleteWorkingSet_Remove,
 					IDialogConstants.CANCEL_LABEL }, 0) {
-				/*
-				 * @see org.eclipse.jface.dialogs.MessageDialog#createButton(org.eclipse.swt.widgets.Composite, int, java.lang.String, boolean)
-				 * @since 3.5
-				 */
 				@Override
 				protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
 					Button button= super.createButton(parent, id, label, defaultButton);

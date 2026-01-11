@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -76,9 +76,6 @@ public class InlineConstantAction extends SelectionDispatchAction {
 
 	//---- structured selection ---------------------------------------------
 
-	/*
-	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -91,9 +88,6 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		}
 	}
 
-	/*
-	 * @see SelectionDispatchAction#run(IStructuredSelection)
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		try {
@@ -111,9 +105,6 @@ public class InlineConstantAction extends SelectionDispatchAction {
 
 	//---- text selection -----------------------------------------------
 
-    /*
-     * @see SelectionDispatchAction#selectionChanged(ITextSelection)
-     */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);

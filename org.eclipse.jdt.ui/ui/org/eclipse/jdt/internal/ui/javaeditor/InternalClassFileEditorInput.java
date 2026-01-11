@@ -48,9 +48,6 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		fClassFile= classFile;
 	}
 
-	/*
-	 * @see Object#equals(Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -61,41 +58,26 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		return fClassFile.equals(other.fClassFile);
 	}
 
-	/*
-	 * @see Object#hashCode
-	 */
 	@Override
 	public int hashCode() {
 		return fClassFile.hashCode();
 	}
 
-	/*
-	 * @see IClassFileEditorInput#getClassFile()
-	 */
 	@Override
 	public IClassFile getClassFile() {
 		return fClassFile;
 	}
 
-	/*
-	 * @see IEditorInput#getPersistable()
-	 */
 	@Override
 	public IPersistableElement getPersistable() {
 		return this;
 	}
 
-	/*
-	 * @see IEditorInput#getName()
-	 */
 	@Override
 	public String getName() {
 		return fClassFile.getElementName();
 	}
 
-	/*
-	 * @see IEditorInput#getToolTipText()
-	 */
 	@Override
 	public String getToolTipText() {
 		if (fClassFile instanceof IOrdinaryClassFile) {
@@ -110,9 +92,6 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		throw new IllegalStateException("input must be either IClassFile or IModularClassFile");  //$NON-NLS-1$
 	}
 
-	/*
-	 * @see IEditorInput#getImageDescriptor()
-	 */
 	@Override
 	public ImageDescriptor getImageDescriptor() {
 		try {
@@ -125,9 +104,6 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		return JavaPluginImages.DESC_OBJS_CFILE;
 	}
 
-	/*
-	 * @see IEditorInput#exists()
-	 */
 	@Override
 	public boolean exists() {
 		return fClassFile.exists();
@@ -143,26 +119,16 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		return null;
 	}
 
-	/*
-	 * @see IPersistableElement#saveState(IMemento)
-	 */
 	@Override
 	public void saveState(IMemento memento) {
 		ClassFileEditorInputFactory.saveState(memento, this);
 	}
 
-	/*
-	 * @see IPersistableElement#getFactoryId()
-	 */
 	@Override
 	public String getFactoryId() {
 		return ClassFileEditorInputFactory.ID;
 	}
 
-	/*
-	 * @see org.eclipse.ui.IPathEditorInput#getPath()
-	 * @since 3.7
-	 */
 	@Override
 	public IPath getPath() {
 		if (fPath == null)
