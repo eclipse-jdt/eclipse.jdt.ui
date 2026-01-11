@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +34,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 
 /**
  * Class file considered as editor input.
@@ -104,7 +102,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 			return ((IOrdinaryClassFile) fClassFile).getType().getFullyQualifiedName();
 		} else if (fClassFile instanceof IModularClassFile) {
 			try {
-				return ((IModularClassFile) fClassFile).getModule().getElementName();
+				return fClassFile.getModule().getElementName();
 			} catch (JavaModelException e) {
 				return e.getMessage();
 			}
