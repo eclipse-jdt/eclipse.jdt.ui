@@ -24,18 +24,25 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 /**
@@ -53,6 +60,11 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 	public void setUp() throws Exception {
 		fJProject = projectSetup.getProject();
 		fSourceFolder = JavaProjectHelper.addSourceContainer(fJProject, "src");
+
+		JavaProjectHelper.addRTJar(fJProject);
+		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT5_CONTAINER_PATH);
+		JavaProjectHelper.addToClasspath(fJProject, cpe);
+		JavaProjectHelper.set18CompilerOptions(fJProject);
 	}
 
 	@After
@@ -66,9 +78,9 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Test;
-			
+
 			public class MyTest {
 			    @Test
 			    public void testMethod() {
@@ -78,7 +90,7 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 			""";
 
 		ICompilationUnit cu = pack1.createCompilationUnit("MyTest.java", original, false, null);
-
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(cu);
 		String str = "testMethod";
 		AssistContext context = getCorrectionContext(cu, original.indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals = collectAssists(context, false);
@@ -90,23 +102,24 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IJavaCompletionProposal disableProposal = findProposalByName(proposals, "Disable test with @Disabled");
 		assertNotNull("Should have 'Disable test with @Disabled' proposal", disableProposal);
 
+		IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
 		// Apply the proposal
-		disableProposal.apply(null);
+		disableProposal.apply(document);
 
 		String expected = """
-			package test1;
-			
-			import org.junit.jupiter.api.Disabled;
-			import org.junit.jupiter.api.Test;
-			
-			public class MyTest {
-			    @Disabled
-			    @Test
-			    public void testMethod() {
-			        // test code
-			    }
-			}
-			""";
+package test1;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+public class MyTest {
+    @Disabled
+	@Test
+    public void testMethod() {
+        // test code
+    }
+}
+""";
 
 		assertEqualString(cu.getSource(), expected);
 	}
@@ -117,10 +130,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Disabled;
 			import org.junit.jupiter.api.Test;
-			
+
 			public class MyTest {
 			    @Disabled
 			    @Test
@@ -143,22 +156,23 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IJavaCompletionProposal enableProposal = findProposalByName(proposals, "Enable test (remove @Disabled)");
 		assertNotNull("Should have 'Enable test (remove @Disabled)' proposal", enableProposal);
 
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(cu);
+		IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
 		// Apply the proposal
-		enableProposal.apply(null);
+		enableProposal.apply(document);
 
 		String expected = """
-			package test1;
-			
-			import org.junit.jupiter.api.Disabled;
-			import org.junit.jupiter.api.Test;
-			
-			public class MyTest {
-			    @Test
-			    public void testMethod() {
-			        // test code
-			    }
-			}
-			""";
+package test1;
+
+import org.junit.jupiter.api.Test;
+
+public class MyTest {
+    @Test
+    public void testMethod() {
+        // test code
+    }
+}
+""";
 
 		assertEqualString(cu.getSource(), expected);
 	}
@@ -169,9 +183,9 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.Test;
-			
+
 			public class MyTest {
 			    @Test
 			    public void testMethod() {
@@ -193,15 +207,17 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IJavaCompletionProposal disableProposal = findProposalByName(proposals, "Disable test with @Ignore");
 		assertNotNull("Should have 'Disable test with @Ignore' proposal", disableProposal);
 
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(cu);
+		IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
 		// Apply the proposal
-		disableProposal.apply(null);
+		disableProposal.apply(document);
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.Ignore;
 			import org.junit.Test;
-			
+
 			public class MyTest {
 			    @Ignore
 			    @Test
@@ -220,10 +236,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.Ignore;
 			import org.junit.Test;
-			
+
 			public class MyTest {
 			    @Ignore
 			    @Test
@@ -246,15 +262,17 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IJavaCompletionProposal enableProposal = findProposalByName(proposals, "Enable test (remove @Ignore)");
 		assertNotNull("Should have 'Enable test (remove @Ignore)' proposal", enableProposal);
 
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(cu);
+		IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
 		// Apply the proposal
-		enableProposal.apply(null);
+		enableProposal.apply(document);
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.Ignore;
 			import org.junit.Test;
-			
+
 			public class MyTest {
 			    @Test
 			    public void testMethod() {
@@ -272,7 +290,7 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			public class MyTest {
 			    public void normalMethod() {
 			        // not a test
@@ -300,10 +318,10 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.jupiter.params.ParameterizedTest;
 			import org.junit.jupiter.params.provider.ValueSource;
-			
+
 			public class MyTest {
 			    @ParameterizedTest
 			    @ValueSource(strings = {"test1", "test2"})
@@ -326,16 +344,18 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IJavaCompletionProposal disableProposal = findProposalByName(proposals, "Disable test with @Disabled");
 		assertNotNull("Should have 'Disable test with @Disabled' proposal for parameterized test", disableProposal);
 
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(cu);
+		IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
 		// Apply the proposal
-		disableProposal.apply(null);
+		disableProposal.apply(document);
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Disabled;
 			import org.junit.jupiter.params.ParameterizedTest;
 			import org.junit.jupiter.params.provider.ValueSource;
-			
+
 			public class MyTest {
 			    @Disabled
 			    @ParameterizedTest
@@ -355,9 +375,9 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1 = fSourceFolder.createPackageFragment("test1", false, null);
 		String original = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.RepeatedTest;
-			
+
 			public class MyTest {
 			    @RepeatedTest(5)
 			    public void testMethod() {
@@ -379,15 +399,18 @@ public class JUnitQuickAssistTest extends QuickFixTest {
 		IJavaCompletionProposal disableProposal = findProposalByName(proposals, "Disable test with @Disabled");
 		assertNotNull("Should have 'Disable test with @Disabled' proposal for repeated test", disableProposal);
 
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(cu);
+		IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+
 		// Apply the proposal
-		disableProposal.apply(null);
+		disableProposal.apply(document);
 
 		String expected = """
 			package test1;
-			
+
 			import org.junit.jupiter.api.Disabled;
 			import org.junit.jupiter.api.RepeatedTest;
-			
+
 			public class MyTest {
 			    @Disabled
 			    @RepeatedTest(5)
