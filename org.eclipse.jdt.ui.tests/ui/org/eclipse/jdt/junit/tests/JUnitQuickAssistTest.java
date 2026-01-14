@@ -219,7 +219,7 @@ public class MyTest {
 
 			public class MyTest {
 			    @Ignore
-			    @Test
+				@Test
 			    public void testMethod() {
 			        // test code
 			    }
@@ -269,7 +269,6 @@ public class MyTest {
 		String expected = """
 			package test1;
 
-			import org.junit.Ignore;
 			import org.junit.Test;
 
 			public class MyTest {
@@ -357,7 +356,7 @@ public class MyTest {
 
 			public class MyTest {
 			    @Disabled
-			    @ParameterizedTest
+				@ParameterizedTest
 			    @ValueSource(strings = {"test1", "test2"})
 			    public void testMethod(String param) {
 			        // test code
@@ -412,7 +411,7 @@ public class MyTest {
 
 			public class MyTest {
 			    @Disabled
-			    @RepeatedTest(5)
+				@RepeatedTest(5)
 			    public void testMethod() {
 			        // test code
 			    }
