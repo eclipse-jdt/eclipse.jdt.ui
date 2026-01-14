@@ -140,6 +140,10 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 	public static class ReturnFinder extends ASTVisitor {
 		boolean foundOne;
+
+		public boolean getFoundOne() {
+			return foundOne;
+		}
 		@Override
 		public boolean visit(ReturnStatement node) {
 			foundOne= true;

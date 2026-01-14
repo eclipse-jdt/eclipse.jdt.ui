@@ -79,4 +79,12 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="refactoring/org/eclipse/jdt/core/refactoring/descriptors/ConvertToRecordDescriptor.java" type="org.eclipse.jdt.core.refactoring.descriptors.ConvertToRecordDescriptor">
+        <filter id="576778288">
+            <message_arguments>
+                <message_argument value="JavaRefactoringDescriptor"/>
+                <message_argument value="ConvertToRecordDescriptor"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
