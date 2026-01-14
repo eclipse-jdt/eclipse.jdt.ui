@@ -402,6 +402,11 @@ public class MyTest {
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(cu);
 		IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
 
+		// Verify document has the expected content before applying proposal
+		String beforeApply = document.get();
+		assertTrue("Document should contain @RepeatedTest before applying proposal, but was: " + beforeApply, 
+				beforeApply.contains("@RepeatedTest(5)"));
+
 		// Apply the proposal
 		disableProposal.apply(document);
 
