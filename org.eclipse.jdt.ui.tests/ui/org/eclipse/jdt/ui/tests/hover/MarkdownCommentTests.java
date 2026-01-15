@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 GK Software SE and others.
+ * Copyright (c) 2024, 2026 GK Software SE and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.hover;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
@@ -1057,6 +1058,42 @@ public class MarkdownCommentTests extends CoreTests {
 		IType type= cu.getType("ArrayInCode");
 		String actualHtmlContent= getHoverHtmlContent(cu, type);
 		assertHtmlContent(expectedContent, actualHtmlContent);
+	}
+
+	@Test
+	public void testLinkTagWithHttp_01() throws CoreException {
+		String source= """
+				/// {@link https://eclipse.org}
+				public class Markdown {}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Markdown.java", source, null);
+		assertNotNull("Markdown.java", cu);
+
+		String expectedContent = "<a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BMarkdown.java%E2%98%83Markdown%E2%98%82%20https://eclipse.org'> https://eclipse.org</a>";
+		IType type= cu.getType("Markdown");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		int index= actualHtmlContent.lastIndexOf("<a");
+		assertNotEquals(-1, index);
+		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
+		assertEquals("sequence doesn't match", expectedContent, actualSnippet);
+	}
+
+	@Test
+	public void testLinkTagWithHttp_02() throws CoreException {
+		String source= """
+				/// {@linkplain https://eclipse.org}
+				public class Markdown {}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Markdown.java", source, null);
+		assertNotNull("Markdown.java", cu);
+
+		String expectedContent = "<a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BMarkdown.java%E2%98%83Markdown%E2%98%82%20https://eclipse.org'> https://eclipse.org</a>";
+		IType type= cu.getType("Markdown");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		int index= actualHtmlContent.lastIndexOf("<a");
+		assertNotEquals(-1, index);
+		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
+		assertEquals("sequence doesn't match", expectedContent, actualSnippet);
 	}
 
 }
