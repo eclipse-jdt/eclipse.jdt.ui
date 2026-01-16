@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,9 +39,6 @@ class Properties extends java.util.Properties {
 		Assert.isNotNull(duplicateKeys);
 		fDuplicateKeys= duplicateKeys;
 	}
-	/*
-	 * @see java.util.Map#put(Object, Object)
-	 */
 	@Override
 	public synchronized Object put(Object arg0, Object arg1) {
 		if (arg0 != null && containsKey(arg0))

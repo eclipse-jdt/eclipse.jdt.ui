@@ -1017,11 +1017,19 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				return;
 			}
 			if (isJUnit5 && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
-				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
+				if (CoreTestSearchEngine.hasJUnit6TestAnnotation(javaProject)) {
+					setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_mixedJUnitJupiterVersions, new Object[] {5, 6}));
+				} else {
+					setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
+				}
 				return;
 			}
 			if (isJUnit6 && !CoreTestSearchEngine.hasJUnit6TestAnnotation(javaProject)) {
-				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
+				if (CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+					setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_mixedJUnitJupiterVersions, new Object[] {6, 5}));
+				} else {
+					setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
+				}
 				return;
 			}
 		}

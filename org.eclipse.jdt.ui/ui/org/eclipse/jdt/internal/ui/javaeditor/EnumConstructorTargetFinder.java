@@ -28,11 +28,13 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 
@@ -145,14 +147,16 @@ public class EnumConstructorTargetFinder extends ASTVisitor {
 					nodeTypeArgument= ((ClassInstanceCreation) nodeArgument).resolveTypeBinding();
 				} else if (nodeArgument.getParent().getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION) {
 					IMethodBinding resolveConstructorBinding= ((EnumConstantDeclaration) nodeArgument.getParent()).resolveConstructorBinding();
-					ITypeBinding[] parameterTypes= resolveConstructorBinding.getParameterTypes();
-					if (parameterTypes.length != enumBodyDeclarationNodeParameters.size()) {
-						continue declarationLoop;
-					}
-					if (singleVariableDeclaration.isVarargs()) {
-						nodeTypeArgument= parameterTypes[i].getElementType();
-					} else {
-						nodeTypeArgument= parameterTypes[i];
+					if (resolveConstructorBinding != null) {
+						ITypeBinding[] parameterTypes= resolveConstructorBinding.getParameterTypes();
+						if (parameterTypes.length != enumBodyDeclarationNodeParameters.size()) {
+							continue declarationLoop;
+						}
+						if (singleVariableDeclaration.isVarargs()) {
+							nodeTypeArgument= parameterTypes[i].getElementType();
+						} else {
+							nodeTypeArgument= parameterTypes[i];
+						}
 					}
 				}
 				if (nodeTypeArgument == null) {

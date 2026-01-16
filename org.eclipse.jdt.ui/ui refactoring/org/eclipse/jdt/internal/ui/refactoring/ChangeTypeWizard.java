@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -69,9 +69,6 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		fCT= ref;
 	}
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */
 	@Override
 	protected void addUserInputPages(){
 		addPage(new ChangeTypeInputPage());
@@ -144,9 +141,6 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			return null;
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
-		 */
 		@Override
 		public Image getImage(Object element) {
 			Image image= super.getImage(element);
@@ -322,9 +316,6 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		private ChangeTypeRefactoring getGeneralizeTypeRefactoring(){
 			return (ChangeTypeRefactoring)getRefactoring();
 		}
-		/*
-		 * @see org.eclipse.jface.wizard.IWizardPage#getNextPage()
-		 */
 		@Override
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
@@ -336,9 +327,6 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			return (ITypeBinding)ss.getFirstElement();
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
-		 */
 		@Override
 		public boolean performFinish(){
 			initializeRefactoring();
@@ -349,9 +337,6 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			getGeneralizeTypeRefactoring().setSelectedType(getSelectedType());
 		}
 
-		/*
-		 * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
-		 */
 		@Override
 		public void dispose() {
 			fTreeViewer= null;

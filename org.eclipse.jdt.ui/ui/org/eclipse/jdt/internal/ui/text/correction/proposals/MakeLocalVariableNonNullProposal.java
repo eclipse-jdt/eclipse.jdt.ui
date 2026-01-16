@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Till Brychcy and others.
+ * Copyright (c) 2023, 2025 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,10 @@ public class MakeLocalVariableNonNullProposal extends ASTRewriteCorrectionPropos
 	public MakeLocalVariableNonNullProposal(ICompilationUnit targetCU, IVariableBinding varBinding, CompilationUnit astRoot, int relevance, String nonNullAnnotationName) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), //$NON-NLS-1$
 				new MakeLocalVariableNonNullProposalCore(targetCU, varBinding, astRoot, relevance, nonNullAnnotationName));
+	}
+
+	public MakeLocalVariableNonNullProposal(MakeLocalVariableNonNullProposalCore core) {
+		this(core.getCompilationUnit(), core.getVarBinding(), core.getRoot(), core.getRelevance(), core.getNonNullAnnotationName());
 	}
 
 }

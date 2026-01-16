@@ -18,6 +18,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import org.junit.After;
 import org.junit.Before;
@@ -50,7 +52,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 
@@ -89,7 +90,6 @@ public class AbstractTestRunListenerTest {
 
 
 	IJavaProject fProject;
-	private boolean fLaunchHasTerminated= false;
 
 	@Before
 	public void setUp() throws Exception {
@@ -111,8 +111,12 @@ public class AbstractTestRunListenerTest {
 		}
 	}
 
-	protected IType createType(String source, String packageName, String typeName) throws CoreException, JavaModelException {
-		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "src");
+	protected IType createType(String source, String packageName, String typeName) throws CoreException {
+		return createType(fProject, source, packageName, typeName);
+	}
+
+	protected static IType createType(IJavaProject project, String source, String packageName, String typeName) throws CoreException {
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(project, "src");
 		IPackageFragment pack= root.createPackageFragment(packageName, true, null);
 		ICompilationUnit aTestCaseCU= pack.createCompilationUnit(typeName, source, true, null);
 		IType aTestCase= aTestCaseCU.findPrimaryType();
@@ -124,6 +128,38 @@ public class AbstractTestRunListenerTest {
 	}
 
 	protected void launchJUnit(IJavaElement aTest, String testKindID, String testName) throws CoreException {
+		buildTestCase(aTest);
+
+		LaunchesListener listener = new LaunchesListener();
+		ILaunchConfigurationWorkingCopy configuration= createLaunchConfiguration(aTest, testKindID, testName, listener);
+		try {
+			configuration.launch(ILaunchManager.RUN_MODE, null);
+			waitForCondition(listener.fLaunchHasTerminated::get, 30 * 1000, 1000);
+		} finally {
+			cleanUp(configuration, listener);
+		}
+		assertTrue("Launch has not terminated", listener.fLaunchHasTerminated.get());
+	}
+
+	protected static ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement aTest, String testKindID, String testName, LaunchesListener launchesListener) throws CoreException {
+		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+		lm.removeLaunches(lm.getLaunches());
+		lm.addLaunchListener(launchesListener);
+		ILaunchConfigurationWorkingCopy configuration= TestJUnitLaunchShortcut.createConfiguration(aTest, testName);
+		if (testKindID != null) {
+			configuration.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindID);
+		}
+		return configuration;
+	}
+
+	protected static void cleanUp(ILaunchConfigurationWorkingCopy configuration, LaunchesListener launchesListener) throws CoreException {
+		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+		lm.removeLaunchListener(launchesListener);
+		lm.removeLaunches(lm.getLaunches());
+		configuration.delete();
+	}
+
+	protected static void buildTestCase(IJavaElement aTest) throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		IMarker[] markers= aTest.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
 		for (IMarker marker : markers) {
@@ -131,75 +167,6 @@ public class AbstractTestRunListenerTest {
 				fail("unexpected errors, e.g. :" + marker.toString());
 			}
 		}
-
-		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
-		lm.removeLaunches(lm.getLaunches());
-		ILaunchesListener2 launchesListener= new ILaunchesListener2() {
-			@Override
-			public void launchesTerminated(ILaunch[] launches) {
-				for (ILaunch launch : launches) {
-					if (isJUnitLaunch(launch)) {
-						fLaunchHasTerminated= true;
-					}
-					logLaunch("terminated", launch);
-				}
-			}
-			@Override
-			public void launchesRemoved(ILaunch[] launches) {
-				for (ILaunch launch : launches) {
-					if (isJUnitLaunch(launch)) {
-						fLaunchHasTerminated= true;
-					}
-					logLaunch("removed   ", launch);
-				}
-			}
-			@Override
-			public void launchesAdded(ILaunch[] launches) {
-				for (ILaunch launch : launches) {
-					logLaunch("added     ", launch);
-				}
-			}
-			@Override
-			public void launchesChanged(ILaunch[] launches) {
-				for (ILaunch launch : launches) {
-					logLaunch("changed   ", launch);
-				}
-			}
-			private void logLaunch(String action, ILaunch launch) {
-				StringBuffer buf= new StringBuffer();
-				buf.append(System.currentTimeMillis()).append(" ");
-				buf.append("launch ").append(action).append(": ");
-				ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
-				if (launchConfiguration != null) {
-					buf.append(launchConfiguration.getName()).append(": ");
-				}
-				buf.append(launch);
-				if (isJUnitLaunch(launch)) {
-					buf.append(" [JUnit]");
-				}
-				System.out.println(buf);
-			}
-		};
-		lm.addLaunchListener(launchesListener);
-
-		ILaunchConfigurationWorkingCopy configuration= TestJUnitLaunchShortcut.createConfiguration(aTest, testName);
-		if (testKindID != null) {
-			configuration.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindID);
-		}
-		try {
-			configuration.launch(ILaunchManager.RUN_MODE, null);
-			new DisplayHelper() {
-				@Override
-				protected boolean condition() {
-					return fLaunchHasTerminated;
-				}
-			}.waitForCondition(Display.getCurrent(), 30 * 1000, 1000);
-		} finally {
-			lm.removeLaunchListener(launchesListener);
-			lm.removeLaunches(lm.getLaunches());
-			configuration.delete();
-		}
-		assertTrue("Launch has not terminated", fLaunchHasTerminated);
 	}
 
 	protected String[] launchJUnit(IJavaElement aTest, final TestRunLog log) throws CoreException {
@@ -213,18 +180,23 @@ public class AbstractTestRunListenerTest {
 	protected String[] launchJUnit(IJavaElement aTest, String testKindID, String testName, final TestRunLog log) throws CoreException {
 		launchJUnit(aTest, testKindID, testName);
 
-		boolean success= new DisplayHelper(){
-			@Override
-			protected boolean condition() {
-				return log.isDone();
-			}
-		}.waitForCondition(Display.getCurrent(), 15*1000, 100);
+		boolean success= waitForCondition(log::isDone, 15*1000, 100);
 		if (! success)
 			log.add("AbstractTestRunListenerTest#launchJUnit(IJavaElement, TestRunLog) timed out");
 		return log.getLog();
 	}
 
-	private boolean isJUnitLaunch(ILaunch launch) {
+	protected static boolean waitForCondition(Supplier<Boolean> condition, long timeout, long interval) {
+		DisplayHelper displayHelper= new DisplayHelper() {
+			@Override
+			protected boolean condition() {
+				return condition.get();
+			}
+		};
+		return displayHelper.waitForCondition(Display.getCurrent(), timeout, interval);
+	}
+
+	protected static boolean isJUnitLaunch(ILaunch launch) {
 		ILaunchConfiguration config= launch.getLaunchConfiguration();
 		if (config == null)
 			return false;
@@ -235,6 +207,21 @@ public class AbstractTestRunListenerTest {
 			return false;
 
 		return true;
+	}
+
+	private static void logLaunch(String action, ILaunch launch) {
+		StringBuffer buf= new StringBuffer();
+		buf.append(System.currentTimeMillis()).append(" ");
+		buf.append("launch ").append(action).append(": ");
+		ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
+		if (launchConfiguration != null) {
+			buf.append(launchConfiguration.getName()).append(": ");
+		}
+		buf.append(launch);
+		if (isJUnitLaunch(launch)) {
+			buf.append(" [JUnit]");
+		}
+		System.out.println(buf);
 	}
 
 	public static void assertEqualLog(final String[] expectedSequence, String[] logMessages) {
@@ -249,5 +236,43 @@ public class AbstractTestRunListenerTest {
 		assertEquals(expected.toString(), actual.toString());
 	}
 
+	protected static class LaunchesListener implements ILaunchesListener2 {
 
+		protected final AtomicBoolean fLaunchChanged= new AtomicBoolean(false);
+		protected final AtomicBoolean fLaunchHasTerminated= new AtomicBoolean(false);
+
+		@Override
+		public void launchesTerminated(ILaunch[] launches) {
+			for (ILaunch launch : launches) {
+				if (isJUnitLaunch(launch)) {
+					fLaunchHasTerminated.set(true);
+				}
+				logLaunch("terminated", launch);
+			}
+		}
+		@Override
+		public void launchesRemoved(ILaunch[] launches) {
+			for (ILaunch launch : launches) {
+				if (isJUnitLaunch(launch)) {
+					fLaunchHasTerminated.set(true);
+				}
+				logLaunch("removed   ", launch);
+			}
+		}
+		@Override
+		public void launchesAdded(ILaunch[] launches) {
+			for (ILaunch launch : launches) {
+				logLaunch("added     ", launch);
+			}
+		}
+		@Override
+		public void launchesChanged(ILaunch[] launches) {
+			for (ILaunch launch : launches) {
+				if (isJUnitLaunch(launch)) {
+					fLaunchChanged.set(true);
+				}
+				logLaunch("changed   ", launch);
+			}
+		}
+	}
 }

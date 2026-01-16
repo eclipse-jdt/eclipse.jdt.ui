@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -66,9 +66,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.ExtractInterfaceWizard_Extract_Interface);
 	}
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */
 	@Override
 	protected void addUserInputPages(){
 		addPage(new ExtractInterfaceInputPage(fProcessor));
@@ -322,9 +319,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			return checkBox;
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
-		 */
 		@Override
 		protected RefactoringStatus validateTextField(String text) {
 			final ExtractInterfaceProcessor processor= fProcessor;
@@ -332,9 +326,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			return processor.checkTypeName(text);
 		}
 
-		/*
-		 * @see org.eclipse.jface.wizard.IWizardPage#getNextPage()
-		 */
 		@Override
 		public IWizardPage getNextPage() {
 			try {
@@ -347,9 +338,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
-		 */
 		@Override
 		public boolean performFinish(){
 			try {

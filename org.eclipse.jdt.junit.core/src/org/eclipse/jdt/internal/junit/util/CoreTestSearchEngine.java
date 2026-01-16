@@ -16,6 +16,8 @@ package org.eclipse.jdt.internal.junit.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import org.osgi.framework.Version;
 
@@ -50,6 +52,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.PackageFragmentRoot;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
@@ -173,18 +176,41 @@ public class CoreTestSearchEngine {
 				}
 				if (type != null) {
 					// check if we have the right JUnit JUpiter version
+					Version version = null;
 					String filename= type.getPath().lastSegment();
-					if ((filename.startsWith(junitBundlePrefix + "_") || filename.startsWith(junitBundlePrefix + "-")) && filename.endsWith(JAR_EXTENSION)) { //$NON-NLS-1$ //$NON-NLS-2$
+					boolean isJar = filename.endsWith(JAR_EXTENSION);
+					// Try matching the library name, this should be enough for many cases.
+					if (isJar && (filename.startsWith(junitBundlePrefix + "_") || filename.startsWith(junitBundlePrefix + "-"))) { //$NON-NLS-1$ //$NON-NLS-2$
 						String versionString = filename.substring(junitBundlePrefix.length() + 1, filename.length() - JAR_EXTENSION.length());
 						try {
-							Version version = Version.parseVersion(versionString);
-							if (version.getMajor() != junitMajorVersion) {
-								return false;
-							}
+							version = Version.parseVersion(versionString);
 						} catch (IllegalArgumentException e) {
-							// Some JUnit distributions use different naming, ignore those. See: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2665
-							JUnitCorePlugin.log(Status.error("Failed to parse determine JUnit version: " + filename, e)); //$NON-NLS-1$
+							/*
+							 * Some JUnit distributions use different naming, ignore those. See: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2665
+							 * We will try parsing a jar manifest below.
+							 */
 						}
+					}
+					if (isJar && version == null) {
+						try {
+							PackageFragmentRoot root= (PackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+							Manifest manifest= null;
+							if (root != null) {
+								manifest= root.getManifest();
+							}
+							if (manifest != null) {
+								Attributes attributes= manifest.getMainAttributes();
+								String versionString= attributes.getValue("Specification-Version"); //$NON-NLS-1$
+								if (versionString != null) {
+									version= Version.parseVersion(versionString);
+								}
+							}
+						} catch (Throwable e) {
+							JUnitCorePlugin.log(Status.warning("Failed to determine JUnit version", e)); //$NON-NLS-1$
+						}
+					}
+					if (version != null && version.getMajor() != junitMajorVersion) {
+						return false;
 					}
 					// @Testable/@Suite annotations are not accessible if the JUnit classpath container is set to JUnit 3 or JUnit 4
 					// (although it may resolve to a JUnit 5 JAR)

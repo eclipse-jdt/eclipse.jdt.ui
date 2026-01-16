@@ -42,7 +42,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.ui.fix.NullAnnotationsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.NullAnnotationsCleanUpCore;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -124,7 +124,7 @@ public class NullAnnotationsCleanUpTest1d8 extends CleanUpTestCase {
 			}
 			""";
 
-		ICleanUp[] cleanUps= { new NullAnnotationsCleanUp(new HashMap<>(), IProblem.TypeAnnotationAtQualifiedName) };
+		ICleanUp[] cleanUps= { new NullAnnotationsCleanUpCore(new HashMap<>(), IProblem.TypeAnnotationAtQualifiedName) };
 		performRefactoring(new CleanUpRefactoring(), new ICompilationUnit[] { cu1 }, cleanUps, null);
 
 		assertEqualStringsIgnoreOrder(new String[] { cu1.getBuffer().getContents() }, new String[] { expected1 });
@@ -174,7 +174,7 @@ public class NullAnnotationsCleanUpTest1d8 extends CleanUpTestCase {
 			}
 			""";
 
-		ICleanUp[] cleanUps= { new NullAnnotationsCleanUp(new HashMap<>(), IProblem.RequiredNonNullButProvidedNull) };
+		ICleanUp[] cleanUps= { new NullAnnotationsCleanUpCore(new HashMap<>(), IProblem.RequiredNonNullButProvidedNull) };
 		performRefactoring(new CleanUpRefactoring(), new ICompilationUnit[] { cu1 }, cleanUps, null);
 
 		assertEqualStringsIgnoreOrder(new String[] { cu1.getBuffer().getContents() }, new String[] { expected1 });

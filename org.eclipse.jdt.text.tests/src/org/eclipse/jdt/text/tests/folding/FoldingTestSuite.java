@@ -20,7 +20,8 @@ import org.junit.platform.suite.api.Suite;
 @SelectClasses({
 	FoldingTest.class,
 	MarkdownJavadocFoldingTest.class,
-	CustomFoldingRegionTest.class
+	CustomFoldingRegionTest.class,
+	FoldingWithShowSelectedElementTests.class
 })
 public class FoldingTestSuite {
 }

@@ -633,13 +633,13 @@ public class ExternalNullAnnotationChangeProposals {
 		SignatureAnnotationChangeProposal operation;
 		String label;
 		// propose adding @NonNull:
-		label= getAddAnnotationLabel(NullAnnotationsFix.getNonNullAnnotationName(cu, true), type, dims, outerDims, annotateVarargs, offset);
+		label= getAddAnnotationLabel(NullAnnotationsFixCore.getNonNullAnnotationName(cu, true), type, dims, outerDims, annotateVarargs, offset);
 		operation= creator.create(rendererNonNull.getResult(), label);
 		if (operation != null)
 			resultingCollection.add(operation);
 
 		// propose adding @Nullable:
-		label= getAddAnnotationLabel(NullAnnotationsFix.getNullableAnnotationName(cu, true), type, dims, outerDims, annotateVarargs, offset);
+		label= getAddAnnotationLabel(NullAnnotationsFixCore.getNullableAnnotationName(cu, true), type, dims, outerDims, annotateVarargs, offset);
 		operation= creator.create(rendererNullable.getResult(), label);
 		if (operation != null)
 			resultingCollection.add(operation);

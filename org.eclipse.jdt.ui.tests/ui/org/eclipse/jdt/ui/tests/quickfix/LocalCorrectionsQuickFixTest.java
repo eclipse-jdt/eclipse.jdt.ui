@@ -11342,6 +11342,50 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testTypeParametersToRawTypeReferenceIssue2668() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		String str= """
+			package pack;
+			import java.util.HashMap;
+			public class E {
+			    private HashMap<String, String> l= new HashMap();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+
+		String[] expected= new String[3];
+
+		expected[0]= """
+			package pack;
+			import java.util.HashMap;
+			public class E {
+			    @SuppressWarnings("rawtypes")
+			    private HashMap<String, String> l= new HashMap();
+			}
+			""";
+
+		expected[1]= """
+			package pack;
+			import java.util.HashMap;
+			public class E {
+			    private HashMap<String, String> l= new HashMap<>();
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
 	public void testTypeParametersToRawTypeReferenceBug212557() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);

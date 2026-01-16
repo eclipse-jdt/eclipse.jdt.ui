@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -66,7 +67,6 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class MoveMembersWizard extends RefactoringWizard {
 
@@ -78,9 +78,6 @@ public class MoveMembersWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.MoveMembersWizard_page_title);
 	}
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */
 	@Override
 	protected void addUserInputPages(){
 		addPage(new MoveMembersInputPage(fProcessor));

@@ -1624,10 +1624,11 @@ public class FormatterModifyDialog extends ModifyDialog {
 				});
 
 		Preference<?> javadocMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
+		Preference<?> markdownMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_MARKDOWN_COMMENT);
 		Preference<?> blockMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
 		Preference<?> headerMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
 
-		Predicate<String> javadocChecker= v -> DefaultCodeFormatterConstants.TRUE.equals(javadocMaster.getValue()) || DefaultCodeFormatterConstants.TRUE.equals(headerMaster.getValue());
+		Predicate<String> javadocChecker= v -> DefaultCodeFormatterConstants.TRUE.equals(javadocMaster.getValue()) ||  DefaultCodeFormatterConstants.TRUE.equals(markdownMaster.getValue()) || DefaultCodeFormatterConstants.TRUE.equals(headerMaster.getValue());
 		Predicate<String> blockChecker= v -> DefaultCodeFormatterConstants.TRUE.equals(blockMaster.getValue()) || DefaultCodeFormatterConstants.TRUE.equals(headerMaster.getValue());
 
 		List<PreferenceTreeNode<?>> mainItems= section.getChildren();
@@ -1636,6 +1637,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		Section javadocSection= sectionFinder.apply("-javadocs"); //$NON-NLS-1$
 		for (PreferenceTreeNode<?> pref : javadocSection.getChildren()) {
 			javadocMaster.addDependant(pref, javadocChecker);
+			markdownMaster.addDependant(pref, javadocChecker);
 			headerMaster.addDependant(pref, javadocChecker);
 		}
 		Section blockSection= sectionFinder.apply("-blockcomments"); //$NON-NLS-1$

@@ -44,7 +44,7 @@ public class JUnit6TestListener implements TestExecutionListener {
 
 	private TestPlan fTestPlan;
 
-	private boolean fStopped;
+	private volatile boolean fStopped;
 
 	public JUnit6TestListener(IListensToTestExecutions notified, RemoteTestRunner remoteTestRunner) {
 		fNotified= notified;

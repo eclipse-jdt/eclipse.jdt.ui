@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -163,8 +163,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	private static boolean fgFirstTime= true;
 
-	private final TypeItemsComparator fTypeItemsComparator;
-
 	private int fTypeFilterVersion= 0;
 
 	private TypeItemsFilter fFilter;
@@ -251,8 +249,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		setListSelectionLabelDecorator(fTypeInfoLabelProvider);
 
 		setDetailsLabelProvider(new TypeItemDetailsLabelProvider(fTypeInfoUtil));
-
-		fTypeItemsComparator= new TypeItemsComparator();
 	}
 
 	@Override
@@ -441,9 +437,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		return super.open();
 	}
 
-	@Override
-	protected String getPatternText() {
-		String text= super.getPatternText();
+	protected String getModifiedPatternText(String text) {
 		StringBuilder builder= new StringBuilder();
 		boolean canAddAnyStringNext= false;
 		boolean allUpperCase= true;
@@ -457,7 +451,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			builder.append(ch);
 			canAddAnyStringNext= canAddAnyStringNext(ch);
 		}
-		fTypeItemsComparator.setOriginalPattern(text);
 		// Default search is Camel Case but if there are any * or ? chars,
 		// it is a pattern search that is not case sensitive so if we are
 		// all caps (e.g. OOME or NPE), just pass the string along directly
@@ -465,6 +458,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return text;
 		}
 		return builder.toString();
+	}
+
+	protected String getOriginalPatternText() {
+		return super.getPatternText();
 	}
 
 	private boolean canAddAnyStringNext(char c) {
@@ -532,7 +529,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 	@Override
 	protected Comparator getItemsComparator() {
-		return fTypeItemsComparator;
+		return new TypeItemsComparator(fFilter);
 	}
 
 	@Override
@@ -931,6 +928,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private final TypeInfoFilter fTypeInfoFilter;
 
+		private String fOriginalPattern;
+
 
 		public TypeItemsFilter(IJavaSearchScope scope, int elementKind, ITypeInfoFilterExtension extension) {
 			/*
@@ -942,7 +941,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			 * which is why we have to supply our own (dummy) implementation.
 			 */
 			super(new TypeSearchPattern());
-			String pattern= patternMatcher.getPattern();
+			fOriginalPattern= patternMatcher.getPattern();
+			String pattern= getModifiedPatternText(fOriginalPattern);
 			fTypeInfoFilter= new TypeInfoFilter(pattern, scope, elementKind, extension);
 		}
 
@@ -1131,12 +1131,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private final String[] fVMNames;
 
-		private String fOriginalPattern;
+		private String fOriginalPrefix;
 
 		/**
 		 * Creates new instance of TypeItemsComparator
 		 */
-		public TypeItemsComparator() {
+		public TypeItemsComparator(TypeItemsFilter filter) {
 			List<String> locations= new ArrayList<>();
 			List<String> labels= new ArrayList<>();
 			for (IVMInstallType install : JavaRuntime.getVMInstallTypes()) {
@@ -1144,10 +1144,19 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 			fInstallLocations= locations.toArray(new String[locations.size()]);
 			fVMNames= labels.toArray(new String[labels.size()]);
-			fOriginalPattern= ""; //$NON-NLS-1$
+			if (filter == null) {
+				fOriginalPrefix= ""; //$NON-NLS-1$
+			} else {
+				setOriginalPrefix(filter.fOriginalPattern);
+			}
 		}
 
-		public void setOriginalPattern(String originalPattern) {
+		/**
+		 * Calculate the prefix of non-wild-card characters from a pattern
+		 *
+		 * @param originalPattern - original pattern
+		 */
+		private void setOriginalPrefix(String originalPattern) {
 			int index= -1;
 			for (int i= 0; i < originalPattern.length(); ++i) {
 				char c= originalPattern.charAt(i);
@@ -1157,9 +1166,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				}
 			}
 			if (index >= 0) {
-				fOriginalPattern= originalPattern.substring(0, index);
+				fOriginalPrefix= originalPattern.substring(0, index);
 			} else {
-				fOriginalPattern= originalPattern;
+				fOriginalPrefix= originalPattern;
 			}
 		}
 
@@ -1223,13 +1232,13 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		private int compareOriginalTextMatchLength(String leftString, String rightString) {
-			if (fOriginalPattern != null && !fOriginalPattern.isEmpty()) {
+			if (fOriginalPrefix != null && !fOriginalPrefix.isEmpty()) {
 				int iLeft= 0;
-				while (iLeft < fOriginalPattern.length() && iLeft < leftString.length() && leftString.charAt(iLeft) == fOriginalPattern.charAt(iLeft)) {
+				while (iLeft < fOriginalPrefix.length() && iLeft < leftString.length() && leftString.charAt(iLeft) == fOriginalPrefix.charAt(iLeft)) {
 					++iLeft;
 				}
 				int iRight= 0;
-				while (iRight < fOriginalPattern.length() && iRight < rightString.length() && rightString.charAt(iRight) == fOriginalPattern.charAt(iRight)) {
+				while (iRight < fOriginalPrefix.length() && iRight < rightString.length() && rightString.charAt(iRight) == fOriginalPrefix.charAt(iRight)) {
 					++iRight;
 				}
 				return iRight - iLeft;

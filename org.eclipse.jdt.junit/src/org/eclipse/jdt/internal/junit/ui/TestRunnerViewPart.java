@@ -869,7 +869,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private class UpdateUIJob extends UIJob {
-		private boolean fRunning= true;
+		private volatile boolean fRunning= true;
 
 		public UpdateUIJob(String name) {
 			super(name);

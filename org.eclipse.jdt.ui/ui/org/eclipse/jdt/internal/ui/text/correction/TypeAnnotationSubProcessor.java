@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Till Brychcy and others.
+ * Copyright (c) 2016, 2025 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,52 +10,38 @@
  *
  * Contributors:
  *     Till Brychcy - initial API and implementation
+ *     IBM Corporation - changed to use refactored base subprocessor
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.jdt.core.compiler.IProblem;
-
-import org.eclipse.jdt.internal.corext.fix.TypeAnnotationFix;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.fix.NullAnnotationsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
 
-public class TypeAnnotationSubProcessor {
+public class TypeAnnotationSubProcessor extends TypeAnnotationBaseSubProcessor<ICommandAccess> {
 
 	public static void addMoveTypeAnnotationToTypeProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		TypeAnnotationFix fix= TypeAnnotationFix.createMoveAnnotationsToTypeAnnotationsFix(context.getASTRoot(), problem);
-		if (fix == null)
-			return;
-
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		Map<String, String> options= new Hashtable<>();
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), IProposalRelevance.REMOVE_REDUNDANT_NULLNESS_ANNOTATION, image, context);
-		proposals.add(proposal);
+		new TypeAnnotationSubProcessor().getMoveTypeAnnotationToTypeProposal(context, problem, proposals);
 	}
 
 	public static boolean hasFixFor(int problemId) {
-		switch (problemId) {
-			case IProblem.TypeAnnotationAtQualifiedName:
-			case IProblem.IllegalTypeAnnotationsInStaticMemberAccess:
-			case IProblem.NullAnnotationAtQualifyingType:
-			case IProblem.IllegalAnnotationForBaseType:
-				return true;
-			default:
-				return false;
-		}
+		return TypeAnnotationBaseSubProcessor.hasFixForProblem(problemId);
 	}
 
 	private TypeAnnotationSubProcessor() {
+	}
+
+	@Override
+	protected ICommandAccess fixCorrectionProposalCoreToT(FixCorrectionProposalCore core, int uid) {
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		return new FixCorrectionProposal(core, image);
 	}
 }
