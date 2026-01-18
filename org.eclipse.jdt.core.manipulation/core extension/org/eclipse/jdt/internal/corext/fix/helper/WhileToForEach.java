@@ -564,7 +564,6 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 		newEnhancedForStatement.setBody(ASTNodes.createMoveTarget(rewrite, hit.whileStatement.getBody()));
 		ASTNodes.replaceButKeepComment(rewrite, hit.whileStatement, newEnhancedForStatement, group);
 		remover.registerRemovedNode(hit.whileStatement.getExpression());
-		remover.applyRemoves(importRewrite);
 	}
 
 	private boolean isLocalOrMemberType(ITypeBinding binding, WhileStatement whileStatement) {
