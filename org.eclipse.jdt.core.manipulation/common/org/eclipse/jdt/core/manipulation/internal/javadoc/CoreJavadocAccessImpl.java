@@ -1519,10 +1519,10 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 						refMethodParamNames[i]= paramName.getIdentifier();
 				}
 			} else if (first instanceof TextElement href) {
-				String tagName = ((TagElement)href.getParent()).getTagName();
+				String tagName= ((TagElement) href.getParent()).getTagName();
 				//should not process anchor tags
 				if (TagElement.TAG_LINK.equals(tagName) || TagElement.TAG_LINKPLAIN.equals(tagName)) {
-					refTypeName = href.getText();
+					refTypeName= href.getText();
 				}
 			}
 
