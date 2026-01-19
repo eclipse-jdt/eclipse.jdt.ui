@@ -803,7 +803,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertToRecord1() throws Exception { https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
+	public void testConvertToRecord1() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
@@ -1107,7 +1107,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertToRecord5() throws Exception { https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
+	public void testConvertToRecord5() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
