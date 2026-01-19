@@ -276,7 +276,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		page.filter= filter;
 
 		if (skipSelection) {
-			setSelection(null);
+			setSelection((Object[])null);
 		}
 
 		// store selection

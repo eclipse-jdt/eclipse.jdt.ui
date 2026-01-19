@@ -106,6 +106,17 @@ public interface IJavaRefactorings {
 	String CONVERT_LOCAL_VARIABLE= "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
 
 	/**
+	 * Refactoring id of the 'Convert type to record' refactoring
+	 * (value: <code>org.eclipse.jdt.ui.convert.to.record</code>).
+	 * <p>
+	 * Clients may safely cast the obtained refactoring descriptor to
+	 * {@link ConvertLocalVariableDescriptor}.
+	 * </p>
+	 * @since 1.24
+	 */
+	String CONVERT_TO_RECORD= "org.eclipse.jdt.ui.convert.to.record"; //$NON-NLS-1$
+
+	/**
 	 * Refactoring id of the 'Convert Member Type to Top Level' refactoring
 	 * (value: <code>org.eclipse.jdt.ui.move.inner</code>).
 	 * <p>
