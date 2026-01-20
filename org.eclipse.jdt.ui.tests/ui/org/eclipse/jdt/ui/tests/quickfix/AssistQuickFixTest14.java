@@ -960,6 +960,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 				package test;
 
 				public class Cls {
+					// Inner class
 					public static class Inner {
 						private final int a;
 						private final String b;
@@ -994,7 +995,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 				""";
 		ICompilationUnit cu2= pack.createCompilationUnit("Cls2.java", str2, false, null);
 
-		int index= str1.indexOf("Inner");
+		int index= str1.indexOf("Inner {");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
@@ -1006,6 +1007,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 				package test;
 
 				public class Cls {
+					// Inner class
 					public static record Inner (int a,String b) {}
 				}
 				""";
@@ -1048,6 +1050,9 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 				package test;
 
 				public class Cls {
+					/**
+					 * Class Inner
+					 */
 					private class Inner {
 						private final int a;
 						private final String b;
@@ -1093,7 +1098,10 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 				package test;
 
 				public class Cls {
-					private record Inner (int a,String b,double c) {}
+					/**\s
+					 * Class Inner
+					 */
+					private record Inner (int a, String b, double c) {}
 					public void foo() {
 						Inner inner= new Inner(1, "comment", 4.3);
 						System.out.println(inner.a());
@@ -1103,7 +1111,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 				}
 				""";
 
-		assertEqualString(expected, preview);
+		assertEqualString(preview, expected);
 	}
 
 	@Test
@@ -1124,6 +1132,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		String str1= """
 				package test;
 
+				/* Class Cls */
 				public class Cls extends Object {
 					private final int a;
 					private final String b;
@@ -1155,6 +1164,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		String expected= """
 				package test;
 
+				/* Class Cls */
 				public record Cls (int a,String b) {}
 				""";
 

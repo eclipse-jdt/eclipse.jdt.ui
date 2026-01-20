@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -154,7 +156,6 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_no_type);
 			}
 			fTypeDeclaration= (TypeDeclaration)selectedType;
-
 			fTypeBinding= fTypeDeclaration.resolveBinding();
 			if (fTypeBinding == null) {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
@@ -372,19 +373,41 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			}
 		});
 
-		RecordDeclaration newRecordDeclaration= ast.newRecordDeclaration();
-		newRecordDeclaration.setName((SimpleName) rewrite.createCopyTarget(fTypeDeclaration.getName()));
-		List<IExtendedModifier> modifiers= fTypeDeclaration.modifiers();
-		List<IExtendedModifier> recordModifiers= newRecordDeclaration.modifiers();
-		for (IExtendedModifier modifier : modifiers) {
-			IExtendedModifier newModifier= (IExtendedModifier) rewrite.createCopyTarget((ASTNode)modifier);
-			recordModifiers.add(newModifier);
-		}
-		List<SingleVariableDeclaration> components= newRecordDeclaration.recordComponents();
-		List<SingleVariableDeclaration> parameters= fConstructor.parameters();
-		for (SingleVariableDeclaration parameter : parameters) {
-			SingleVariableDeclaration newSingleVariableDeclaration= (SingleVariableDeclaration) rewrite.createCopyTarget(parameter);
-			components.add(newSingleVariableDeclaration);
+		RecordDeclaration newRecordDeclaration= null;
+		if (fTypeDeclaration.getJavadoc() instanceof Javadoc javadoc) {
+			StringBuilder builder= new StringBuilder();
+			builder.append(ASTFlattener.asString(javadoc));
+			builder.append("\n"); //$NON-NLS-1$
+			List<IExtendedModifier> modifiers= fTypeDeclaration.modifiers();
+			for (IExtendedModifier modifier : modifiers) {
+				builder.append(modifier.toString());
+				builder.append(" "); //$NON-NLS-1$
+			}
+			builder.append("record " + fTypeDeclaration.getName().getFullyQualifiedName() + " ("); //$NON-NLS-1$ //$NON-NLS-2$
+			List<SingleVariableDeclaration> parameters= fConstructor.parameters();
+			String separator= ""; //$NON-NLS-1$
+			for (SingleVariableDeclaration parameter : parameters) {
+				builder.append(separator);
+				builder.append(ASTFlattener.asString(parameter));
+				separator= ", "; //$NON-NLS-1$
+			}
+			builder.append(") {}"); //$NON-NLS-1$
+			newRecordDeclaration= (RecordDeclaration) rewrite.createStringPlaceholder(builder.toString(), ASTNode.RECORD_DECLARATION);
+		} else {
+			newRecordDeclaration= ast.newRecordDeclaration();
+			newRecordDeclaration.setName((SimpleName) rewrite.createCopyTarget(fTypeDeclaration.getName()));
+			List<IExtendedModifier> modifiers= fTypeDeclaration.modifiers();
+			List<IExtendedModifier> recordModifiers= newRecordDeclaration.modifiers();
+			for (IExtendedModifier modifier : modifiers) {
+				IExtendedModifier newModifier= (IExtendedModifier) rewrite.createCopyTarget((ASTNode)modifier);
+				recordModifiers.add(newModifier);
+			}
+			List<SingleVariableDeclaration> components= newRecordDeclaration.recordComponents();
+			List<SingleVariableDeclaration> parameters= fConstructor.parameters();
+			for (SingleVariableDeclaration parameter : parameters) {
+				SingleVariableDeclaration newSingleVariableDeclaration= (SingleVariableDeclaration) rewrite.createCopyTarget(parameter);
+				components.add(newSingleVariableDeclaration);
+			}
 		}
 		ASTNodes.replaceButKeepComment(rewrite, fTypeDeclaration, newRecordDeclaration, null);
 	}
