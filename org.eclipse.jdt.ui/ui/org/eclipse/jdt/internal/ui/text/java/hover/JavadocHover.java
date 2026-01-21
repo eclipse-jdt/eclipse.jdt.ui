@@ -1362,9 +1362,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	public static String getHexConstantValue(Object constantValue) {
 		if (constantValue instanceof Character) {
-			String constantResult= '\'' + constantValue.toString() + '\'';
-
 			char charValue= ((Character) constantValue);
+			String constantResult= '\'' + (charValue == 0 ? "" : constantValue.toString()) + '\''; //$NON-NLS-1$
+
 			String hexString= Integer.toHexString(charValue);
 			StringBuilder hexResult= new StringBuilder("\\u"); //$NON-NLS-1$
 			for (int i= hexString.length(); i < 4; i++) {
