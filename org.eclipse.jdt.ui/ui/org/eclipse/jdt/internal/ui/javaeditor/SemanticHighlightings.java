@@ -2145,8 +2145,8 @@ public class SemanticHighlightings {
 				new MethodHighlighting(), // before types to get ctors
 				new TypeArgumentHighlighting(), // before other types
 				new AbstractClassHighlighting(), // before classes
-				new ClassHighlighting(),
 				new RecordHighlighting(),
+				new ClassHighlighting(),
 				new EnumHighlighting(),
 				new AnnotationHighlighting(), // before interfaces
 				new InterfaceHighlighting(),
