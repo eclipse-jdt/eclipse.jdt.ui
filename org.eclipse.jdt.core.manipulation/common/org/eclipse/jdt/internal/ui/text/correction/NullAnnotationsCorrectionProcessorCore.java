@@ -1,10 +1,29 @@
+/*******************************************************************************
+ * Copyright (c) 2026 GK Software AG and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     Stephan Herrmann - [quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
+ *     IBM Corporation - bug fixes
+ *     IBM Corporation - extend core processor
+ *     IBM Corporation - refactor to jdt.core.manipulation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -22,17 +41,36 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.NullAnnotationsCleanUpCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CreatePackageInfoWithDefaultNullnessProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ExtractToNullCheckedLocalProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MakeLocalVariableNonNullProposalCore;
 
 public abstract class NullAnnotationsCorrectionProcessorCore<T> {
 	protected final int CORRECTION_CHANGE= 1;
+
+	public void getAddMissingDefaultNullnessProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
+		final CompilationUnit astRoot= context.getASTRoot();
+		if (JavaModelUtil.PACKAGE_INFO_JAVA.equals(astRoot.getJavaElement().getElementName())) {
+			NullAnnotationsFixCore fix= NullAnnotationsFixCore.createAddMissingDefaultNullnessAnnotationsFix(astRoot, problem);
+			Map<String, String> options= new Hashtable<>();
+			FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(fix, new NullAnnotationsCleanUpCore(options, problem.getProblemId()), IProposalRelevance.ADD_MISSING_NULLNESS_ANNOTATION, context);
+			proposals.add(fixCorrectionProposalCoreToT(proposal, CORRECTION_CHANGE));
+		} else {
+			final IPackageFragment pack= (IPackageFragment) astRoot.getJavaElement().getParent();
+			String nonNullByDefaultAnnotationname= NullAnnotationsFixCore.getNonNullByDefaultAnnotationName(pack, true);
+			String label= Messages.format(CorrectionMessages.NullAnnotationsCorrectionProcessor_create_packageInfo_with_defaultnullness, new String[] { nonNullByDefaultAnnotationname });
+			CreatePackageInfoWithDefaultNullnessProposalCore proposal= CreatePackageInfoWithDefaultNullnessProposalCore.createFor(problem.getProblemId(), label, pack);
+			proposals.add(createPackageInfoWithDefaultNullnessProposalCoreToT(proposal, CORRECTION_CHANGE));
+		}
+	}
 
 	// pre: changeKind != OVERRIDDEN
 	public void getReturnAndArgumentTypeProposal(IInvocationContext context, IProblemLocation problem, ChangeKind changeKind,
@@ -177,5 +215,6 @@ public abstract class NullAnnotationsCorrectionProcessorCore<T> {
 
 	protected abstract T makeLocalVariableNonNullProposalCoreToT(MakeLocalVariableNonNullProposalCore core);
 	protected abstract T extractToNullCheckedLocalProposalCoreToT(ExtractToNullCheckedLocalProposalCore core, int uid);
+	protected abstract T createPackageInfoWithDefaultNullnessProposalCoreToT(CreatePackageInfoWithDefaultNullnessProposalCore core, int uid);
 	protected abstract T fixCorrectionProposalCoreToT(FixCorrectionProposalCore core, int uid);
 }
