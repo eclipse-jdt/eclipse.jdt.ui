@@ -5607,7 +5607,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String expected= """
 			package test;
 			import java.io.File;
-			import java.util.Iterator;
 			import java.util.List;
 
 			public class Test {
