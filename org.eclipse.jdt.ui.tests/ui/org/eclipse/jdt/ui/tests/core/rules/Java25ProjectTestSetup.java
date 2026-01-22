@@ -50,13 +50,13 @@ public class Java25ProjectTestSetup extends ProjectTestSetup {
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], ClasspathEntry.NO_ACCESS_RULES, extraAttributes, true) };
 	}
 
-	public Java25ProjectTestSetup( boolean enable_preview_feature) {
-		this.enable_preview_feature= enable_preview_feature;
+	public Java25ProjectTestSetup() {
+		this.enable_preview_feature= false;
 		projectName= PROJECT_NAME25;
 	}
 
-	public Java25ProjectTestSetup( String projectName, boolean enable_preview_feature) {
-		this.enable_preview_feature= enable_preview_feature;
+	public Java25ProjectTestSetup( String projectName) {
+		this.enable_preview_feature= false;
 		this.projectName= projectName;
 	}
 
