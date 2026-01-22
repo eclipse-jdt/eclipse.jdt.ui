@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -782,6 +783,14 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		if (cleanUps.length == 0)
 			return null;
 
+		// Create shared ImportRemover for all cleanups on this compilation unit
+		CompilationUnit ast = context.getAST();
+		if (ast != null) {
+			IJavaProject project = context.getCompilationUnit().getJavaProject();
+			ImportRemover sharedRemover = new ImportRemover(project, ast);
+			context.setSharedImportRemover(sharedRemover);
+		}
+
 		CleanUpChange solution= null;
 		int i= 0;
 		do {
@@ -796,6 +805,10 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				fix= cleanUp.createFix(context);
 			}
 			if (fix != null) {
+				// Pass shared ImportRemover to fix if it supports it
+				if (fix instanceof CompilationUnitRewriteOperationsFixCore && context.getSharedImportRemover() != null) {
+					((CompilationUnitRewriteOperationsFixCore) fix).setSharedImportRemover(context.getSharedImportRemover());
+				}
 				CompilationUnitChange current= fix.createChange(null);
 				TextEdit currentEdit= current.getEdit();
 

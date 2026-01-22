@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
+
 
 /**
  * The context that contains all information required by a clean up to create a fix.
@@ -32,6 +34,8 @@ public class CleanUpContextCore {
 	private final ICompilationUnit fUnit;
 
 	private final CompilationUnit fAst;
+
+	private ImportRemover fSharedImportRemover;
 
 	/**
 	 * Creates a new clean up context.
@@ -74,5 +78,26 @@ public class CleanUpContextCore {
 	@Deprecated
 	public CompilationUnit getAST() {
 		return fAst;
+	}
+
+	/**
+	 * Sets the shared ImportRemover for this cleanup context.
+	 * This allows multiple cleanups to share a single ImportRemover instance.
+	 *
+	 * @param remover the ImportRemover to share across cleanups
+	 * @since 1.13
+	 */
+	public void setSharedImportRemover(ImportRemover remover) {
+		fSharedImportRemover = remover;
+	}
+
+	/**
+	 * Gets the shared ImportRemover for this cleanup context.
+	 *
+	 * @return the shared ImportRemover, or <code>null</code> if none has been set
+	 * @since 1.13
+	 */
+	public ImportRemover getSharedImportRemover() {
+		return fSharedImportRemover;
 	}
 }

@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 
 public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 
@@ -87,6 +88,7 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 	private final CompilationUnitRewriteOperation[] fOperations;
 	private final CompilationUnit fCompilationUnit;
 	protected LinkedProposalModelCore fLinkedProposalModel;
+	private ImportRemover fSharedImportRemover;
 
 	public CompilationUnitRewriteOperationsFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
 		this(name, compilationUnit, new CompilationUnitRewriteOperation[] { operation });
@@ -114,9 +116,25 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 		return fLinkedProposalModel;
 	}
 
+	/**
+	 * Sets the shared ImportRemover to be used by this fix.
+	 * This allows multiple fixes to share a single ImportRemover instance.
+	 *
+	 * @param remover the ImportRemover to share
+	 * @since 1.13
+	 */
+	public void setSharedImportRemover(ImportRemover remover) {
+		fSharedImportRemover = remover;
+	}
+
 	@Override
 	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite((ICompilationUnit)fCompilationUnit.getJavaElement(), fCompilationUnit);
+
+		// Use shared ImportRemover if available
+		if (fSharedImportRemover != null) {
+			cuRewrite.setImportRemover(fSharedImportRemover);
+		}
 
 		fLinkedProposalModel.clear();
 		for (CompilationUnitRewriteOperation operation : fOperations) {

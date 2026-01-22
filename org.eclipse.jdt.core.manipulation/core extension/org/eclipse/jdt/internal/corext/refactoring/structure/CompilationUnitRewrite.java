@@ -392,6 +392,17 @@ public class CompilationUnitRewrite {
 		return fImportRemover;
 	}
 
+	/**
+	 * Sets an external ImportRemover to be used by this CompilationUnitRewrite.
+	 * This allows multiple CompilationUnitRewrite instances to share the same ImportRemover.
+	 *
+	 * @param remover the ImportRemover to use
+	 * @since 1.13
+	 */
+	public void setImportRemover(ImportRemover remover) {
+		fImportRemover = remover;
+	}
+
 	private void clearGroupDescriptionEdits() {
 		for (TextEditGroup group : fTextEditGroups) {
 			group.clearTextEdits();
