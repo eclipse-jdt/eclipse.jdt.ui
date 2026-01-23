@@ -5441,6 +5441,54 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	/**
+	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/121
+	 */
+	@Test
+	public void testWhileIssue121() throws CoreException {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= """
+			package test;
+			import java.util.Date;
+			import java.util.Iterator;
+			import java.util.List;
+			import java.util.Map;
+			public class Test {
+				private void method(List<String> list, Map<Date, List<String>> map) {
+					Iterator<String> removed = list.iterator();
+					while (removed.hasNext()) {
+						System.out.println(removed.next());
+					}
+					for (Iterator<List<String>> value = map.values().iterator(); value.hasNext();) {
+						System.out.println(value.next());
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		String expected= """
+			package test;
+			import java.util.Date;
+			import java.util.List;
+			import java.util.Map;
+			public class Test {
+				private void method(List<String> list, Map<Date, List<String>> map) {
+					for (String element : list) {
+						System.out.println(element);
+					}
+					for (List<String> list2 : map.values()) {
+						System.out.println(list2);
+					}
+				}
+			}
+			""";
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
+	/**
 	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/190
 	 */
 	@Test
