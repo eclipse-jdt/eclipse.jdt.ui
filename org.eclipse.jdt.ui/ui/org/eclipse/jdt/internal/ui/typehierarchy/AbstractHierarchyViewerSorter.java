@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 
@@ -115,6 +117,18 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 				}
 			}
 			if (isSortAlphabetically()) {
+				// When sorting by defining type, use the label provider's text which includes
+				// the defining type prefix, ensuring sort order matches displayed text
+				if (isSortByDefiningType() && viewer != null) {
+					IBaseLabelProvider labelProvider= viewer.getLabelProvider();
+					if (labelProvider instanceof ILabelProvider) {
+						String label1= ((ILabelProvider) labelProvider).getText(e1);
+						String label2= ((ILabelProvider) labelProvider).getText(e2);
+						if (label1 != null && label2 != null) {
+							return getComparator().compare(label1, label2);
+						}
+					}
+				}
 				return fNormalSorter.compare(viewer, e1, e2); // use appearance pref page settings
 			}
 			return 0;
