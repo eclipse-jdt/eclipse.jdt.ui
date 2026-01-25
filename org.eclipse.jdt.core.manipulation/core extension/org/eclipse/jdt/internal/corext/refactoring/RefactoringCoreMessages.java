@@ -1335,6 +1335,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_generic_type_possible_error;
 
+	public static String MoveInstanceMethodProcessor_overload_resolution_change;
+
 	public static String MoveInstanceMethodProcessor_inline_inaccurate;
 
 	public static String MoveInstanceMethodProcessor_inline_method_invocation;
