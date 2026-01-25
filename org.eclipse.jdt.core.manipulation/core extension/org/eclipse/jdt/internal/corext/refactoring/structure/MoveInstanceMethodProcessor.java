@@ -1474,12 +1474,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * Checks whether moving the method would change which overloaded method gets called
 	 * in the target type's hierarchy.
 	 *
+	 * @param monitor
+	 *            the progress monitor to display progress
 	 * @param status
 	 *            the refactoring status
 	 * @throws JavaModelException
 	 *             if method resolution fails
 	 */
-	protected void checkOverloadResolutionChanges(final RefactoringStatus status) throws JavaModelException {
+	protected void checkOverloadResolutionChanges(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
+		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		
 		// Get the method declaration being moved
@@ -1492,21 +1495,27 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final String movedMethodName= fMethod.getElementName();
 		final String[] movedMethodParamTypes= fMethod.getParameterTypes();
 		
-		// Find all method invocations in the target type that might be affected
+		IType targetType= getTargetType();
+		if (targetType == null) {
+			return;
+		}
+		
 		try {
-			IType targetType= getTargetType();
-			if (targetType == null) {
-				return;
-			}
+			monitor.beginTask("", 10); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			
 			// Check methods in the target type's hierarchy
-			ITypeHierarchy hierarchy= targetType.newSupertypeHierarchy(null);
+			ITypeHierarchy hierarchy= targetType.newSupertypeHierarchy(Progress.subMonitor(monitor, 5));
 			if (hierarchy == null) {
+				status.merge(RefactoringStatus.createWarningStatus(
+					RefactoringCoreMessages.MoveInstanceMethodProcessor_hierarchy_not_available,
+					JavaStatusContext.create(fMethod)));
 				return;
 			}
 			
 			// Look for methods with the same name in the hierarchy
-			for (IType type : hierarchy.getAllSupertypes(targetType)) {
+			IType[] supertypes= hierarchy.getAllSupertypes(targetType);
+			for (IType type : supertypes) {
 				for (IMethod method : type.getMethods()) {
 					if (method.getElementName().equals(movedMethodName)) {
 						// Found a method with the same name in the hierarchy
@@ -1515,21 +1524,20 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						
 						// If parameter counts match, there could be a resolution change
 						if (existingParamTypes.length == movedMethodParamTypes.length) {
-							// Check if parameters are compatible but not identical
-							// (could cause resolution to change from superclass method to moved method)
-							boolean potentialConflict= false;
+							// Check if any parameters are different (potential overload)
+							boolean hasDifferentParams= false;
 							for (int i= 0; i < existingParamTypes.length; i++) {
 								String existingParam= Signature.toString(existingParamTypes[i]);
 								String movedParam= Signature.toString(movedMethodParamTypes[i]);
 								
-								// Check if types are different but compatible (e.g., Object vs String)
+								// If types are different, this could cause resolution changes
 								if (!existingParam.equals(movedParam)) {
-									potentialConflict= true;
+									hasDifferentParams= true;
 									break;
 								}
 							}
 							
-							if (potentialConflict) {
+							if (hasDifferentParams) {
 								// Found a potential overload resolution change
 								status.merge(RefactoringStatus.createErrorStatus(
 									Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_overload_resolution_change,
@@ -1544,10 +1552,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						}
 					}
 				}
+				monitor.worked(5 / supertypes.length);
 			}
-		} catch (JavaModelException e) {
-			// Log but don't fail the refactoring
-			JavaManipulationPlugin.log(e);
+		} finally {
+			monitor.done();
 		}
 	}
 
@@ -1812,7 +1820,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 								checkGenericTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingMethod(Progress.subMonitor(monitor, 1), status);
-								checkOverloadResolutionChanges(status);
+								checkOverloadResolutionChanges(Progress.subMonitor(monitor, 1), status);
 								checkOverrideOuterMethod(Progress.subMonitor(monitor, 1), status);
 								checkFinalMethod(status);
 
