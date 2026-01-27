@@ -51,11 +51,11 @@ import org.eclipse.jdt.ui.tests.core.rules.Java25ProjectTestSetup;
 
 public class ImportOrganizeTest25 extends CoreTests {
 	@Rule
-	public Java25ProjectTestSetup proj= new Java25ProjectTestSetup(false);
+	public Java25ProjectTestSetup proj= new Java25ProjectTestSetup();
 	@Rule
-	public Java25ProjectTestSetup proj2= new Java25ProjectTestSetup("TestSetupProject25_2", false);
+	public Java25ProjectTestSetup proj2= new Java25ProjectTestSetup("TestSetupProject25_2");
 	@Rule
-	public Java25ProjectTestSetup proj3= new Java25ProjectTestSetup("TestSetupProject25_3", false);
+	public Java25ProjectTestSetup proj3= new Java25ProjectTestSetup("TestSetupProject25_3");
 
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
