@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -486,7 +487,8 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 			declaringNode= selectedNode;
 		} else if (selectedNode instanceof SimpleName) {
 			StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
-			if (locationInParent == MethodDeclaration.NAME_PROPERTY || locationInParent == TypeDeclaration.NAME_PROPERTY) {
+			if (locationInParent == MethodDeclaration.NAME_PROPERTY || locationInParent == TypeDeclaration.NAME_PROPERTY
+					|| locationInParent == EnumConstantDeclaration.NAME_PROPERTY) {
 				declaringNode= selectedNode.getParent();
 			} else if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY) {
 				declaringNode= selectedNode.getParent().getParent();
