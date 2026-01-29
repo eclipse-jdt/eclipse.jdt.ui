@@ -317,16 +317,14 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 	private static Annotation getCopyAnnotation(IProblemLocation problem, ASTNode declaringNode, String annotation) {
 		Annotation copyAnnotation= null;
 
-		if (problem.getProblemId() == IProblem.MemberOfDeprecatedTypeNotDeprecated) {
-			AbstractTypeDeclaration typeDecl= ASTNodes.getFirstAncestorOrNull(declaringNode, AbstractTypeDeclaration.class);
-			if (typeDecl != null) {
-				List<IExtendedModifier> modifiers= typeDecl.modifiers();
-				for (IExtendedModifier modifier : modifiers) {
-					if (modifier instanceof Annotation annotation2
-							&& annotation2.getTypeName().getFullyQualifiedName().equals(annotation)
-							&& !annotation2.isMarkerAnnotation()) {
-						copyAnnotation= annotation2;
-					}
+		AbstractTypeDeclaration typeDecl= ASTNodes.getFirstAncestorOrNull(declaringNode, AbstractTypeDeclaration.class);
+		if (typeDecl != null) {
+			List<IExtendedModifier> modifiers= typeDecl.modifiers();
+			for (IExtendedModifier modifier : modifiers) {
+				if (modifier instanceof Annotation annotation2
+						&& annotation2.getTypeName().getFullyQualifiedName().equals(annotation)
+						&& !annotation2.isMarkerAnnotation()) {
+					copyAnnotation= annotation2;
 				}
 			}
 		}
