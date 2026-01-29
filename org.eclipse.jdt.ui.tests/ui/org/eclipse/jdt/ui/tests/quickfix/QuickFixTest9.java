@@ -16,8 +16,8 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -601,12 +602,12 @@ public class QuickFixTest9 extends QuickFixTest {
 	public void testIssue2763() throws Exception {
 		IJavaProject jProject1= JavaProjectHelper.createJavaProject("TestProject_1", "bin");
 		JavaProjectHelper.set9CompilerOptions(jProject1);
-		Map<String, String> options= jProject1.getOptions(false);
-		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
-		jProject1.setOptions(options);
-
 		JavaProjectHelper.addRequiredModularProject(jProject1, projectSetup1.getProject());
 		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
+
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		JavaCore.setOptions(options);
 
 		String str= """
 			module test {
