@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -34,6 +35,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -53,6 +55,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintsSolver;
@@ -84,17 +87,28 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		private final BodyDeclaration fBodyDeclaration;
 		private final String fAnnotation;
 
+		private final Annotation fCopyAnnotation;
+
 		public AnnotationRewriteOperation(BodyDeclaration bodyDeclaration, String annotation) {
+			this(bodyDeclaration, annotation, null);
+		}
+		public AnnotationRewriteOperation(BodyDeclaration bodyDeclaration, String annotation, Annotation copyAnnotation) {
 			fBodyDeclaration= bodyDeclaration;
 			fAnnotation= annotation;
+			fCopyAnnotation= copyAnnotation;
 		}
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
-			Annotation newAnnotation= ast.newMarkerAnnotation();
-			newAnnotation.setTypeName(ast.newSimpleName(fAnnotation));
+			Annotation newAnnotation= null;
+			if (fCopyAnnotation != null) {
+				newAnnotation= (Annotation) cuRewrite.getASTRewrite().createCopyTarget(fCopyAnnotation);
+			} else {
+				newAnnotation= ast.newMarkerAnnotation();
+				newAnnotation.setTypeName(ast.newSimpleName(fAnnotation));
+			}
 			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, BasicElementLabels.getJavaElementName(fAnnotation)), cuRewrite);
 			listRewrite.insertFirst(newAnnotation, group);
 		}
@@ -148,7 +162,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		if (!isMissingOverrideAnnotationProblem(problem.getProblemId()))
 			return null;
 
-		return createFix(compilationUnit, problem, OVERRIDE, FixMessages.Java50Fix_AddOverride_description);
+		return createFix(compilationUnit, problem, OVERRIDE, null, FixMessages.Java50Fix_AddOverride_description);
 	}
 
 	public static boolean isMissingOverrideAnnotationInterfaceProblem(int id) {
@@ -163,7 +177,20 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		if (!isMissingDeprecationProblem(problem.getProblemId()))
 			return null;
 
-		return createFix(compilationUnit, problem, DEPRECATED, FixMessages.Java50Fix_AddDeprecated_description);
+		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+		if (selectedNode == null)
+			return null;
+
+		ASTNode declaringNode= getDeclaringNode(selectedNode);
+		if (!(declaringNode instanceof BodyDeclaration))
+			return null;
+
+		Annotation copyAnnotation= null;
+		if (problem.getProblemId() == IProblem.MemberOfDeprecatedTypeNotDeprecated) {
+			copyAnnotation= getCopyAnnotation(declaringNode, DEPRECATED);
+		}
+
+		return createFix(compilationUnit, problem, DEPRECATED, copyAnnotation,  FixMessages.Java50Fix_AddDeprecated_description);
 	}
 
 	public static boolean isMissingDeprecationProblem(int id) {
@@ -174,7 +201,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		};
 	}
 
-	private static Java50FixCore createFix(CompilationUnit compilationUnit, IProblemLocation problem, String annotation, String label) {
+	private static Java50FixCore createFix(CompilationUnit compilationUnit, IProblemLocation problem, String annotation, Annotation copyAnnotation, String label) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 		if (selectedNode == null)
 			return null;
@@ -184,8 +211,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 			return null;
 
 		BodyDeclaration declaration= (BodyDeclaration) declaringNode;
-
-		AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, annotation);
+		AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, annotation, copyAnnotation);
 
 		return new Java50FixCore(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation});
 	}
@@ -276,12 +302,33 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 					ASTNode declaringNode= getDeclaringNode(selectedNode);
 					if (declaringNode instanceof BodyDeclaration) {
 						BodyDeclaration declaration= (BodyDeclaration) declaringNode;
-						AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, DEPRECATED);
+						Annotation copyAnnotation= null;
+						if (problem.getProblemId() == IProblem.MemberOfDeprecatedTypeNotDeprecated) {
+							copyAnnotation= getCopyAnnotation(declaringNode, DEPRECATED);
+						}
+						AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, DEPRECATED, copyAnnotation);
 						result.add(operation);
 					}
 				}
 			}
 		}
+	}
+
+	private static Annotation getCopyAnnotation(ASTNode declaringNode, String annotation) {
+		Annotation copyAnnotation= null;
+
+		AbstractTypeDeclaration typeDecl= ASTNodes.getFirstAncestorOrNull(declaringNode, AbstractTypeDeclaration.class);
+		if (typeDecl != null) {
+			List<IExtendedModifier> modifiers= typeDecl.modifiers();
+			for (IExtendedModifier modifier : modifiers) {
+				if (modifier instanceof Annotation annotation2
+						&& annotation2.getTypeName().getFullyQualifiedName().equals(annotation)
+						&& !annotation2.isMarkerAnnotation()) {
+					copyAnnotation= annotation2;
+				}
+			}
+		}
+		return copyAnnotation;
 	}
 
 	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
