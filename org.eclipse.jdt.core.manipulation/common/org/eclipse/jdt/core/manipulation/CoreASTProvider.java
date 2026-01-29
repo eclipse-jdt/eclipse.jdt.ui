@@ -14,6 +14,7 @@
 package org.eclipse.jdt.core.manipulation;
 
 import java.util.List;
+import java.util.concurrent.CancellationException;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -297,6 +298,12 @@ public final class CoreASTProvider {
 					ASTNodes.setFlagsToAST(root[0], ASTNode.PROTECT);
 				} catch (OperationCanceledException ex) {
 					return;
+				} catch (RuntimeException ex) {
+					// We would love to catch AbortCompilation from Parser,
+					// but it is compiler internal
+					if(ex.getCause() instanceof CancellationException) {
+						return;
+					}
 				}
 			}
 			@Override
