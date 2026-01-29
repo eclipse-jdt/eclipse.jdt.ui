@@ -187,7 +187,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 
 		Annotation copyAnnotation= null;
 		if (problem.getProblemId() == IProblem.MemberOfDeprecatedTypeNotDeprecated) {
-			copyAnnotation= getCopyAnnotation(problem, declaringNode, DEPRECATED);
+			copyAnnotation= getCopyAnnotation(declaringNode, DEPRECATED);
 		}
 
 		return createFix(compilationUnit, problem, DEPRECATED, copyAnnotation,  FixMessages.Java50Fix_AddDeprecated_description);
@@ -304,7 +304,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 						BodyDeclaration declaration= (BodyDeclaration) declaringNode;
 						Annotation copyAnnotation= null;
 						if (problem.getProblemId() == IProblem.MemberOfDeprecatedTypeNotDeprecated) {
-							copyAnnotation= getCopyAnnotation(problem, declaringNode, DEPRECATED);
+							copyAnnotation= getCopyAnnotation(declaringNode, DEPRECATED);
 						}
 						AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, DEPRECATED, copyAnnotation);
 						result.add(operation);
@@ -314,7 +314,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static Annotation getCopyAnnotation(IProblemLocation problem, ASTNode declaringNode, String annotation) {
+	private static Annotation getCopyAnnotation(ASTNode declaringNode, String annotation) {
 		Annotation copyAnnotation= null;
 
 		AbstractTypeDeclaration typeDecl= ASTNodes.getFirstAncestorOrNull(declaringNode, AbstractTypeDeclaration.class);
