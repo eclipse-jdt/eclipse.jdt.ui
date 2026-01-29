@@ -600,23 +600,18 @@ public class QuickFixTest9 extends QuickFixTest {
 
 	@Test
 	public void testIssue2763() throws Exception {
-		IJavaProject jProject1= JavaProjectHelper.createJavaProject("TestProject_1", "bin");
-		JavaProjectHelper.set9CompilerOptions(jProject1);
-		JavaProjectHelper.addRequiredModularProject(jProject1, projectSetup1.getProject());
-		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
+		String str0= """
+				module test {
+				}
+				""";
+		IPackageFragment def0= fSourceFolder3.createPackageFragment("", false, null);
+		def0.createCompilationUnit("module-info.java", str0, false, null);
+
+		IPackageFragment pack= fSourceFolder3.createPackageFragment("test1", false, null);
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
 		JavaCore.setOptions(options);
-
-		String str= """
-			module test {
-			}
-			""";
-		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", str, false, null);
-
-		IPackageFragment pack=fProject1Src.createPackageFragment("test1", false, null);
 
 		String str1= """
 			package test1;
