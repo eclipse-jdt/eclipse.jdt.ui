@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 IBM Corporation and others.
+ * Copyright (c) 2017, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,8 +36,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java9ProjectTestSetup;
@@ -85,9 +88,9 @@ public class QuickFixTest9 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 		String str1= """
 			package java.defaultProject;\s
-			
+
 			 public class One {\s
-			
+
 			}
 			""";
 		pkgFrag.createCompilationUnit("One.java", str1, false, null);
@@ -158,9 +161,9 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragment pack= fSourceFolder3.createPackageFragment("test", false, null);
 		String str1= """
 			package test;
-			
+
 			import java.defaultProject.One;
-			
+
 			public class Cls {
 			    One one;
 			}
@@ -190,7 +193,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragment pack= fSourceFolder3.createPackageFragment("test", false, null);
 		String str1= """
 			package test;
-			
+
 			public class Cls {
 			    java.defaultProject.One one;
 			}
@@ -244,7 +247,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		String str1= """
 			import java.sql.Driver;
 			package test;
-			
+
 			public interface IFoo extends Driver {
 			}
 			""";
@@ -261,9 +264,9 @@ public class QuickFixTest9 extends QuickFixTest {
 		String expected= """
 			import java.sql.Driver;
 			package test;
-			
+
 			public interface IFoo extends Driver {
-			
+
 				/**
 				 * @return
 				 */
@@ -294,7 +297,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragment pack=fProject1Src.createPackageFragment("test", false, null);
 		String str1= """
 			package test;
-			
+
 			public interface IFoo {
 			}
 			""";
@@ -302,7 +305,7 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		String str2= """
 			package test;
-			
+
 			public interface Foo extends test.IFoo {
 			}
 			""";
@@ -310,7 +313,7 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		String str3= """
 			package test;
-			
+
 			public interface Bar extends test.IFoo {
 			}
 			""";
@@ -318,7 +321,7 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		String str4= """
 			package test;
-			
+
 			public interface FooFoo extends test.Foo {
 			}
 			""";
@@ -356,7 +359,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragment pack= fProject1Src.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public interface IFoo {
 			}
 			""";
@@ -380,7 +383,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		pack= fProject2Src.createPackageFragment("test2", false, null);
 		String str3= """
 			package test2;
-			
+
 			public interface HiddenFoo extends test1.IFoo {
 			}
 			""";
@@ -396,7 +399,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		pack= fProject3Src.createPackageFragment("test3", false, null);
 		String str4= """
 			package test3;
-			
+
 			public interface Foo extends test1.IFoo {
 			}
 			""";
@@ -452,7 +455,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragment pack= fProject1Src.createPackageFragment("test", false, null);
 		String str1= """
 			package test;
-			
+
 			public interface IFoo {
 			}
 			""";
@@ -462,7 +465,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		// PrivateFoo should not be accessible
 		String str2= """
 			package test;
-			
+
 			class NonPublicFoo implements test.IFoo {
 			private interface PrivateFoo extends test.IFoo {
 			}
@@ -499,7 +502,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragment pack=fProject1Src.createPackageFragment("test", false, null);
 		String str1= """
 			package test;
-			
+
 			public interface IFoo {
 			}
 			""";
@@ -507,7 +510,7 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		String str2= """
 			package test;
-			
+
 			public class Foo implements test.IFoo {
 			public Foo (String arg) {
 			}
@@ -525,11 +528,11 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		String expected= """
 			package test;
-			
+
 			public class Foo implements test.IFoo {
 			public Foo (String arg) {
 			}
-			
+
 			/**
 			 *\s
 			 */
@@ -559,7 +562,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragment pack=fProject1Src.createPackageFragment("test", false, null);
 		String str1= """
 			package test;
-			
+
 			public interface IFoo {
 			}
 			""";
@@ -567,7 +570,7 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		String str2= """
 			package test;
-			
+
 			public class Foo implements test.IFoo {
 			private Foo () {
 			}
@@ -585,7 +588,7 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		String expected= """
 			package test;
-			
+
 			public class Foo implements test.IFoo {
 			public Foo () {
 			}
@@ -593,4 +596,53 @@ public class QuickFixTest9 extends QuickFixTest {
 			""";
 		assertEquals(expected, actual);
 	}
+
+	@Test
+	public void testIssue2763() throws Exception {
+		IJavaProject jProject1= JavaProjectHelper.createJavaProject("TestProject_1", "bin");
+		JavaProjectHelper.set9CompilerOptions(jProject1);
+		Map<String, String> options= jProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		jProject1.setOptions(options);
+
+		JavaProjectHelper.addRequiredModularProject(jProject1, projectSetup1.getProject());
+		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack=fProject1Src.createPackageFragment("test1", false, null);
+
+		String str1= """
+			package test1;
+
+			@Deprecated(forRemoval=true)
+			public enum E {
+				BAR
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", str1, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String expected1= """
+			package test1;
+
+			@Deprecated(forRemoval=true)
+			public enum E {
+				@Deprecated(forRemoval=true)
+				BAR
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
 }
