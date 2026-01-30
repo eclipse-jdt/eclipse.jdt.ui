@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -153,6 +153,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fRenameAction;
 	private SelectionDispatchAction fModifyParametersAction;
 	private SelectionDispatchAction fConvertAnonymousToNestedAction;
+	private SelectionDispatchAction fConvertClassToRecordAction;
 	private SelectionDispatchAction fConvertNestedToTopAction;
 
 	private SelectionDispatchAction fPullUpAction;
@@ -263,6 +264,10 @@ public class RefactorActionGroup extends ActionGroup {
 			fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(editor);
 			initUpdatingAction(fConvertAnonymousToNestedAction, provider, null, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
 			editor.setAction("ConvertAnonymousToNested", fConvertAnonymousToNestedAction); //$NON-NLS-1$
+
+			fConvertClassToRecordAction= new ConvertToRecordAction(editor);
+			initUpdatingAction(fConvertClassToRecordAction, provider, null, selection, IJavaEditorActionDefinitionIds.CONVERT_CLASS_TO_RECORD);
+			editor.setAction("ConvertClassToRecord", fConvertClassToRecordAction); //$NON-NLS-1$
 
 			fConvertNestedToTopAction= new ConvertNestedToTopAction(editor);
 			initAction(fConvertNestedToTopAction, selection, IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
@@ -418,6 +423,9 @@ public class RefactorActionGroup extends ActionGroup {
 
 			fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(fSite);
 			initUpdatingAction(fConvertAnonymousToNestedAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
+
+			fConvertClassToRecordAction= new ConvertToRecordAction(fSite);
+			initUpdatingAction(fConvertClassToRecordAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.CONVERT_CLASS_TO_RECORD);
 		}
 		fInlineAction= new InlineAction(fSite);
 		initUpdatingAction(fInlineAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INLINE);
@@ -497,6 +505,7 @@ public class RefactorActionGroup extends ActionGroup {
 			actionBars.setGlobalActionHandler(JdtActionConstants.INFER_TYPE_ARGUMENTS, fInferTypeArgumentsAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
+			actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_CLASS_TO_RECORD, fConvertClassToRecordAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_PARAMETER_OBJECT, fIntroduceParameterObjectAction);
 		}
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
@@ -551,6 +560,7 @@ public class RefactorActionGroup extends ActionGroup {
 			disposeAction(fInferTypeArgumentsAction, fSelectionProvider);
 			disposeAction(fConvertLocalToFieldAction, fSelectionProvider);
 			disposeAction(fConvertAnonymousToNestedAction, fSelectionProvider);
+			disposeAction(fConvertClassToRecordAction, fSelectionProvider);
 		}
 		disposeAction(fIntroduceIndirectionAction, fSelectionProvider);
 		disposeAction(fInlineAction, fSelectionProvider);
@@ -605,6 +615,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fConvertAnonymousToNestedAction);
 		added+= addAction(refactorSubmenu, fConvertNestedToTopAction);
 		added+= addAction(refactorSubmenu, fConvertLocalToFieldAction);
+		added+= addAction(refactorSubmenu, fConvertClassToRecordAction);
 		refactorSubmenu.add(new Separator(GROUP_TYPE));
 		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
 		added+= addAction(refactorSubmenu, fExtractSupertypeAction);
