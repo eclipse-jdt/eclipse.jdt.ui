@@ -2537,6 +2537,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ConvertToRecordRefactoring_not_implicit_getter;
 
+	public static String ConvertToRecordRefactoring_setter_found;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}

@@ -165,6 +165,9 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			if (fASTRoot == null) {
 				fASTRoot= Checks.convertICUtoCU(fCu);
 			}
+			if (fASTRoot == null) {
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
+			}
 			ASTNode selected= getSelectedNode(fASTRoot, fSelectionStart, fSelectionLength);
 
 			ASTNode selectedType= ASTNodes.getFirstAncestorOrNull(selected,
@@ -221,6 +224,10 @@ public class ConvertToRecordRefactoring extends Refactoring {
 					IMethodBinding getter= findGetter(fTypeBinding, field);
 					if (getter != null) {
 						fGetterMap.put(field, getter);
+					}
+					IMethodBinding setter= findSetter(fTypeBinding, field);
+					if (setter != null) {
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ConvertToRecordRefactoring_setter_found, field.getName()));
 					}
 				}
 
@@ -345,6 +352,14 @@ public class ConvertToRecordRefactoring extends Refactoring {
 		return null;
 	}
 
+	private IMethodBinding findSetter(ITypeBinding declaringType, IVariableBinding variableBinding) {
+		ITypeBinding fieldType= variableBinding.getType();
+		String setterName= GetterSetterUtil.getSetterName(variableBinding, fCu.getJavaProject(), null, isBoolean(variableBinding));
+		if (declaringType == null)
+			return null;
+		IMethodBinding setter= Bindings.findMethodInHierarchy(declaringType, setterName, new ITypeBinding[] { fieldType });
+		return setter;
+	}
 
 	public static ASTNode getSelectedNode(CompilationUnit cu, int selectionOffset, int selectionLength) {
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(selectionOffset, selectionLength), false);
