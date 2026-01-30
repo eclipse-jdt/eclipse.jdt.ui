@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -525,6 +525,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 2.1
 	 */
 	String CONVERT_ANONYMOUS_TO_NESTED= "org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the refactor -> convert class to record action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.convert.class.to.record"</code>).
+	 *
+	 * @since 3.37
+	 */
+	String CONVERT_CLASS_TO_RECORD= "org.eclipse.jdt.ui.edit.text.java.convert.class.to.record"; //$NON-NLS-1$
 
 	// navigate
 

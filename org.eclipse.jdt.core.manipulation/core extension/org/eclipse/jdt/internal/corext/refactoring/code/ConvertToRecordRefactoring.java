@@ -33,9 +33,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -79,7 +82,6 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -136,7 +138,20 @@ public class ConvertToRecordRefactoring extends Refactoring {
 		return RefactoringCoreMessages.ConvertToRecordRefactoring_name;
 	}
 
-
+	public String getClassName() {
+		IJavaElement element= null;
+		try {
+			element= fCu.getElementAt(fSelectionStart);
+		} catch (JavaModelException e) {
+			// ignore
+		}
+		if (element instanceof IType type)
+			return type.getElementName();
+		if (element instanceof IMember member) {
+			return member.getDeclaringType().getElementName();
+		}
+		return "class"; //$NON-NLS-1$
+	}
 
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
@@ -147,6 +162,12 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 
+			if (fASTRoot == null) {
+				fASTRoot= Checks.convertICUtoCU(fCu);
+			}
+			if (fASTRoot == null) {
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
+			}
 			ASTNode selected= getSelectedNode(fASTRoot, fSelectionStart, fSelectionLength);
 
 			ASTNode selectedType= ASTNodes.getFirstAncestorOrNull(selected,
@@ -201,16 +222,26 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				IMethod[] methods= sourceType.getMethods();
 				for (IVariableBinding field : fields) {
 					IMethodBinding getter= findGetter(fTypeBinding, field);
-					if (getter == null) {
-						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+					if (getter != null) {
+						fGetterMap.put(field, getter);
 					}
-					fGetterMap.put(field, getter);
+					IMethodBinding setter= findSetter(fTypeBinding, field);
+					if (setter != null) {
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ConvertToRecordRefactoring_setter_found, field.getName()));
+					}
 				}
 
-				if (methods.length < fields.length + 1) {
-					return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_enough_getters);
+				if (fGetterMap.size() < fields.length) {
+					result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_enough_getters));
 				} else if (methods.length > fields.length + 1) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+				}
+				class VisitException extends RuntimeException {
+					private static final long serialVersionUID= 1L;
+
+					public VisitException(String message) {
+						super(message);
+					}
 				}
 				try {
 					fTypeDeclaration.accept(new ASTVisitor() {
@@ -219,7 +250,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 							List<VariableDeclarationFragment> fragments= node.fragments();
 							for (VariableDeclarationFragment fragment : fragments) {
 								if (fragment.getInitializer() != null) {
-									throw new AbortSearchException();
+									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_fields_initialized);
 								}
 							}
 							return false;
@@ -229,7 +260,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 							List<Statement> statements= ASTNodes.asList(node.getBody());
 							if (node.isConstructor()) {
 								if (fConstructor != null) {
-									throw new AbortSearchException();
+									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_multiple_constructors);
 								}
 								fConstructor= node;
 								for (Statement statement : statements) {
@@ -239,24 +270,33 @@ public class ConvertToRecordRefactoring extends Refactoring {
 											Expression rightHandSide= assignment.getRightHandSide();
 											if (rightHandSide instanceof SimpleName simpleName) {
 												IBinding binding= simpleName.resolveBinding();
-												if (binding instanceof IVariableBinding simpleNameBinding) {
+												if (binding instanceof IVariableBinding simpleNameBinding && simpleNameBinding.isParameter()) {
 													String getterName= GetterSetterUtil.getGetterName(fCu.getJavaProject(), simpleNameBinding.getName(), simpleNameBinding.getModifiers(), isBoolean(simpleNameBinding), null);
 													if (isGetterField(leftHandSide, getterName)) {
+														continue;
+													}
+													if (leftHandSide instanceof SimpleName leftHandName) {
+														IBinding leftBinding= leftHandName.resolveBinding();
+														if (leftBinding instanceof IVariableBinding varBinding
+																&& varBinding.isField()) {
+															continue;
+														}
+													} else if (leftHandSide instanceof FieldAccess) {
 														continue;
 													}
 												}
 											}
 										}
 									}
-									throw new AbortSearchException();
+									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_nonstandard_constructor);
 								}
 							} else {
 								if (statements.size() != 1 || !(statements.get(0) instanceof ReturnStatement retStmt)) {
-									throw new AbortSearchException();
+									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_implicit_getter);
 								} else {
 									Expression exp= retStmt.getExpression();
 									if (!isGetterField(exp, node.getName().getFullyQualifiedName())) {
-										throw new AbortSearchException();
+										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_implicit_getter);
 									}
 								}
 							}
@@ -282,8 +322,8 @@ public class ConvertToRecordRefactoring extends Refactoring {
 							return false;
 						}
 					});
-				} catch (AbortSearchException e) {
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+				} catch (VisitException e) {
+					return RefactoringStatus.createFatalErrorStatus(e.getMessage());
 				}
 			}
 			return result;
@@ -312,6 +352,14 @@ public class ConvertToRecordRefactoring extends Refactoring {
 		return null;
 	}
 
+	private IMethodBinding findSetter(ITypeBinding declaringType, IVariableBinding variableBinding) {
+		ITypeBinding fieldType= variableBinding.getType();
+		String setterName= GetterSetterUtil.getSetterName(variableBinding, fCu.getJavaProject(), null, isBoolean(variableBinding));
+		if (declaringType == null)
+			return null;
+		IMethodBinding setter= Bindings.findMethodInHierarchy(declaringType, setterName, new ITypeBinding[] { fieldType });
+		return setter;
+	}
 
 	public static ASTNode getSelectedNode(CompilationUnit cu, int selectionOffset, int selectionLength) {
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(selectionOffset, selectionLength), false);

@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -1012,7 +1013,9 @@ public abstract class ModifierCorrectionSubProcessorCore<T> {
 			return Modifier.PROTECTED;
 		}
 
-		if (currNodeBinding.getPackage().getKey().equals(targetType.getPackage().getKey())) {
+		String pack1Key = currNodeBinding.getPackage() == null ? null : currNodeBinding.getPackage().getKey();
+		String pack2Key = targetType.getPackage() == null ? null : targetType.getPackage().getKey();
+		if (Objects.equals(pack1Key, pack2Key)) {
 			return 0;
 		}
 		return Modifier.PUBLIC;
