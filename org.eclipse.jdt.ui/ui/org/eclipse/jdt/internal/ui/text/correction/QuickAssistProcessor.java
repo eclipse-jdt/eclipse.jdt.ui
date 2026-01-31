@@ -219,6 +219,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteRemoveImp
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddStaticFavoriteProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConvertFieldNamingConventionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ConvertProjectNamingConventionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
@@ -268,7 +269,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	public static final String FIELD_NAMING_CONVENTION_ID= "org.eclipse.jdt.ui.correction.convertToConstantNamingConvention.assist"; //$NON-NLS-1$
 
+	public static final String CONVERT_To_PROJECT_NAMING_CONVENTION_ID= "org.eclipse.jdt.ui.correction.convertToProjectNamingConvention.assist"; //$NON-NLS-1$
+
 	public static final Pattern FIELD_NAMING_PATTERN= Pattern.compile("^[A-Z0-9]+(_[A-Z0-9]+)*$"); //$NON-NLS-1$
+
+	public static final Pattern PROJECT_NAMING_PATTERN= Pattern.compile("([a-z]+|[A-Z][a-z]*|\\d+|_+)"); //$NON-NLS-1$
 
 	public QuickAssistProcessor() {
 		super();
@@ -309,6 +314,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getExtractMethodFromLambdaProposal(context, coveringNode, false, null)
 					|| getInlineLocalProposal(context, coveringNode, null)
 					|| getConvertFieldNamingConventionProposal(context, coveringNode, null)
+					|| getConvertProjectNamingConvention(context, coveringNode, null)
 					|| getConvertLocalToFieldProposal(context, coveringNode, null)
 					|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 					|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, null)
@@ -392,6 +398,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getExtractMethodFromLambdaProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
 				getConvertFieldNamingConventionProposal(context, coveringNode, resultingCollections);
+				getConvertProjectNamingConvention(context, coveringNode, resultingCollections);
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, resultingCollections);
@@ -3510,6 +3517,131 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		return constantNaming.toString().replaceAll("_{2,}", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	private boolean getConvertProjectNamingConvention(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+		if (!(coveringNode instanceof SimpleName)) {
+			return false;
+		}
+		SimpleName simpleName= (SimpleName) coveringNode;
+		String selectedField= simpleName.toString();
+		int offset= coveringNode.getStartPosition();
+		if (simpleName.getAST().apiLevel() >= ASTHelper.JLS10 && simpleName.isVar()) {
+			return false;
+		}
+		IEditorPart editor= ((AssistContext) context).getEditor();
+		if (!(editor instanceof JavaEditor))
+			return false;
+
+		if (!(simpleName.resolveBinding() instanceof IVariableBinding binding) || !binding.isField()) {
+			return false;
+		}
+
+		CompilationUnit cu= context.getASTRoot();
+		VariableDeclarationFragment vdf= (VariableDeclarationFragment) ASTNodes.findDeclaration(binding, cu);
+		if (vdf == null) {
+			return false;
+		}
+
+		FieldDeclaration fd= (FieldDeclaration) vdf.getParent();
+		if (fd == null) {
+			return false;
+		}
+
+		AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) fd.getParent();
+		if (typeDecl == null) {
+			return false;
+		}
+
+		FieldDeclarationChecker fdChecker= new FieldDeclarationChecker();
+		typeDecl.accept(fdChecker);
+
+		List<String> fieldNames= fdChecker.getFieldDeclarationList();
+		if (fieldNames.size() < 3) {
+			return false;
+		}
+
+		List<String> namePrefix= new ArrayList<>();
+		for (int i= 0; i < fieldNames.size(); i++) {
+			namePrefix.add(splitField(fieldNames.get(i)).get(0));
+		}
+
+		String firstField= findMostFrequentElement(namePrefix);
+		List<String> selectField= splitField(selectedField);
+		if (firstField == null || selectField.contains(firstField)) {
+			return false;
+		}
+
+		selectField.add(0, firstField);
+		String newName= joinToCamelCase(selectField);
+		if (fdChecker.getFieldDeclarationList().contains(newName)) {
+			return false;
+		}
+
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		IField iField= (IField) binding.getJavaElement();
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+		ConvertProjectNamingConventionProposal proposal= new ConvertProjectNamingConventionProposal(newName, offset, offset, image, iField);
+		proposal.setCommandId(CONVERT_To_PROJECT_NAMING_CONVENTION_ID);
+		resultingCollections.add(proposal);
+
+		return true;
+	}
+
+	public static List<String> splitField(String input) {
+		List<String> words= new ArrayList<>();
+		Pattern pattern= PROJECT_NAMING_PATTERN;
+		Matcher matcher= pattern.matcher(input);
+		while (matcher.find()) {
+			String word= matcher.group();
+			words.add(word);
+		}
+		return words;
+	}
+
+	public static String joinToCamelCase(List<String> elements) {
+		if (elements == null || elements.isEmpty()) {
+			return null;
+		}
+		StringBuilder result= new StringBuilder();
+		result.append(elements.get(0));
+		String camelCaseElement= null;
+		for (int i= 1; i < elements.size(); i++) {
+			String element= elements.get(i);
+			if (i - 1 >= 0 && elements.get(i - 1).equals("_")) { //$NON-NLS-1$
+				camelCaseElement= element;
+			} else {
+				camelCaseElement= element.substring(0, 1).toUpperCase() + element.substring(1).toLowerCase();
+			}
+			result.append(camelCaseElement);
+		}
+		return result.toString();
+	}
+
+	@SuppressWarnings("boxing")
+	public static String findMostFrequentElement(List<String> list) {
+		if (list.isEmpty()) {
+			return null;
+		}
+		Map<String, Integer> elementCountMap= new HashMap<>();
+		for (String element : list) {
+			elementCountMap.put(element, elementCountMap.getOrDefault(element, 0) + 1);
+		}
+		String mostFrequentElement= null;
+		int maxCount= 0;
+		for (Map.Entry<String, Integer> entry : elementCountMap.entrySet()) {
+			if (entry.getValue() > maxCount) {
+				mostFrequentElement= entry.getKey();
+				maxCount= entry.getValue();
+			}
+		}
+		if (maxCount >= (list.size()/2 -1)) {
+			return mostFrequentElement;
+		} else {
+			return null;
+		}
 	}
 }
 
