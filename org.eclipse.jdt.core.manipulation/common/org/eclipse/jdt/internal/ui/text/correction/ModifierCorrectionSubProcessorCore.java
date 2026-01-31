@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -469,6 +470,44 @@ public abstract class ModifierCorrectionSubProcessorCore<T> {
 			return;
 		}
 
+		if (modifier == Modifier.STATIC) {
+			MethodDeclaration methodDeclaration= (MethodDeclaration)selectedNode;
+			List<IExtendedModifier> modifiers= methodDeclaration.modifiers();
+			for (IExtendedModifier declModifier : modifiers) {
+				if (declModifier instanceof Annotation annotation) {
+					switch (annotation.getTypeName().getFullyQualifiedName()) {
+						case "BeforeEach": //$NON-NLS-1$
+						case "AfterEach": //$NON-NLS-1$
+						case "BeforeAll": //$NON-NLS-1$
+						case "AfterAll": //$NON-NLS-1$
+						case "Before": //$NON-NLS-1$
+						case "After": //$NON-NLS-1$
+						case "Test": //$NON-NLS-1$
+						case "TestTemplate": //$NON-NLS-1$
+						case "TestFactory": //$NON-NLS-1$
+						case "ParameterizedTest": //$NON-NLS-1$
+						case "RepeatedTest": //$NON-NLS-1$
+							IAnnotationBinding binding= annotation.resolveAnnotationBinding();
+							if (binding != null) {
+								ITypeBinding typeBinding= binding.getAnnotationType();
+								String packageName= typeBinding.getPackage().getName();
+								if (packageName.equals("org.junit") //$NON-NLS-1$
+										|| packageName.equals("org.junit.jupiter.api") //$NON-NLS-1$
+										|| packageName.equals("org.junit.jupiter.params")) { //$NON-NLS-1$
+									return;
+								}
+							}
+							break;
+						default:
+							break;
+					}
+					IAnnotationBinding binding= annotation.resolveAnnotationBinding();
+					if (binding != null) {
+						System.out.println(annotation.getTypeName().getFullyQualifiedName());
+					}
+				}
+			}
+		}
 		IMethodBinding binding= ((MethodDeclaration) selectedNode).resolveBinding();
 		if (binding != null) {
 			binding= binding.getMethodDeclaration();
