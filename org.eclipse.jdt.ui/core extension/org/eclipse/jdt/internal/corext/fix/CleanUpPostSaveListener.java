@@ -328,6 +328,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				return;
 
 			ICleanUp[] cleanUps= getCleanUps(unit.getJavaProject().getProject());
+			boolean needsChangedRegions = requiresChangedRegions(cleanUps);
 
 			long oldFileValue= unit.getResource().getModificationStamp();
 			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), Progress.subMonitor(monitor, 2));
@@ -335,7 +336,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			// Use DocumentDirtyTracker to get current dirty regions instead of stale changedRegions
 			// This prevents race conditions where regions become invalid between calculation and use
 			IRegion[] regionsToFormat = changedRegions;
-			if (requiresChangedRegions(cleanUps)) {
+			if (needsChangedRegions) {
 				IDocument document = getDocument(unit);
 				if (document != null) {
 					DocumentDirtyTracker tracker = DocumentDirtyTracker.get(document);
@@ -434,17 +435,17 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				}
     			} while (cleanUps.length > 0);
     			success= true;
-    			
-    			// Clear dirty lines after successful formatting
-    			if (success && requiresChangedRegions(cleanUps)) {
-    				IDocument document = getDocument(unit);
-    				if (document != null) {
-    					DocumentDirtyTracker tracker = DocumentDirtyTracker.get(document);
-    					tracker.clearDirtyLines();
-    				}
-    			}
 			} finally {
 				manager.changePerformed(result, success);
+			}
+			
+			// Clear dirty lines after successful formatting (if we used the tracker)
+			if (success && needsChangedRegions) {
+				IDocument document = getDocument(unit);
+				if (document != null) {
+					DocumentDirtyTracker tracker = DocumentDirtyTracker.get(document);
+					tracker.clearDirtyLines();
+				}
 			}
 
 			if (undoEdits.size() > 0) {

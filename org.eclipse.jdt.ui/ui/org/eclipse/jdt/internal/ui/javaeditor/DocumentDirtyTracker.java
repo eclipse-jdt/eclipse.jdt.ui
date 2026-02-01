@@ -154,7 +154,12 @@ public class DocumentDirtyTracker implements IDocumentListener {
 		}
 	}
 
-	/** Stores the state before a change to calculate removed lines correctly */
+	/** 
+	 * Stores the state before a change to calculate removed lines correctly.
+	 * Note: This assumes document changes are serialized (which is guaranteed by IDocument contract).
+	 * The Eclipse document model ensures documentAboutToBeChanged and documentChanged are called
+	 * sequentially for each change, never concurrently.
+	 */
 	private int lineCountBeforeChange = -1;
 
 	@Override
