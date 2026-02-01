@@ -720,11 +720,13 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 		for (IRegion region : regions) {
 			// Check bounds: offset and length must be valid
+			// Offset must be within document (< docLength for non-empty regions, <= for empty)
+			// Empty regions at end of document are allowed if length is 0
 			if (region != null && 
 				region.getOffset() >= 0 && 
-				region.getOffset() <= docLength &&
 				region.getLength() >= 0 &&
-				region.getOffset() + region.getLength() <= docLength) {
+				region.getOffset() + region.getLength() <= docLength &&
+				(region.getLength() > 0 ? region.getOffset() < docLength : region.getOffset() <= docLength)) {
 				validRegions.add(region);
 			}
 		}

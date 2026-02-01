@@ -152,9 +152,25 @@ public class DocumentDirtyTracker implements IDocumentListener {
 		}
 	}
 
+	/** Stores the state before a change to calculate removed lines correctly */
+	private int lineCountBeforeChange = -1;
+
 	@Override
 	public synchronized void documentAboutToBeChanged(DocumentEvent event) {
-		// Nothing to do before change
+		// Store the number of lines that will be removed before the change is applied
+		try {
+			int offset = event.getOffset();
+			int length = event.getLength();
+			if (length > 0) {
+				int startLine = document.getLineOfOffset(offset);
+				int endLine = document.getLineOfOffset(offset + length);
+				lineCountBeforeChange = endLine - startLine;
+			} else {
+				lineCountBeforeChange = 0;
+			}
+		} catch (BadLocationException e) {
+			lineCountBeforeChange = 0;
+		}
 	}
 
 	@Override
@@ -162,16 +178,17 @@ public class DocumentDirtyTracker implements IDocumentListener {
 		try {
 			// Get the line numbers affected by this change
 			int offset = event.getOffset();
-			int length = event.getLength();
 			String text = event.getText();
 
 			int startLine = document.getLineOfOffset(offset);
 			int linesAdded = text != null ? countLines(text) : 0;
-			int linesRemoved = length > 0 ? document.getLineOfOffset(offset + length) - startLine : 0;
+			int linesRemoved = lineCountBeforeChange >= 0 ? lineCountBeforeChange : 0;
 
-			// Mark changed lines as dirty
-			for (int i = 0; i <= linesAdded; i++) {
-				dirtyLines.add(startLine + i);
+			// Mark the start line as dirty (where the edit occurred)
+			dirtyLines.add(startLine);
+			// If newlines were added, also mark the end line as dirty
+			if (linesAdded > 0) {
+				dirtyLines.add(startLine + linesAdded);
 			}
 
 			// Adjust line numbers if lines were added or removed
@@ -179,9 +196,12 @@ public class DocumentDirtyTracker implements IDocumentListener {
 			if (netChange != 0) {
 				adjustLineNumbers(startLine + 1, netChange);
 			}
+			
+			lineCountBeforeChange = -1; // Reset for next change
 
 		} catch (BadLocationException e) {
 			// If we can't determine the line, ignore this change
+			lineCountBeforeChange = -1;
 		}
 	}
 
