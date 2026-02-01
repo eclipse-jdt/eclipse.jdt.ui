@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
+import org.eclipse.jdt.internal.ui.javaeditor.DocumentDirtyTracker;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantPreferenceConfigurationConstants;
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
@@ -330,6 +331,21 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			long oldFileValue= unit.getResource().getModificationStamp();
 			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), Progress.subMonitor(monitor, 2));
 
+			// Use DocumentDirtyTracker to get current dirty regions instead of stale changedRegions
+			// This prevents race conditions where regions become invalid between calculation and use
+			IRegion[] regionsToFormat = changedRegions;
+			if (requiresChangedRegions(cleanUps)) {
+				IDocument document = getDocument(unit);
+				if (document != null) {
+					DocumentDirtyTracker tracker = DocumentDirtyTracker.get(document);
+					IRegion[] dirtyRegions = tracker.getDirtyRegions();
+					if (dirtyRegions != null) {
+						// Validate regions before using them
+						regionsToFormat = validateRegions(dirtyRegions, document);
+					}
+				}
+			}
+
 			CompositeChange result= new CompositeChange(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName);
 			LinkedList<UndoEdit> undoEdits= new LinkedList<>();
 
@@ -379,10 +395,10 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				}
 
     				CleanUpContext context;
-    				if (changedRegions == null) {
+    				if (regionsToFormat == null) {
     					context= new CleanUpContext(unit, ast);
     				} else {
-    					context= new MultiLineCleanUpContext(unit, ast, changedRegions);
+    					context= new MultiLineCleanUpContext(unit, ast, regionsToFormat);
     				}
 
     				ArrayList<ICleanUp> undoneCleanUps= new ArrayList<>();
@@ -406,8 +422,8 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					PerformChangeOperation performChangeOperation= new PerformChangeOperation(change);
     					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
 
-    					if (changedRegions != null && changedRegions.length > 0 && requiresChangedRegions(cleanUps)) {
-							changedRegions= performWithChangedRegionUpdate(performChangeOperation, changedRegions, unit, Progress.subMonitor(monitor, 5));
+    					if (regionsToFormat != null && regionsToFormat.length > 0 && requiresChangedRegions(cleanUps)) {
+							regionsToFormat= performWithChangedRegionUpdate(performChangeOperation, regionsToFormat, unit, Progress.subMonitor(monitor, 5));
 						} else {
 							performChangeOperation.run(Progress.subMonitor(monitor, 5));
 						}
@@ -417,6 +433,15 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				}
     			} while (cleanUps.length > 0);
     			success= true;
+    			
+    			// Clear dirty lines after successful formatting
+    			if (success && requiresChangedRegions(cleanUps)) {
+    				IDocument document = getDocument(unit);
+    				if (document != null) {
+    					DocumentDirtyTracker tracker = DocumentDirtyTracker.get(document);
+    					tracker.clearDirtyLines();
+    				}
+    			}
 			} finally {
 				manager.changePerformed(result, success);
 			}
@@ -653,6 +678,58 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		if (message == null)
 			message= "BadPositionCategoryException"; //$NON-NLS-1$
 		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, message, e));
+	}
+
+	/**
+	 * Gets the document for the given compilation unit.
+	 *
+	 * @param unit the compilation unit
+	 * @return the document, or null if not available
+	 * @throws CoreException if an error occurs
+	 */
+	private IDocument getDocument(ICompilationUnit unit) throws CoreException {
+		final ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		final IPath path= unit.getResource().getFullPath();
+
+		ITextFileBuffer buffer= null;
+		try {
+			manager.connect(path, LocationKind.IFILE, new NullProgressMonitor());
+			buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
+			return buffer != null ? buffer.getDocument() : null;
+		} finally {
+			if (buffer != null)
+				manager.disconnect(path, LocationKind.IFILE, new NullProgressMonitor());
+		}
+	}
+
+	/**
+	 * Validates regions against the current document state, filtering out any invalid regions.
+	 * This provides defensive bounds checking to prevent StringIndexOutOfBoundsException.
+	 *
+	 * @param regions the regions to validate
+	 * @param document the document to validate against
+	 * @return the validated regions, or null if all regions are invalid
+	 */
+	private IRegion[] validateRegions(IRegion[] regions, IDocument document) {
+		if (regions == null || regions.length == 0 || document == null) {
+			return regions;
+		}
+
+		ArrayList<IRegion> validRegions = new ArrayList<>();
+		int docLength = document.getLength();
+
+		for (IRegion region : regions) {
+			// Check bounds: offset and length must be valid
+			if (region != null && 
+				region.getOffset() >= 0 && 
+				region.getOffset() <= docLength &&
+				region.getLength() >= 0 &&
+				region.getOffset() + region.getLength() <= docLength) {
+				validRegions.add(region);
+			}
+		}
+
+		return validRegions.isEmpty() ? null : validRegions.toArray(new IRegion[validRegions.size()]);
 	}
 
 	private void showSlowCleanUpsWarning(HashSet<ICleanUp> slowCleanUps) {
