@@ -14,7 +14,9 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
 
@@ -34,8 +36,8 @@ import org.eclipse.jface.text.Region;
  */
 public class DocumentDirtyTracker implements IDocumentListener {
 
-	/** WeakHashMap to associate trackers with documents without requiring API changes */
-	private static final WeakHashMap<IDocument, DocumentDirtyTracker> trackers = new WeakHashMap<>();
+	/** Synchronized map to associate trackers with documents without requiring API changes */
+	private static final Map<IDocument, DocumentDirtyTracker> trackers = Collections.synchronizedMap(new WeakHashMap<>());
 
 	/** Set of dirty line numbers, maintained in sorted order */
 	private final TreeSet<Integer> dirtyLines = new TreeSet<>();
@@ -49,7 +51,7 @@ public class DocumentDirtyTracker implements IDocumentListener {
 	 * @param document the document to track
 	 * @return the tracker for this document
 	 */
-	public static synchronized DocumentDirtyTracker get(IDocument document) {
+	public static DocumentDirtyTracker get(IDocument document) {
 		if (document == null) {
 			throw new IllegalArgumentException("Document cannot be null"); //$NON-NLS-1$
 		}
@@ -249,10 +251,8 @@ public class DocumentDirtyTracker implements IDocumentListener {
 	 * Removes the tracker from the document (cleanup).
 	 * Should be called when the document is no longer needed.
 	 */
-	public synchronized void dispose() {
+	public void dispose() {
 		document.removeDocumentListener(this);
-		synchronized (DocumentDirtyTracker.class) {
-			trackers.remove(document);
-		}
+		trackers.remove(document);
 	}
 }
