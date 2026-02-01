@@ -13,15 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -38,13 +37,13 @@ public class DocumentDirtyTrackerTest {
 	private IDocument document;
 	private DocumentDirtyTracker tracker;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		document = new Document();
 		tracker = DocumentDirtyTracker.get(document);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (tracker != null) {
 			tracker.dispose();
