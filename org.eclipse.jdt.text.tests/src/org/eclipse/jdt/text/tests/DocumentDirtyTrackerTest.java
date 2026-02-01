@@ -17,6 +17,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -214,9 +215,9 @@ public class DocumentDirtyTrackerTest {
 			int length = region.getLength();
 			int docLength = document.getLength();
 
-			assertEquals("Offset should be non-negative", true, offset >= 0);
-			assertEquals("Length should be non-negative", true, length >= 0);
-			assertEquals("Region should be within document bounds", true, offset + length <= docLength);
+			assertTrue("Offset should be non-negative", offset >= 0);
+			assertTrue("Length should be non-negative", length >= 0);
+			assertTrue("Region should be within document bounds", offset + length <= docLength);
 		}
 	}
 
