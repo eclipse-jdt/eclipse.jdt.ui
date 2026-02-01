@@ -306,6 +306,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
 	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
 	private static final String CHANGED_REGION_POSITION_CATEGORY= "changed_region_position_category"; //$NON-NLS-1$
+	private static final NullProgressMonitor NULL_PROGRESS_MONITOR = new NullProgressMonitor();
 	private static boolean FIRST_CALL= false;
 	private static boolean FIRST_CALL_DONE= false;
 
@@ -693,12 +694,12 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 		ITextFileBuffer buffer= null;
 		try {
-			manager.connect(path, LocationKind.IFILE, new NullProgressMonitor());
+			manager.connect(path, LocationKind.IFILE, NULL_PROGRESS_MONITOR);
 			buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
 			return buffer != null ? buffer.getDocument() : null;
 		} finally {
 			if (buffer != null)
-				manager.disconnect(path, LocationKind.IFILE, new NullProgressMonitor());
+				manager.disconnect(path, LocationKind.IFILE, NULL_PROGRESS_MONITOR);
 		}
 	}
 
@@ -719,19 +720,43 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		int docLength = document.getLength();
 
 		for (IRegion region : regions) {
-			// Check bounds: offset and length must be valid
-			// Offset must be within document (< docLength for non-empty regions, <= for empty)
-			// Empty regions at end of document are allowed if length is 0
-			if (region != null && 
-				region.getOffset() >= 0 && 
-				region.getLength() >= 0 &&
-				region.getOffset() + region.getLength() <= docLength &&
-				(region.getLength() > 0 ? region.getOffset() < docLength : region.getOffset() <= docLength)) {
+			if (region != null && isValidRegion(region, docLength)) {
 				validRegions.add(region);
 			}
 		}
 
 		return validRegions.isEmpty() ? null : validRegions.toArray(new IRegion[validRegions.size()]);
+	}
+
+	/**
+	 * Checks if a region is valid for the given document length.
+	 * A region is valid if:
+	 * - Its offset and length are non-negative
+	 * - The region doesn't extend beyond the document bounds
+	 * - For non-empty regions: offset must be within document content (< docLength)
+	 * - For empty regions: offset can be at document end (== docLength) for cursor positioning
+	 *
+	 * @param region the region to validate
+	 * @param docLength the document length
+	 * @return true if the region is valid
+	 */
+	private boolean isValidRegion(IRegion region, int docLength) {
+		int offset = region.getOffset();
+		int length = region.getLength();
+
+		// Basic validity checks
+		if (offset < 0 || length < 0) {
+			return false;
+		}
+
+		// Check that region doesn't extend beyond document
+		if (offset + length > docLength) {
+			return false;
+		}
+
+		// Empty regions at end are valid (for cursor positioning)
+		// Non-empty regions must start within document content
+		return length == 0 || offset < docLength;
 	}
 
 	private void showSlowCleanUpsWarning(HashSet<ICleanUp> slowCleanUps) {
