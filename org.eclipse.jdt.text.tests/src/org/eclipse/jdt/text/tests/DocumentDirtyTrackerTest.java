@@ -53,7 +53,7 @@ public class DocumentDirtyTrackerTest {
 	@Test
 	public void testInitiallyNoDirtyRegions() {
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNull("Should have no dirty regions initially", regions);
+		assertNull(regions, "Should have no dirty regions initially");
 	}
 
 	@Test
@@ -65,8 +65,8 @@ public class DocumentDirtyTrackerTest {
 		document.set("modified1\nline2\nline3\n");
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should have dirty regions after edit", regions);
-		assertEquals("Should have 1 dirty region", 1, regions.length);
+		assertNotNull(regions, "Should have dirty regions after edit");
+		assertEquals(1, regions.length, "Should have 1 dirty region");
 	}
 
 	@Test
@@ -78,8 +78,8 @@ public class DocumentDirtyTrackerTest {
 		document.set("modified1\nmodified2\nline3\nline4\n");
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should have dirty regions", regions);
-		assertEquals("Should merge consecutive lines into 1 region", 1, regions.length);
+		assertNotNull(regions, "Should have dirty regions");
+		assertEquals(1, regions.length, "Should merge consecutive lines into 1 region");
 	}
 
 	@Test
@@ -91,8 +91,8 @@ public class DocumentDirtyTrackerTest {
 		tracker.markLinesDirty(0, 2);
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should have dirty regions", regions);
-		assertEquals("Should have 2 separate regions", 2, regions.length);
+		assertNotNull(regions, "Should have dirty regions");
+		assertEquals(2, regions.length, "Should have 2 separate regions");
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class DocumentDirtyTrackerTest {
 
 		// The dirty line should have shifted from 1 to 2
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should still have dirty regions after insertion", regions);
+		assertNotNull(regions, "Should still have dirty regions after insertion");
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class DocumentDirtyTrackerTest {
 
 		// The dirty line should have shifted from 2 to 1
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should still have dirty regions after deletion", regions);
+		assertNotNull(regions, "Should still have dirty regions after deletion");
 	}
 
 	@Test
@@ -136,13 +136,13 @@ public class DocumentDirtyTrackerTest {
 		document.set("modified1\nline2\nline3\n");
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should have dirty regions before clear", regions);
+		assertNotNull(regions, "Should have dirty regions before clear");
 
 		// Clear dirty lines
 		tracker.clearDirtyLines();
 
 		regions = tracker.getDirtyRegions();
-		assertNull("Should have no dirty regions after clear", regions);
+		assertNull(regions, "Should have no dirty regions after clear");
 	}
 
 	@Test
@@ -155,8 +155,8 @@ public class DocumentDirtyTrackerTest {
 		document.set("Hello 世界\n你好 World\nModified 🚀✨\n");
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should handle UTF-8 characters correctly", regions);
-		assertEquals("Should have 1 dirty region", 1, regions.length);
+		assertNotNull(regions, "Should handle UTF-8 characters correctly");
+		assertEquals(1, regions.length, "Should have 1 dirty region");
 	}
 
 	@Test
@@ -170,9 +170,9 @@ public class DocumentDirtyTrackerTest {
 		document.set("mod1\nmod2\nmod3\n");
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should track all rapid edits", regions);
+		assertNotNull(regions, "Should track all rapid edits");
 		// All lines should be marked as dirty
-		assertEquals("All consecutive lines should be in 1 region", 1, regions.length);
+		assertEquals(1, regions.length, "All consecutive lines should be in 1 region");
 	}
 
 	@Test
@@ -181,7 +181,7 @@ public class DocumentDirtyTrackerTest {
 		tracker.clearDirtyLines();
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNull("Empty document should have no dirty regions", regions);
+		assertNull(regions, "Empty document should have no dirty regions");
 	}
 
 	@Test
@@ -193,8 +193,8 @@ public class DocumentDirtyTrackerTest {
 		document.set("modified line");
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should have dirty regions for single line edit", regions);
-		assertEquals("Should have 1 dirty region", 1, regions.length);
+		assertNotNull(regions, "Should have dirty regions for single line edit");
+		assertEquals(1, regions.length, "Should have 1 dirty region");
 	}
 
 	@Test
@@ -206,7 +206,7 @@ public class DocumentDirtyTrackerTest {
 		document.set("modified1\nline2\nline3\n");
 
 		IRegion[] regions = tracker.getDirtyRegions();
-		assertNotNull("Should have regions", regions);
+		assertNotNull(regions, "Should have regions");
 
 		// Verify region is within document bounds
 		for (IRegion region : regions) {
@@ -214,9 +214,9 @@ public class DocumentDirtyTrackerTest {
 			int length = region.getLength();
 			int docLength = document.getLength();
 
-			assertTrue("Offset should be non-negative", offset >= 0);
-			assertTrue("Length should be non-negative", length >= 0);
-			assertTrue("Region should be within document bounds", offset + length <= docLength);
+			assertTrue(offset >= 0, "Offset should be non-negative");
+			assertTrue(length >= 0, "Length should be non-negative");
+			assertTrue(offset + length <= docLength, "Region should be within document bounds");
 		}
 	}
 
@@ -238,8 +238,8 @@ public class DocumentDirtyTrackerTest {
 		IRegion[] regions1 = tracker1.getDirtyRegions();
 		IRegion[] regions2 = tracker2.getDirtyRegions();
 
-		assertNotNull("Doc1 should have dirty regions", regions1);
-		assertNull("Doc2 should not have dirty regions", regions2);
+		assertNotNull(regions1, "Doc1 should have dirty regions");
+		assertNull(regions2, "Doc2 should not have dirty regions");
 
 		tracker1.dispose();
 		tracker2.dispose();
@@ -250,6 +250,6 @@ public class DocumentDirtyTrackerTest {
 		DocumentDirtyTracker tracker1 = DocumentDirtyTracker.get(document);
 		DocumentDirtyTracker tracker2 = DocumentDirtyTracker.get(document);
 
-		assertEquals("Same document should return same tracker instance", tracker1, tracker2);
+		assertEquals(tracker1, tracker2, "Same document should return same tracker instance");
 	}
 }
