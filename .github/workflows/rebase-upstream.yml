@@ -114,6 +114,17 @@ jobs:
             core.setOutput('head_ref', pr.head.ref);
             core.setOutput('head_repo', pr.head.repo.full_name);
             core.setOutput('head_clone_url', pr.head.repo.clone_url);
+            
+            // Get the number of commits in the PR
+            // Note: per_page is set to 250, which covers most PRs.
+            // For PRs with >250 commits, manual rebasing would be required.
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 250
+            });
+            core.setOutput('commit_count', commits.length);
 
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -133,14 +144,20 @@ jobs:
         run: |
           git remote add upstream https://github.com/eclipse-jdt/eclipse.jdt.ui.git
           git fetch upstream master
-          git fetch origin master
           
-          # Find where PR branch diverged from fork master
-          FORK_POINT=$(git merge-base HEAD origin/master)
-          echo "Fork point: $FORK_POINT"
+          # Get the number of commits in the PR
+          PR_COMMIT_COUNT=${{ steps.pr.outputs.commit_count }}
+          echo "PR has $PR_COMMIT_COUNT commits"
           
-          # Rebase only PR commits onto upstream, skipping fork-specific commits
-          if git rebase --onto upstream/master $FORK_POINT HEAD; then
+          # Validate commit count
+          if [ "$PR_COMMIT_COUNT" -eq 0 ]; then
+            echo "Error: PR has 0 commits"
+            echo "success=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Rebase only the PR commits onto upstream/master
+          if git rebase --onto upstream/master HEAD~${PR_COMMIT_COUNT}; then
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "success=false" >> $GITHUB_OUTPUT
@@ -191,15 +208,15 @@ jobs:
             # Add upstream remote
             git remote add upstream https://github.com/eclipse-jdt/eclipse.jdt.ui.git
             
-            # Fetch upstream and origin
+            # Fetch upstream
             git fetch upstream master
-            git fetch origin master
             
-            # Find where PR branch diverged from fork master
-            FORK_POINT=$(git merge-base HEAD origin/master)
+            # Count the number of commits in your PR (check GitHub PR page)
+            # For example, if your PR has 3 commits:
+            PR_COMMIT_COUNT=3
             
-            # Rebase only PR commits onto upstream/master
-            git rebase --onto upstream/master $FORK_POINT HEAD
+            # Rebase only your PR commits onto upstream/master
+            git rebase --onto upstream/master HEAD~\${PR_COMMIT_COUNT}
             
             # Resolve conflicts, then:
             git add .
