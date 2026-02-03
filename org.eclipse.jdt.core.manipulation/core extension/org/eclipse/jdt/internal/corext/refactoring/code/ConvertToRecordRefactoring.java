@@ -231,9 +231,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 					}
 				}
 
-				if (fGetterMap.size() < fields.length) {
-					result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_enough_getters));
-				} else if (methods.length > fields.length + 1) {
+				if (methods.length > fields.length + 1) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 				}
 				class VisitException extends RuntimeException {
@@ -271,17 +269,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 											if (rightHandSide instanceof SimpleName simpleName) {
 												IBinding binding= simpleName.resolveBinding();
 												if (binding instanceof IVariableBinding simpleNameBinding && simpleNameBinding.isParameter()) {
-													String getterName= GetterSetterUtil.getGetterName(fCu.getJavaProject(), simpleNameBinding.getName(), simpleNameBinding.getModifiers(), isBoolean(simpleNameBinding), null);
-													if (isGetterField(leftHandSide, getterName)) {
-														continue;
-													}
-													if (leftHandSide instanceof SimpleName leftHandName) {
-														IBinding leftBinding= leftHandName.resolveBinding();
-														if (leftBinding instanceof IVariableBinding varBinding
-																&& varBinding.isField()) {
-															continue;
-														}
-													} else if (leftHandSide instanceof FieldAccess) {
+													if (getFieldBinding(leftHandSide) != null) {
 														continue;
 													}
 												}
@@ -295,15 +283,23 @@ public class ConvertToRecordRefactoring extends Refactoring {
 									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_implicit_getter);
 								} else {
 									Expression exp= retStmt.getExpression();
-									if (!isGetterField(exp, node.getName().getFullyQualifiedName())) {
+									IVariableBinding fieldBinding= getFieldBinding(exp);
+									if (fieldBinding == null) {
 										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_implicit_getter);
+									}
+									if (!fGetterMap.containsKey(fieldBinding)) {
+										IMethodBinding methodBinding= node.resolveBinding();
+										if (methodBinding == null) {
+											throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
+										}
+										fGetterMap.put(fieldBinding, methodBinding);
 									}
 								}
 							}
 							return false;
 						}
 
-						private boolean isGetterField(Expression exp, String name) {
+						private IVariableBinding getFieldBinding(Expression exp) {
 							IVariableBinding varBinding= null;
 							if (exp instanceof FieldAccess fieldAccess) {
 								varBinding= fieldAccess.resolveFieldBinding();
@@ -313,19 +309,21 @@ public class ConvertToRecordRefactoring extends Refactoring {
 									varBinding= (IVariableBinding)simpleNameBinding;
 								}
 							}
-							if (varBinding != null) {
-								IMethodBinding getMethod= fGetterMap.get(varBinding);
-								if (getMethod != null && getMethod.getName().equals(name)) {
-									return true;
-								}
+							if (varBinding != null && varBinding.isField()) {
+								return varBinding;
 							}
-							return false;
+							return null;
 						}
 					});
 				} catch (VisitException e) {
 					return RefactoringStatus.createFatalErrorStatus(e.getMessage());
 				}
 			}
+
+			if (fGetterMap.size() < fields.length) {
+				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_enough_getters));
+			}
+
 			return result;
 		} finally {
 			pm.done();
