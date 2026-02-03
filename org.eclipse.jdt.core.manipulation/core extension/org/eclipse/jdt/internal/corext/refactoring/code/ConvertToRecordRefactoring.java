@@ -287,12 +287,14 @@ public class ConvertToRecordRefactoring extends Refactoring {
 									if (fieldBinding == null) {
 										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_implicit_getter);
 									}
+									IMethodBinding methodBinding= node.resolveBinding();
+									if (methodBinding == null) {
+										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
+									}
 									if (!fGetterMap.containsKey(fieldBinding)) {
-										IMethodBinding methodBinding= node.resolveBinding();
-										if (methodBinding == null) {
-											throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
-										}
 										fGetterMap.put(fieldBinding, methodBinding);
+									} else if (!methodBinding.isEqualTo(fGetterMap.get(fieldBinding))) {
+										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 									}
 								}
 							}
