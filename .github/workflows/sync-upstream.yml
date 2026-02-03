@@ -1,0 +1,289 @@
+name: Sync Fork with Upstream
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Daily at 3:00 AM UTC
+  workflow_dispatch:
+  issue_comment:
+    types: [created]
+
+jobs:
+  sync-scheduled:
+    name: Sync Fork (Scheduled)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout fork master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/eclipse-jdt/eclipse.jdt.ui.git
+          git fetch upstream master
+
+      - name: Identify and backup fork-specific files
+        id: backup
+        run: |
+          # Create temporary directory for fork-specific files
+          mkdir -p /tmp/fork-specific
+          
+          # Identify fork-specific workflow files (files that don't exist in upstream)
+          git fetch upstream master
+          
+          # Get list of workflow files in fork
+          FORK_WORKFLOWS=$(git ls-tree -r HEAD --name-only .github/workflows/ 2>/dev/null || echo "")
+          
+          # For each workflow file in fork, check if it exists in upstream
+          for file in $FORK_WORKFLOWS; do
+            if ! git cat-file -e upstream/master:"$file" 2>/dev/null; then
+              echo "Fork-specific file: $file"
+              # Create directory structure and copy file
+              mkdir -p "/tmp/fork-specific/$(dirname "$file")"
+              cp "$file" "/tmp/fork-specific/$file"
+            fi
+          done
+          
+          # Check if any fork-specific files were found
+          if [ -d "/tmp/fork-specific/.github" ]; then
+            echo "has_fork_files=true" >> $GITHUB_OUTPUT
+            echo "Found fork-specific files:"
+            find /tmp/fork-specific -type f
+          else
+            echo "has_fork_files=false" >> $GITHUB_OUTPUT
+            echo "No fork-specific files found"
+          fi
+
+      - name: Reset to upstream master
+        run: |
+          # Reset fork master to upstream master
+          git reset --hard upstream/master
+
+      - name: Restore fork-specific files
+        if: steps.backup.outputs.has_fork_files == 'true'
+        run: |
+          # Copy fork-specific files back
+          if [ -d "/tmp/fork-specific" ]; then
+            cp -r /tmp/fork-specific/.github ./ 2>/dev/null || true
+          fi
+          
+          # Add all fork-specific changes
+          git add .github/
+
+      - name: Commit fork-specific changes
+        if: steps.backup.outputs.has_fork_files == 'true'
+        run: |
+          # Check if there are changes to commit
+          if ! git diff --cached --quiet; then
+            git commit -m "Fork-specific CI and workflow configurations"
+            echo "✅ Fork-specific changes committed"
+          else
+            echo "ℹ️  No fork-specific changes to commit"
+          fi
+
+      - name: Push to fork master
+        run: |
+          git push --force origin master
+          echo "✅ Successfully synced with upstream"
+
+  sync-manual:
+    name: Sync Fork (Manual)
+    if: |
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '/sync-upstream')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Check user permission
+        id: check
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const authorAssociation = context.payload.comment.author_association;
+            const allowedRoles = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+            
+            if (allowedRoles.includes(authorAssociation)) {
+              return 'true';
+            } else {
+              return 'false';
+            }
+
+      - name: Add unauthorized reaction
+        if: steps.check.outputs.result != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: '-1'
+            });
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '❌ Only repository collaborators can trigger the sync.'
+            });
+
+      - name: Exit if unauthorized
+        if: steps.check.outputs.result != 'true'
+        run: exit 1
+
+      - name: Add rocket reaction
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket'
+            });
+
+      - name: Checkout fork master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/eclipse-jdt/eclipse.jdt.ui.git
+          git fetch upstream master
+
+      - name: Identify and backup fork-specific files
+        id: backup
+        run: |
+          # Create temporary directory for fork-specific files
+          mkdir -p /tmp/fork-specific
+          
+          # Identify fork-specific workflow files (files that don't exist in upstream)
+          git fetch upstream master
+          
+          # Get list of workflow files in fork
+          FORK_WORKFLOWS=$(git ls-tree -r HEAD --name-only .github/workflows/ 2>/dev/null || echo "")
+          
+          # For each workflow file in fork, check if it exists in upstream
+          for file in $FORK_WORKFLOWS; do
+            if ! git cat-file -e upstream/master:"$file" 2>/dev/null; then
+              echo "Fork-specific file: $file"
+              # Create directory structure and copy file
+              mkdir -p "/tmp/fork-specific/$(dirname "$file")"
+              cp "$file" "/tmp/fork-specific/$file"
+            fi
+          done
+          
+          # Check if any fork-specific files were found
+          if [ -d "/tmp/fork-specific/.github" ]; then
+            echo "has_fork_files=true" >> $GITHUB_OUTPUT
+            echo "Found fork-specific files:"
+            find /tmp/fork-specific -type f
+          else
+            echo "has_fork_files=false" >> $GITHUB_OUTPUT
+            echo "No fork-specific files found"
+          fi
+
+      - name: Reset to upstream master
+        id: reset
+        run: |
+          # Reset fork master to upstream master
+          git reset --hard upstream/master
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      - name: Restore fork-specific files
+        if: steps.backup.outputs.has_fork_files == 'true'
+        run: |
+          # Copy fork-specific files back
+          if [ -d "/tmp/fork-specific" ]; then
+            cp -r /tmp/fork-specific/.github ./ 2>/dev/null || true
+          fi
+          
+          # Add all fork-specific changes
+          git add .github/
+
+      - name: Commit fork-specific changes
+        if: steps.backup.outputs.has_fork_files == 'true'
+        run: |
+          # Check if there are changes to commit
+          if ! git diff --cached --quiet; then
+            git commit -m "Fork-specific CI and workflow configurations"
+            echo "✅ Fork-specific changes committed"
+          else
+            echo "ℹ️  No fork-specific changes to commit"
+          fi
+
+      - name: Push to fork master
+        id: push
+        run: |
+          if git push --force origin master; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add success comment
+        if: steps.push.outputs.success == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: '+1'
+            });
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ Successfully synced fork master with `eclipse-jdt/eclipse.jdt.ui:master`'
+            });
+
+      - name: Add failure comment
+        if: steps.push.outputs.success == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: '-1'
+            });
+            
+            const comment = `❌ Sync failed. Please check the workflow logs for details.
+            
+            [View workflow run](${context.payload.repository.html_url}/actions/runs/${context.runId})`;
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: Fail workflow if push failed
+        if: steps.push.outputs.success == 'false'
+        run: exit 1

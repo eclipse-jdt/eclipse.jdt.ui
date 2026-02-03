@@ -133,8 +133,14 @@ jobs:
         run: |
           git remote add upstream https://github.com/eclipse-jdt/eclipse.jdt.ui.git
           git fetch upstream master
+          git fetch origin master
           
-          if git rebase upstream/master; then
+          # Find where PR branch diverged from fork master
+          FORK_POINT=$(git merge-base HEAD origin/master)
+          echo "Fork point: $FORK_POINT"
+          
+          # Rebase only PR commits onto upstream, skipping fork-specific commits
+          if git rebase --onto upstream/master $FORK_POINT HEAD; then
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "success=false" >> $GITHUB_OUTPUT
@@ -185,11 +191,15 @@ jobs:
             # Add upstream remote
             git remote add upstream https://github.com/eclipse-jdt/eclipse.jdt.ui.git
             
-            # Fetch upstream
+            # Fetch upstream and origin
             git fetch upstream master
+            git fetch origin master
             
-            # Rebase onto upstream/master
-            git rebase upstream/master
+            # Find where PR branch diverged from fork master
+            FORK_POINT=$(git merge-base HEAD origin/master)
+            
+            # Rebase only PR commits onto upstream/master
+            git rebase --onto upstream/master $FORK_POINT HEAD
             
             # Resolve conflicts, then:
             git add .
