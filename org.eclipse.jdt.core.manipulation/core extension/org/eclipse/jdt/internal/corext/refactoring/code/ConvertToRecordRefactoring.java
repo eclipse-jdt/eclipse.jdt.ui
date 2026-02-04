@@ -202,6 +202,9 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				if (!Modifier.isPrivate(modifiers)) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_private);
 				}
+				if (Modifier.isStatic(modifiers)) {
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_static_members);
+				}
 			}
 
 			IMethodBinding[] methodBindings= fTypeBinding.getDeclaredMethods();
@@ -212,6 +215,9 @@ public class ConvertToRecordRefactoring extends Refactoring {
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_constructors);
 					}
 					hasConstructor= true;
+				}
+				if (Modifier.isStatic(method.getModifiers())) {
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_static_members);
 				}
 			}
 			if (!hasConstructor) {
