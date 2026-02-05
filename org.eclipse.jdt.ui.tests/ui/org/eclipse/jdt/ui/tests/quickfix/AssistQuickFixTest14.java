@@ -1287,7 +1287,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 				package test;
 
 				public class Cls {
-					private final int a;
+					private final static int a;
 					private final String b;
 					private double c;;
 
@@ -1297,7 +1297,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 						this.c= c;
 					}
 
-					public int getAValue() {
+					public static int getAValue() {
 						return a;
 					}
 

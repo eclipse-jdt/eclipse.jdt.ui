@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -348,7 +349,8 @@ public final class RefactoringAvailabilityTesterCore  {
 					return false;
 				}
 				for (IField field : fields) {
-					if (!(Flags.isPrivate(field.getFlags()))) {
+					if (!(Flags.isPrivate(field.getFlags()))
+							|| Flags.isStatic(field.getFlags())) {
 						return false;
 					}
 				}
@@ -363,6 +365,9 @@ public final class RefactoringAvailabilityTesterCore  {
 						if (method.getNumberOfParameters() < fields.length) {
 							return false;
 						}
+					}
+					if (Modifier.isStatic(method.getFlags())) {
+						return false;
 					}
 				}
 			}
