@@ -252,4 +252,60 @@ public class DocumentDirtyTrackerTest {
 
 		assertEquals(tracker1, tracker2, "Same document should return same tracker instance");
 	}
+
+	@Test
+	public void testIncrementalSingleLineEdit() throws Exception {
+		document.set("line1\nline2\nline3\n");
+		tracker.clearDirtyLines();
+		
+		// Incremental edit on line 0: replace "line1" with "modified1"
+		document.replace(0, 5, "modified1");
+		
+		IRegion[] regions = tracker.getDirtyRegions();
+		assertNotNull(regions, "Should have dirty regions after incremental edit");
+		assertEquals(1, regions.length, "Should have 1 dirty region");
+	}
+
+	@Test
+	public void testIncrementalInsertNewLine() throws Exception {
+		document.set("line1\nline2\nline3\n");
+		tracker.clearDirtyLines();
+		
+		// Insert a new line after "line1\n" (offset 6)
+		document.replace(6, 0, "inserted\n");
+		
+		IRegion[] regions = tracker.getDirtyRegions();
+		assertNotNull(regions, "Should have dirty regions after line insertion");
+	}
+
+	@Test
+	public void testIncrementalDeleteLine() throws Exception {
+		document.set("line1\nline2\nline3\n");
+		tracker.clearDirtyLines();
+		
+		// Mark line 2 as dirty first
+		tracker.markLinesDirty(2);
+		
+		// Delete "line2\n" (offset 6, length 6)
+		document.replace(6, 6, "");
+		
+		IRegion[] regions = tracker.getDirtyRegions();
+		assertNotNull(regions, "Should still have dirty regions after deletion");
+	}
+
+	@Test
+	public void testIncrementalMultipleEditsOnDifferentLines() throws Exception {
+		document.set("line1\nline2\nline3\nline4\n");
+		tracker.clearDirtyLines();
+		
+		// Edit line 0
+		document.replace(0, 5, "mod1");
+		// Edit line 2 (offsets shifted because line 0 is now shorter)
+		int line2Offset = document.getLineOffset(2);
+		document.replace(line2Offset, 5, "mod3");
+		
+		IRegion[] regions = tracker.getDirtyRegions();
+		assertNotNull(regions, "Should have dirty regions");
+		assertEquals(2, regions.length, "Should have 2 separate dirty regions for non-consecutive edits");
+	}
 }

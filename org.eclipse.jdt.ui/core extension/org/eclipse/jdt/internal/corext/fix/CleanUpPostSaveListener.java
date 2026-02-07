@@ -306,7 +306,6 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
 	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
 	private static final String CHANGED_REGION_POSITION_CATEGORY= "changed_region_position_category"; //$NON-NLS-1$
-	private static final NullProgressMonitor NULL_PROGRESS_MONITOR = new NullProgressMonitor();
 	private static boolean FIRST_CALL= false;
 	private static boolean FIRST_CALL_DONE= false;
 
@@ -336,10 +335,12 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			// Use DocumentDirtyTracker to get current dirty regions instead of stale changedRegions
 			// This prevents race conditions where regions become invalid between calculation and use
 			IRegion[] regionsToFormat = changedRegions;
+			IDocument document = null;
+			DocumentDirtyTracker tracker = null;
 			if (needsChangedRegions) {
-				IDocument document = getDocument(unit);
+				document = getDocument(unit);
 				if (document != null) {
-					DocumentDirtyTracker tracker = DocumentDirtyTracker.get(document);
+					tracker = DocumentDirtyTracker.get(document);
 					IRegion[] dirtyRegions = tracker.getDirtyRegions();
 					if (dirtyRegions != null) {
 						// Validate regions before using them
@@ -440,12 +441,8 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			}
 			
 			// Clear dirty lines after successful formatting (if we used the tracker)
-			if (success && needsChangedRegions) {
-				IDocument document = getDocument(unit);
-				if (document != null) {
-					DocumentDirtyTracker tracker = DocumentDirtyTracker.get(document);
-					tracker.clearDirtyLines();
-				}
+			if (success && needsChangedRegions && tracker != null) {
+				tracker.clearDirtyLines();
 			}
 
 			if (undoEdits.size() > 0) {
@@ -695,12 +692,12 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 		ITextFileBuffer buffer= null;
 		try {
-			manager.connect(path, LocationKind.IFILE, NULL_PROGRESS_MONITOR);
+			manager.connect(path, LocationKind.IFILE, new NullProgressMonitor());
 			buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
 			return buffer != null ? buffer.getDocument() : null;
 		} finally {
 			if (buffer != null)
-				manager.disconnect(path, LocationKind.IFILE, NULL_PROGRESS_MONITOR);
+				manager.disconnect(path, LocationKind.IFILE, new NullProgressMonitor());
 		}
 	}
 
