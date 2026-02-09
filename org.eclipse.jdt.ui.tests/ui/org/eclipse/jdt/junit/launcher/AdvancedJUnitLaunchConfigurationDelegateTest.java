@@ -214,7 +214,6 @@ public class AdvancedJUnitLaunchConfigurationDelegateTest {
 		List<String> fileLines= showCommandAndExtractContentOfPackageNameFile(projectName, fJavaProject, firstPackage);
 
 		assertThat(fileLines) //
-				.hasSize(2) //
 				.containsExactly("a", "a.nested");
 	}
 
