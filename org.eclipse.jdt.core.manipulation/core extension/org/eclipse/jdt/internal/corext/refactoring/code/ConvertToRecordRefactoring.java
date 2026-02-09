@@ -434,8 +434,10 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			builder.append("\n"); //$NON-NLS-1$
 			List<IExtendedModifier> modifiers= fTypeDeclaration.modifiers();
 			for (IExtendedModifier modifier : modifiers) {
-				builder.append(modifier.toString());
-				builder.append(" "); //$NON-NLS-1$
+				if (!(modifier instanceof Modifier mod) || !mod.isFinal()) {
+					builder.append(modifier.toString());
+					builder.append(" "); //$NON-NLS-1$
+				}
 			}
 			builder.append("record " + fTypeDeclaration.getName().getFullyQualifiedName() + " ("); //$NON-NLS-1$ //$NON-NLS-2$
 			List<SingleVariableDeclaration> parameters= fConstructor.parameters();
@@ -453,8 +455,10 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			List<IExtendedModifier> modifiers= fTypeDeclaration.modifiers();
 			List<IExtendedModifier> recordModifiers= newRecordDeclaration.modifiers();
 			for (IExtendedModifier modifier : modifiers) {
-				IExtendedModifier newModifier= (IExtendedModifier) rewrite.createCopyTarget((ASTNode)modifier);
-				recordModifiers.add(newModifier);
+				if (!(modifier instanceof Modifier mod) || !mod.isFinal()) {
+					IExtendedModifier newModifier= (IExtendedModifier) rewrite.createCopyTarget((ASTNode)modifier);
+					recordModifiers.add(newModifier);
+				}
 			}
 			List<SingleVariableDeclaration> components= newRecordDeclaration.recordComponents();
 			List<SingleVariableDeclaration> parameters= fConstructor.parameters();
