@@ -1053,7 +1053,7 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 					/**
 					 * Class Inner
 					 */
-					private class Inner {
+					private final class Inner {
 						private final int a;
 						private final String b;
 						private double c;
