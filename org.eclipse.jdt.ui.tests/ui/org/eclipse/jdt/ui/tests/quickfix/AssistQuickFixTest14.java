@@ -1514,6 +1514,9 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 						}
 					}
 					private class Inner2 extends Inner {
+						public Inner2() {
+							super(2, "blah", 5.2);
+						}
 					}
 					public void foo() {
 						Inner inner= new Inner(1, "comment", 4.3);
