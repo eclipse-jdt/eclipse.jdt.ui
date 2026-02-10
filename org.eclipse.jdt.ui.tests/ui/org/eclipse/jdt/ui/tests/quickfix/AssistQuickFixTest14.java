@@ -840,8 +840,8 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 				""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
 
-		int index= str1.indexOf("Cls(");
-		IInvocationContext ctx= getCorrectionContext(cu, index, 3);
+		int index= str1.indexOf("a;");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 1);
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
