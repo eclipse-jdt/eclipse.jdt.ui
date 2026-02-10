@@ -1,6 +1,6 @@
 package p;
 // Class A
-public class A {
+public final class A {
 
 	private final int a;
 	private final String b;

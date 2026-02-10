@@ -1214,9 +1214,6 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		int index= str1.indexOf("Cls(");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 3);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-		for (IJavaCompletionProposal proposal : proposals) {
-			System.out.println(proposal.getDisplayString());
-		}
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
 	}
 
@@ -1262,9 +1259,6 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		int index= str1.indexOf("Cls(");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 3);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-		for (IJavaCompletionProposal proposal : proposals) {
-			System.out.println(proposal.getDisplayString());
-		}
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
 	}
 
@@ -1315,9 +1309,6 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		int index= str1.indexOf("Cls(");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 3);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-		for (IJavaCompletionProposal proposal : proposals) {
-			System.out.println(proposal.getDisplayString());
-		}
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
 	}
 
@@ -1372,9 +1363,6 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		int index= str1.indexOf("Cls(");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 3);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-		for (IJavaCompletionProposal proposal : proposals) {
-			System.out.println(proposal.getDisplayString());
-		}
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
 	}
 
@@ -1425,9 +1413,6 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		int index= str1.indexOf("Cls(");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 3);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-		for (IJavaCompletionProposal proposal : proposals) {
-			System.out.println(proposal.getDisplayString());
-		}
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
 	}
 
@@ -1480,11 +1465,74 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		int index= str1.indexOf("Cls(");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 3);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-		for (IJavaCompletionProposal proposal : proposals) {
-			System.out.println(proposal.getDisplayString());
-		}
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
 	}
 
+	@Test
+	public void testNoConvertToRecord7() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+				package test;
+
+				public class Cls {
+					/**
+					 * Class Inner
+					 */
+					private class Inner {
+						private final int a;
+						private final String b;
+						private double c;
+
+						public Inner(int a, String b, double c) {
+							this.a= a;
+							this.b= b;
+							this.c= c;
+						}
+
+						public int getA() {
+							return a;
+						}
+
+						public String getB() {
+							return b;
+						}
+
+						public double getC() {
+							return c;
+						}
+					}
+					private class Inner2 extends Inner {
+						public Inner2() {
+							super(2, "blah", 5.2);
+						}
+					}
+					public void foo() {
+						Inner inner= new Inner(1, "comment", 4.3);
+						System.out.println(inner.getA());
+						System.out.println(inner.getB());
+						System.out.println(inner.getC());
+					}
+				}
+				""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("Inner(");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
 }
 
