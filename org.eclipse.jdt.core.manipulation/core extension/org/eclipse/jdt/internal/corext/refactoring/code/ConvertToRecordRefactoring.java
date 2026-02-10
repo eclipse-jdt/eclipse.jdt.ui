@@ -74,6 +74,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
@@ -332,6 +333,29 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_enough_getters));
 			}
 
+			if (!result.hasError() && !Modifier.isFinal(typeModifiers)) {
+				// search to see if any other class sub-classes the type to convert
+				IType type= (IType) fTypeBinding.getJavaElement();
+				if (type == null) {
+					result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error));
+				} else {
+					RefactoringStatus status= new RefactoringStatus();
+					SearchPattern pattern= RefactoringSearchEngine.createOrPattern(new IType[] {type}, IJavaSearchConstants.TYPE | IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
+					SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, RefactoringScopeFactory.create(fTypeBinding.getJavaElement()), pm, status);
+					if (!status.isOK()) {
+						result.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error));
+					} else if (results.length > 0) {
+						SearchMatch[] matches= results[0].getSearchResults();
+						TypeReferenceMatch match= (TypeReferenceMatch) matches[0];
+						IJavaElement element= (IJavaElement)match.getElement();
+						String name= element.getElementName();
+						if (element instanceof IType elementType) {
+							name= elementType.getFullyQualifiedName('.');
+						}
+						result.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ConvertToRecordRefactoring_subclassed_error, name)));
+					}
+				}
+			}
 			return result;
 		} finally {
 			pm.done();
