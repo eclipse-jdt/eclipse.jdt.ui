@@ -1190,9 +1190,14 @@
             class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider"/>
    </extension>
 
-   <extension
-         point="org.eclipse.ui.themes">
-        <themeElementCategory label="%javaPresentation.label" id="org.eclipse.jdt.ui.presentation"/>
+   <extension point="org.eclipse.ui.themes">
+        <themeElementCategory 
+        	label="%javaPresentation.label" 
+        	id="org.eclipse.jdt.ui.presentation">
+         	<description>
+            	%JavaTheme.description
+         	</description>
+        </themeElementCategory>
       <fontDefinition
             label="%javaEditorFontDefiniton.label"
             defaultsTo="org.eclipse.jface.textfont"
