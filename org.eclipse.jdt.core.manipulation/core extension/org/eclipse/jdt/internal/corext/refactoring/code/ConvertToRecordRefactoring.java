@@ -449,7 +449,6 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			updateReferences(pm);
 
 			CompilationUnitChange rewriteChange= fBaseCURewrite.createChange(true, pm);
-			System.out.println(rewriteChange.getEdit());
 			fChangeManager.manage(typeCU, rewriteChange);
 			changes.addAll(Arrays.asList(fChangeManager.getAllChanges()));
 			final Map<String, String> arguments= new HashMap<>();
