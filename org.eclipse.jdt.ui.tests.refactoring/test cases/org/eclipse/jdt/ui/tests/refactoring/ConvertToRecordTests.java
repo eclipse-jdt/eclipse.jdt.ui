@@ -135,7 +135,8 @@ public class ConvertToRecordTests extends GenericRefactoringTest {
 	public void test1() throws Exception {
 		helper1(8, 18, 8, 23);
 	}
-@Test
+
+	@Test
 	public void test2() throws Exception {
 		helper1(12, 16, 12, 21);
 	}
