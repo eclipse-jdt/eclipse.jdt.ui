@@ -1204,7 +1204,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getConvertToRecordProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is14OrHigher(context.getCompilationUnit().getJavaProject())) {
+		if (!JavaModelUtil.is16OrHigher(context.getCompilationUnit().getJavaProject())) {
 			return false;
 		}
 		return ConvertRecordSubProcessor.getConvertToRecordProposals(context, node, resultingCollections);

@@ -2,10 +2,11 @@ package p;
 // Class A
 public class A {
 
-	/** 
+	/**
 	 * Inner
 	 */
-	private static record Inner (int a, String b) {}
+	private static record Inner(int a, String b) {
+	}
 	
 	public void foo() {
 		Inner x= new Inner(3, "abc");
