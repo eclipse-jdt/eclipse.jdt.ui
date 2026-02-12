@@ -343,6 +343,9 @@ public final class RefactoringAvailabilityTesterCore  {
 			if (type.isImplicitlyDeclared() || type.isBinary() || type.isLambda() || type.isAnnotation()) {
 				return false;
 			}
+			if (type.getJavaProject() == null || !JavaModelUtil.is16OrHigher(type.getJavaProject())) {
+				return false;
+			}
 			if (type.isClass()) {
 				IField[] fields= type.getFields();
 				if (fields.length == 0) {
