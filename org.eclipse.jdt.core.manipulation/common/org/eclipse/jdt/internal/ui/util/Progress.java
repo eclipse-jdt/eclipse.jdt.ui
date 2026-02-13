@@ -14,20 +14,33 @@
 package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
-@SuppressWarnings("deprecation")
 public class Progress {
 	private Progress() {
 		// static Utility
 	}
 
 	public static IProgressMonitor subMonitor(IProgressMonitor monitor, int ticks) {
-		return new org.eclipse.core.runtime.SubProgressMonitor(monitor, ticks);
+		if (monitor instanceof SubMonitor) {
+			return ((SubMonitor) monitor).split(ticks);
+		}
+		return SubMonitor.convert(monitor, ticks);
 	}
+
 	public static IProgressMonitor subMonitorSupressed(IProgressMonitor monitor, int ticks) {
-		return new org.eclipse.core.runtime.SubProgressMonitor(monitor, ticks, org.eclipse.core.runtime.SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
+		if (monitor instanceof SubMonitor) {
+			return ((SubMonitor) monitor).split(ticks, SubMonitor.SUPPRESS_SUBTASK);
+		}
+		return SubMonitor.convert(monitor, ticks);
 	}
+
 	public static IProgressMonitor subMonitorPrepend(IProgressMonitor monitor, int ticks) {
-		return new org.eclipse.core.runtime.SubProgressMonitor(monitor, ticks, org.eclipse.core.runtime.SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+		// PREPEND_MAIN_LABEL_TO_SUBTASK has no direct replacement in SubMonitor.
+		// Simply use split() as clients should use fully-formatted task labels instead.
+		if (monitor instanceof SubMonitor) {
+			return ((SubMonitor) monitor).split(ticks);
+		}
+		return SubMonitor.convert(monitor, ticks);
 	}
 }

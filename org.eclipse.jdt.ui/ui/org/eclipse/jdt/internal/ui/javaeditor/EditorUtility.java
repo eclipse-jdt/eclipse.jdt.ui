@@ -31,10 +31,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 
@@ -105,7 +105,6 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaCompareUtilities;
 import org.eclipse.jdt.internal.ui.text.LineComparator;
-import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 /**
@@ -801,19 +800,18 @@ public class EditorUtility {
 				 */
 				@Override
 				public void run() throws Exception {
-					monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_calculatingChangedRegions_message, 20);
+					SubMonitor subMonitor = SubMonitor.convert(monitor, JavaEditorMessages.CompilationUnitDocumentProvider_calculatingChangedRegions_message, 20);
 					IPath location= buffer.getLocation();
 
 					ITextFileBufferManager fileBufferManager= FileBuffers.createTextFileBufferManager();
-					fileBufferManager.connect(location, LocationKind.NORMALIZE, getSubProgressMonitor(monitor, 15));
+					fileBufferManager.connect(location, LocationKind.NORMALIZE, subMonitor.split(15));
 					try {
 						IDocument currentDocument= buffer.getDocument();
 						IDocument oldDocument= fileBufferManager.getTextFileBuffer(location, LocationKind.NORMALIZE).getDocument();
 
 						result[0]= getChangedLineRegions(oldDocument, currentDocument);
 					} finally {
-						fileBufferManager.disconnect(location, LocationKind.NORMALIZE, getSubProgressMonitor(monitor, 5));
-						monitor.done();
+						fileBufferManager.disconnect(location, LocationKind.NORMALIZE, subMonitor.split(5));
 					}
 				}
 
@@ -873,21 +871,6 @@ public class EditorUtility {
 		return result[0];
 	}
 
-	/**
-	 * Creates and returns a new sub-progress monitor for the
-	 * given parent monitor.
-	 *
-	 * @param monitor the parent progress monitor
-	 * @param ticks the number of work ticks allocated from the parent monitor
-	 * @return the new sub-progress monitor
-	 * @since 3.4
-	 */
-	private static IProgressMonitor getSubProgressMonitor(IProgressMonitor monitor, int ticks) {
-		if (monitor != null)
-			return Progress.subMonitorPrepend(monitor, ticks);
-
-		return new NullProgressMonitor();
-	}
 
 	private EditorUtility() {
 	}
