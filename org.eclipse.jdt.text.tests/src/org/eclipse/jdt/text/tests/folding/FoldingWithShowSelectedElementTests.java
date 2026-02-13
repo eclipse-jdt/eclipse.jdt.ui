@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Daniel Schmid and others.
+ * Copyright (c) 2025, 2026 Daniel Schmid and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -84,7 +84,7 @@ public class FoldingWithShowSelectedElementTests {
 				""";
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "B.java", str);
 		assertEquals(1, regions.size());
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 3);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4);
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class FoldingWithShowSelectedElementTests {
 
 			IDocument document= editor.getViewer().getDocument();
 			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6);
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4);
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5);
 
 			document.replace(str.indexOf("content"), 0, "method ");
 
@@ -132,7 +132,7 @@ public class FoldingWithShowSelectedElementTests {
 			assertEquals(2, regions.size());
 
 			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6);
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4);
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5);
 		} finally {
 			editor.close(false);
 		}

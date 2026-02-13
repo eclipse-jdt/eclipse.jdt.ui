@@ -141,7 +141,7 @@ public class FoldingTest {
 
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // Javadoc
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // foo Methode
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 7); // foo Methode
 	}
 
 	@Test
@@ -160,8 +160,8 @@ public class FoldingTest {
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 3); // foo Methode
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // bar Methode
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // foo Methode
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 7); // bar Methode
 	}
 
 	@Test
@@ -179,13 +179,8 @@ public class FoldingTest {
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		if (newFoldingActive) {
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // InnerClass
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // bar Methode
-		} else {
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // InnerClass
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // bar Methode
-		}
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // InnerClass
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5); // bar Methode
 	}
 
 	@Test
@@ -210,9 +205,9 @@ public class FoldingTest {
 
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // OuterWithDocs Javadoc
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 11); // InnerWithDocs Klasse
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 12); // InnerWithDocs Klasse
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 6, 8); // InnerWithDocs Javadoc
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 9, 10); // bar Methode
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 9, 11); // bar Methode
 	}
 
 	@Test
@@ -271,7 +266,7 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 6); // 2. Javadoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 7, 9); // 3. Javadoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 12, 14); // 4. Javadoc
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 15, 19); // Methode b()
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 15, 20); // Methode b()
 		if (newFoldingActive) {
 			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 16, 18); // 5. Javadoc
 		}
@@ -309,7 +304,7 @@ public class FoldingTest {
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // JavaDoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 7, 8); // 2. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 7, 9); // 2. Method
 	}
 
 	@Test
@@ -327,7 +322,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // 1. Method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // if
 	}
 
@@ -348,7 +343,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 3);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 7); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 8); // 1. Method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // try
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // catch
 	}
@@ -368,7 +363,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // 1. Method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // while
 	}
 
@@ -387,7 +382,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // 1. Method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // for
 	}
 
@@ -406,7 +401,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // 1. Method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // for
 	}
 
@@ -425,7 +420,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // 1. Method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // do
 	}
 
@@ -444,7 +439,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // 1. Method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // synchronized
 	}
 
@@ -464,8 +459,8 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 6); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 5); // Supplier
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 7); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 6); // Supplier
 	}
 
 	@Test
@@ -482,12 +477,8 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		if (newFoldingActive) {
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // Object
-		} else {
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // Object
-		}
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // Object
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5); // Method
 	}
 
 	@Test
@@ -502,7 +493,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 1);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 3); // enum
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 4); // enum
 	}
 
 	@Test
@@ -517,7 +508,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 1);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 3); // static
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // static
 	}
 
 	@Test
@@ -541,7 +532,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 5);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 11); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 12); // method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 10); // if
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 9); // for
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 8); // while
@@ -562,12 +553,8 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // method
-		if (newFoldingActive) {
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // inner class
-		} else {
-			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5); // inner class
-		}
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5); // inner class
 	}
 
 
@@ -601,10 +588,11 @@ public class FoldingTest {
 				    }
 				}
 				""";
-		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 3);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 20); // Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 21); // x()
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 15, 19); // switch
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 22, 23); // bar()
 	}
 
 	@Test
@@ -641,7 +629,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 6);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 24); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 25); // method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 23); // switch
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // 1. case
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 10, 11); // 3. case
@@ -674,7 +662,7 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 4);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 15); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 16); // method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 14); // switch
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // case
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 12, 13); // default
