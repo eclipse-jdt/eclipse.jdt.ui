@@ -524,7 +524,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			Highlighting h = fromSemanticTokenType(t.tokenType());
 			if (h == null) {
 				JavaPlugin.logErrorMessage("Cannot find semantic highlighting for %s".formatted(t)); //$NON-NLS-1$
-			} else {
+			} else if (h.isEnabled()) {
 				addPosition(t.ofset(), t.length(), h);
 			}
 		}
@@ -611,9 +611,6 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private Highlighting findSemanticHighlighting(String preferenceKey) {
 		for (Highlighting h : fJobHighlightings) {
 			if (Objects.equals(preferenceKey, h.getPreferenceKey())) {
-				if (!h.isEnabled()) {
-					break;
-				}
 				return h;
 			}
 		}
@@ -623,9 +620,6 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private Highlighting findSyntaxHighlighting(String key) {
 		for (Highlighting h : fJobSyntaxHighlightings) {
 			if (Objects.equals(key, h.getPreferenceKey())) {
-				if (!h.isEnabled()) {
-					break;
-				}
 				return h;
 			}
 		}
