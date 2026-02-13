@@ -305,8 +305,6 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
 	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
 	private static final String CHANGED_REGION_POSITION_CATEGORY= "changed_region_position_category"; //$NON-NLS-1$
-	private static boolean FIRST_CALL= false;
-	private static boolean FIRST_CALL_DONE= false;
 
 	@Override
 	public boolean needsChangedRegions(ICompilationUnit unit) throws CoreException {
@@ -333,18 +331,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			CompositeChange result= new CompositeChange(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName);
 			LinkedList<UndoEdit> undoEdits= new LinkedList<>();
 
-			if (FIRST_CALL && !FIRST_CALL_DONE) {
-				FIRST_CALL= false;
-				FIRST_CALL_DONE= true;
-			} else {
-				FIRST_CALL= true;
-			}
-			HashSet<ICleanUp> slowCleanUps;
-			if (FIRST_CALL_DONE) {
-				slowCleanUps= new HashSet<>();
-			} else {
-				slowCleanUps= null;
-			}
+			HashSet<ICleanUp> slowCleanUps= new HashSet<>();
 			IUndoManager manager= RefactoringCore.getUndoManager();
 
 			boolean success= false;
@@ -428,7 +415,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     			manager.addUndo(result.getName(), undo);
 			}
 
-			if (slowCleanUps != null && slowCleanUps.size() > 0)
+			if (slowCleanUps.size() > 0)
 				showSlowCleanUpsWarning(slowCleanUps);
 		} finally {
 			monitor.done();
