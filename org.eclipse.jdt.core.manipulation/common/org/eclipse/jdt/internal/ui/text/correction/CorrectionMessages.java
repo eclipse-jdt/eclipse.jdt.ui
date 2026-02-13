@@ -76,6 +76,8 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_name_extension_from_interface;
 	public static String QuickAssistProcessor_convert_constant_name;
 	public static String QuickAssistProcessor_convert_constant_name_description;
+	public static String QuickAssistProcessor_convert_project_name;
+	public static String QuickAssistProcessor_convert_project_name_description;
 	public static String SerialVersionHashOperation_computing_id;
 	public static String SerialVersionHashOperation_error_classnotfound;
 	public static String SerialVersionHashOperation_save_caption;
