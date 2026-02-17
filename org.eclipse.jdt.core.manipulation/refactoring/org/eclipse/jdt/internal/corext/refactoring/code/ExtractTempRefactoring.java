@@ -759,19 +759,17 @@ public class ExtractTempRefactoring extends Refactoring {
 						}
 
 						ITypeBinding firstBinding = resolveBinding(firstSelectedOperand);
-						firstSelectedOperand.getNodeType();
 						for ( int i = curExpressionsPos; i < expressions.size();  i++) {
 							Expression curExpression = expressions.get(i);
 							if(curExpression.getStartPosition() < endOfSelection) {
 								System.out.println("Declared method: " + curExpression.getNodeType());
 								ITypeBinding curExpBinding = resolveBinding(curExpression);
 								if(!firstBinding.isEqualTo(curExpBinding)) {
-									System.out.println("Types are different, it could result in unexpected Behaviour");
-									return RefactoringStatus.createWarningStatus("Types are different, this could result in unexpected behaviour");
-								} else {
-									System.out.println("everything is fine");
+									if (!isTypeCompatible(firstBinding, curExpBinding)) {
+										System.out.println("Extracting fragment of addition operation with different types could alter program behavior");
+										return RefactoringStatus.createWarningStatus("Extracting fragment of addition operation with different types could alter program behavior");
+									}
 								}
-								curExpression.resolveTypeBinding().getDeclaredMethods();
 							}
 						}
 					}
@@ -779,6 +777,19 @@ public class ExtractTempRefactoring extends Refactoring {
 			}
 		}
 		return null;
+	}
+
+	private boolean isTypeCompatible(ITypeBinding left, ITypeBinding right) {
+		if(left.isPrimitive()) {
+			if (right.isPrimitive() || right.getSuperclass().getName().equals("Number")) {
+				return true;
+			}
+		} else if (left.getSuperclass().getName().equals("Number")){
+			if (right.isPrimitive() || right.getSuperclass().equals("Number" )) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 
