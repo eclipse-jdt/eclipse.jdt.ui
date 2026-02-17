@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.ChangeMethodSignatureDescrip
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertAnonymousDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertLocalVariableDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertMemberTypeDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.ConvertToRecordDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.CopyDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.DeleteDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.EncapsulateFieldDescriptor;
@@ -66,6 +67,10 @@ public class RefactoringSignatureDescriptorFactory {
 
 	public static ConvertAnonymousDescriptor createConvertAnonymousDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ConvertAnonymousDescriptor(project, description, comment, arguments, flags);
+	}
+
+	public static ConvertToRecordDescriptor createConvertToRecordDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
+		return new ConvertToRecordDescriptor(project, description, comment, arguments, flags);
 	}
 
 	public static GeneralizeTypeDescriptor createGeneralizeTypeDescriptor() {

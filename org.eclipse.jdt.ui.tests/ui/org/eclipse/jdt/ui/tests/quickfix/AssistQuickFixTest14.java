@@ -39,7 +39,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class AssistQuickFixTest14 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java14ProjectTestSetup(true);
+    public ProjectTestSetup projectSetup = new Java14ProjectTestSetup(false);
 
 	private IJavaProject fJProject1;
 

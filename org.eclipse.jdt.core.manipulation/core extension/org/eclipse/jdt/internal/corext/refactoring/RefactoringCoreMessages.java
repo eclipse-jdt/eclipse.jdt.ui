@@ -2503,6 +2503,46 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_lambda_expression;
 
+	public static String ConvertToRecordRefactoring_name;
+
+	public static String ConvertToRecordRefactoring_no_type;
+
+	public static String ConvertToRecordRefactoring_unexpected_error;
+
+	public static String ConvertToRecordRefactoring_not_private;
+
+	public static String ConvertToRecordRefactoring_cannot_convert_fields;
+
+	public static String ConvertToRecordRefactoring_has_constructors;
+
+	public static String ConvertToRecordRefactoring_not_simple_case;
+
+	public static String ConvertToRecordRefactoring_progress_updating_references;
+
+	public static String ConvertToRecordRefactoring_group_replace_getters;
+
+	public static String ConvertToRecordRefactoring_descriptor_description_short;
+
+	public static String ConvertToRecordRefactoring_descriptor_description;
+
+	public static String ConvertToRecordRefactoring_not_enough_getters;
+
+	public static String ConvertToRecordRefactoring_cannot_extend;
+
+	public static String ConvertToRecordRefactoring_fields_initialized;
+
+	public static String ConvertToRecordRefactoring_multiple_constructors;
+
+	public static String ConvertToRecordRefactoring_nonstandard_constructor;
+
+	public static String ConvertToRecordRefactoring_not_implicit_getter;
+
+	public static String ConvertToRecordRefactoring_setter_found;
+
+	public static String ConvertToRecordRefactoring_has_static_members;
+
+	public static String ConvertToRecordRefactoring_subclassed_error;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}

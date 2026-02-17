@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -36,6 +37,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -54,6 +56,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
@@ -85,6 +88,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT5_CONTAINER_PATH);
+		JavaProjectHelper.addToClasspath(fJProject1, cpe);
 	}
 
 	@After
@@ -4111,6 +4117,71 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			}
 			""";
 		assertEqualString(preview, str1);
+	}
+
+	@Test
+	public void testMethodCanBeStatic2() throws Exception {
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_MISSING_STATIC_ON_METHOD, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD, JavaCore.WARNING);
+		JavaCore.setOptions(hashtable);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import org.junit.jupiter.api.BeforeEach;
+			import org.junit.jupiter.api.Test;
+			public class E {
+				@BeforeEach
+				public void setup() {
+				}
+				@Test
+			    public void foo() {
+			        System.out.println("doesn't need class");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		assertProposalDoesNotExist(proposals, CorrectionMessages.ModifierCorrectionSubProcessor_addstatic_description);
+	}
+
+	@Test
+	public void testMethodCanBeStatic3() throws Exception {
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_MISSING_STATIC_ON_METHOD, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD, JavaCore.WARNING);
+		JavaCore.setOptions(hashtable);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import org.junit.jupiter.api.BeforeEach;
+			import org.junit.jupiter.api.Test;
+			public class E {
+				@BeforeEach
+				public void setup() {
+					System.out.println("setup");
+				}
+				@Test
+			    public void foo() {
+			        System.out.println("doesn't need class");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		assertProposalDoesNotExist(proposals, CorrectionMessages.ModifierCorrectionSubProcessor_addstatic_description);
 	}
 
 	@Test

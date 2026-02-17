@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 GK Software SE and others.
+ * Copyright (c) 2020, 2026 GK Software SE and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -366,5 +366,100 @@ public class JavadocHoverTests extends CoreTests {
 			assertNotEquals("Expected HTML not found, instead found : " + actualHtmlContent,  -1, index);
 		}
 	}
+
+	@Test
+	public void testLinkTagWithHttp_01() throws Exception {
+		String source=
+				"""
+				package p;
+				public class Javadoc {
+					/**
+					 * {@link https://eclipse.org}
+					 */
+					void foo(){}
+				}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("Javadoc");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			String expectedCodeSequence = "<code><a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BJavadoc.java%E2%98%83Javadoc~foo%E2%98%82%20https://eclipse.org'> https://eclipse.org</a></code>";
+
+			int index= actualHtmlContent.indexOf("<code>");
+			assertNotEquals(-1, index);
+			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
+			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
+		}
+	}
+
+	@Test
+	public void testLinkTagWithHttp_02() throws Exception {
+		String source=
+				"""
+				package p;
+				public class Javadoc {
+					/**
+					 * {@linkplain https://eclipse.org}
+					 */
+					void foo(){}
+				}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("Javadoc");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			String expectedCodeSequence = "<a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BJavadoc.java%E2%98%83Javadoc~foo%E2%98%82%20https://eclipse.org'> https://eclipse.org</a>";
+
+			int index= actualHtmlContent.lastIndexOf("<a");
+			assertNotEquals(-1, index);
+			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
+			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
+		}
+	}
+
+	@Test
+	public void testCharConstant() throws Exception {
+		String source=
+				"""
+				package p;
+				public class Javadoc {
+					static final char c = (char)0;
+				}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("Javadoc");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+			System.out.println(actualHtmlContent);
+
+			String expectedCodeSequence = "char <a class='header' href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp'>p</a>.<a class='header' href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BJavadoc.java%E2%98%83Javadoc'>Javadoc</a>.c</span> : <span style='white-space:pre'>'' [\\u0000]";
+
+			int index= actualHtmlContent.lastIndexOf("char");
+			assertNotEquals(-1, index);
+			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
+			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
+		}
+	}
+
 }
 

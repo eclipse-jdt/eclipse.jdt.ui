@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2023 IBM Corporation and others.
+ * Copyright (c) 2019, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -333,6 +334,47 @@ public final class RefactoringAvailabilityTesterCore  {
 			if (element instanceof IField && JdtFlags.isEnum((IMember) element))
 				return false;
 			return type.isAnonymous();
+		}
+		return false;
+	}
+
+	public static boolean isConvertToRecordAvailable(final IType type) throws JavaModelException {
+		if (Checks.isAvailable(type)) {
+			if (type.isImplicitlyDeclared() || type.isBinary() || type.isLambda() || type.isAnnotation()) {
+				return false;
+			}
+			if (type.getJavaProject() == null || !JavaModelUtil.is16OrHigher(type.getJavaProject())) {
+				return false;
+			}
+			if (type.isClass()) {
+				IField[] fields= type.getFields();
+				if (fields.length == 0) {
+					return false;
+				}
+				for (IField field : fields) {
+					if (!(Flags.isPrivate(field.getFlags()))
+							|| Flags.isStatic(field.getFlags())) {
+						return false;
+					}
+				}
+				IMethod[] methods= type.getMethods();
+				boolean hasConstructor= false;
+				for (IMethod method : methods) {
+					if (method.isConstructor()) {
+						if (hasConstructor) {
+							return false;
+						}
+						hasConstructor= true;
+						if (method.getNumberOfParameters() < fields.length) {
+							return false;
+						}
+					}
+					if (Modifier.isStatic(method.getFlags())) {
+						return false;
+					}
+				}
+			}
+			return type.isClass();
 		}
 		return false;
 	}

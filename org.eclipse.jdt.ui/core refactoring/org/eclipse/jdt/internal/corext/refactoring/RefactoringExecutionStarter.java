@@ -58,6 +58,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -70,6 +72,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.ConvertToRecordRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
@@ -136,6 +139,7 @@ import org.eclipse.jdt.internal.ui.refactoring.UseSupertypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.code.InlineMethodWizard;
 import org.eclipse.jdt.internal.ui.refactoring.code.ReplaceInvocationsWizard;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ConvertToRecordWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteUserInterfaceManager;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.NewNameQueries;
@@ -267,6 +271,21 @@ public final class RefactoringExecutionStarter {
 		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(unit, offset, length);
 		new RefactoringStarter().activate(new ConvertAnonymousToNestedWizard(refactoring), shell, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title,
 				IRefactoringSaveModes.SAVE_REFACTORING);
+	}
+
+	public static void startConvertToRecordRefactoring(final ICompilationUnit unit, final int offset, @SuppressWarnings("unused") final int length, final Shell shell) {
+		try {
+			IJavaElement element= unit.getElementAt(offset);
+			if (!(element instanceof ITypeRoot) && element instanceof ISourceReference ref) {
+				ISourceRange range= ref.getNameRange();
+				if (range != null) {
+					final ConvertToRecordRefactoring refactoring= new ConvertToRecordRefactoring(unit, range.getOffset(), range.getLength());
+					new RefactoringStarter().activate(new ConvertToRecordWizard(refactoring), shell, RefactoringMessages.ConvertToRecord_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
+				}
+			}
+		} catch (JavaModelException e) {
+			// do nothing
+		}
 	}
 
 	public static void startCopyRefactoring(IResource[] resources, IJavaElement[] javaElements, Shell shell) throws JavaModelException {

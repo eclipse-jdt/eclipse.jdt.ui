@@ -1190,9 +1190,14 @@
             class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider"/>
    </extension>
 
-   <extension
-         point="org.eclipse.ui.themes">
-        <themeElementCategory label="%javaPresentation.label" id="org.eclipse.jdt.ui.presentation"/>
+   <extension point="org.eclipse.ui.themes">
+        <themeElementCategory 
+        	label="%javaPresentation.label" 
+        	id="org.eclipse.jdt.ui.presentation">
+         	<description>
+            	%JavaTheme.description
+         	</description>
+        </themeElementCategory>
       <fontDefinition
             label="%javaEditorFontDefiniton.label"
             defaultsTo="org.eclipse.jface.textfont"
@@ -2759,6 +2764,13 @@
                id="org.eclipse.jdt.ui.actions.ConvertAnonymousToNested">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.convert.class.to.record"
+               label="%Refactoring.convertClassToRecordAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup2"
+               id="org.eclipse.jdt.ui.actions.ConvertClassToRecord">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
                label="%Refactoring.convertLocalToFieldAction.label"
                retarget="true"
@@ -4096,6 +4108,12 @@
             description="%ActionDefinition.convertAnonymousToNested.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested">
+      </command>
+      <command
+            name="%ActionDefinition.convertClassToRecord.name"
+            description="%ActionDefinition.convertClassToRecord.description"
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.convert.class.to.record">
       </command>
       <command
             name="%ActionDefinition.convertNestedToTopLevel.name"

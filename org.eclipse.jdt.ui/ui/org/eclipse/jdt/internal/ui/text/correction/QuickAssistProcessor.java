@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -339,6 +339,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getSplitTryResourceProposal(context, coveringNode, null)
 					|| getConvertPatternInstanceofIfStmtToSwitchProposals(context, coveringNode, null)
 					|| getDeprecatedFieldProposal(context, coveringNode, null, null)
+					|| getConvertToRecordProposals(context, coveringNode, null)
 					|| getDeprecatedProposal(context, coveringNode, null, null);
 		}
 		return false;
@@ -367,6 +368,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getAddMethodDeclaration(context, coveringNode, resultingCollections);
 			getDeprecatedProposal(context, coveringNode, locations, resultingCollections);
 			getDeprecatedFieldProposal(context, coveringNode, locations, resultingCollections);
+			getConvertToRecordProposals(context, coveringNode, resultingCollections);
 
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
@@ -1201,6 +1203,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return LocalCorrectionsSubProcessor.getAssignToVariableProposals(context, node, locations, resultingCollections);
 	}
 
+	public static boolean getConvertToRecordProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+		if (!JavaModelUtil.is16OrHigher(context.getCompilationUnit().getJavaProject())) {
+			return false;
+		}
+		return ConvertRecordSubProcessor.getConvertToRecordProposals(context, node, resultingCollections);
+	}
 	private static boolean containsMatchingProblem(IProblemLocation[] locations, int problemId) {
 		if (locations != null) {
 			for (IProblemLocation location : locations) {
