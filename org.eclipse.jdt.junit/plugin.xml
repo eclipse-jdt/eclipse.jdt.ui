@@ -273,6 +273,15 @@
    </extension>
 
    <extension
+         point="org.eclipse.jdt.ui.quickAssistProcessors">
+      <quickAssistProcessor
+            name="%junitQuickAssistProcessor"
+            class="org.eclipse.jdt.internal.junit.ui.JUnitQuickAssistProcessor"
+            id="org.eclipse.jdt.junit.JUnitQuickAssistProcessor">
+      </quickAssistProcessor>
+   </extension>
+
+   <extension
          point="org.eclipse.jdt.ui.classpathFixProcessors">
       <classpathFixProcessor
             name="%junitClasspathFixProcessor"

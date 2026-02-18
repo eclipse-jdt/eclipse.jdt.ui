@@ -222,7 +222,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 						// if marker is on package-info.java, no need to create it (another quickfix offers just to add @NonNullByDefault)
 						continue;
 					}
-					if (createPackageInfoWithDefaultNullnessProposal.fProblemId == id)
+					if (createPackageInfoWithDefaultNullnessProposal.getProblemId() == id)
 						result.add(marker);
 				}
 				if (result.isEmpty())

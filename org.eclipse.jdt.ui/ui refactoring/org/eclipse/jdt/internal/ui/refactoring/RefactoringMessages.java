@@ -1040,6 +1040,14 @@ public final class RefactoringMessages extends NLS {
 
 	public static String SelfEncapsulateFieldInputPage_access_warning;
 
+	public static String ConvertToRecordWizard_defaultPageTitle;
+
+	public static String ConvertToRecordWizard_message;
+
+	public static String ConvertToRecord_dialog_title;
+
+	public static String ConvertToRecordAction_Convert_Class;
+
 
 	static {
 		reloadMessages();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 IBM Corporation and others.
+ * Copyright (c) 2005, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -106,6 +106,16 @@ public final class RefactoringAvailabilityTester {
 		return null;
 	}
 
+	public static IType getEnclosingType(IStructuredSelection selection) {
+		Object first= selection.getFirstElement();
+		if (first instanceof IType)
+			return (IType) first;
+		if (first instanceof IMember) {
+			return ((IMember) first).getDeclaringType();
+		}
+		return null;
+	}
+
 	public static IType getTopLevelType(final IMember[] members) {
 		return RefactoringAvailabilityTesterCore.getTopLevelType(members);
 	}
@@ -181,6 +191,21 @@ public final class RefactoringAvailabilityTester {
 		if (type != null)
 			return RefactoringAvailabilityTester.isConvertAnonymousAvailable(type);
 		return false;
+	}
+
+	public static boolean isConvertToRecordAvailable(final IType type) throws JavaModelException {
+		return RefactoringAvailabilityTesterCore.isConvertToRecordAvailable(type);
+	}
+
+	public static boolean isConvertToRecordAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IType type= RefactoringActions.getEnclosingType(selection);
+		if (type != null)
+			return RefactoringAvailabilityTester.isConvertToRecordAvailable(type);
+		return false;
+	}
+
+	public static boolean isConvertToRecordAvailable(final IStructuredSelection selection) throws JavaModelException {
+		return isConvertToRecordAvailable(getEnclosingType(selection));
 	}
 
 	public static boolean isCopyAvailable(final IResource[] resources, final IJavaElement[] elements) throws JavaModelException {
