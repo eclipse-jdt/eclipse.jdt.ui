@@ -1120,6 +1120,11 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test163() throws Exception {
+		warningHelper1(6, 32, 6, 39, true, false, "x", "string", RefactoringStatus.WARNING);
+	}
+
+	@Test
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
