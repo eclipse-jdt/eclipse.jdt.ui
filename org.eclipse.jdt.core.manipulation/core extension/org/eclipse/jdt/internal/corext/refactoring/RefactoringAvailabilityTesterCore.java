@@ -361,17 +361,16 @@ public final class RefactoringAvailabilityTesterCore  {
 				boolean hasConstructor= false;
 				for (IMethod method : methods) {
 					if (method.isConstructor()) {
-						if (hasConstructor) {
-							return false;
-						}
-						hasConstructor= true;
-						if (method.getNumberOfParameters() < fields.length) {
-							return false;
+						if (method.getNumberOfParameters() == fields.length) {
+							hasConstructor= true;
 						}
 					}
 					if (Modifier.isStatic(method.getFlags())) {
 						return false;
 					}
+				}
+				if (!hasConstructor) {
+					return false;
 				}
 			}
 			return type.isClass();

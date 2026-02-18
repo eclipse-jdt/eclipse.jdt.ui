@@ -16,9 +16,11 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -202,6 +205,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			}
 
 			IVariableBinding[] fields= fTypeBinding.getDeclaredFields();
+			List<IVariableBinding> fieldsToSet= new ArrayList<>();
 			for (IVariableBinding field : fields) {
 				int modifiers= field.getModifiers();
 				if (!Modifier.isPrivate(modifiers)) {
@@ -210,22 +214,20 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				if (Modifier.isStatic(modifiers)) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_static_members);
 				}
+				fieldsToSet.add(field);
 			}
 
 			IMethodBinding[] methodBindings= fTypeBinding.getDeclaredMethods();
-			boolean hasConstructor= false;
+			int constructorCount= 0;
 			for (IMethodBinding method : methodBindings) {
 				if (method.isConstructor()) {
-					if (hasConstructor) {
-						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_constructors);
-					}
-					hasConstructor= true;
+					++constructorCount;
 				}
 				if (Modifier.isStatic(method.getModifiers())) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_static_members);
 				}
 			}
-			if (!hasConstructor) {
+			if (constructorCount == 0) {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 			}
 
@@ -265,26 +267,35 @@ public class ConvertToRecordRefactoring extends Refactoring {
 						public boolean visit(MethodDeclaration node) {
 							List<Statement> statements= ASTNodes.asList(node.getBody());
 							if (node.isConstructor()) {
-								if (fConstructor != null) {
-									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_multiple_constructors);
-								}
-								fConstructor= node;
+								Set<IVariableBinding> assignedFieldBindings= new HashSet<>();
 								for (Statement statement : statements) {
 									if (statement instanceof ExpressionStatement expStmt) {
 										if (expStmt.getExpression() instanceof Assignment assignment) {
+											if (fConstructor != null && fConstructor != node) {
+												throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+											}
+											fConstructor= node;
 											Expression leftHandSide= assignment.getLeftHandSide();
 											Expression rightHandSide= assignment.getRightHandSide();
 											if (rightHandSide instanceof SimpleName simpleName) {
 												IBinding binding= simpleName.resolveBinding();
 												if (binding instanceof IVariableBinding simpleNameBinding && simpleNameBinding.isParameter()) {
-													if (getFieldBinding(leftHandSide) != null) {
+													IVariableBinding fieldBinding= getFieldBinding(leftHandSide);
+													if (fieldBinding != null) {
+														assignedFieldBindings.add(fieldBinding);
 														continue;
 													}
 												}
 											}
 										}
+									} else if (statements.size() == 1 && statement instanceof ConstructorInvocation) {
+										fMethodsToCopy.add(node);
+										continue;
 									}
 									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_nonstandard_constructor);
+								}
+								if (!assignedFieldBindings.isEmpty() && assignedFieldBindings.size() < fieldsToSet.size()) {
+									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 								}
 							} else {
 								if (node.getName().getFullyQualifiedName().equals("equals")) { //$NON-NLS-1$
