@@ -17,4 +17,9 @@ public final class A {
 	public String getB() {
 		return b;
 	}
+
+	@Override
+	public String toString() {
+		return "toString";
+	}
 }

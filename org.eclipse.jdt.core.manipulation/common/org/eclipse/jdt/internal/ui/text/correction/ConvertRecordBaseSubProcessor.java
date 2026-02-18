@@ -51,7 +51,7 @@ public abstract class ConvertRecordBaseSubProcessor<T> {
 
 		Assert.isNotNull(context);
 
-		ConvertToRecordRefactoring refactoring= new ConvertToRecordRefactoring(context.getCompilationUnit(), (CompilationUnit) node.getRoot(), context.getSelectionOffset(), context.getSelectionLength());
+		ConvertToRecordRefactoring refactoring= new ConvertToRecordRefactoring(context.getCompilationUnit(), (CompilationUnit) node.getRoot(), node.getStartPosition(), node.getLength());
 		try {
 			if (refactoring.checkAllConditions(null).isOK()) {
 				if (proposals == null) {

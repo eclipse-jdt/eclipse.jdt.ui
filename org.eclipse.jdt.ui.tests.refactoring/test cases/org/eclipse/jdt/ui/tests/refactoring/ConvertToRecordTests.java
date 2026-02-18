@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertToRecordRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java14Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java16Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class ConvertToRecordTests extends GenericRefactoringTest {
@@ -45,7 +45,7 @@ public class ConvertToRecordTests extends GenericRefactoringTest {
 	}
 
 	public ConvertToRecordTests() {
-		super(new Java14Setup());
+		super(new Java16Setup());
 	}
 
 	protected ConvertToRecordTests(RefactoringTestSetup rts) {
@@ -128,12 +128,27 @@ public class ConvertToRecordTests extends GenericRefactoringTest {
 
 	@Test
 	public void test0() throws Exception {
-		helper1(8, 12, 8, 13);
+		helper1(9, 17, 9, 18);
+	}
+
+	@Test
+	public void test1() throws Exception {
+		helper1(8, 18, 8, 23);
 	}
 
 	@Test
 	public void test2() throws Exception {
 		helper1(12, 16, 12, 21);
+	}
+
+	@Test
+	public void test3() throws Exception {
+		helper1(12, 16, 12, 21);
+	}
+
+	@Test
+	public void test4() throws Exception {
+		helper1(9, 17, 9, 18);
 	}
 
 	@Test
@@ -169,6 +184,11 @@ public class ConvertToRecordTests extends GenericRefactoringTest {
 	@Test
 	public void testFail7() throws Exception {
 		helper2(15, 16, 15, 21);
+	}
+
+	@Test
+	public void testFail8() throws Exception {
+		helper2(8, 18, 8, 23);
 	}
 
 }
