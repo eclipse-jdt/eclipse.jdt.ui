@@ -719,8 +719,6 @@ public class ExtractTempRefactoring extends Refactoring {
 	private ITypeBinding resolveBinding(Expression exp) {
 		ITypeBinding curExpBinding = null;
 		if(exp.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			System.out.println("Different approach needed");
-			System.out.println(exp.resolveTypeBinding().getDeclaredMethods());
 			curExpBinding = ((MethodInvocation)exp).resolveMethodBinding().getReturnType();
 		} else {
 			curExpBinding = exp.resolveTypeBinding();
@@ -734,16 +732,10 @@ public class ExtractTempRefactoring extends Refactoring {
 			// Is newFrag an Infix Operation
 			Expression newExp = expFrag.getAssociatedExpression();
 			if (newExp instanceof InfixExpression infixNewExp) {
-				System.out.println(infixNewExp.hasExtendedOperands());
-				System.out.println(fSelectionStart + " - " + fSelectionLength);
-				System.out.println("newFrag: " + newExp.getStartPosition());
-				System.out.println("fSelExp: " + fSelectedExpression.getStartPosition());
 				if (infixNewExp.getOperator() == InfixExpression.Operator.PLUS && infixNewExp.hasExtendedOperands()) {
 					if ( fSelectedExpression.getStartPosition() > infixNewExp.getStartPosition()) {
 						int selectStartingPosition = fSelectedExpression.getStartPosition();
 						int endOfSelection = selectStartingPosition +  fSelectedExpression.getLength();
-						Expression leftOperand = infixNewExp.getLeftOperand();
-						System.out.println("Left Operand: " + leftOperand.getStartPosition());
 						Expression firstSelectedOperand = infixNewExp.getRightOperand();
 						int curExpressionsPos = 0;
 						List<Expression> expressions = infixNewExp.extendedOperands();
@@ -759,15 +751,19 @@ public class ExtractTempRefactoring extends Refactoring {
 						}
 
 						ITypeBinding firstBinding = resolveBinding(firstSelectedOperand);
+						if (firstBinding == null) {
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_unexpected_error);
+						}
 						for ( int i = curExpressionsPos; i < expressions.size();  i++) {
 							Expression curExpression = expressions.get(i);
 							if(curExpression.getStartPosition() < endOfSelection) {
-								System.out.println("Declared method: " + curExpression.getNodeType());
 								ITypeBinding curExpBinding = resolveBinding(curExpression);
+								if (curExpBinding == null) {
+									return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_unexpected_error);
+								}
 								if(!firstBinding.isEqualTo(curExpBinding)) {
 									if (!isTypeCompatible(firstBinding, curExpBinding)) {
-										System.out.println("Extracting fragment of addition operation with different types could alter program behavior");
-										return RefactoringStatus.createWarningStatus("Extracting fragment of addition operation with different types could alter program behavior");
+										return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ExtractTempRefactoring_sum_mismatch);
 									}
 								}
 							}
