@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -120,6 +121,8 @@ public class ConvertToRecordRefactoring extends Refactoring {
 	TextChangeManager fChangeManager;
 	CompilationUnitRewrite fBaseCURewrite;
 	List<MethodDeclaration> fMethodsToCopy= new ArrayList<>();
+	List<FieldDeclaration> fFieldsToCopy= new ArrayList<>();
+	List<Initializer> fInitializersToCopy= new ArrayList<>();
 
 
 	public ConvertToRecordRefactoring(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
@@ -208,13 +211,12 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			List<IVariableBinding> fieldsToSet= new ArrayList<>();
 			for (IVariableBinding field : fields) {
 				int modifiers= field.getModifiers();
-				if (!Modifier.isPrivate(modifiers)) {
+				if (!Modifier.isPrivate(modifiers) && !Modifier.isStatic(modifiers)) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_private);
 				}
-				if (Modifier.isStatic(modifiers)) {
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_static_members);
+				if (!Modifier.isStatic(modifiers)) {
+					fieldsToSet.add(field);
 				}
-				fieldsToSet.add(field);
 			}
 
 			IMethodBinding[] methodBindings= fTypeBinding.getDeclaredMethods();
@@ -222,9 +224,6 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			for (IMethodBinding method : methodBindings) {
 				if (method.isConstructor()) {
 					++constructorCount;
-				}
-				if (Modifier.isStatic(method.getModifiers())) {
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_static_members);
 				}
 			}
 			if (constructorCount == 0) {
@@ -234,13 +233,15 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			if (fTypeBinding.getJavaElement() instanceof IType sourceType) {
 				IMethod[] methods= sourceType.getMethods();
 				for (IVariableBinding field : fields) {
-					IMethodBinding getter= findGetter(fTypeBinding, field);
-					if (getter != null) {
-						fGetterMap.put(field, getter);
-					}
-					IMethodBinding setter= findSetter(fTypeBinding, field);
-					if (setter != null) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ConvertToRecordRefactoring_setter_found, field.getName()));
+					if (!Modifier.isStatic(field.getModifiers())) {
+						IMethodBinding getter= findGetter(fTypeBinding, field);
+						if (getter != null) {
+							fGetterMap.put(field, getter);
+						}
+						IMethodBinding setter= findSetter(fTypeBinding, field);
+						if (setter != null) {
+							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ConvertToRecordRefactoring_setter_found, field.getName()));
+						}
 					}
 				}
 
@@ -254,11 +255,26 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				try {
 					fTypeDeclaration.accept(new ASTVisitor() {
 						@Override
+						public boolean visit(Initializer node) {
+							int modifiers= node.getModifiers();
+							if (Modifier.isStatic(modifiers)) {
+								fInitializersToCopy.add(node);
+							} else {
+								throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_has_initializer);
+							}
+							return false;
+						}
+						@Override
 						public boolean visit(FieldDeclaration node) {
-							List<VariableDeclarationFragment> fragments= node.fragments();
-							for (VariableDeclarationFragment fragment : fragments) {
-								if (fragment.getInitializer() != null) {
-									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_fields_initialized);
+							int modifiers= node.getModifiers();
+							if (Modifier.isStatic(modifiers)) {
+								fFieldsToCopy.add(node);
+							} else {
+								List<VariableDeclarationFragment> fragments= node.fragments();
+								for (VariableDeclarationFragment fragment : fragments) {
+									if (fragment.getInitializer() != null) {
+										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_fields_initialized);
+									}
 								}
 							}
 							return false;
@@ -298,7 +314,10 @@ public class ConvertToRecordRefactoring extends Refactoring {
 									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 								}
 							} else {
-								if (node.getName().getFullyQualifiedName().equals("equals")) { //$NON-NLS-1$
+								int modifiers= node.getModifiers();
+								if (Modifier.isStatic(modifiers)) {
+									fMethodsToCopy.add(node);
+								} else if (node.getName().getFullyQualifiedName().equals("equals")) { //$NON-NLS-1$
 									if (Modifier.isPublic(node.getModifiers())
 											&& node.getReturnType2() instanceof PrimitiveType primitiveType
 											&& primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN
@@ -373,7 +392,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				}
 			}
 
-			if (fGetterMap.size() < fields.length) {
+			if (fGetterMap.size() < fieldsToSet.size()) {
 				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_enough_getters));
 			}
 
@@ -519,6 +538,14 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			components.add(newSingleVariableDeclaration);
 		}
 		List<BodyDeclaration> bodyDeclarations= newRecordDeclaration.bodyDeclarations();
+		for (Initializer initializer : fInitializersToCopy) {
+			Initializer newInitializer= (Initializer) rewrite.createCopyTarget(initializer);
+			bodyDeclarations.add(newInitializer);
+		}
+		for (FieldDeclaration fieldDeclaration : fFieldsToCopy) {
+			FieldDeclaration newFieldDeclaration= (FieldDeclaration) rewrite.createCopyTarget(fieldDeclaration);
+			bodyDeclarations.add(newFieldDeclaration);
+		}
 		for (MethodDeclaration methodDecl : fMethodsToCopy) {
 			MethodDeclaration newMethodDeclaration= (MethodDeclaration) rewrite.createCopyTarget(methodDecl);
 			bodyDeclarations.add(newMethodDeclaration);
