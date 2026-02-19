@@ -85,9 +85,11 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
@@ -714,6 +716,80 @@ public class ExtractTempRefactoring extends Refactoring {
 		return binding;
 	}
 
+	private ITypeBinding resolveBinding(Expression exp) {
+		ITypeBinding curExpBinding = null;
+		if(exp.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			curExpBinding = ((MethodInvocation)exp).resolveMethodBinding().getReturnType();
+		} else {
+			curExpBinding = exp.resolveTypeBinding();
+		}
+		return curExpBinding;
+	}
+
+	public RefactoringStatus checkSumPosition() throws CoreException {
+		/*fSelectedExpression.*/
+		if(fSelectedExpression instanceof IExpressionFragment expFrag) {
+			// Is newFrag an Infix Operation
+			Expression newExp = expFrag.getAssociatedExpression();
+			if (newExp instanceof InfixExpression infixNewExp) {
+				if (infixNewExp.getOperator() == InfixExpression.Operator.PLUS && infixNewExp.hasExtendedOperands()) {
+					if ( fSelectedExpression.getStartPosition() > infixNewExp.getStartPosition()) {
+						int selectStartingPosition = fSelectedExpression.getStartPosition();
+						int endOfSelection = selectStartingPosition +  fSelectedExpression.getLength();
+						Expression firstSelectedOperand = infixNewExp.getRightOperand();
+						int curExpressionsPos = 0;
+						List<Expression> expressions = infixNewExp.extendedOperands();
+						if (selectStartingPosition > firstSelectedOperand.getStartPosition()) {
+							for (int i=0; i < expressions.size(); i++ ) {
+								Expression exp = expressions.get(i);
+								if (selectStartingPosition <= exp.getStartPosition()) {
+									firstSelectedOperand = exp;
+									curExpressionsPos = i+1;
+									break;
+								}
+							}
+						}
+
+						ITypeBinding firstBinding = resolveBinding(firstSelectedOperand);
+						if (firstBinding == null) {
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_unexpected_error);
+						}
+						for ( int i = curExpressionsPos; i < expressions.size();  i++) {
+							Expression curExpression = expressions.get(i);
+							if(curExpression.getStartPosition() < endOfSelection) {
+								ITypeBinding curExpBinding = resolveBinding(curExpression);
+								if (curExpBinding == null) {
+									return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_unexpected_error);
+								}
+								if(!firstBinding.isEqualTo(curExpBinding)) {
+									if (!isTypeCompatible(firstBinding, curExpBinding)) {
+										return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ExtractTempRefactoring_sum_mismatch);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean isTypeCompatible(ITypeBinding left, ITypeBinding right) {
+		if(left.isPrimitive()) {
+			if (right.isPrimitive() || right.getSuperclass().getName().equals("Number")) {
+				return true;
+			}
+		} else if (left.getSuperclass().getName().equals("Number")){
+			if (right.isPrimitive() || right.getSuperclass().equals("Number" )) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
@@ -737,6 +813,9 @@ public class ExtractTempRefactoring extends Refactoring {
 						result.merge(checkSideEffectsInSelectedExpression);
 					}
 				}
+
+				RefactoringStatus sumPositionResult = checkSumPosition();
+				result.merge(sumPositionResult);
 
 				doCreateChange(Progress.subMonitor(pm, 2));
 
