@@ -18,7 +18,7 @@ public class A {
 			return a;
 		}
 
-		public void foo() {
+		private void foo() {
 			System.out.println("foo");
 		}
 
