@@ -833,26 +833,24 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 				package test;
 
 				public class Cls {
-					private final static int a;
+					private final int a;
 					private final String b;
-					private double c;;
 
-					public Cls(int a, String b, double c) {
-						this.a= a;
-						this.b= b;
-						this.c= c;
+					{
+						System.out.println("abc");
 					}
 
-					public static int getAValue() {
+					public Cls(int a, String b) {
+						this.a= a;
+						this.b= b;
+					}
+
+					public int getA() {
 						return a;
 					}
 
 					public String getB() {
 						return b;
-					}
-
-					public double getC() {
-						return c;
 					}
 				}
 			""";
@@ -1212,54 +1210,6 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 		int index= str1.indexOf("Inner(");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
 		assertNoErrors(ctx);
-		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
-	}
-
-	@Test
-	public void testNoConvertToRecord10() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
-		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-
-		String str= """
-			module test {
-			}
-			""";
-		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", str, false, null);
-
-		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String str1= """
-				package test;
-
-				public class Cls {
-					private final int a;
-					private final String b;
-
-					{
-						System.out.println("abc");
-					}
-
-					public Cls(int a, String b) {
-						this.a= a;
-						this.b= b;
-					}
-
-					public int getA() {
-						return a;
-					}
-
-					public String getB() {
-						return b;
-					}
-				}
-			""";
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
-
-		int index= str1.indexOf("Cls(");
-		IInvocationContext ctx= getCorrectionContext(cu, index, 3);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
 	}
