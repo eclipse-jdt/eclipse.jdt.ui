@@ -65,13 +65,12 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -115,7 +114,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 	private ICompilationUnit fCu;
 	private CompilationUnit fASTRoot;
 	private MethodDeclaration fConstructor;
-	private AbstractTypeDeclaration fTypeDeclaration;
+	private TypeDeclaration fTypeDeclaration;
 	private ITypeBinding fTypeBinding;
 	Map<IVariableBinding, IMethodBinding> fGetterMap= new HashMap<>();
 	TextChangeManager fChangeManager;
@@ -198,10 +197,6 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_cannot_extend);
 			}
 
-			if (fTypeBinding.getInterfaces().length != 0) {
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
-			}
-
 			int typeModifiers= fTypeBinding.getModifiers();
 			if (Modifier.isSealed(typeModifiers)) {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
@@ -209,10 +204,14 @@ public class ConvertToRecordRefactoring extends Refactoring {
 
 			IVariableBinding[] fields= fTypeBinding.getDeclaredFields();
 			List<IVariableBinding> fieldsToSet= new ArrayList<>();
+			List<IVariableBinding> fieldsToCheck= new ArrayList<>();
 			for (IVariableBinding field : fields) {
 				int modifiers= field.getModifiers();
 				if (!Modifier.isPrivate(modifiers) && !Modifier.isStatic(modifiers)) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_private);
+				}
+				if (Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers)) {
+					fieldsToCheck.add(field);
 				}
 				if (!Modifier.isStatic(modifiers)) {
 					fieldsToSet.add(field);
@@ -254,6 +253,44 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				}
 				try {
 					fTypeDeclaration.accept(new ASTVisitor() {
+						@Override
+						public boolean visit(FieldAccess node) {
+							if (!fieldsToCheck.isEmpty()) {
+								IVariableBinding nodeBinding= node.resolveFieldBinding();
+								if (nodeBinding == null) {
+									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
+								}
+								checkForFieldChange(node, nodeBinding);
+							}
+							return false;
+						}
+						@Override
+						public boolean visit(SimpleName node) {
+							IBinding binding= node.resolveBinding();
+							if (binding == null) {
+								throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
+							}
+							if (!fieldsToCheck.isEmpty() && binding instanceof IVariableBinding nodeBinding && nodeBinding.isField()) {
+								checkForFieldChange(node, nodeBinding);
+							}
+							return false;
+						}
+						private void checkForFieldChange(ASTNode node, IVariableBinding nodeBinding) {
+							if (Modifier.isPrivate(nodeBinding.getModifiers())) {
+								boolean found= false;
+								for (IVariableBinding field : fieldsToCheck) {
+									if (field.isEqualTo(nodeBinding)) {
+										found= true;
+										break;
+									}
+								}
+								if (found) {
+									if (node.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_cannot_convert_fields);
+									}
+								}
+							}
+						}
 						@Override
 						public boolean visit(Initializer node) {
 							int modifiers= node.getModifiers();
@@ -313,59 +350,34 @@ public class ConvertToRecordRefactoring extends Refactoring {
 								if (!assignedFieldBindings.isEmpty() && assignedFieldBindings.size() < fieldsToSet.size()) {
 									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 								}
+								return false;
 							} else {
 								int modifiers= node.getModifiers();
 								if (Modifier.isStatic(modifiers)) {
 									fMethodsToCopy.add(node);
-								} else if (node.getName().getFullyQualifiedName().equals("equals")) { //$NON-NLS-1$
-									if (Modifier.isPublic(node.getModifiers())
-											&& node.getReturnType2() instanceof PrimitiveType primitiveType
-											&& primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN
-											&& node.parameters().size() == 1
-											&& ((SingleVariableDeclaration)node.parameters().get(0)).getType().resolveBinding() instanceof ITypeBinding typeBinding
-											&& typeBinding.getQualifiedName().equals("java.lang.Object")) { //$NON-NLS-1$
-										fMethodsToCopy.add(node);
+								} else if (Modifier.isPublic(modifiers)) {
+									if (statements.size() == 1 && statements.get(0) instanceof ReturnStatement retStmt) {
+										Expression exp= retStmt.getExpression();
+										IVariableBinding fieldBinding= getFieldBinding(exp);
+										if (fieldBinding != null) {
+											IMethodBinding methodBinding= node.resolveBinding();
+											if (methodBinding == null) {
+												throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
+											}
+											if (!fGetterMap.containsKey(fieldBinding)) {
+												fGetterMap.put(fieldBinding, methodBinding);
+											} else if (!methodBinding.isEqualTo(fGetterMap.get(fieldBinding))) {
+												throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+											}
+										} else {
+											fMethodsToCopy.add(node);
+										}
 									} else {
-										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
-									}
-								} else if (node.getName().getFullyQualifiedName().equals("hashCode")) { //$NON-NLS-1$
-									if (Modifier.isPublic(node.getModifiers())
-											&& node.getReturnType2() instanceof PrimitiveType primitiveType
-											&& primitiveType.getPrimitiveTypeCode() == PrimitiveType.INT
-											&& node.parameters().size() == 0) {
 										fMethodsToCopy.add(node);
-									} else {
-										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
-									}
-								} else if (node.getName().getFullyQualifiedName().equals("toString")) { //$NON-NLS-1$
-									if (Modifier.isPublic(node.getModifiers())
-											&& node.getReturnType2() instanceof SimpleType simpleType
-											&& simpleType.getName().getFullyQualifiedName().equals("String") //$NON-NLS-1$
-											&& node.parameters().size() == 0) {
-										fMethodsToCopy.add(node);
-									} else {
-										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
-									}
-							} else if (statements.size() != 1 || !(statements.get(0) instanceof ReturnStatement retStmt)) {
-									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_implicit_getter);
-								} else {
-									Expression exp= retStmt.getExpression();
-									IVariableBinding fieldBinding= getFieldBinding(exp);
-									if (fieldBinding == null) {
-										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_implicit_getter);
-									}
-									IMethodBinding methodBinding= node.resolveBinding();
-									if (methodBinding == null) {
-										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
-									}
-									if (!fGetterMap.containsKey(fieldBinding)) {
-										fGetterMap.put(fieldBinding, methodBinding);
-									} else if (!methodBinding.isEqualTo(fGetterMap.get(fieldBinding))) {
-										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 									}
 								}
 							}
-							return false;
+							return !fieldsToCheck.isEmpty();
 						}
 
 						private IVariableBinding getFieldBinding(Expression exp) {
@@ -385,6 +397,9 @@ public class ConvertToRecordRefactoring extends Refactoring {
 						}
 					});
 					if (methods.length > fields.length + fMethodsToCopy.size() + 1) {
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+					}
+					if (fConstructor == null) {
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 					}
 				} catch (VisitException e) {
@@ -536,6 +551,12 @@ public class ConvertToRecordRefactoring extends Refactoring {
 		for (SingleVariableDeclaration parameter : parameters) {
 			SingleVariableDeclaration newSingleVariableDeclaration= (SingleVariableDeclaration) rewrite.createCopyTarget(parameter);
 			components.add(newSingleVariableDeclaration);
+		}
+		List<Type> interfaces= fTypeDeclaration.superInterfaceTypes();
+		List<Type> interfaceTypes= newRecordDeclaration.superInterfaceTypes();
+		for (Type interfaceType : interfaces) {
+			Type newType= (Type) rewrite.createCopyTarget(interfaceType);
+			interfaceTypes.add(newType);
 		}
 		List<BodyDeclaration> bodyDeclarations= newRecordDeclaration.bodyDeclarations();
 		for (Initializer initializer : fInitializersToCopy) {

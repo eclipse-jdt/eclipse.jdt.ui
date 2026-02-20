@@ -350,17 +350,21 @@ public final class RefactoringAvailabilityTesterCore  {
 				if (fields.length == 0) {
 					return false;
 				}
+				int privateFieldCount= 0;
 				for (IField field : fields) {
 					if (!(Flags.isPrivate(field.getFlags()))
 							&& !Flags.isStatic(field.getFlags())) {
 						return false;
+					}
+					if (Flags.isPrivate(field.getFlags()) && !Flags.isStatic(field.getFlags())) {
+						++privateFieldCount;
 					}
 				}
 				IMethod[] methods= type.getMethods();
 				boolean hasConstructor= false;
 				for (IMethod method : methods) {
 					if (method.isConstructor()) {
-						if (method.getNumberOfParameters() == fields.length) {
+						if (method.getNumberOfParameters() == privateFieldCount) {
 							hasConstructor= true;
 						}
 					}
