@@ -9,17 +9,12 @@ public class A {
 		private int a;
 		private final String b;
 
-		public Inner(int a, String b) {
-			this.a= a;
+		public Inner(String b) {
 			this.b= b;
 		}
 		
 		public int getA() {
 			return a;
-		}
-
-		private void foo() {
-			System.out.println("foo");
 		}
 
 		public String getB() {

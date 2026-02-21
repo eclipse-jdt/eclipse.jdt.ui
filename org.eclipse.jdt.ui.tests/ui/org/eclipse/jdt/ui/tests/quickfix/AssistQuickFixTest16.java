@@ -589,6 +589,230 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 	}
 
 	@Test
+	public void testConvertToRecord7() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+				package test;
+
+				public class Cls {
+					private final int a;
+					private final String b;
+
+					public Cls(int a, String b) {
+						this.a= a;
+						this.b= b;
+					}
+
+					public Cls(int a) {
+						this(a, "abc");
+					}
+
+					public int getA() {
+						return a;
+					}
+
+					public String getB() {
+						return b;
+					}
+				}
+				""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("a;");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 1);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
+		proposal.apply();
+		String preview= cu.getBuffer().getContents();
+
+		String expected= """
+				package test;
+
+				public record Cls(int a, String b) {
+					public Cls(int a) {
+						this(a, "abc");
+					}
+				}
+				""";
+
+		assertEqualString(expected, preview);
+	}
+
+	@Test
+	public void testConvertToRecord8() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+				package test;
+
+				public class Cls {
+					private final int a;
+					private final String b;
+					public static int c;
+
+					static {
+						c = 3;
+					}
+
+					public static int getC() {
+						return c;
+					}
+
+					public Cls(int a, String b) {
+						this.a= a;
+						this.b= b;
+					}
+
+					public int getA() {
+						return a;
+					}
+
+					public String getB() {
+						return b;
+					}
+				}
+				""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("a;");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 1);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
+		proposal.apply();
+		String preview= cu.getBuffer().getContents();
+
+		String expected= """
+				package test;
+
+				public record Cls(int a, String b) {
+					static {
+						c = 3;
+					}
+					public static int c;
+					public static int getC() {
+						return c;
+					}
+				}
+				""";
+
+		assertEqualString(expected, preview);
+	}
+
+	@Test
+	public void testConvertToRecord9() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+				package test;
+
+				interface Blah {
+					void printSomething();
+				}
+
+				public class Cls implements Blah {
+					private final int a;
+					private final String b;
+					public static int c;
+
+					static {
+						c = 3;
+					}
+
+					public static int getC() {
+						return c;
+					}
+
+					public Cls(int a, String b) {
+						this.a= a;
+						this.b= b;
+					}
+
+					public int getA() {
+						return a;
+					}
+
+					public String getB() {
+						return b;
+					}
+
+					@Override
+					public void printSomething() {
+						System.out.println("here");
+					}
+				}
+				""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("a;");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 1);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
+		proposal.apply();
+		String preview= cu.getBuffer().getContents();
+
+		String expected= """
+				package test;
+
+				interface Blah {
+					void printSomething();
+				}
+
+				public record Cls(int a, String b) implements Blah {
+					static {
+						c = 3;
+					}
+					public static int c;
+					public static int getC() {
+						return c;
+					}
+					@Override
+					public void printSomething() {
+						System.out.println("here");
+					}
+				}
+				""";
+
+		assertEqualString(expected, preview);
+	}
+
+	@Test
 	public void testNoConvertToRecord1() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
@@ -698,26 +922,24 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 				package test;
 
 				public class Cls {
-					private final static int a;
+					private final int a;
 					private final String b;
-					private double c;;
 
-					public Cls(int a, String b, double c) {
-						this.a= a;
-						this.b= b;
-						this.c= c;
+					{
+						System.out.println("abc");
 					}
 
-					public static int getAValue() {
+					public Cls(int a, String b) {
+						this.a= a;
+						this.b= b;
+					}
+
+					public int getA() {
 						return a;
 					}
 
 					public String getB() {
 						return b;
-					}
-
-					public double getC() {
-						return c;
 					}
 				}
 			""";
@@ -770,7 +992,7 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 						return c;
 					}
 
-					public int getSum() {
+					private int getSum() {
 						return a + b.length();
 					}
 				}
@@ -933,6 +1155,135 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 					private class Inner2 extends Inner {
 						public Inner2() {
 							super(2, "blah", 5.2);
+						}
+					}
+					public void foo() {
+						Inner inner= new Inner(1, "comment", 4.3);
+						System.out.println(inner.getA());
+						System.out.println(inner.getB());
+						System.out.println(inner.getC());
+					}
+				}
+				""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("Inner(");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
+	@Test
+	public void testNoConvertToRecord8() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+				package test;
+
+				public class Cls {
+					/**
+					 * Class Inner
+					 */
+					private class Inner {
+						private final int a;
+						private final String b;
+						private double c;
+
+						public Inner(int a, String b, double c) {
+							this.a= a;
+							this.b= b;
+						}
+
+						public int getA() {
+							return a;
+						}
+
+						public String getB() {
+							return b;
+						}
+
+						public double getC() {
+							return c;
+						}
+					}
+					public void foo() {
+						Inner inner= new Inner(1, "comment", 4.3);
+						System.out.println(inner.getA());
+						System.out.println(inner.getB());
+						System.out.println(inner.getC());
+					}
+				}
+				""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("Inner(");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
+	@Test
+	public void testNoConvertToRecord9() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+				package test;
+
+				public class Cls {
+					/**
+					 * Class Inner
+					 */
+					private class Inner {
+						private final int a;
+						private final String b;
+						private double c;
+
+						public Inner(int a, String b, double c) {
+							this.a= a;
+							this.b= b;
+							this.c= c;
+						}
+
+						public Inner(int a, String b) {
+							this.a= a;
+							this.b= b;
+							this.c= 2.0;
+						}
+
+						public int getA() {
+							return a;
+						}
+
+						public String getB() {
+							return b;
+						}
+
+						public double getC() {
+							return c;
 						}
 					}
 					public void foo() {

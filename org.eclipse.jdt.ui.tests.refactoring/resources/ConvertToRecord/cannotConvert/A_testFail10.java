@@ -10,16 +10,11 @@ public class A {
 		private final String b;
 
 		public Inner(int a, String b) {
-			this.a= a;
 			this.b= b;
 		}
 		
 		public int getA() {
 			return a;
-		}
-
-		private void foo() {
-			System.out.println("foo");
 		}
 
 		public String getB() {
