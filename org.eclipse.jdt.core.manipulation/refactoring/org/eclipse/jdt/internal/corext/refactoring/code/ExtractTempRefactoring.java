@@ -717,7 +717,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return binding;
 	}
 
-	public RefactoringStatus checkSumPosition() throws CoreException {
+	public RefactoringStatus checkSumPosition() {
 		if (fSelectedExpression instanceof IExpressionFragment expFrag) {
 			// Is newFrag an Infix Operation
 			Expression newExp= expFrag.getAssociatedExpression();
