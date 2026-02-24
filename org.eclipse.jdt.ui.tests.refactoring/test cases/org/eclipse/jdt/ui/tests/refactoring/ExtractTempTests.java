@@ -1151,7 +1151,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
-	public void test168() throws Exception{
+	public void test168() throws Exception {
 		// Testing if one of the unselected items is not numeric, but is not the first one.
 		// This should return an error.
 		warningHelper1(10, 36, 10, 41, false, false, "x", "string", RefactoringStatus.ERROR);

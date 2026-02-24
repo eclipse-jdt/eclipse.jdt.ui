@@ -738,7 +738,7 @@ public class ExtractTempRefactoring extends Refactoring {
 						int selectStartingPosition= fSelectedExpression.getStartPosition();
 						int endOfSelection= selectStartingPosition + fSelectedExpression.getLength();
 						Expression firstSelectedOperand= infixNewExp.getRightOperand();
-						Expression leftOperand = infixNewExp.getLeftOperand();
+						Expression leftOperand= infixNewExp.getLeftOperand();
 						ITypeBinding leftOperandBinding= resolveBinding(infixNewExp.getLeftOperand());
 						if (leftOperandBinding == null || (!leftOperandBinding.isPrimitive() && !leftOperand.resolveUnboxing())) {
 							return null;
@@ -762,7 +762,7 @@ public class ExtractTempRefactoring extends Refactoring {
 								}
 							}
 						}
-						firstBinding = resolveBinding(firstSelectedOperand);
+						firstBinding= resolveBinding(firstSelectedOperand);
 						// If we are here, this mean that we have found the first Operand, and the checks on the unselected part are passed.
 						if (firstBinding == null) {
 							return null;
