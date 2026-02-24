@@ -756,9 +756,6 @@ public class ExtractTempRefactoring extends Refactoring {
 						if (firstBinding == null) {
 							return null;
 						}
-						if (!firstSelectedOperand.resolveUnboxing() && !firstBinding.isPrimitive()) {
-							return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_sum_mismatch);
-						}
 						for (int i= curExpressionsPos; i < expressions.size(); i++) {
 							Expression curExpression= expressions.get(i);
 							if (curExpression.getStartPosition() < endOfSelection) {
@@ -767,7 +764,7 @@ public class ExtractTempRefactoring extends Refactoring {
 									return null;
 								}
 								if (!firstBinding.isEqualTo(curExpBinding)) {
-									if (!isTypeCompatible(firstBinding, firstSelectedOperand.resolveUnboxing(), curExpBinding, curExpression.resolveUnboxing())) {
+									if (!curExpBinding.isPrimitive() && !curExpression.resolveUnboxing()) {
 										return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_sum_mismatch);
 									}
 								}
@@ -779,21 +776,6 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 		return null;
 	}
-
-	private boolean isTypeCompatible(ITypeBinding left, boolean isLeftUnboxing, ITypeBinding right, boolean isRightUnboxing) {
-		if (left.isPrimitive()) {
-			if (right.isPrimitive() || isRightUnboxing) {
-				return true;
-			}
-		} else if (isLeftUnboxing) {
-			if (right.isPrimitive() || isRightUnboxing) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-
 
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
