@@ -89,7 +89,6 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
@@ -718,16 +717,6 @@ public class ExtractTempRefactoring extends Refactoring {
 		return binding;
 	}
 
-	private ITypeBinding resolveBinding(Expression exp) {
-		ITypeBinding curExpBinding= null;
-		if (exp.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			curExpBinding= ((MethodInvocation) exp).resolveMethodBinding().getReturnType();
-		} else {
-			curExpBinding= exp.resolveTypeBinding();
-		}
-		return curExpBinding;
-	}
-
 	public RefactoringStatus checkSumPosition() throws CoreException {
 		if (fSelectedExpression instanceof IExpressionFragment expFrag) {
 			// Is newFrag an Infix Operation
@@ -739,11 +728,11 @@ public class ExtractTempRefactoring extends Refactoring {
 						int endOfSelection= selectStartingPosition + fSelectedExpression.getLength();
 						Expression firstSelectedOperand= infixNewExp.getRightOperand();
 						Expression leftOperand= infixNewExp.getLeftOperand();
-						ITypeBinding leftOperandBinding= resolveBinding(infixNewExp.getLeftOperand());
+						ITypeBinding leftOperandBinding= infixNewExp.getLeftOperand().resolveTypeBinding();
 						if (leftOperandBinding == null || (!leftOperandBinding.isPrimitive() && !leftOperand.resolveUnboxing())) {
 							return null;
 						}
-						ITypeBinding firstBinding= resolveBinding(firstSelectedOperand);
+						ITypeBinding firstBinding= firstSelectedOperand.resolveTypeBinding();
 						if (firstBinding == null || (!firstBinding.isPrimitive() && !firstSelectedOperand.resolveUnboxing())) {
 							return null;
 						}
@@ -762,7 +751,7 @@ public class ExtractTempRefactoring extends Refactoring {
 								}
 							}
 						}
-						firstBinding= resolveBinding(firstSelectedOperand);
+						firstBinding= firstSelectedOperand.resolveTypeBinding();
 						// If we are here, this mean that we have found the first Operand, and the checks on the unselected part are passed.
 						if (firstBinding == null) {
 							return null;
@@ -773,7 +762,7 @@ public class ExtractTempRefactoring extends Refactoring {
 						for (int i= curExpressionsPos; i < expressions.size(); i++) {
 							Expression curExpression= expressions.get(i);
 							if (curExpression.getStartPosition() < endOfSelection) {
-								ITypeBinding curExpBinding= resolveBinding(curExpression);
+								ITypeBinding curExpBinding= curExpression.resolveTypeBinding();
 								if (curExpBinding == null) {
 									return null;
 								}
