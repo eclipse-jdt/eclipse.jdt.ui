@@ -145,7 +145,6 @@ public class ChangedValueChecker extends AbstractChecker {
 					if (fPosSet.add(pos)) {
 						threadPool.execute(() -> {
 							UpdateVisitor uv= new UpdateVisitor(fDependSet, true, (Expression) fAssignmentExpressionToIgnore);
-							System.out.println(node);
 							node.accept(uv);
 							if (uv.hasConflict()) {
 								fConflict= true;
