@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests; singleton:=true
-Bundle-Version: 3.16.400.qualifier
+Bundle-Version: 3.16.500.qualifier
 Bundle-Activator: org.eclipse.jdt.testplugin.JavaTestPlugin
 Bundle-Vendor: %Plugin.providerName
 Bundle-Localization: plugin
