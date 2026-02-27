@@ -16,9 +16,11 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -56,6 +59,7 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -117,6 +121,8 @@ public class ConvertToRecordRefactoring extends Refactoring {
 	TextChangeManager fChangeManager;
 	CompilationUnitRewrite fBaseCURewrite;
 	List<MethodDeclaration> fMethodsToCopy= new ArrayList<>();
+	List<FieldDeclaration> fFieldsToCopy= new ArrayList<>();
+	List<Initializer> fInitializersToCopy= new ArrayList<>();
 
 
 	public ConvertToRecordRefactoring(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
@@ -202,43 +208,40 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			}
 
 			IVariableBinding[] fields= fTypeBinding.getDeclaredFields();
+			List<IVariableBinding> fieldsToSet= new ArrayList<>();
 			for (IVariableBinding field : fields) {
 				int modifiers= field.getModifiers();
-				if (!Modifier.isPrivate(modifiers)) {
+				if (!Modifier.isPrivate(modifiers) && !Modifier.isStatic(modifiers)) {
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_private);
 				}
-				if (Modifier.isStatic(modifiers)) {
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_static_members);
+				if (!Modifier.isStatic(modifiers)) {
+					fieldsToSet.add(field);
 				}
 			}
 
 			IMethodBinding[] methodBindings= fTypeBinding.getDeclaredMethods();
-			boolean hasConstructor= false;
+			int constructorCount= 0;
 			for (IMethodBinding method : methodBindings) {
 				if (method.isConstructor()) {
-					if (hasConstructor) {
-						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_constructors);
-					}
-					hasConstructor= true;
-				}
-				if (Modifier.isStatic(method.getModifiers())) {
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_has_static_members);
+					++constructorCount;
 				}
 			}
-			if (!hasConstructor) {
+			if (constructorCount == 0) {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 			}
 
 			if (fTypeBinding.getJavaElement() instanceof IType sourceType) {
 				IMethod[] methods= sourceType.getMethods();
 				for (IVariableBinding field : fields) {
-					IMethodBinding getter= findGetter(fTypeBinding, field);
-					if (getter != null) {
-						fGetterMap.put(field, getter);
-					}
-					IMethodBinding setter= findSetter(fTypeBinding, field);
-					if (setter != null) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ConvertToRecordRefactoring_setter_found, field.getName()));
+					if (!Modifier.isStatic(field.getModifiers())) {
+						IMethodBinding getter= findGetter(fTypeBinding, field);
+						if (getter != null) {
+							fGetterMap.put(field, getter);
+						}
+						IMethodBinding setter= findSetter(fTypeBinding, field);
+						if (setter != null) {
+							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ConvertToRecordRefactoring_setter_found, field.getName()));
+						}
 					}
 				}
 
@@ -252,11 +255,26 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				try {
 					fTypeDeclaration.accept(new ASTVisitor() {
 						@Override
+						public boolean visit(Initializer node) {
+							int modifiers= node.getModifiers();
+							if (Modifier.isStatic(modifiers)) {
+								fInitializersToCopy.add(node);
+							} else {
+								throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_has_initializer);
+							}
+							return false;
+						}
+						@Override
 						public boolean visit(FieldDeclaration node) {
-							List<VariableDeclarationFragment> fragments= node.fragments();
-							for (VariableDeclarationFragment fragment : fragments) {
-								if (fragment.getInitializer() != null) {
-									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_fields_initialized);
+							int modifiers= node.getModifiers();
+							if (Modifier.isStatic(modifiers)) {
+								fFieldsToCopy.add(node);
+							} else {
+								List<VariableDeclarationFragment> fragments= node.fragments();
+								for (VariableDeclarationFragment fragment : fragments) {
+									if (fragment.getInitializer() != null) {
+										throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_fields_initialized);
+									}
 								}
 							}
 							return false;
@@ -265,29 +283,41 @@ public class ConvertToRecordRefactoring extends Refactoring {
 						public boolean visit(MethodDeclaration node) {
 							List<Statement> statements= ASTNodes.asList(node.getBody());
 							if (node.isConstructor()) {
-								if (fConstructor != null) {
-									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_multiple_constructors);
-								}
-								fConstructor= node;
+								Set<IVariableBinding> assignedFieldBindings= new HashSet<>();
 								for (Statement statement : statements) {
 									if (statement instanceof ExpressionStatement expStmt) {
 										if (expStmt.getExpression() instanceof Assignment assignment) {
+											if (fConstructor != null && fConstructor != node) {
+												throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+											}
+											fConstructor= node;
 											Expression leftHandSide= assignment.getLeftHandSide();
 											Expression rightHandSide= assignment.getRightHandSide();
 											if (rightHandSide instanceof SimpleName simpleName) {
 												IBinding binding= simpleName.resolveBinding();
 												if (binding instanceof IVariableBinding simpleNameBinding && simpleNameBinding.isParameter()) {
-													if (getFieldBinding(leftHandSide) != null) {
+													IVariableBinding fieldBinding= getFieldBinding(leftHandSide);
+													if (fieldBinding != null) {
+														assignedFieldBindings.add(fieldBinding);
 														continue;
 													}
 												}
 											}
 										}
+									} else if (statements.size() == 1 && statement instanceof ConstructorInvocation) {
+										fMethodsToCopy.add(node);
+										continue;
 									}
 									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_nonstandard_constructor);
 								}
+								if (!assignedFieldBindings.isEmpty() && assignedFieldBindings.size() < fieldsToSet.size()) {
+									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+								}
 							} else {
-								if (node.getName().getFullyQualifiedName().equals("equals")) { //$NON-NLS-1$
+								int modifiers= node.getModifiers();
+								if (Modifier.isStatic(modifiers)) {
+									fMethodsToCopy.add(node);
+								} else if (node.getName().getFullyQualifiedName().equals("equals")) { //$NON-NLS-1$
 									if (Modifier.isPublic(node.getModifiers())
 											&& node.getReturnType2() instanceof PrimitiveType primitiveType
 											&& primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN
@@ -362,7 +392,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 				}
 			}
 
-			if (fGetterMap.size() < fields.length) {
+			if (fGetterMap.size() < fieldsToSet.size()) {
 				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_enough_getters));
 			}
 
@@ -508,6 +538,14 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			components.add(newSingleVariableDeclaration);
 		}
 		List<BodyDeclaration> bodyDeclarations= newRecordDeclaration.bodyDeclarations();
+		for (Initializer initializer : fInitializersToCopy) {
+			Initializer newInitializer= (Initializer) rewrite.createCopyTarget(initializer);
+			bodyDeclarations.add(newInitializer);
+		}
+		for (FieldDeclaration fieldDeclaration : fFieldsToCopy) {
+			FieldDeclaration newFieldDeclaration= (FieldDeclaration) rewrite.createCopyTarget(fieldDeclaration);
+			bodyDeclarations.add(newFieldDeclaration);
+		}
 		for (MethodDeclaration methodDecl : fMethodsToCopy) {
 			MethodDeclaration newMethodDeclaration= (MethodDeclaration) rewrite.createCopyTarget(methodDecl);
 			bodyDeclarations.add(newMethodDeclaration);
