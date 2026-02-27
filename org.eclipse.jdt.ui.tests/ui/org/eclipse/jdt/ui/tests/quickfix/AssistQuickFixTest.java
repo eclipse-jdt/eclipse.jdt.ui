@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
@@ -106,6 +107,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		fJProject1= projectSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		JavaModelManager.getIndexManager().waitForIndex(false, null);
 	}
 
 
