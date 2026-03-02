@@ -94,6 +94,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
@@ -441,6 +442,8 @@ public class RenamePackageTests extends GenericRefactoringTest {
 	 * @throws Exception if one of the resources cannot be created
 	 */
 	private void helperMultiProjects(IPackageFragmentRoot[] roots, String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
+		TestUtils.waitForIndexer();
+
 		ICompilationUnit[][][] cus=new ICompilationUnit[roots.length][][];
 		IPackageFragment thisPackage= null;
 
