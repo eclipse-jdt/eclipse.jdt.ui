@@ -501,10 +501,6 @@ public abstract class ModifierCorrectionSubProcessorCore<T> {
 						default:
 							break;
 					}
-					IAnnotationBinding binding= annotation.resolveAnnotationBinding();
-					if (binding != null) {
-						System.out.println(annotation.getTypeName().getFullyQualifiedName());
-					}
 				}
 			}
 		}
