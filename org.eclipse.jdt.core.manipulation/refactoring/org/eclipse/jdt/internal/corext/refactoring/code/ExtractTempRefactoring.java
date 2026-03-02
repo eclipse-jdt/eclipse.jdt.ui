@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -158,6 +159,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.util.Progress;
+
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
  */
@@ -225,7 +227,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		@Override
 		public boolean visit(VariableDeclarationStatement node) {
 			for (Object obj : node.fragments()) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment)obj;
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) obj;
 				if (fragment.getInitializer() != null) {
 					Expression initializer= fragment.getInitializer();
 					if (initializer.subtreeMatch(new ASTMatcher(), this.expression)) {
@@ -540,9 +542,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	private HashSet<IASTFragment> fSeen= new HashSet<>();
 
 	private String fEnclosingKey;
+
 	private HashSet<String> fEnclosingKeySet;
 
-	private Map<String,String> fFormatterOptions;
+	private Map<String, String> fFormatterOptions;
 
 	/**
 	 * Creates a new extract temp refactoring
@@ -555,7 +558,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		this(unit, selectionStart, selectionLength, null);
 	}
 
-	public ExtractTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength, Map<String,String> formatterOptions) {
+	public ExtractTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength, Map<String, String> formatterOptions) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		fSelectionStart= selectionStart;
@@ -575,14 +578,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		fEndPoint= -1; // default
 		fEnclosingKey= null;
 		fEnclosingKeySet= new HashSet<>();
-		fFormatterOptions = formatterOptions;
+		fFormatterOptions= formatterOptions;
 	}
 
 	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
 		this(astRoot, selectionStart, selectionLength, null);
 	}
 
-	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength, Map<String,String> formatterOptions) {
+	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength, Map<String, String> formatterOptions) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(astRoot.getTypeRoot() instanceof ICompilationUnit);
@@ -605,7 +608,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		fEndPoint= -1; // default
 		fEnclosingKey= null;
 		fEnclosingKeySet= new HashSet<>();
-		fFormatterOptions = formatterOptions;
+		fFormatterOptions= formatterOptions;
 	}
 
 	public ExtractTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
@@ -651,7 +654,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				newAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(fragmentNode));
 				replacement= newAssignment;
 			} else {
-			   replacement= fCURewrite.getAST().newSimpleName(fTempName);
+				replacement= fCURewrite.getAST().newSimpleName(fTempName);
 			}
 			TextEditGroup description= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_replace);
 
@@ -714,6 +717,66 @@ public class ExtractTempRefactoring extends Refactoring {
 		return binding;
 	}
 
+	public RefactoringStatus checkSumPosition() {
+		if (fSelectedExpression instanceof IExpressionFragment expFrag) {
+			// Is newFrag an Infix Operation
+			Expression newExp= expFrag.getAssociatedExpression();
+			if (newExp instanceof InfixExpression infixNewExp) {
+				if (infixNewExp.getOperator() == InfixExpression.Operator.PLUS && infixNewExp.hasExtendedOperands()) {
+					if (fSelectedExpression.getStartPosition() > infixNewExp.getStartPosition()) {
+						int selectStartingPosition= fSelectedExpression.getStartPosition();
+						int endOfSelection= selectStartingPosition + fSelectedExpression.getLength();
+						Expression firstSelectedOperand= infixNewExp.getRightOperand();
+						Expression leftOperand= infixNewExp.getLeftOperand();
+						ITypeBinding leftOperandBinding= infixNewExp.getLeftOperand().resolveTypeBinding();
+						if (leftOperandBinding == null || (!leftOperandBinding.isPrimitive() && !leftOperand.resolveUnboxing())) {
+							return null;
+						}
+						ITypeBinding firstBinding= firstSelectedOperand.resolveTypeBinding();
+						if (firstBinding == null || (!firstBinding.isPrimitive() && !firstSelectedOperand.resolveUnboxing())) {
+							return null;
+						}
+						int curExpressionsPos= 0;
+						List<Expression> expressions= infixNewExp.extendedOperands();
+						if (selectStartingPosition > firstSelectedOperand.getStartPosition()) {
+							for (int i= 0; i < expressions.size(); i++) {
+								Expression exp= expressions.get(i);
+								if (selectStartingPosition <= exp.getStartPosition()) {
+									if (!exp.resolveUnboxing() && !exp.resolveTypeBinding().isPrimitive()) {
+										return null;
+									}
+									firstSelectedOperand= exp;
+									curExpressionsPos= i + 1;
+									break;
+								}
+							}
+						}
+						firstBinding= firstSelectedOperand.resolveTypeBinding();
+						// If we are here, this mean that we have found the first Operand, and the checks on the unselected part are passed.
+						if (firstBinding == null) {
+							return null;
+						}
+						for (int i= curExpressionsPos; i < expressions.size(); i++) {
+							Expression curExpression= expressions.get(i);
+							if (curExpression.getStartPosition() < endOfSelection) {
+								ITypeBinding curExpBinding= curExpression.resolveTypeBinding();
+								if (curExpBinding == null) {
+									return null;
+								}
+								if (!firstBinding.isEqualTo(curExpBinding)) {
+									if (!curExpBinding.isPrimitive() && !curExpression.resolveUnboxing()) {
+										return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_sum_mismatch);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
@@ -737,6 +800,9 @@ public class ExtractTempRefactoring extends Refactoring {
 						result.merge(checkSideEffectsInSelectedExpression);
 					}
 				}
+
+				RefactoringStatus sumPositionResult= checkSumPosition();
+				result.merge(sumPositionResult);
 
 				doCreateChange(Progress.subMonitor(pm, 2));
 
@@ -765,7 +831,8 @@ public class ExtractTempRefactoring extends Refactoring {
 								fLinkedProposalModel.clear();
 							}
 							fLinkedProposalModel= null;
-							result.addEntry(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractTempRefactoring_side_effects_possible, null, JavaManipulationPlugin.getPluginId(), RefactoringStatusCodes.EXPRESSION_MAY_CAUSE_SIDE_EFFECTS, null);
+							result.addEntry(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractTempRefactoring_side_effects_possible, null, JavaManipulationPlugin.getPluginId(),
+									RefactoringStatusCodes.EXPRESSION_MAY_CAUSE_SIDE_EFFECTS, null);
 						}
 					}
 				}
@@ -1578,15 +1645,15 @@ public class ExtractTempRefactoring extends Refactoring {
 	private IExpressionFragment getSelectedExpression(int startOffset, int length) throws JavaModelException {
 		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(startOffset, length), fCompilationUnitNode, fCu);
 		if (selectedFragment instanceof IExpressionFragment && !Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
-			fSelectedExpression= (IExpressionFragment)selectedFragment;
+			fSelectedExpression= (IExpressionFragment) selectedFragment;
 		} else if (selectedFragment != null) {
 			if (selectedFragment.getAssociatedNode() instanceof ExpressionStatement) {
-				ExpressionStatement exprStatement= (ExpressionStatement)selectedFragment.getAssociatedNode();
+				ExpressionStatement exprStatement= (ExpressionStatement) selectedFragment.getAssociatedNode();
 				Expression expression= exprStatement.getExpression();
-				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(expression);
+				fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(expression);
 			} else if (selectedFragment.getAssociatedNode() instanceof Assignment) {
-				Assignment assignment= (Assignment)selectedFragment.getAssociatedNode();
-				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(assignment);
+				Assignment assignment= (Assignment) selectedFragment.getAssociatedNode();
+				fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(assignment);
 			}
 		}
 
@@ -1603,15 +1670,15 @@ public class ExtractTempRefactoring extends Refactoring {
 			return fSelectedExpression;
 		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCompilationUnitNode, fCu);
 		if (selectedFragment instanceof IExpressionFragment && !Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
-			fSelectedExpression= (IExpressionFragment)selectedFragment;
+			fSelectedExpression= (IExpressionFragment) selectedFragment;
 		} else if (selectedFragment != null) {
 			if (selectedFragment.getAssociatedNode() instanceof ExpressionStatement) {
-				ExpressionStatement exprStatement= (ExpressionStatement)selectedFragment.getAssociatedNode();
+				ExpressionStatement exprStatement= (ExpressionStatement) selectedFragment.getAssociatedNode();
 				Expression expression= exprStatement.getExpression();
-				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(expression);
+				fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(expression);
 			} else if (selectedFragment.getAssociatedNode() instanceof Assignment) {
-				Assignment assignment= (Assignment)selectedFragment.getAssociatedNode();
-				fSelectedExpression= (IExpressionFragment)ASTFragmentFactory.createFragmentForFullSubtree(assignment);
+				Assignment assignment= (Assignment) selectedFragment.getAssociatedNode();
+				fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(assignment);
 			}
 		}
 

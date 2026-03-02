@@ -1120,6 +1120,44 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test163() throws Exception {
+		//Extract variable test: primitive integer + string
+		warningHelper1(6, 32, 6, 39, false, false, "x", "string", RefactoringStatus.ERROR);
+	}
+
+	@Test
+	public void test164() throws Exception {
+		//Extract variable test: numeric class add to string class results in error
+		warningHelper1(9, 32, 9, 37, false, false, "x", "string", RefactoringStatus.ERROR);
+	}
+
+	@Test
+	public void test165() throws Exception {
+		//Extract variable test: numeric class add to numeric class, with numeric prefix
+		helper1(9, 32, 9, 37, true, false, "x", "i");
+	}
+
+	@Test
+	public void test166() throws Exception {
+		//Extract variable test: numeric class calling method that add to string numeric class no error
+		helper1(9, 32, 9, 48, false, false, "x", "i");
+	}
+
+	@Test
+	public void test167() throws Exception {
+		//Extract variable: first selected operand is numeric calling a function that returns a primitive
+		//second operand is a toString method. This should return an error message.
+		warningHelper1(9, 32, 9, 59, false, false, "x", "string", RefactoringStatus.ERROR);
+	}
+
+	@Test
+	public void test168() throws Exception {
+		// Testing if one of the unselected items is not numeric, but is not the first one.
+		// This should return an error.
+		warningHelper1(10, 36, 10, 41, false, false, "x", "string", RefactoringStatus.ERROR);
+	}
+
+	@Test
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
