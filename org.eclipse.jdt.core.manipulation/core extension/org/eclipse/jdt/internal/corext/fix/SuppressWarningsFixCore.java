@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Red Hat Inc. and others.
+ * Copyright (c) 2025, 2026 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,11 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -158,9 +160,21 @@ public class SuppressWarningsFixCore extends CompilationUnitRewriteOperationsFix
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 
+			Set<ASTNode> coveredNodes= new HashSet<>();
+
 			for (Entry<ASTNode, ChildListPropertyDescriptor> location : fNodeMap.entrySet()) {
 				ASTNode coveringNode= location.getKey();
 				ChildListPropertyDescriptor property= location.getValue();
+
+				while (property == null && coveringNode != null) {
+					coveringNode= coveringNode.getParent();
+					property= getChildListPropertyDescriptor(coveringNode, fWarningToken);
+				}
+
+				if (coveredNodes.contains(coveringNode)) {
+					continue;
+				}
+				coveredNodes.add(coveringNode);
 
 				ASTRewrite rewrite= cuRewrite.getASTRewrite();
 				AST ast= rewrite.getAST();
