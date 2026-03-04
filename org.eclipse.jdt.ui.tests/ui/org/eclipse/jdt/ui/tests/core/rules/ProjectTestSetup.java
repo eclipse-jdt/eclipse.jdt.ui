@@ -33,6 +33,9 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.jdt.internal.core.JavaProject;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
@@ -72,9 +75,17 @@ public class ProjectTestSetup extends ExternalResource {
 
 	@Override
 	protected void before() throws Throwable {
-
 		if (projectExists()) { // allow nesting of ProjectTestSetups
-			return;
+			IJavaProject project= getProject();
+			if (project.getProject().exists()) {
+				return;
+			}
+			/*
+			 * Tests run into cases where the JDT model contains the project,
+			 * but the platform resources model doesn't - causing many resource exceptions.
+			 * To avoid them, we remove the Java project from the JDT model and recreate the test project.
+			 */
+			JavaModelManager.getJavaModelManager().removeInfoAndChildren((JavaProject) project);
 		}
 
 		fAutobuilding = CoreUtility.setAutoBuilding(false);
