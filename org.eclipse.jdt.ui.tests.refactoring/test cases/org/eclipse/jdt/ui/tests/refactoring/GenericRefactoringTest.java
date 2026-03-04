@@ -647,5 +647,4 @@ public abstract class GenericRefactoringTest {
 		String actual2= (actualLines == null ? null : Strings.concatenate(actualLines, "\n"));
 		assertEquals(message, expected2, actual2);
 	}
-
 }
