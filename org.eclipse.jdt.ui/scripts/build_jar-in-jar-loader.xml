@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project name="Jar in Jar Loader" default="build" basedir="..">
 
-	<target name="build" description="Cleans, builds and refreshes the impacted resources" depends="clean, jar-in-jar-loader_zip" />
+	<target name="build" description="Cleans, builds and refreshes the impacted resources" depends="jar-in-jar-loader_zip" />
 
 	<!-- Empty target for "After a Clean" task (we don't want to rebuild the Jar here, e.g. on checkout). -->
 	<target name="dummy_clean"/>
@@ -15,8 +15,15 @@
 		<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
 	</target>
 
-	<target name="jar-in-jar-loader_zip" depends="init" description="Creates the jar-in-jar-loader.zip">
+	<target name="checkSourceUpToDate" depends="init">
+		<uptodate property="jarUpToDate" targetfile="${build.result.folder}/jar-in-jar-loader.zip">
+			<srcfiles dir="jar in jar loader/" includes="**/*" />
+		</uptodate>
+	</target>
+
+	<target name="jar-in-jar-loader_zip" depends="init, checkSourceUpToDate" unless="jarUpToDate" description="Creates the jar-in-jar-loader.zip">
 		<property name="destdir" value="${temp.folder}/jar-in-jar-loader.zip.bin" />
+		<delete dir="${temp.folder}" />
 		<delete dir="${temp.folder}/jar-in-jar-loader.zip.bin" />
 		<mkdir dir="${temp.folder}/jar-in-jar-loader.zip.bin" />
 		<javac target="1.8" source="1.8" destdir="${temp.folder}/jar-in-jar-loader.zip.bin" failonerror="true" verbose="false" debug="on" includeAntRuntime="no" classpath="${basedir}/bin">
