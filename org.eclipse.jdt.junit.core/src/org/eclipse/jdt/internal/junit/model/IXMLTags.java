@@ -33,6 +33,8 @@ public interface IXMLTags {
 	String NODE_SYSTEM_ERR= "system-err"; //$NON-NLS-1$
 	String NODE_SKIPPED = "skipped"; //$NON-NLS-1$
 	String NODE_ABORTED = "aborted"; //$NON-NLS-1$
+	String NODE_RERUN_FAILURE= "rerunFailure"; //$NON-NLS-1$
+	String NODE_STACK_TRACE= "stackTrace"; //$NON-NLS-1$
 
 	/**
 	 * value: String
