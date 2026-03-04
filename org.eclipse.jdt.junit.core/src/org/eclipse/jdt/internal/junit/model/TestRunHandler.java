@@ -203,6 +203,8 @@ public class TestRunHandler extends DefaultHandler {
 		// not interested
 		case IXMLTags.NODE_SYSTEM_OUT:
 		case IXMLTags.NODE_SYSTEM_ERR:
+		case IXMLTags.NODE_RERUN_FAILURE:
+		case IXMLTags.NODE_STACK_TRACE:
 			break;
 		case IXMLTags.NODE_ABORTED:		// fall through to the skipped
 		case IXMLTags.NODE_SKIPPED:
@@ -291,6 +293,8 @@ public class TestRunHandler extends DefaultHandler {
 		// OK
 		case IXMLTags.NODE_SYSTEM_OUT:
 		case IXMLTags.NODE_SYSTEM_ERR:
+		case IXMLTags.NODE_RERUN_FAILURE:
+		case IXMLTags.NODE_STACK_TRACE:
 			break;
 		case IXMLTags.NODE_ABORTED:		// fall through to the skipped
 		case IXMLTags.NODE_SKIPPED:
