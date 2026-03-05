@@ -52,6 +52,9 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
+import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.core.NameLookup;
 import org.eclipse.jdt.internal.core.PackageFragmentRoot;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
@@ -169,10 +172,10 @@ public class CoreTestSearchEngine {
 		try {
 			if (project != null) {
 				String junitBundlePrefix = JUNIT_PLATFORM_COMMONS_PREFIX;
-				IType type= project.findType(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
+				IType type= findAnnotation(project, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
 				if (type == null) {
 					junitBundlePrefix = JUNIT_PLATFORM_SUITE_API_PREFIX;
-					type= project.findType(JUnitCorePlugin.JUNIT5_SUITE_ANNOTATION_NAME);
+					type= findAnnotation(project, JUnitCorePlugin.JUNIT5_SUITE_ANNOTATION_NAME);
 				}
 				if (type != null) {
 					// check if we have the right JUnit JUpiter version
@@ -330,5 +333,23 @@ public class CoreTestSearchEngine {
 		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
 		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 		new SearchEngine().search(suitePattern, participants, scope, requestor, pm);
+	}
+
+	private static IType findAnnotation(IJavaProject project, String fullyQualifiedName) throws JavaModelException {
+		if (project instanceof JavaProject p) {
+			NameLookup lookup= p.newNameLookup(DefaultWorkingCopyOwner.PRIMARY);
+			NameLookup.Answer answer = lookup.findType(
+					fullyQualifiedName,
+					false /* no partial matches */,
+					NameLookup.ACCEPT_ANNOTATIONS,
+					false /* no secondary types */,
+					true /* wait for indexer */,
+					true /* check restrictions */,
+					null);
+			if (answer != null) {
+				return answer.type;
+			}
+		}
+		return null;
 	}
 }
