@@ -443,7 +443,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			System.out.println(curNode);
 			if (curNode instanceof QualifiedName) {
 				ReplaceQualifiedTypeFixCore fqvnrp = new ReplaceQualifiedTypeFixCore((QualifiedName)curNode, imports);
-				fqvnrp.create(curNode, curNode.toString());
+				fqvnrp.create(curNode, ((QualifiedName)curNode).getFullyQualifiedName());
 			}
 		}
 		return false;
