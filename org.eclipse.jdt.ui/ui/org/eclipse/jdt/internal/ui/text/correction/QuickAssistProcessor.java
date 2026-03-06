@@ -436,16 +436,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ICompilationUnit cu = context.getCompilationUnit();
 		IImportDeclaration[] imports = cu.getImports();
 		if ( node instanceof SimpleName || node instanceof QualifiedName) {
-			ASTNode curNode = node;
+ 			ASTNode curNode = node;
 			while ((curNode.getParent() instanceof QualifiedName)) {
 				curNode = curNode.getParent();
 			}
 			System.out.println(curNode);
-			ReplaceQualifiedTypeFixCore fqvnrp = new ReplaceQualifiedTypeFixCore(curNode.toString(), imports);
-			fqvnrp.create(curNode, curNode.toString());
+			if (curNode instanceof QualifiedName) {
+				ReplaceQualifiedTypeFixCore fqvnrp = new ReplaceQualifiedTypeFixCore((QualifiedName)curNode, imports);
+				fqvnrp.create(curNode, curNode.toString());
+			}
 		}
-
-		//boolean isValid= ASTNodes.isVarType(node, astRoot);
 		return false;
 	}
 
