@@ -56,7 +56,7 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		@Override
 		public boolean visit(EnumDeclaration edecl) {
 			//Do something
-			System.out.println("edecl: " + edecl.getName());
+			//System.out.println("edecl: " + edecl.getName());
 			if (edecl.getName().getFullyQualifiedName().equals(className)) {
 				System.out.println("Abort Edecl");
 			} else {
@@ -68,6 +68,7 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		private boolean checkTypeBinding(ITypeBinding sourceBinding) {
 			ITypeBinding[] bindings = sourceBinding.getDeclaredTypes();
 			for ( ITypeBinding binding : bindings) {
+				System.out.println("binding: " + binding.getName() + " is equals to sourceBinding: " + sourceBinding.getName() + ": " +  binding.isEqualTo(sourceBinding));
 				if (binding.getName().equals(className) && !binding.equals(fullQualifiedName)) {
 					return true;
 				}
@@ -78,7 +79,7 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		@Override
 		public boolean visit(TypeDeclaration tdecl) {
 			//Do something
-			System.out.println("tdecl: " + tdecl.getName());
+			//System.out.println("tdecl: " + tdecl.getName());
 			if (tdecl.getName().getFullyQualifiedName().equals(className)) {
 				System.out.println("Abort type decl");
 			} else {
