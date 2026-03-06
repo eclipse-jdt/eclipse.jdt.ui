@@ -1,5 +1,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -7,21 +9,126 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 
+	public static class ReplaceQualifiedTypeVisitor extends ASTVisitor {
+
+		ArrayList<QualifiedName> searchResults;
+		String fullQualifiedName;
+		String className;
+		QualifiedName sourceBinding;
+
+		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, String fullQualifiedName, ArrayList<QualifiedName> searchResults) {
+			this.fullQualifiedName = fullQualifiedName;
+			this.searchResults = searchResults;
+			this.sourceBinding = sourceBinding;
+
+		}
+
+		@Override
+		public boolean visit(SimpleName node) {
+			if ( node.getFullyQualifiedName().equals(className)) {
+				//resolve fully qualified name and add to list
+				IBinding binding = node.resolveBinding();
+				if ( binding instanceof ITypeBinding) {
+					//System.out.println("node: " + node.toString());
+					ITypeBinding tbdg = node.resolveTypeBinding();
+					if (tbdg.getName().equals(fullQualifiedName)) {
+						if (tbdg instanceof QualifiedName) {
+							System.out.println("Item found adding to list" + ((QualifiedName) tbdg).getFullyQualifiedName());
+							searchResults.add((QualifiedName) tbdg);
+							return false;
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(EnumDeclaration edecl) {
+			//Do something
+			System.out.println("edecl: " + edecl.getName());
+			if (edecl.getName().getFullyQualifiedName().equals(className)) {
+				System.out.println("Abort Edecl");
+			} else {
+				ITypeBinding binding = edecl.resolveBinding();
+			}
+			return true;
+		}
+
+		private boolean checkTypeBinding(ITypeBinding sourceBinding) {
+			ITypeBinding[] bindings = sourceBinding.getDeclaredTypes();
+			for ( ITypeBinding binding : bindings) {
+				if (binding.getName().equals(className) && !binding.equals(fullQualifiedName)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean visit(TypeDeclaration tdecl) {
+			//Do something
+			System.out.println("tdecl: " + tdecl.getName());
+			if (tdecl.getName().getFullyQualifiedName().equals(className)) {
+				System.out.println("Abort type decl");
+			} else {
+				ITypeBinding binding = tdecl.resolveBinding();
+				checkTypeBinding(binding);
+				ITypeBinding superClass = binding.getSuperclass();
+				while(superClass != null) {
+					checkTypeBinding(superClass);
+					for(ITypeBinding curInterface : binding.getInterfaces()) {
+						checkTypeBinding(curInterface);
+					}
+					superClass = superClass.getSuperclass();
+				}
+				System.out.println(binding.getName() + "Superclass: " + binding.getSuperclass().getName());
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(QualifiedName qname) {
+			if (qname.getFullyQualifiedName().equals(fullQualifiedName)) {
+				System.out.println("Item found adding to list" + qname.getFullyQualifiedName()+ " to list");
+				searchResults.add(qname);
+				// Item found, can stop the visit
+				return false;
+			}
+			return true;
+		}
+
+		public ArrayList<QualifiedName> getSearchResults() {
+			return searchResults;
+		}
+
+	}
+
 	boolean isImportFound = false;
 	String className;
+	String fullQualifiedName;
 	IImportDeclaration[] imports;
 
-	public ReplaceQualifiedTypeFixCore(String fullQualifiedName, IImportDeclaration[] imports) {
-		String[] names = fullQualifiedName.split("\\.");
+	ArrayList<QualifiedName> searchResults;
+	QualifiedName sourceBinding;
+
+	public ReplaceQualifiedTypeFixCore(QualifiedName fullQualifiedName, IImportDeclaration[] imports) {
+		this.fullQualifiedName = fullQualifiedName.getFullyQualifiedName();
 		this.imports = imports;
 		//Check for length
-		this.className = names[names.length-1];
+		this.className = fullQualifiedName.getName().getFullyQualifiedName();
+		this.searchResults = new ArrayList<>();
+		this.sourceBinding = fullQualifiedName;
 	}
 
 	@Override
@@ -31,7 +138,6 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 	}
 
 	public String create(ASTNode node, String fullQualifiedName) {
-		//class QualifiedNameASTVisitor
 		ASTNode rootNode = node.getRoot();
 		for(IImportDeclaration cur_import : imports) {
 			System.out.println("Cur import: " + cur_import.getElementName());
@@ -42,35 +148,16 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 				System.out.println("Abort");
 			}
 		}
-		ASTVisitor importVisitor = new ASTVisitor() {
-			@Override
-			public boolean visit(ImportDeclaration node) {
-				System.out.println("Node: " + node.getName() + " - Type: " + node.getNodeType());
-				System.out.println("FullQualifiedName:" + fullQualifiedName);
-				if (node.getName().equals(fullQualifiedName)) {
-					isImportFound = true;
-				} else if(node.getName().toString().contains(className)) {
-					System.out.println("Abort");
-				}
-				return true;
-			}
-
-			@Override
-			public boolean visit(VariableDeclarationFragment vstatement) {
-				System.out.println("Vstatement: " + vstatement);
-				return true;
-			}
-		};
-		rootNode.accept(importVisitor);
-		//getAS
+		ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(sourceBinding, fullQualifiedName, searchResults);
+		rootNode.accept(rfqnVisitor);
 		System.out.println(rootNode.getLength());
 		if (isImportFound) {
 			System.out.println("I found the import...");
-			// Need to remove the FQN from the variable decl
 		} else {
 			// We need to add an import
 		}
 		System.out.println(fullQualifiedName);
+		ArrayList<QualifiedName> itemsToModify = rfqnVisitor.getSearchResults();
 		return null;
 	}
 
