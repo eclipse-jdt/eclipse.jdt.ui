@@ -442,8 +442,6 @@ public class RenamePackageTests extends GenericRefactoringTest {
 	 * @throws Exception if one of the resources cannot be created
 	 */
 	private void helperMultiProjects(IPackageFragmentRoot[] roots, String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
-		TestUtils.waitForIndexer();
-
 		ICompilationUnit[][][] cus=new ICompilationUnit[roots.length][][];
 		IPackageFragment thisPackage= null;
 
@@ -461,6 +459,8 @@ public class RenamePackageTests extends GenericRefactoringTest {
 				}
 			}
 		}
+
+		TestUtils.waitForIndexer();
 
 		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(thisPackage, newPackageName);
 		descriptor.setUpdateReferences(fUpdateReferences);
