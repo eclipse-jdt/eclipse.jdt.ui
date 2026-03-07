@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
@@ -60,6 +61,8 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	@Rule
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
+	private boolean wasVerbose;
+
 	@Override
 	protected IJavaProject getProject() {
 		return projectSetup.getProject();
@@ -72,12 +75,20 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 	@Override
 	public void setUp() throws Exception {
+		wasVerbose = JavaModelManager.VERBOSE;
+		JavaModelManager.VERBOSE = true;
 		super.setUp();
 
 		IEclipsePreferences node= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 		node.putBoolean("editor_save_participant_" + CleanUpPostSaveListener.POSTSAVELISTENER_ID, true);
 		node.put(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, CleanUpOptions.TRUE);
 		TestUtils.waitForIndexer();
+	}
+
+	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
+		JavaModelManager.VERBOSE = wasVerbose;
 	}
 
 	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws JavaModelException, PartInitException {
