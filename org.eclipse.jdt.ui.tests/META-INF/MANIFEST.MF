@@ -90,6 +90,8 @@ Import-Package: org.assertj.core.api;version="3.24.2",
  org.junit.jupiter.params.converter;version="[5.14.0,6.0.0)",
  org.junit.jupiter.params.provider;version="[5.14.0,6.0.0)",
  org.junit.jupiter.params.support;version="[5.14.0,6.0.0)",
+ org.junit.platform.engine;version="[1.14.0,2.0.0)",
+ org.junit.platform.launcher;version="[1.14.0,2.0.0)",
  org.junit.platform.suite.api;version="[1.14.0,2.0.0)",
  org.junit.platform.suite.commons;status=INTERNAL;version="[1.14.0,2.0.0)",
  org.junit.platform.suite.engine;status=INTERNAL;version="[1.14.0,2.0.0)"
