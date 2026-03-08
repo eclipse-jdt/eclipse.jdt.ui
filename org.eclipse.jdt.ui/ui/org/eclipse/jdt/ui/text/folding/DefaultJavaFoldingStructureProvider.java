@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2025 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -410,7 +410,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private class FoldingVisitor extends ASTVisitor {
 
 		private FoldingStructureComputationContext ctx;
-		private List<Position> topLevelTypes = new ArrayList<>();
+		private List<Position> astRegions = new ArrayList<>();
 		private ICompilationUnit topLevelCompilationUnit;
 
 		public FoldingVisitor(FoldingStructureComputationContext ctx, ICompilationUnit compilationUnit) {
@@ -437,9 +437,10 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			if (node.isMemberTypeDeclaration() || node.isLocalTypeDeclaration()) {
 				int start= name.getStartPosition();
 				int end= node.getStartPosition() + node.getLength();
+				includelastLine = shouldIncludeLastLine(ctx, end);
 				createFoldingRegion(start, end - start, ctx.collapseMembers());
 			} else {
-				topLevelTypes.add(new Position(node.getStartPosition(), node.getLength()-1));
+				astRegions.add(new Position(node.getStartPosition(), node.getLength()));
 			}
 			return true;
 		}
@@ -448,6 +449,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		public boolean visit(MethodDeclaration node) {
 			int start= node.getName().getStartPosition();
 			int end= node.getStartPosition() + node.getLength();
+			includelastLine |= shouldIncludeLastLine(ctx, end);
 			createFoldingRegion(start, end - start, ctx.collapseMembers());
 			return true;
 		}
@@ -529,6 +531,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		@Override
 		public boolean visit(LambdaExpression node) {
 			if (node.getBody() instanceof Block) {
+				includelastLine = shouldIncludeLastLine(ctx, node.getStartPosition() + node.getLength());
 				createFoldingRegion(node.getBody(), ctx.collapseMembers());
 				node.getBody().accept(this);
 			}
@@ -537,18 +540,21 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		@Override
 		public boolean visit(AnonymousClassDeclaration node) {
+			includelastLine = shouldIncludeLastLine(ctx, node.getStartPosition() + node.getLength());
 			createFoldingRegion(node, ctx.collapseInnerTypes());
 			return true;
 		}
 
 		@Override
 		public boolean visit(EnumDeclaration node) {
+			includelastLine = shouldIncludeLastLine(ctx, node.getStartPosition() + node.getLength());
 			createFoldingRegion(node, ctx.collapseMembers());
 			return true;
 		}
 
 		@Override
 		public boolean visit(Initializer node) {
+			includelastLine = shouldIncludeLastLine(ctx, node.getStartPosition() + node.getLength());
 			createFoldingRegion(node, ctx.collapseMembers());
 			return true;
 		}
@@ -617,6 +623,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 
 		private void createFoldingRegion(int start, int length, boolean collapse) {
+			astRegions.add(new Position(start, length));
 			createFoldingRegion(start, length, collapse, false);
 		}
 
@@ -648,6 +655,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					ctx.addProjectionRange(annotation, position);
 				}
 			}
+			includelastLine = false;
 		}
 
 		private boolean isMultiline(IRegion region) {
@@ -1512,7 +1520,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				Deque<Deque<Integer>> openCustomRegionStartPositions= new ArrayDeque<>();
 				openCustomRegionStartPositions.add(new ArrayDeque<>());
 
-				for (Position nonCommentFoldingRegion : merge(visitor.topLevelTypes, ctx.fMap.values())) {
+				for (Position nonCommentFoldingRegion : visitor.astRegions) {
 
 					// process regions depth-first until reaching the current region
 					currentCommentIndex= processFoldingRegionsForCustomCommentFolding(
@@ -1544,29 +1552,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				checkCustomFoldingCommentsBeforePosition(sourceArray, visitor, comments, currentCommentIndex, openCustomRegionStartPositions.peek(), Integer.MAX_VALUE);
 
 				for (Deque<Integer> activeFoldingRegions : openCustomRegionStartPositions) {
-					endAllActiveFoldingRegions(sourceArray, visitor, activeFoldingRegions, sourceArray.length - 1);
+					endAllActiveFoldingRegions(sourceArray, visitor, activeFoldingRegions, sourceArray.length);
 				}
 			}
 		} catch (JavaModelException | IllegalStateException e) {
 		}
-	}
-
-	private List<Position> merge(List<Position> topLevelTypes, Collection<Position> nonCustomFoldingRegions) {
-		List<Position> merged = new ArrayList<>(topLevelTypes.size() + nonCustomFoldingRegions.size());
-
-		int topLevelIndex = 0;
-		for (Position region : nonCustomFoldingRegions) {
-			while (topLevelIndex < topLevelTypes.size() && topLevelTypes.get(topLevelIndex).getOffset() < region.getOffset()) {
-				merged.add(topLevelTypes.get(topLevelIndex++));
-			}
-			merged.add(region);
-		}
-
-		while (topLevelIndex < topLevelTypes.size()) {
-			merged.add(topLevelTypes.get(topLevelIndex++));
-		}
-
-		return merged;
 	}
 
 	/**
@@ -1617,7 +1607,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		if (fCurrentPreferences.fCustomFoldingRegionMarkersCanOverlap) {
 			for (Integer startPosition : openRegionsToEnd) {
 				IRegion region= new Region(startPosition, foldingRegionEnd - startPosition);
-				checkIncludeLastLineAndCreateCustomFoldingRegion(sourceArray, visitor, region, false);
+				checkIncludeLastLineAndCreateCustomFoldingRegion(sourceArray, visitor, region, true);
 			}
 		}
 	}
@@ -1660,8 +1650,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void checkIncludeLastLineAndCreateCustomFoldingRegion(char[] sourceArray, FoldingVisitor visitor, IRegion customFoldingRegion, boolean excludeEndregionComment) {
-		includelastLine = includeLastLineInCustomFoldingRegion(sourceArray, customFoldingRegion.getOffset() + customFoldingRegion.getLength(), excludeEndregionComment);
+		int endIndex = customFoldingRegion.getOffset() + customFoldingRegion.getLength() - 1;
+		if (isLineBreak(sourceArray, endIndex)) {
+			includelastLine = true;
+			customFoldingRegion = new Region(customFoldingRegion.getOffset(), customFoldingRegion.getLength() - 1);
+		} else {
+			includelastLine = includeLastLineInCustomFoldingRegion(sourceArray, customFoldingRegion.getOffset() + customFoldingRegion.getLength(), excludeEndregionComment);
+		}
 		visitor.createFoldingRegion(customFoldingRegion.getOffset(), customFoldingRegion.getLength(), fCurrentPreferences.fCollapseCustomRegions, true);
+	}
+
+	private boolean isLineBreak(char[] sourceArray, int endIndex) {
+		return sourceArray[endIndex] == '\r' || sourceArray[endIndex] == '\n';
 	}
 
 	private boolean includeLastLineInCustomFoldingRegion(char[] sourceArray, int regionEnd, boolean excludeEndregionComment) {
@@ -1861,10 +1861,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		switch (element.getElementType()) {
 			case IJavaElement.IMPORT_CONTAINER:
 				collapse= ctx.collapseImportContainer();
-				includelastLine= true;
 				break;
 			case IJavaElement.TYPE:
-				collapseCode= includelastLine= isInnerType((IType) element) && !isAnonymousEnum((IType) element);
+				collapseCode= isInnerType((IType) element) && !isAnonymousEnum((IType) element);
 				collapse= ctx.collapseInnerTypes() && collapseCode;
 				break;
 			case IJavaElement.FIELD:
@@ -1905,7 +1904,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 			// code
 			if (collapseCode) {
-				IRegion normalized= alignRegion(regions[regions.length - 1], ctx);
+				IRegion region= regions[regions.length - 1];
+				includelastLine= shouldIncludeLastLine(ctx, region.getOffset() + region.getLength());
+				IRegion normalized= alignRegion(region, ctx);
 				if (normalized != null) {
 					Position position;
 					if (element instanceof IMember) {
@@ -1919,6 +1920,25 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 						ctx.addProjectionRange(new JavaProjectionAnnotation(collapse, element, false), position);
 				}
 			}
+		}
+	}
+
+	private boolean shouldIncludeLastLine(FoldingStructureComputationContext ctx, int regionEnd) {
+		try {
+			IDocument doc= ctx.fDocument;
+			for(int i= regionEnd; i<doc.getLength();i++) {
+				char c = doc.getChar(i);
+				if (c == '\n' || c == '\r') {
+					return true;
+				}
+				if (!Character.isWhitespace(c) && c != ';' && c != ',') {
+					return false;
+				}
+			}
+			return true;
+		}catch (BadLocationException e) {
+			JavaPlugin.log(e);
+			return false;
 		}
 	}
 
