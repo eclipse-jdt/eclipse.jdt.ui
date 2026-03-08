@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
@@ -169,6 +170,7 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.PatternInstanceofToSwitchFixCore;
 import org.eclipse.jdt.internal.corext.fix.RemoveVarOrInferredLambdaParameterTypesFixCore;
 import org.eclipse.jdt.internal.corext.fix.ReplaceDeprecatedFieldFixCore;
+import org.eclipse.jdt.internal.corext.fix.ReplaceQualifiedTypeFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitTryResourceFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
@@ -378,6 +380,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getUnrollMultiCatchProposals(context, coveringNode, resultingCollections);
 				getTryWithResourceAssistProposals(locations, context, coveringNode, coveredNodes, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
+				getFullQualifiedReplacement(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
 				getAddFinallyProposals(context, coveringNode, resultingCollections);
@@ -425,6 +428,25 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
+	}
+
+	private static boolean getFullQualifiedReplacement(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
+		// TODO Auto-generated method stub
+		System.out.println(node);
+		ICompilationUnit cu = context.getCompilationUnit();
+		IImportDeclaration[] imports = cu.getImports();
+		if ( node instanceof SimpleName || node instanceof QualifiedName) {
+ 			ASTNode curNode = node;
+			while ((curNode.getParent() instanceof QualifiedName)) {
+				curNode = curNode.getParent();
+			}
+			System.out.println(curNode);
+			if (curNode instanceof QualifiedName) {
+				ReplaceQualifiedTypeFixCore fqvnrp = new ReplaceQualifiedTypeFixCore((QualifiedName)curNode, imports);
+				fqvnrp.create(curNode, ((QualifiedName)curNode).getFullyQualifiedName());
+			}
+		}
+		return false;
 	}
 
 	static boolean noErrorsAtLocation(IProblemLocation[] locations) {
