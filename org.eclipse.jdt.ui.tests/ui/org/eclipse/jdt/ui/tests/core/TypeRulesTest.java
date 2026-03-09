@@ -191,6 +191,9 @@ public class TypeRulesTest extends CoreTests {
 				boolean res2= b1.isAssignmentCompatible(b2);
 				if (res2 != (problems.length == 0)) {
 					errors.append(line).append('\n');
+					for (IProblem problem : problems) {
+						errors.append('\t').append(problem.getMessage()).append('\n');
+					}
 				}
 			}
 		}
@@ -232,6 +235,9 @@ public class TypeRulesTest extends CoreTests {
 				boolean res2= TypeRules.canAssign(b1, b2);
 				if (res2 != (problems.length == 0)) {
 					errors.append(line).append('\n');
+					for (IProblem problem : problems) {
+						errors.append('\t').append(problem.getMessage()).append('\n');
+					}
 				}
 			}
 		}
@@ -272,6 +278,9 @@ public class TypeRulesTest extends CoreTests {
 				boolean res= b2.isCastCompatible(b1);
 				if (res != (problems.length == 0)) {
 					errors.append(line).append('\n');
+					for (IProblem problem : problems) {
+						errors.append('\t').append(problem.getMessage()).append('\n');
+					}
 				}
 			}
 		}
@@ -324,6 +333,9 @@ public class TypeRulesTest extends CoreTests {
 				boolean res= TypeRules.canCast(b2, b1);
 				if (res != (problems.length == 0)) {
 					errors.append(line).append('\n');
+					for (IProblem problem : problems) {
+						errors.append('\t').append(problem.getMessage()).append('\n');
+					}
 				}
 			}
 		}
