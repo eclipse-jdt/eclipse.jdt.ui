@@ -29,6 +29,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
@@ -44,6 +45,8 @@ import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
+import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
 public class RemoveAnnotationProposal implements IJavaCompletionProposal {
 
@@ -97,12 +100,12 @@ public class RemoveAnnotationProposal implements IJavaCompletionProposal {
 
 			// Combine both edits using MultiTextEdit to avoid conflicts
 			MultiTextEdit multiEdit = new MultiTextEdit();
-			
+
 			TextEdit importEdit = importRewrite.rewriteImports(null);
 			if (importEdit.hasChildren() || importEdit.getLength() != 0) {
 				multiEdit.addChild(importEdit);
 			}
-			
+
 			TextEdit rewriteEdit = rewrite.rewriteAST(document, cu.getOptions(true));
 			if (rewriteEdit.hasChildren() || rewriteEdit.getLength() != 0) {
 				multiEdit.addChild(rewriteEdit);
@@ -147,6 +150,11 @@ public class RemoveAnnotationProposal implements IJavaCompletionProposal {
 
 	@Override
 	public int getRelevance() {
-		return 10;
+		ASTNode coveringNode = fContext.getCoveringNode();
+		if (coveringNode.getParent() instanceof MethodDeclaration) {
+			return 10;
+		} else {
+			return IProposalRelevance.ADD_SUPPRESSWARNINGS - 1;
+		}
 	}
 }
