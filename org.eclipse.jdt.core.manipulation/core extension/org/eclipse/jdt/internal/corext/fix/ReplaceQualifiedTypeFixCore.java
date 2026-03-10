@@ -77,52 +77,45 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 
 		@Override
 		public boolean visit(EnumDeclaration edecl) {
-			//Do something
-			//System.out.println("edecl: " + edecl.getName());
-			if (edecl.getName().getFullyQualifiedName().equals(className)) {
-				throw new AbortSearchException();
-			} else {
-				ITypeBinding binding = edecl.resolveBinding();
-			}
+			declVisit(fullQualifiedName, edecl.resolveBinding());
 			return true;
-		}
-
-		private boolean declVisit(String fullyQualifiedName, ITypeBinding binding) {
-
-			return false;
-		}
-
-		private void checkTypeBinding(ITypeBinding sourceBinding) {
-			ITypeBinding[] bindings = sourceBinding.getDeclaredTypes();
-			for ( ITypeBinding binding : bindings) {
-				System.out.println("binding: " + binding.getName() + " is equals to sourceBinding: " + sourceBinding.getName() + ": " + binding.isEqualTo(sourceBinding));
-				if (binding.getName().equals(className) && !binding.equals(fullQualifiedName)) {
-					throw new AbortSearchException();
-				}
-			}
 		}
 
 		@Override
 		public boolean visit(TypeDeclaration tdecl) {
 			//Do something
 			//System.out.println("tdecl: " + tdecl.getName());
-			if (tdecl.getName().getFullyQualifiedName().equals(className)) {
-				System.out.println("Abort type decl");
-				throw new AbortSearchException();
-			} else {
-				ITypeBinding binding = tdecl.resolveBinding();
-				checkTypeBinding(binding);
-				ITypeBinding superClass = binding.getSuperclass();
-				while(superClass != null) {
-					checkTypeBinding(superClass);
-					for(ITypeBinding curInterface : binding.getInterfaces()) {
-						checkTypeBinding(curInterface);
-					}
-					superClass = superClass.getSuperclass();
-				}
-				System.out.println(binding.getName() + "Superclass: " + binding.getSuperclass().getName());
-			}
+			declVisit(tdecl.getName().getFullyQualifiedName(), tdecl.resolveBinding());
 			return true;
+		}
+
+		private boolean declVisit(String fullyQualifiedName, ITypeBinding binding) {
+			if (fullyQualifiedName.equals(className)) {
+				throw new AbortSearchException();
+			}
+			checkTypeBinding(binding);
+			ITypeBinding superClass = binding.getSuperclass();
+			while(superClass != null) {
+				checkTypeBinding(superClass);
+				for(ITypeBinding curInterface : binding.getInterfaces()) {
+					checkTypeBinding(curInterface);
+				}
+				superClass = superClass.getSuperclass();
+			}
+			return false;
+		}
+
+		private void checkTypeBinding(ITypeBinding sourceTypeBinding) {
+			if (sourceTypeBinding == null) {
+				throw new AbortSearchException();
+			}
+			ITypeBinding[] bindings = sourceTypeBinding.getDeclaredTypes();
+			for ( ITypeBinding binding : bindings) {
+				System.out.println("binding: " + binding.getName() + " is equals to sourceTypeBinding: " + sourceTypeBinding.getName() + ": " + binding.isEqualTo(sourceTypeBinding));
+				if (binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
+					throw new AbortSearchException();
+				}
+			}
 		}
 
 		@Override
