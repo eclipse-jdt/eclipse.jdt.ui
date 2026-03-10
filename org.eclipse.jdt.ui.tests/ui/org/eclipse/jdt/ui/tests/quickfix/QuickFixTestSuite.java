@@ -43,6 +43,7 @@ import org.junit.platform.suite.api.Suite;
 	ModifierCorrectionsQuickFixTest.class,
 	ModifierCorrectionsQuickFixTest1d7.class,
 	ModifierCorrectionsQuickFixTest9.class,
+	SuppressWarningsQuickFixTest.class,
 	GetterSetterQuickFixTest.class,
 	AssistQuickFixTest.class,
 	AssistQuickFixTest1d7.class,

@@ -25,10 +25,11 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
-import org.eclipse.ui.PartInitException;
+import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -76,10 +78,13 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		IEclipsePreferences node= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 		node.putBoolean("editor_save_participant_" + CleanUpPostSaveListener.POSTSAVELISTENER_ID, true);
 		node.put(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, CleanUpOptions.TRUE);
+		TestUtils.waitForIndexer();
 	}
 
-	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws JavaModelException, PartInitException {
+	@SuppressWarnings("restriction")
+	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws Exception {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+		Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
 
 		cu.getBuffer().setContents(newContent);
 		editor.doSave(null);

@@ -18,20 +18,29 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Plugin;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.core.filebuffers.tests.FileTool;
 import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
 import org.eclipse.ui.IEditorInput;
@@ -104,7 +113,7 @@ public class CompilationUnitDocumentProviderTest {
 
 	@Test
 	public void test3() throws Exception {
-		fLinkedProject= ResourceHelper.createLinkedProject("P2", JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
+		fLinkedProject= createLinkedProject("P2", JdtTextTestPlugin.getDefault(), new Path("testResources/folderLinkTarget1"));
 		assertNotNull(fLinkedProject);
 		assertTrue(fLinkedProject.exists());
 
@@ -146,5 +155,24 @@ public class CompilationUnitDocumentProviderTest {
 		provider.disconnect(input);
 		assertNull(provider.getDocument(input));
 		assertNull(provider.getAnnotationModel(input));
+	}
+
+	private static IProject createLinkedProject(String projectName, Plugin plugin, IPath linkPath) throws CoreException {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IProject project= workspace.getRoot().getProject(projectName);
+
+		IProjectDescription desc= workspace.newProjectDescription(projectName);
+		File file= FileTool.getFileInPlugin(plugin, linkPath);
+		IPath projectLocation= IPath.fromOSString(file.getAbsolutePath());
+		if (Platform.getLocation().equals(projectLocation))
+			projectLocation= null;
+		desc.setLocation(projectLocation);
+
+		NullProgressMonitor monitor= new NullProgressMonitor();
+		project.create(desc, monitor);
+		if (!project.isOpen())
+			project.open(monitor);
+
+		return project;
 	}
 }
