@@ -96,6 +96,9 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 			checkTypeBinding(binding);
 			ITypeBinding superClass = binding.getSuperclass();
 			while(superClass != null) {
+				if (superClass.getQualifiedName().equals(fullQualifiedName)) {
+					throw new AbortSearchException();
+				}
 				checkTypeBinding(superClass);
 				for(ITypeBinding curInterface : binding.getInterfaces()) {
 					checkTypeBinding(curInterface);
@@ -169,8 +172,11 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 				}
 			} else if (cur_import.getElementName().equals(fullQualifiedName)) {
 				isImportFound = true;
-			} else if (fullString.contains(className)) {
-				System.out.println("Abort");
+			} else {
+				String importClassname = fullString.substring(fullString.lastIndexOf('.')+1, fullString.length());
+				if (importClassname.equals(className)) {
+					System.out.println("Abort");
+				}
 			}
 		}
 		ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(sourceBinding, fullQualifiedName, className,searchResults);
