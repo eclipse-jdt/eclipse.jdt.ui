@@ -25,10 +25,11 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
-import org.eclipse.ui.PartInitException;
+import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -80,8 +81,10 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		TestUtils.waitForIndexer();
 	}
 
-	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws JavaModelException, PartInitException {
+	@SuppressWarnings("restriction")
+	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws Exception {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+		Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
 
 		cu.getBuffer().setContents(newContent);
 		editor.doSave(null);
