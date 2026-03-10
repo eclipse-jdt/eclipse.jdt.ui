@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2026 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+  * Contributors:
+ *     IBM Corporation - Add first version of ReplceQualifiedTypeFixCore
+ */
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
@@ -17,6 +30,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
 public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 
 	public static class ReplaceQualifiedTypeVisitor extends ASTVisitor {
@@ -25,12 +42,17 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		String fullQualifiedName;
 		String className;
 		QualifiedName sourceBinding;
+		ITypeBinding sourceTypeBinding;
 
-		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, String fullQualifiedName, ArrayList<QualifiedName> searchResults) {
+		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, String fullQualifiedName, String className,ArrayList<QualifiedName> searchResults) {
 			this.fullQualifiedName = fullQualifiedName;
 			this.searchResults = searchResults;
 			this.sourceBinding = sourceBinding;
-
+			this.sourceTypeBinding = sourceBinding.resolveTypeBinding();
+			if (this.sourceTypeBinding == null) {
+				throw new AbortSearchException();
+			}
+			this.className = className;
 		}
 
 		@Override
@@ -41,7 +63,7 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 				if ( binding instanceof ITypeBinding) {
 					//System.out.println("node: " + node.toString());
 					ITypeBinding tbdg = node.resolveTypeBinding();
-					if (tbdg.getName().equals(fullQualifiedName)) {
+					if (tbdg.getQualifiedName().equals(fullQualifiedName)) {
 						if (tbdg instanceof QualifiedName) {
 							System.out.println("Item found adding to list" + ((QualifiedName) tbdg).getFullyQualifiedName());
 							searchResults.add((QualifiedName) tbdg);
@@ -58,22 +80,26 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 			//Do something
 			//System.out.println("edecl: " + edecl.getName());
 			if (edecl.getName().getFullyQualifiedName().equals(className)) {
-				System.out.println("Abort Edecl");
+				throw new AbortSearchException();
 			} else {
 				ITypeBinding binding = edecl.resolveBinding();
 			}
 			return true;
 		}
 
-		private boolean checkTypeBinding(ITypeBinding sourceBinding) {
+		private boolean declVisit(String fullyQualifiedName, ITypeBinding binding) {
+
+			return false;
+		}
+
+		private void checkTypeBinding(ITypeBinding sourceBinding) {
 			ITypeBinding[] bindings = sourceBinding.getDeclaredTypes();
 			for ( ITypeBinding binding : bindings) {
-				System.out.println("binding: " + binding.getName() + " is equals to sourceBinding: " + sourceBinding.getName() + ": " +  binding.isEqualTo(sourceBinding));
+				System.out.println("binding: " + binding.getName() + " is equals to sourceBinding: " + sourceBinding.getName() + ": " + binding.isEqualTo(sourceBinding));
 				if (binding.getName().equals(className) && !binding.equals(fullQualifiedName)) {
-					return true;
+					throw new AbortSearchException();
 				}
 			}
-			return false;
 		}
 
 		@Override
@@ -82,6 +108,7 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 			//System.out.println("tdecl: " + tdecl.getName());
 			if (tdecl.getName().getFullyQualifiedName().equals(className)) {
 				System.out.println("Abort type decl");
+				throw new AbortSearchException();
 			} else {
 				ITypeBinding binding = tdecl.resolveBinding();
 				checkTypeBinding(binding);
@@ -103,10 +130,9 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 			if (qname.getFullyQualifiedName().equals(fullQualifiedName)) {
 				System.out.println("Item found adding to list" + qname.getFullyQualifiedName()+ " to list");
 				searchResults.add(qname);
-				// Item found, can stop the visit
-				return false;
 			}
-			return true;
+			// We stop the visit in any case.
+			return false;
 		}
 
 		public ArrayList<QualifiedName> getSearchResults() {
@@ -143,13 +169,18 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		for(IImportDeclaration cur_import : imports) {
 			System.out.println("Cur import: " + cur_import.getElementName());
 			String fullString = cur_import.getElementName();
-			if(cur_import.getElementName().equals(fullQualifiedName)) {
+			if (cur_import.isOnDemand()) {
+				String onDemandImport = fullString.substring(0, cur_import.getElementName().length()-2);
+				if (fullString.contains(onDemandImport)) {
+					isImportFound = true;
+				}
+			} else if (cur_import.getElementName().equals(fullQualifiedName)) {
 				isImportFound = true;
 			} else if (fullString.contains(className)) {
 				System.out.println("Abort");
 			}
 		}
-		ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(sourceBinding, fullQualifiedName, searchResults);
+		ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(sourceBinding, fullQualifiedName, className,searchResults);
 		rootNode.accept(rfqnVisitor);
 		System.out.println(rootNode.getLength());
 		if (isImportFound) {
@@ -180,4 +211,13 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		return null;
 	}
 
+	public static class ReplaceQualiiedTypeOperation extends CompilationUnitRewriteOperation {
+
+		@Override
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
+			// TODO Auto-generated method stub
+
+		}
+
+	}
 }
