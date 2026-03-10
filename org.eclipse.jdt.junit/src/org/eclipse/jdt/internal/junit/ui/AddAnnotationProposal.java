@@ -123,7 +123,8 @@ public class AddAnnotationProposal implements IJavaCompletionProposal {
 	@Override
 	public int getRelevance() {
 		ASTNode coveringNode = fContext.getCoveringNode();
-		if (coveringNode.getParent() instanceof MethodDeclaration) {
+		if (fMethodDecl.getBody() != null &&
+				coveringNode.getStartPosition() < fMethodDecl.getBody().getStartPosition()) {
 			return 10;
 		} else {
 			return IProposalRelevance.ADD_SUPPRESSWARNINGS - 1;
