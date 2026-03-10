@@ -157,7 +157,7 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		return null;
 	}
 
-	public String create(ASTNode node, String fullQualifiedName) {
+	public ArrayList<QualifiedName> create(ASTNode node, String fullQualifiedName) {
 		ASTNode rootNode = node.getRoot();
 		for(IImportDeclaration cur_import : imports) {
 			System.out.println("Cur import: " + cur_import.getElementName());
@@ -177,16 +177,20 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 			}
 		}
 		ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(sourceBinding, fullQualifiedName, className,searchResults);
-		rootNode.accept(rfqnVisitor);
-		System.out.println(rootNode.getLength());
-		if (isImportFound) {
-			System.out.println("I found the import...");
-		} else {
-			// We need to add an import
+		try {
+			rootNode.accept(rfqnVisitor);
+			System.out.println(rootNode.getLength());
+			if (isImportFound) {
+				System.out.println("I found the import...");
+			} else {
+				// 	We need to add an import
+			}
+			System.out.println(fullQualifiedName);
+			ArrayList<QualifiedName> itemsToModify = rfqnVisitor.getSearchResults();
+			return itemsToModify;
+		} catch (AbortSearchException ase) {
+			return null;
 		}
-		System.out.println(fullQualifiedName);
-		ArrayList<QualifiedName> itemsToModify = rfqnVisitor.getSearchResults();
-		return null;
 	}
 
 	@Override
