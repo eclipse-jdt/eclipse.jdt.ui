@@ -512,7 +512,41 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private MethodInvocation createStandaloneJ7HashCall() {
 		MethodInvocation j7Invoc= fAst.newMethodInvocation();
 		for (IVariableBinding field : fFields) {
-			j7Invoc.arguments().add(fAst.newSimpleName(field.getName()));
+			if (field.getType().isPrimitive()) {
+				MethodInvocation invocation= fAst.newMethodInvocation();
+				invocation.setName(fAst.newSimpleName("valueOf")); //$NON-NLS-1$
+				invocation.arguments().add(fAst.newSimpleName(field.getName()));
+				switch (field.getType().getName()) {
+					case "byte": //$NON-NLS-1$
+						invocation.setExpression(fAst.newSimpleName("Byte")); //$NON-NLS-1$
+						break;
+					case "short": //$NON-NLS-1$
+						invocation.setExpression(fAst.newSimpleName("Short")); //$NON-NLS-1$
+						break;
+					case "int": //$NON-NLS-1$
+						invocation.setExpression(fAst.newSimpleName("Integer")); //$NON-NLS-1$
+						break;
+					case "long": //$NON-NLS-1$
+						invocation.setExpression(fAst.newSimpleName("Long")); //$NON-NLS-1$
+						break;
+					case "float": //$NON-NLS-1$
+						invocation.setExpression(fAst.newSimpleName("Float")); //$NON-NLS-1$
+						break;
+					case "double": //$NON-NLS-1$
+						invocation.setExpression(fAst.newSimpleName("Double")); //$NON-NLS-1$
+						break;
+					case "char": //$NON-NLS-1$
+						invocation.setExpression(fAst.newSimpleName("Character")); //$NON-NLS-1$
+						break;
+					case "boolean": //$NON-NLS-1$
+						invocation.setExpression(fAst.newSimpleName("Boolean")); //$NON-NLS-1$
+						break;
+				}
+				j7Invoc.arguments().add(invocation);
+			}
+			else {
+				j7Invoc.arguments().add(fAst.newSimpleName(field.getName()));
+			}
 		}
 		j7Invoc.setExpression(getQualifiedName(JAVA_UTIL_OBJECTS));
 		j7Invoc.setName(fAst.newSimpleName(METHODNAME_HASH));
