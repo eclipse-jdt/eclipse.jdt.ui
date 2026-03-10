@@ -63,12 +63,9 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 				if ( binding instanceof ITypeBinding) {
 					//System.out.println("node: " + node.toString());
 					ITypeBinding tbdg = node.resolveTypeBinding();
-					if (tbdg.getQualifiedName().equals(fullQualifiedName)) {
-						if (tbdg instanceof QualifiedName) {
-							System.out.println("Item found adding to list" + ((QualifiedName) tbdg).getFullyQualifiedName());
-							searchResults.add((QualifiedName) tbdg);
-							return false;
-						}
+					if(tbdg.getName().equals(className) && !tbdg.isEqualTo(sourceTypeBinding)) {
+						System.out.println("We should abort");
+						throw new AbortSearchException();
 					}
 				}
 			}
