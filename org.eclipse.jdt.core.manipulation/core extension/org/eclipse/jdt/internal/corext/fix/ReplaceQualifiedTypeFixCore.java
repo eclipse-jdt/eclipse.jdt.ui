@@ -164,15 +164,16 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 			String fullString = cur_import.getElementName();
 			if (cur_import.isOnDemand()) {
 				String onDemandImport = fullString.substring(0, cur_import.getElementName().length()-2);
-				if (fullString.contains(onDemandImport)) {
+				String sourceQualifier = sourceBinding.getQualifier().getFullyQualifiedName();
+				if (sourceQualifier.contains(onDemandImport)) {
 					isImportFound = true;
 				}
 			} else if (cur_import.getElementName().equals(fullQualifiedName)) {
 				isImportFound = true;
 			} else {
-				String importClassname = fullString.substring(fullString.lastIndexOf('.')+1, fullString.length());
+				String importClassname = fullString.substring(fullString.lastIndexOf('.')+1);
 				if (importClassname.equals(className)) {
-					System.out.println("Abort");
+					return null;
 				}
 			}
 		}
