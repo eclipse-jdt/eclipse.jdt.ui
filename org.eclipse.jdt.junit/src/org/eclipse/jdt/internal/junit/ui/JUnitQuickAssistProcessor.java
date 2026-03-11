@@ -72,10 +72,34 @@ public class JUnitQuickAssistProcessor implements IQuickAssistProcessor {
 			return null;
 		}
 
+
 		List<IJavaCompletionProposal> proposals = new ArrayList<>();
 
 		boolean hasDisabledAnnotation = hasAnnotation(methodDecl, JUNIT5_DISABLED_ANNOTATION);
 		boolean hasIgnoreAnnotation = hasAnnotation(methodDecl, JUNIT4_IGNORE_ANNOTATION);
+
+		// if user selects code within the method, only continue if we can disable the test and
+		// there is a problem found in the selection
+		if (context.getSelectionLength() > 0 &&
+				methodDecl.getBody() != null &&
+				coveringNode.getStartPosition() >= methodDecl.getBody().getStartPosition()) {
+			boolean problemFoundInSelection= false;
+			if (!hasDisabledAnnotation && !hasIgnoreAnnotation) {
+				int contextStart= context.getSelectionOffset();
+				int contextEnd= context.getSelectionOffset() + context.getSelectionLength();
+				for (IProblemLocation location : locations) {
+					int locationEnd= location.getOffset() + location.getLength();
+					if (location.getOffset() >= contextStart &&
+							locationEnd <= contextEnd) {
+						problemFoundInSelection= true;
+						break;
+					}
+				}
+			}
+			if (!problemFoundInSelection) {
+				return null;
+			}
+		}
 
 		if (hasDisabledAnnotation || hasIgnoreAnnotation) {
 			// Offer to remove the annotation
