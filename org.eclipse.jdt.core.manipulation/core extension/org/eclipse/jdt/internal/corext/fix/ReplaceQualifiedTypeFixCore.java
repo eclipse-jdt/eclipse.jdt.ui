@@ -13,6 +13,7 @@
  */
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
@@ -74,7 +75,7 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 
 		@Override
 		public boolean visit(EnumDeclaration edecl) {
-			declVisit(fullQualifiedName, edecl.resolveBinding());
+			declVisit(edecl.resolveBinding());
 			return true;
 		}
 
@@ -82,38 +83,37 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		public boolean visit(TypeDeclaration tdecl) {
 			//Do something
 			//System.out.println("tdecl: " + tdecl.getName());
-			declVisit(tdecl.getName().getFullyQualifiedName(), tdecl.resolveBinding());
+			declVisit(tdecl.resolveBinding());
 			return true;
 		}
 
-		private boolean declVisit(String fullyQualifiedName, ITypeBinding binding) {
-			if (fullyQualifiedName.equals(className)) {
+		private boolean declVisit(ITypeBinding binding) {
+			if (binding == null) {
+				return false;
+			}
+			if (binding.getName().equals(className)) {
 				throw new AbortSearchException();
 			}
 			checkTypeBinding(binding);
-			ITypeBinding superClass = binding.getSuperclass();
-			while(superClass != null) {
-				if (superClass.getQualifiedName().equals(fullQualifiedName)) {
-					throw new AbortSearchException();
-				}
-				checkTypeBinding(superClass);
-				for(ITypeBinding curInterface : binding.getInterfaces()) {
-					checkTypeBinding(curInterface);
-				}
-				superClass = superClass.getSuperclass();
+
+			declVisit(binding.getSuperclass());
+			for(ITypeBinding curInterface : binding.getInterfaces()) {
+				checkTypeBinding(curInterface);
+				declVisit(curInterface.getSuperclass());
 			}
 			return false;
 		}
 
-		private void checkTypeBinding(ITypeBinding sourceTypeBinding) {
-			if (sourceTypeBinding == null) {
+		private void checkTypeBinding(ITypeBinding typeBinding) {
+			if (typeBinding == null) {
 				throw new AbortSearchException();
 			}
-			ITypeBinding[] bindings = sourceTypeBinding.getDeclaredTypes();
+			ITypeBinding[] bindings = typeBinding.getDeclaredTypes();
 			for ( ITypeBinding binding : bindings) {
-				System.out.println("binding: " + binding.getName() + " is equals to sourceTypeBinding: " + sourceTypeBinding.getName() + ": " + binding.isEqualTo(sourceTypeBinding));
-				if (binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
-					throw new AbortSearchException();
+				if(Modifier.isProtected(binding.getModifiers()) || Modifier.isPublic(binding.getModifiers())) {
+					if (binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
+						throw new AbortSearchException();
+					}
 				}
 			}
 		}
@@ -121,7 +121,6 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		@Override
 		public boolean visit(QualifiedName qname) {
 			if (qname.getFullyQualifiedName().equals(fullQualifiedName)) {
-				System.out.println("Item found adding to list" + qname.getFullyQualifiedName()+ " to list");
 				searchResults.add(qname);
 			}
 			// We stop the visit in any case.
@@ -160,7 +159,6 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 	public ArrayList<QualifiedName> create(ASTNode node, String fullQualifiedName) {
 		ASTNode rootNode = node.getRoot();
 		for(IImportDeclaration cur_import : imports) {
-			System.out.println("Cur import: " + cur_import.getElementName());
 			String fullString = cur_import.getElementName();
 			if (cur_import.isOnDemand()) {
 				String onDemandImport = fullString.substring(0, cur_import.getElementName().length()-2);
@@ -186,7 +184,6 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 			} else {
 				// 	We need to add an import
 			}
-			System.out.println(fullQualifiedName);
 			ArrayList<QualifiedName> itemsToModify = rfqnVisitor.getSearchResults();
 			return itemsToModify;
 		} catch (AbortSearchException ase) {
