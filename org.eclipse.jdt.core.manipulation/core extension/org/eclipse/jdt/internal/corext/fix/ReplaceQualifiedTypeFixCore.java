@@ -45,14 +45,11 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		QualifiedName sourceBinding;
 		ITypeBinding sourceTypeBinding;
 
-		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, String fullQualifiedName, String className,ArrayList<QualifiedName> searchResults) {
+		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, ITypeBinding sourceTypeBinding, String fullQualifiedName, String className,ArrayList<QualifiedName> searchResults) {
 			this.fullQualifiedName = fullQualifiedName;
 			this.searchResults = searchResults;
 			this.sourceBinding = sourceBinding;
-			this.sourceTypeBinding = sourceBinding.resolveTypeBinding();
-			if (this.sourceTypeBinding == null) {
-				throw new AbortSearchException();
-			}
+			this.sourceTypeBinding = sourceTypeBinding;
 			this.className = className;
 		}
 
@@ -64,8 +61,7 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 				if ( binding instanceof ITypeBinding) {
 					//System.out.println("node: " + node.toString());
 					ITypeBinding tbdg = node.resolveTypeBinding();
-					if(tbdg.getName().equals(className) && !tbdg.isEqualTo(sourceTypeBinding)) {
-						System.out.println("We should abort");
+					if(!tbdg.isEqualTo(sourceTypeBinding)) {
 						throw new AbortSearchException();
 					}
 				}
@@ -112,6 +108,10 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 			for ( ITypeBinding binding : bindings) {
 				if(Modifier.isProtected(binding.getModifiers()) || Modifier.isPublic(binding.getModifiers())) {
 					if (binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
+						throw new AbortSearchException();
+					}
+				} else if(!Modifier.isPrivate(binding.getModifiers())) {
+					if(binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
 						throw new AbortSearchException();
 					}
 				}
@@ -175,20 +175,26 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 				}
 			}
 		}
-		ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(sourceBinding, fullQualifiedName, className,searchResults);
-		try {
-			rootNode.accept(rfqnVisitor);
-			System.out.println(rootNode.getLength());
-			if (isImportFound) {
-				System.out.println("I found the import...");
-			} else {
-				// 	We need to add an import
+		ITypeBinding sourceTypeBinding = sourceBinding.resolveTypeBinding();
+		if (sourceTypeBinding != null) {
+			ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(sourceBinding, sourceTypeBinding,fullQualifiedName, className,searchResults);
+			try {
+				rootNode.accept(rfqnVisitor);
+				if (isImportFound) {
+					System.out.println("I found the import...");
+					// Don't need to add an import
+				} else {
+					// 	We need to add an import
+				}
+				ArrayList<QualifiedName> itemsToModify = rfqnVisitor.getSearchResults();
+				return itemsToModify;
+			} catch (AbortSearchException ase) {
+				return null;
 			}
-			ArrayList<QualifiedName> itemsToModify = rfqnVisitor.getSearchResults();
-			return itemsToModify;
-		} catch (AbortSearchException ase) {
-			return null;
 		}
+		// If i am arrived here, this means there was an issue in getting the typeBinding for the sourceBinding.
+		// So we should abort the search
+		throw new AbortSearchException();
 	}
 
 	@Override
