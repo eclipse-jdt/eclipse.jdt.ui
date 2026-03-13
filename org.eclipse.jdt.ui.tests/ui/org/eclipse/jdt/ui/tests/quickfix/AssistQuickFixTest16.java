@@ -813,6 +813,220 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 	}
 
 	@Test
+	public void testConvertToRecord10() throws Exception { // Class with Generics
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class Pair<T, U> {
+					private final T first;
+					private final U second;
+
+					public Pair(T first, U second) {
+						this.first = first;
+						this.second = second;
+					}
+
+					public T getFirst() {
+						return first;
+					}
+
+					public U getSecond() {
+						return second;
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("Pair.java", str1, false, null);
+
+		int index= str1.indexOf("getFirst");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 8);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
+		proposal.apply();
+		String preview= cu.getBuffer().getContents();
+
+		String expected = """
+				package test;
+
+				public record Pair<T, U>(T first, U second) {
+				}
+				""";
+
+		assertEqualString(expected, preview);
+	}
+
+	@Test
+	public void testConvertToRecord11() throws Exception { // Class with Annotations
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				import java.lang.annotation.Retention;
+				import java.lang.annotation.RetentionPolicy;
+
+				@Deprecated
+				public class User {
+					@NotNull
+					private final String name;
+
+					@Range(min = 0, max = 150)
+					private final int age;
+
+					public User(@NotNull String name, int age) {
+						this.name = name;
+						this.age = age;
+					}
+
+					@NotNull
+					public String getName() {
+						return name;
+					}
+
+					public int getAge() {
+						return age;
+					}
+				}
+
+				@Retention(RetentionPolicy.RUNTIME)
+				@interface NotNull {}
+
+				@Retention(RetentionPolicy.RUNTIME)
+				@interface Range {
+					int min();
+					int max();
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("User.java", str1, false, null);
+
+		int index= str1.indexOf("getAge");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
+		proposal.apply();
+		String preview= cu.getBuffer().getContents();
+
+		String expected = """
+				package test;
+
+				import java.lang.annotation.Retention;
+				import java.lang.annotation.RetentionPolicy;
+
+				@Deprecated
+				public record User(@NotNull String name, @Range(min = 0, max = 150) int age) {
+				}
+
+				@Retention(RetentionPolicy.RUNTIME)
+				@interface NotNull {}
+
+				@Retention(RetentionPolicy.RUNTIME)
+				@interface Range {
+					int min();
+					int max();
+				}
+				""";
+
+		assertEqualString(expected, preview);
+	}
+
+	@Test
+	public void testConvertToRecord12() throws Exception { // Single Field Class
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class Identifier {
+					private final String id;
+
+					public Identifier(String id) {
+						this.id = id;
+					}
+
+					public String getId() {
+						return id;
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("Identifier.java", str1, false, null);
+
+		int index= str1.indexOf("getId");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
+		proposal.apply();
+		String preview= cu.getBuffer().getContents();
+
+		String expected = """
+				package test;
+
+				public record Identifier(String id) {
+				}
+				""";
+
+		assertEqualString(expected, preview);
+	}
+
+	@Test
+	public void testConvertToRecord13() throws Exception { // Package-Private Class
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				class PackagePrivateCls {
+					private final int value;
+
+					PackagePrivateCls(int value) {
+						this.value = value;
+					}
+
+					int getValue() {
+						return value;
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("PackagePrivateCls.java", str1, false, null);
+
+		int index= str1.indexOf("getValue");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 8);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
+		proposal.apply();
+		String preview= cu.getBuffer().getContents();
+
+		String expected = """
+				package test;
+
+				record PackagePrivateCls(int value) {
+				}
+				""";
+
+		assertEqualString(expected, preview);
+	}
+
+	@Test
 	public void testNoConvertToRecord1() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
@@ -1298,6 +1512,273 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 
 		int index= str1.indexOf("Inner(");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+	@Test
+	public void testNoConvertToRecord10() throws Exception { // Getter with Wrong Return Type
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+				module test {
+		}
+		""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class WrongTypeCls {
+					private final int a;
+
+					public WrongTypeCls(int a) {
+						this.a = a;
+					}
+
+					public long getA() {
+						return (long) a;
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("WrongTypeCls.java", str1, false, null);
+
+		int index= str1.indexOf("Inner(");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
+	@Test
+	public void testNoConvertToRecord11() throws Exception { // Class with Instance Initializer Blocks
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class InitializerCls {
+					private final int value;
+					private final String name;
+
+					{
+						System.out.println("Instance initializer");
+					}
+
+					public InitializerCls(int value, String name) {
+						this.value = value;
+						this.name = name;
+					}
+
+					public int getValue() {
+						return value;
+					}
+
+					public String getName() {
+						return name;
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("InitializerCls.java", str1, false, null);
+
+		int index= str1.indexOf("getValue");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 8);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
+	@Test
+	public void testNoConvertToRecord12() throws Exception { // Constructor with Additional Logic
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class CalculatedCls {
+					private final int value;
+					private final int doubled;
+
+					public CalculatedCls(int value) {
+						this.value = value;
+						this.doubled = value * 2;
+					}
+
+					public int getValue() {
+						return value;
+					}
+
+					public int getDoubled() {
+						return doubled;
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("CalculatedCls.java", str1, false, null);
+
+		int index= str1.indexOf("getValue");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 8);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
+
+	@Test
+	public void testNoConvertToRecord13() throws Exception { // Class with Native Methods
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class NativeCls {
+					private final int value;
+
+					public NativeCls(int value) {
+						this.value = value;
+					}
+
+					public int getValue() {
+						return value;
+					}
+
+					public native void nativeMethod();
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("NativeCls.java", str1, false, null);
+
+		int index= str1.indexOf("getValue");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 8);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
+	@Test
+	public void testNoConvertToRecord14() throws Exception { // Class with Finalize Method
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class FinalizeCls {
+					private final int value;
+
+					public FinalizeCls(int value) {
+						this.value = value;
+					}
+
+					public int getValue() {
+						return value;
+					}
+
+					@Override
+					protected void finalize() throws Throwable {
+						super.finalize();
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("FinalizeCls.java", str1, false, null);
+
+		int index= str1.indexOf("getValue");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 8);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
+	public void testNoConvertToRecord15() throws Exception { // Constructor Not Initializing All Final Fields
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class PartialInitCls {
+					private final int a;
+					private final int b = 10;
+
+					public PartialInitCls(int a) {
+						this.a = a;
+					}
+
+					public int getA() {
+						return a;
+					}
+
+					public int getB() {
+						return b;
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("PartialInitCls.java", str1, false, null);
+
+		int index= str1.indexOf("getA");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);

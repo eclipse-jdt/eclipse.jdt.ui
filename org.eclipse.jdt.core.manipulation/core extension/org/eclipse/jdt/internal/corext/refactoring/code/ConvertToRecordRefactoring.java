@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,11 +47,13 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -72,6 +76,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
@@ -198,7 +203,7 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			}
 
 			int typeModifiers= fTypeBinding.getModifiers();
-			if (Modifier.isSealed(typeModifiers)) {
+			if (Modifier.isSealed(typeModifiers) || Modifier.isAbstract(typeModifiers)) {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 			}
 
@@ -353,6 +358,9 @@ public class ConvertToRecordRefactoring extends Refactoring {
 								return false;
 							} else {
 								int modifiers= node.getModifiers();
+								if (Modifier.isNative(modifiers)) {
+									throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+								}
 								if (Modifier.isStatic(modifiers)) {
 									fMethodsToCopy.add(node);
 								} else if (Modifier.isPublic(modifiers)) {
@@ -541,17 +549,37 @@ public class ConvertToRecordRefactoring extends Refactoring {
 		List<IExtendedModifier> modifiers= fTypeDeclaration.modifiers();
 		List<IExtendedModifier> recordModifiers= newRecordDeclaration.modifiers();
 		for (IExtendedModifier modifier : modifiers) {
-			if (!(modifier instanceof Modifier mod) || !mod.isFinal()) {
+			if (!(modifier instanceof Modifier mod) || (!mod.isFinal() && !mod.isNonSealed())) {
 				IExtendedModifier newModifier= (IExtendedModifier) rewrite.createCopyTarget((ASTNode)modifier);
 				recordModifiers.add(newModifier);
 			}
 		}
-		List<SingleVariableDeclaration> components= newRecordDeclaration.recordComponents();
-		List<SingleVariableDeclaration> parameters= fConstructor.parameters();
-		for (SingleVariableDeclaration parameter : parameters) {
-			SingleVariableDeclaration newSingleVariableDeclaration= (SingleVariableDeclaration) rewrite.createCopyTarget(parameter);
-			components.add(newSingleVariableDeclaration);
+		FieldDeclaration[] fieldDecls= fTypeDeclaration.getFields();
+		Map<String, Set<Annotation>> fieldAnnotationMap= new LinkedHashMap<>();
+		for (FieldDeclaration field : fieldDecls) {
+			List<IExtendedModifier> fieldModifiers= field.modifiers();
+			for (IExtendedModifier fieldModifier : fieldModifiers) {
+				if (fieldModifier.isAnnotation()) {
+					List<VariableDeclarationFragment> fragments= field.fragments();
+					for (VariableDeclarationFragment fragment : fragments) {
+						String fieldName= fragment.getName().getFullyQualifiedName();
+						Set<Annotation> annotations= fieldAnnotationMap.get(fieldName);
+						if (annotations == null) {
+							annotations= new LinkedHashSet<>();
+							fieldAnnotationMap.put(fieldName, annotations);
+						}
+						annotations.add((Annotation)fieldModifier);
+					}
+				}
+			}
 		}
+		List<TypeParameter> typeParameters= fTypeDeclaration.typeParameters();
+		List<TypeParameter>	recordTypeParameters= newRecordDeclaration.typeParameters();
+		for (TypeParameter typeParameter : typeParameters) {
+			TypeParameter newTypeParameter= (TypeParameter) rewrite.createCopyTarget(typeParameter);
+			recordTypeParameters.add(newTypeParameter);
+		}
+		createComponents(ast, rewrite, newRecordDeclaration, fieldAnnotationMap);
 		List<Type> interfaces= fTypeDeclaration.superInterfaceTypes();
 		List<Type> interfaceTypes= newRecordDeclaration.superInterfaceTypes();
 		for (Type interfaceType : interfaces) {
@@ -572,6 +600,52 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			bodyDeclarations.add(newMethodDeclaration);
 		}
 		ASTNodes.replaceButKeepComment(rewrite, fTypeDeclaration, newRecordDeclaration, null);
+	}
+
+	private void createComponents(AST ast, ASTRewrite rewrite, RecordDeclaration newRecordDeclaration, Map<String, Set<Annotation>> fieldAnnotationMap) {
+		List<SingleVariableDeclaration> components= newRecordDeclaration.recordComponents();
+		List<SingleVariableDeclaration> parameters= fConstructor.parameters();
+		for (SingleVariableDeclaration parameter : parameters) {
+			Set<Annotation> annotationSet= fieldAnnotationMap.get(parameter.getName().getFullyQualifiedName());
+			List<IExtendedModifier> parameterAnnotations= parameter.modifiers();
+			if (annotationSet != null) {
+				for (IExtendedModifier parameterAnnotation : parameterAnnotations) {
+					if (parameterAnnotation.isAnnotation()) {
+						Annotation[] annotationArray= annotationSet.toArray(new Annotation[0]);
+						for (Annotation annotation : annotationArray) {
+							if (((Annotation)parameterAnnotation).getTypeName().getFullyQualifiedName().equals(annotation.getTypeName().getFullyQualifiedName())) {
+								annotationSet.remove(annotation);
+							}
+						}
+					}
+				}
+			}
+			SingleVariableDeclaration newSingleVariableDeclaration= ast.newSingleVariableDeclaration();
+			newSingleVariableDeclaration.setName(ast.newSimpleName(parameter.getName().getFullyQualifiedName()));
+			newSingleVariableDeclaration.setType((Type) rewrite.createCopyTarget(parameter.getType()));
+			newSingleVariableDeclaration.setVarargs(parameter.isVarargs());
+			List<IExtendedModifier> svdModifiers= newSingleVariableDeclaration.modifiers();
+			List<IExtendedModifier> oldModifiers= parameter.modifiers();
+			for (IExtendedModifier oldModifier : oldModifiers) {
+				svdModifiers.add((IExtendedModifier) rewrite.createCopyTarget((ASTNode) oldModifier));
+			}
+			if (annotationSet != null) {
+				for (IExtendedModifier annotation : annotationSet) {
+					svdModifiers.add((IExtendedModifier) rewrite.createCopyTarget((ASTNode) annotation));
+				}
+			}
+			List<Dimension> oldExtraDimensions= parameter.extraDimensions();
+			List<Dimension> svdDimensions= newSingleVariableDeclaration.extraDimensions();
+			for (Dimension oldExtraDimension : oldExtraDimensions) {
+				svdDimensions.add((Dimension) rewrite.createCopyTarget(oldExtraDimension));
+			}
+			List<Annotation> oldVarargAnnotations= parameter.varargsAnnotations();
+			List<Annotation> svdVarargAnnotations= newSingleVariableDeclaration.varargsAnnotations();
+			for (Annotation annotation : oldVarargAnnotations) {
+				svdVarargAnnotations.add((Annotation) rewrite.createCopyTarget(annotation));
+			}
+			components.add(newSingleVariableDeclaration);
+		}
 	}
 
 	private RefactoringStatus updateReferences(IProgressMonitor pm) throws CoreException {
