@@ -1784,4 +1784,114 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
 	}
 
+	@Test
+	public void testNoConvertToRecord16() throws Exception { // no fields
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class NoFieldsCls {
+
+					public NoFieldsCls() {
+					}
+
+					public class Inner {
+						private int a;
+						private String b;
+
+						public Inner(int a, String b) {
+							this.a = a;
+							this.b = b;
+						}
+
+						public int getA() {
+							return a;
+						}
+
+						public String getB() {
+							return b;
+						}
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("NoFieldsCls.java", str1, false, null);
+
+		int index= str1.indexOf("NoFieldsCls");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 10);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
+	@Test
+	public void testNoConvertToRecord17() throws Exception { // member class
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public class MemberCls {
+
+					private int a;
+					public MemberCls(int a) {
+						this.a = a;
+					}
+
+					public int getA() {
+						return a;
+					}
+
+					public class Inner {
+						private int a;
+						private String b;
+
+						public Inner(int a, String b) {
+							this.a = a;
+							this.b = b;
+						}
+
+						public int getA() {
+							return a;
+						}
+
+						public String getB() {
+							return b;
+						}
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("MemberCls.java", str1, false, null);
+
+		int index= str1.indexOf("MemberCls");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 9);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
+	}
+
 }

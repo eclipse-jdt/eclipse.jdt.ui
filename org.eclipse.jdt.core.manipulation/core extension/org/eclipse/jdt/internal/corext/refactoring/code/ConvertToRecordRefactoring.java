@@ -48,12 +48,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Dimension;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -208,6 +210,11 @@ public class ConvertToRecordRefactoring extends Refactoring {
 			}
 
 			IVariableBinding[] fields= fTypeBinding.getDeclaredFields();
+
+			if (fields.length == 0) {
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+			}
+
 			List<IVariableBinding> fieldsToSet= new ArrayList<>();
 			List<IVariableBinding> fieldsToCheck= new ArrayList<>();
 			for (IVariableBinding field : fields) {
@@ -295,6 +302,25 @@ public class ConvertToRecordRefactoring extends Refactoring {
 									}
 								}
 							}
+						}
+						@Override
+						public boolean visit(TypeDeclaration node) {
+							ITypeBinding nodeBinding= node.resolveBinding();
+							if (nodeBinding == null) {
+								throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_unexpected_error);
+							}
+							if (!nodeBinding.isLocal() && !nodeBinding.isEqualTo(fTypeBinding)) {
+								throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_member_types_not_supported);
+							}
+							return !nodeBinding.isLocal();
+						}
+						@Override
+						public boolean visit(EnumDeclaration node) {
+							throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
+						}
+						@Override
+						public boolean visit(AnnotationTypeDeclaration node) {
+							throw new VisitException(RefactoringCoreMessages.ConvertToRecordRefactoring_not_simple_case);
 						}
 						@Override
 						public boolean visit(Initializer node) {
