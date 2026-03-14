@@ -29,10 +29,12 @@ import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -74,6 +76,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -144,16 +147,19 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 	}
 
 	protected void disable(String key) throws CoreException {
+		JavaTestPlugin.log(Status.info("Disabling: " + key));
 		fProfile.getSettings().put(key, CleanUpOptions.FALSE);
 		commitProfile();
 	}
 
 	protected void enable(String key) throws CoreException {
+		JavaTestPlugin.log(Status.info("Enabling: " + key));
 		fProfile.getSettings().put(key, CleanUpOptions.TRUE);
 		commitProfile();
 	}
 
 	private void commitProfile() throws CoreException {
+		TestUtils.waitForIndexer();
 		List<Profile> profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(fProfile);
 
