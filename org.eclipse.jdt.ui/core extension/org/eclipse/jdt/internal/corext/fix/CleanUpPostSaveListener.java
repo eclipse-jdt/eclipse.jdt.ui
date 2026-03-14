@@ -13,12 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -60,6 +62,7 @@ import org.eclipse.text.edits.UndoEdit;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -71,7 +74,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -375,7 +380,9 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
     				CompilationUnit ast= null;
     				if (requiresAST(cleanUps)) {
-    					ast= createAst(unit, options, Progress.subMonitor(monitor, 10));
+    					AtomicReference<CompilationUnit> ref = new AtomicReference<>();
+    					runUsingProgressService(m -> ref.set(createAst(unit, options, m)));
+    					ast= ref.get();
     				}
 
     				CleanUpContext context;
@@ -581,6 +588,24 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		}
 
 		return false;
+	}
+
+	private static void runUsingProgressService(IRunnableWithProgress runnable) {
+		try {
+			IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
+			progressService.run(true, false, runnable);
+		} catch (InvocationTargetException e) {
+			if (e instanceof InvocationTargetException ite && ite.getCause() instanceof RuntimeException rte)
+				// Something happened inside the call, re-throw
+				throw rte;
+
+			// Other kind of exceptions are simply logged
+			JavaPlugin.log(e);
+		} catch (InterruptedException e) {
+			// This currently doesn't happen since canceling the monitor does not throw an OperationCanceledException.
+			// ... but better safe than sorry, so log it.
+			JavaPlugin.log(e);
+		}
 	}
 
 	private CompilationUnit createAst(ICompilationUnit unit, Map<String, String> cleanUpOptions, IProgressMonitor monitor) {
