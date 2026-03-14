@@ -72,8 +72,7 @@ public class ProjectTestSetup extends ExternalResource {
 
 	@Override
 	protected void before() throws Throwable {
-
-		if (projectExists()) { // allow nesting of ProjectTestSetups
+		if (projectExists() && getProject().getProject().isAccessible()) { // allow nesting of ProjectTestSetups
 			return;
 		}
 

@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -31,6 +28,9 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
 
 
 /**
@@ -63,7 +63,7 @@ public class ProjectTestSetup extends TestSetup {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		if (projectExists()) { // allow nesting of ProjectTestSetups
+		if (projectExists() && getProject().getProject().isAccessible()) { // allow nesting of ProjectTestSetups
 			return;
 		}
 
