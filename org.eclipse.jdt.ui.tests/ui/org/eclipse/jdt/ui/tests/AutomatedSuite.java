@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,7 @@ import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTestSuite;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.dialogs.FilteredTypesSelectionDialogTests;
+import org.eclipse.jdt.ui.tests.editor.ClassFileEditorTests;
 import org.eclipse.jdt.ui.tests.editor.ClassFileInputTests;
 import org.eclipse.jdt.ui.tests.hover.JavadocHoverTests;
 import org.eclipse.jdt.ui.tests.hover.MarkdownCommentTests;
@@ -91,6 +92,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	MarkdownCommentTests.class,
 	SmokeViewsTest.class,
 	ClassFileInputTests.class,
+	ClassFileEditorTests.class,
 	FilteredTypesSelectionDialogTests.class
 })
 public class AutomatedSuite {
