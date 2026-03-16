@@ -348,6 +348,7 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_replaceelsewithblock_description;
 	public static String QuickAssistProcessor_replacethenelsewithblock_description;
 	public static String QuickAssistProcessor_replacebodywithblock_description;
+	public static String QuickAssistProcessor_replaceQualifiedName_description;
 	public static String QuickAssistProcessor_invertequals_description;
 	public static String QuickAssistProcessor_typetoarrayInitializer_description;
 	public static String QuickAssistProcessor_createmethodinsuper_description;

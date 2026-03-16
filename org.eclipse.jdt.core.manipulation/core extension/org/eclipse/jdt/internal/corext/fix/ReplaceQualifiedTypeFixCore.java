@@ -15,27 +15,36 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
-public class ReplaceQualifiedTypeFixCore implements IProposableFix {
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+
+public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 	public static class ReplaceQualifiedTypeVisitor extends ASTVisitor {
 
@@ -45,9 +54,11 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		QualifiedName sourceBinding;
 		ITypeBinding sourceTypeBinding;
 
-		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, ITypeBinding sourceTypeBinding, String fullQualifiedName, String className,ArrayList<QualifiedName> searchResults) {
+		MethodDeclaration lastMethodDeclaration;
+
+		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, ITypeBinding sourceTypeBinding, String fullQualifiedName, String className) {
 			this.fullQualifiedName = fullQualifiedName;
-			this.searchResults = searchResults;
+			this.searchResults = new ArrayList<>();
 			this.sourceBinding = sourceBinding;
 			this.sourceTypeBinding = sourceTypeBinding;
 			this.className = className;
@@ -59,7 +70,6 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 				//resolve fully qualified name and add to list
 				IBinding binding = node.resolveBinding();
 				if ( binding instanceof ITypeBinding) {
-					//System.out.println("node: " + node.toString());
 					ITypeBinding tbdg = node.resolveTypeBinding();
 					if(!tbdg.isEqualTo(sourceTypeBinding)) {
 						throw new AbortSearchException();
@@ -71,48 +81,55 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 
 		@Override
 		public boolean visit(EnumDeclaration edecl) {
-			declVisit(edecl.resolveBinding());
+			declVisit(edecl.resolveBinding(), edecl);
 			return true;
 		}
 
 		@Override
 		public boolean visit(TypeDeclaration tdecl) {
-			//Do something
-			//System.out.println("tdecl: " + tdecl.getName());
-			declVisit(tdecl.resolveBinding());
+			declVisit(tdecl.resolveBinding(), tdecl);
 			return true;
 		}
 
-		private boolean declVisit(ITypeBinding binding) {
+		private boolean declVisit(ITypeBinding binding, ASTNode node) {
 			if (binding == null) {
 				return false;
 			}
 			if (binding.getName().equals(className)) {
 				throw new AbortSearchException();
 			}
-			checkTypeBinding(binding);
+			checkTypeBinding(binding, node);
 
-			declVisit(binding.getSuperclass());
+			declVisit(binding.getSuperclass(), node);
 			for(ITypeBinding curInterface : binding.getInterfaces()) {
-				checkTypeBinding(curInterface);
-				declVisit(curInterface.getSuperclass());
+				checkTypeBinding(curInterface, node);
+				declVisit(curInterface.getSuperclass(), node);
 			}
 			return false;
 		}
 
-		private void checkTypeBinding(ITypeBinding typeBinding) {
+		private void checkTypeBinding(ITypeBinding typeBinding, ASTNode node) {
 			if (typeBinding == null) {
 				throw new AbortSearchException();
 			}
 			ITypeBinding[] bindings = typeBinding.getDeclaredTypes();
 			for ( ITypeBinding binding : bindings) {
+				//binding.isLocal()
 				if(Modifier.isProtected(binding.getModifiers()) || Modifier.isPublic(binding.getModifiers())) {
 					if (binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
-						throw new AbortSearchException();
+						if (binding.isLocal()) {
+							lastMethodDeclaration = ASTNodes.getFirstAncestorOrNull(node, MethodDeclaration.class);
+						} else {
+							throw new AbortSearchException();
+						}
 					}
 				} else if(!Modifier.isPrivate(binding.getModifiers())) {
 					if(binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
-						throw new AbortSearchException();
+						if (binding.isLocal()) {
+							lastMethodDeclaration = ASTNodes.getFirstAncestorOrNull(node, MethodDeclaration.class);
+						} else {
+							throw new AbortSearchException();
+						}
 					}
 				}
 			}
@@ -121,9 +138,18 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 		@Override
 		public boolean visit(QualifiedName qname) {
 			if (qname.getFullyQualifiedName().equals(fullQualifiedName)) {
+				MethodDeclaration curMethodDeclaration = ASTNodes.getFirstAncestorOrNull(qname, MethodDeclaration.class);
+				if (lastMethodDeclaration != null) {
+					if (curMethodDeclaration != null) {
+						IMethodBinding lmdBinding = lastMethodDeclaration.resolveBinding();
+						IMethodBinding curBinding = curMethodDeclaration.resolveBinding();
+						if (lmdBinding.isEqualTo(curBinding)) {
+							return false;
+						}
+					}
+				}
 				searchResults.add(qname);
 			}
-			// We stop the visit in any case.
 			return false;
 		}
 
@@ -133,40 +159,25 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 
 	}
 
-	boolean isImportFound = false;
-	String className;
-	String fullQualifiedName;
-	IImportDeclaration[] imports;
-
-	ArrayList<QualifiedName> searchResults;
-	QualifiedName sourceBinding;
-
-	public ReplaceQualifiedTypeFixCore(QualifiedName fullQualifiedName, IImportDeclaration[] imports) {
-		this.fullQualifiedName = fullQualifiedName.getFullyQualifiedName();
-		this.imports = imports;
-		//Check for length
-		this.className = fullQualifiedName.getName().getFullyQualifiedName();
-		this.searchResults = new ArrayList<>();
-		this.sourceBinding = fullQualifiedName;
+	public ReplaceQualifiedTypeFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
+		super (name, compilationUnit, operation);
 	}
 
-	@Override
-	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public ArrayList<QualifiedName> create(ASTNode node, String fullQualifiedName) {
+	public static ReplaceQualifiedTypeFixCore createReplaceType(CompilationUnit compilationUnit, ASTNode node, IImportDeclaration[] imports) {
 		ASTNode rootNode = node.getRoot();
+		QualifiedName qualifiedNode = (QualifiedName)(node);
+		String className = qualifiedNode.getName().getFullyQualifiedName();
+		String fqName = qualifiedNode.getFullyQualifiedName();
+		boolean isImportFound = false;
 		for(IImportDeclaration cur_import : imports) {
 			String fullString = cur_import.getElementName();
 			if (cur_import.isOnDemand()) {
 				String onDemandImport = fullString.substring(0, cur_import.getElementName().length()-2);
-				String sourceQualifier = sourceBinding.getQualifier().getFullyQualifiedName();
+				String sourceQualifier = qualifiedNode.getQualifier().getFullyQualifiedName();
 				if (sourceQualifier.contains(onDemandImport)) {
 					isImportFound = true;
 				}
-			} else if (cur_import.getElementName().equals(fullQualifiedName)) {
+			} else if (cur_import.getElementName().equals(qualifiedNode)) {
 				isImportFound = true;
 			} else {
 				String importClassname = fullString.substring(fullString.lastIndexOf('.')+1);
@@ -175,53 +186,46 @@ public class ReplaceQualifiedTypeFixCore implements IProposableFix {
 				}
 			}
 		}
-		ITypeBinding sourceTypeBinding = sourceBinding.resolveTypeBinding();
+		ITypeBinding sourceTypeBinding = qualifiedNode.resolveTypeBinding();
 		if (sourceTypeBinding != null) {
-			ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(sourceBinding, sourceTypeBinding,fullQualifiedName, className,searchResults);
+			ReplaceQualifiedTypeVisitor rfqnVisitor = new ReplaceQualifiedTypeVisitor(qualifiedNode, sourceTypeBinding, fqName, className);
 			try {
 				rootNode.accept(rfqnVisitor);
-				if (isImportFound) {
-					System.out.println("I found the import...");
-					// Don't need to add an import
-				} else {
-					// 	We need to add an import
-				}
-				ArrayList<QualifiedName> itemsToModify = rfqnVisitor.getSearchResults();
-				return itemsToModify;
+				String label = CorrectionMessages.QuickAssistProcessor_replaceQualifiedName_description;
+				return new ReplaceQualifiedTypeFixCore(label, compilationUnit, new ReplaceQualifiedTypeOperation(qualifiedNode.getName(), rfqnVisitor.getSearchResults(), !isImportFound));
 			} catch (AbortSearchException ase) {
 				return null;
 			}
 		}
-		// If i am arrived here, this means there was an issue in getting the typeBinding for the sourceBinding.
-		// So we should abort the search
-		throw new AbortSearchException();
-	}
-
-	@Override
-	public String getDisplayString() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public String getAdditionalProposalInfo() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public static class ReplaceQualifiedTypeOperation extends CompilationUnitRewriteOperation {
 
-	@Override
-	public IStatus getStatus() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		List<QualifiedName> itemsToModify;
+		SimpleName className;
+		String packageToAdd;
+		boolean needImport;
 
-	public static class ReplaceQualiiedTypeOperation extends CompilationUnitRewriteOperation {
+		public ReplaceQualifiedTypeOperation(SimpleName className, List<QualifiedName> itemsToModify ,boolean needImport) {
+			this.itemsToModify = itemsToModify;
+			this.className = className;
+			this.needImport = needImport;
+		}
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
-			// TODO Auto-generated method stub
-
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.ReplaceQualifiedName_description, cuRewrite);
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			AST ast= cuRewrite.getRoot().getAST();
+			for(QualifiedName itemToModify: itemsToModify) {
+				SimpleName newItem = ast.newSimpleName(className.getFullyQualifiedName());
+				ASTNodes.replaceButKeepComment(rewrite, itemToModify, newItem, group);
+			}
+			if (needImport) {
+				ImportRewrite iRewrite = cuRewrite.getImportRewrite();
+				iRewrite.addImport(itemsToModify.get(0).getFullyQualifiedName());
+			}
 		}
-
 	}
 }

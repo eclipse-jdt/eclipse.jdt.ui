@@ -342,7 +342,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertPatternInstanceofIfStmtToSwitchProposals(context, coveringNode, null)
 					|| getDeprecatedFieldProposal(context, coveringNode, null, null)
 					|| getConvertToRecordProposals(context, coveringNode, null)
-					|| getDeprecatedProposal(context, coveringNode, null, null);
+					|| getDeprecatedProposal(context, coveringNode, null, null)
+					|| getFullQualifiedReplacement(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -431,8 +432,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getFullQualifiedReplacement(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
-		// TODO Auto-generated method stub
-		System.out.println(node);
 		ICompilationUnit cu = context.getCompilationUnit();
 		IImportDeclaration[] imports = cu.getImports();
 		if ( node instanceof SimpleName || node instanceof QualifiedName) {
@@ -440,10 +439,27 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			while ((curNode.getParent() instanceof QualifiedName)) {
 				curNode = curNode.getParent();
 			}
-			System.out.println(curNode);
 			if (curNode instanceof QualifiedName) {
-				ReplaceQualifiedTypeFixCore fqvnrp = new ReplaceQualifiedTypeFixCore((QualifiedName)curNode, imports);
-				fqvnrp.create(curNode, ((QualifiedName)curNode).getFullyQualifiedName());
+				//ReplaceQualifiedTypeFixCore fqvnrp = new ReplaceQualifiedTypeFixCore((QualifiedName)curNode, imports);
+				//createAddVarLambdaParameterTypesFix(context.getASTRoot(), covering);
+				ReplaceQualifiedTypeFixCore replaceFixCore = ReplaceQualifiedTypeFixCore.createReplaceType(context.getASTRoot(), curNode, imports);
+				/*ArrayList<QualifiedName> names = \
+						fqvnrp.create(curNode, ((QualifiedName)curNode).getFullyQualifiedName());*/
+				/*SimpleName className = ((QualifiedName) curNode).getName();
+				if (names.size() > 0) {
+					//We have found something to update
+						ReplaceQualifiedTypeOperation operation = new ReplaceQualifiedTypeOperation(names, className);
+					return true;
+				}*/
+				if (replaceFixCore != null) {
+					if (resultingCollections == null) {
+						return true;
+					}
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					FixCorrectionProposal proposal= new FixCorrectionProposal(replaceFixCore, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image, context);
+					resultingCollections.add(proposal);
+					return true;
+				}
 			}
 		}
 		return false;
@@ -3172,7 +3188,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getCompilationUnit(), true);
 			ASTRewrite astRewrite= ASTRewrite.create(node.getAST());
 			ASTRewrite astRewriteReplaceAllOccurrences= ASTRewrite.create(node.getAST());
-
 			ImportRemover remover= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
 			ImportRemover removerAllOccurences= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
 			MethodInvocation mi= null;
