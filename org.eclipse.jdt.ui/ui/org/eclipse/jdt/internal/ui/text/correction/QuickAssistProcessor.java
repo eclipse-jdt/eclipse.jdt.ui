@@ -440,17 +440,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				curNode = curNode.getParent();
 			}
 			if (curNode instanceof QualifiedName) {
-				//ReplaceQualifiedTypeFixCore fqvnrp = new ReplaceQualifiedTypeFixCore((QualifiedName)curNode, imports);
-				//createAddVarLambdaParameterTypesFix(context.getASTRoot(), covering);
 				ReplaceQualifiedTypeFixCore replaceFixCore = ReplaceQualifiedTypeFixCore.createReplaceType(context.getASTRoot(), curNode, imports);
-				/*ArrayList<QualifiedName> names = \
-						fqvnrp.create(curNode, ((QualifiedName)curNode).getFullyQualifiedName());*/
-				/*SimpleName className = ((QualifiedName) curNode).getName();
-				if (names.size() > 0) {
-					//We have found something to update
-						ReplaceQualifiedTypeOperation operation = new ReplaceQualifiedTypeOperation(names, className);
-					return true;
-				}*/
 				if (replaceFixCore != null) {
 					if (resultingCollections == null) {
 						return true;
