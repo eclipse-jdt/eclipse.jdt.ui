@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.tests.core.CoreTestSuite;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.dialogs.FilteredTypesSelectionDialogTests;
 import org.eclipse.jdt.ui.tests.editor.ClassFileInputTests;
+import org.eclipse.jdt.ui.tests.editor.MarkdownTypingTest;
 import org.eclipse.jdt.ui.tests.hover.JavadocHoverTests;
 import org.eclipse.jdt.ui.tests.hover.MarkdownCommentTests;
 import org.eclipse.jdt.ui.tests.hover.PackageJavadocTests;
@@ -91,7 +92,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	MarkdownCommentTests.class,
 	SmokeViewsTest.class,
 	ClassFileInputTests.class,
-	FilteredTypesSelectionDialogTests.class
+	FilteredTypesSelectionDialogTests.class,
+	MarkdownTypingTest.class
 })
 public class AutomatedSuite {
 	@BeforeEach

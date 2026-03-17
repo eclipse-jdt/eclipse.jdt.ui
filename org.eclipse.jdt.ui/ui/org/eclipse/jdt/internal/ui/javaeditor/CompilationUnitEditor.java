@@ -527,7 +527,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				}
 
 				ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
-				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && !IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(partition.getType()))
+				// Markdown checking is not required since Markdown should behave the same as Javadoc
+				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
 					return;
 				if (!validateEditorInputState())
 					return;
