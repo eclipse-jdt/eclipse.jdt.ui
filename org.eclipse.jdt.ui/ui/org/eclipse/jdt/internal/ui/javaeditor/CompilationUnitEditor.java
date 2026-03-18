@@ -453,6 +453,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				case '[':
 				case '\'':
 				case '\"':
+				case '`':
 					break;
 				default:
 					return;
@@ -480,6 +481,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				IJavaProject project= cu.getJavaProject();
 				boolean textBlockSupported= JavaModelUtil.is15OrHigher(project);
 
+				ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 				switch (event.character) {
 					case '(':
 						if (!fCloseBrackets
@@ -521,12 +523,48 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 								|| textBlockSupported && previous == null && offset > 2 && document.get(offset - 2, 2).equals("\"\"")) //$NON-NLS-1$
 							return;
 						break;
+					case '`':
+						String compliance = project != null
+				        ? project.getOption(JavaCore.COMPILER_COMPLIANCE, true)
+				        : JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+						if (validateEditorInputState()
+						        && IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(partition.getType())
+						        && JavaCore.compareJavaVersions(
+						        		compliance,
+					                    JavaCore.VERSION_23) >= 0) {
+							IDocument doc = sourceViewer.getDocument();
+						    int backtickOffset = selection.x;
+
+						    if (backtickOffset >= 2) {
+						        String prev = doc.get(backtickOffset - 2, 2);
+
+						        if ("``".equals(prev) //$NON-NLS-1$
+						        		&& isPreferenceTrue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK)
+						        		&& !shouldSuppressFenceAutoClose(doc, backtickOffset)) {
+
+						            String delimiter = TextUtilities.getDefaultLineDelimiter(doc);
+						            String insertion = "```" + "```"; //$NON-NLS-1$ //$NON-NLS-2$
+
+						            doc.replace(backtickOffset - 2, 2, insertion);
+
+						            sourceViewer.setSelectedRange(
+						            		backtickOffset + delimiter.length(),
+						                0
+						            );
+
+						            event.doit = false;
+						            return;
+						        }
+						    }
+					    } else {
+					    	return;
+					    }
+					    break;
 
 					default:
 						return;
 				}
 
-				ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 				// Markdown checking is not required since Markdown should behave the same as Javadoc
 				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
 					return;
@@ -579,6 +617,59 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			} catch (BadLocationException | BadPositionCategoryException e) {
 				JavaPlugin.log(e);
 			}
+		}
+
+		private boolean shouldSuppressFenceAutoClose(IDocument doc, int offset) throws BadLocationException {
+		    IRegion lineInfo = doc.getLineInformationOfOffset(offset);
+		    int lineStart = lineInfo.getOffset();
+
+		    String text = doc.get(lineStart, offset - lineStart);
+
+		    // Optional: only for markdown doc comment lines
+		    String trimmed = text.trim();
+		    if (!trimmed.startsWith("///")) { //$NON-NLS-1$
+		        return false;
+		    }
+		    return hasUnclosedQuote(text) || hasUnclosedParen(text);
+		}
+
+		// handles int x = "
+		private boolean hasUnclosedQuote(String s) {
+		    boolean escaped = false;
+		    int quotes = 0;
+
+		    for (char c : s.toCharArray()) {
+		        if (escaped) {
+		            escaped = false;
+		            continue;
+		        }
+		        if (c == '\\') {
+		            escaped = true;
+		        } else if (c == '"') {
+		            quotes++;
+		        }
+		    }
+		    return (quotes % 2) == 1;
+		}
+
+		// handles abc(
+		private boolean hasUnclosedParen(String s) {
+		    int count = 0;
+		    for (char c : s.toCharArray()) {
+		        if (c == '(') count++;
+		        else if (c == ')' && count > 0) count--;
+		    }
+		    return count > 0;
+		}
+
+		/**
+		 * Returns the value of the given boolean-typed preference.
+		 *
+		 * @param preference the preference to look up
+		 * @return the value of the given preference in the Java plug-in's default preference store
+		 */
+		private boolean isPreferenceTrue(String preference) {
+			return JavaPlugin.getDefault().getPreferenceStore().getBoolean(preference);
 		}
 
 		/*

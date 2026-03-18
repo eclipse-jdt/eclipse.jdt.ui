@@ -70,6 +70,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACKETS),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACES),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_JAVADOCS),
+				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WRAP_STRINGS),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ESCAPE_STRINGS),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ESCAPE_STRINGS_NON_ASCII),
@@ -224,6 +225,12 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		label= PreferencesMessages.JavaEditorPreferencePage_addJavaDocTags;
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 0);
 		createDependency(master, slave);
+
+		if (JavaCore.compareJavaVersions(
+				JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE), JavaCore.VERSION_23) >= 0) {
+			label= PreferencesMessages.JavaEditorPreferencePage_closeMarkdownThreeBacktick;
+			master= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, 0);
+		}
 	}
 
 	private void createMessage(final Composite composite) {
