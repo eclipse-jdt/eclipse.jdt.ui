@@ -8,7 +8,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
-  * Contributors:
+ * Contributors:
  *     IBM Corporation - Add first version of ReplceQualifiedTypeFixCore
  */
 package org.eclipse.jdt.internal.corext.fix;
@@ -28,9 +28,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -53,8 +51,6 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 		String className;
 		QualifiedName sourceBinding;
 		ITypeBinding sourceTypeBinding;
-
-		MethodDeclaration lastMethodDeclaration;
 
 		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, ITypeBinding sourceTypeBinding, String fullQualifiedName, String className) {
 			this.fullQualifiedName = fullQualifiedName;
@@ -99,7 +95,6 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 				throw new AbortSearchException();
 			}
 			checkTypeBinding(binding, node);
-
 			declVisit(binding.getSuperclass(), node);
 			for(ITypeBinding curInterface : binding.getInterfaces()) {
 				checkTypeBinding(curInterface, node);
@@ -114,22 +109,13 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 			}
 			ITypeBinding[] bindings = typeBinding.getDeclaredTypes();
 			for ( ITypeBinding binding : bindings) {
-				//binding.isLocal()
 				if(Modifier.isProtected(binding.getModifiers()) || Modifier.isPublic(binding.getModifiers())) {
 					if (binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
-						if (binding.isLocal()) {
-							lastMethodDeclaration = ASTNodes.getFirstAncestorOrNull(node, MethodDeclaration.class);
-						} else {
-							throw new AbortSearchException();
-						}
+						throw new AbortSearchException();
 					}
 				} else if(!Modifier.isPrivate(binding.getModifiers())) {
-					if(binding.getName().equals(className) && !binding.getQualifiedName().equals(fullQualifiedName)) {
-						if (binding.isLocal()) {
-							lastMethodDeclaration = ASTNodes.getFirstAncestorOrNull(node, MethodDeclaration.class);
-						} else {
-							throw new AbortSearchException();
-						}
+					if(binding.getName().equals(className) && typeBinding.getPackage().getName().equals(sourceBinding.getQualifier().getFullyQualifiedName())) {
+						throw new AbortSearchException();
 					}
 				}
 			}
@@ -138,16 +124,6 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 		@Override
 		public boolean visit(QualifiedName qname) {
 			if (qname.getFullyQualifiedName().equals(fullQualifiedName)) {
-				MethodDeclaration curMethodDeclaration = ASTNodes.getFirstAncestorOrNull(qname, MethodDeclaration.class);
-				if (lastMethodDeclaration != null) {
-					if (curMethodDeclaration != null) {
-						IMethodBinding lmdBinding = lastMethodDeclaration.resolveBinding();
-						IMethodBinding curBinding = curMethodDeclaration.resolveBinding();
-						if (lmdBinding.isEqualTo(curBinding)) {
-							return false;
-						}
-					}
-				}
 				searchResults.add(qname);
 			}
 			return false;
@@ -174,7 +150,7 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 			if (cur_import.isOnDemand()) {
 				String onDemandImport = fullString.substring(0, cur_import.getElementName().length()-2);
 				String sourceQualifier = qualifiedNode.getQualifier().getFullyQualifiedName();
-				if (sourceQualifier.contains(onDemandImport)) {
+				if (sourceQualifier.equals(onDemandImport)) {
 					isImportFound = true;
 				}
 			} else if (cur_import.getElementName().equals(qualifiedNode)) {

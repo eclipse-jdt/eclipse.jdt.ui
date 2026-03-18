@@ -343,7 +343,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getDeprecatedFieldProposal(context, coveringNode, null, null)
 					|| getConvertToRecordProposals(context, coveringNode, null)
 					|| getDeprecatedProposal(context, coveringNode, null, null)
-					|| getFullQualifiedReplacement(context, coveringNode, null);
+					|| getReplaceQualifiedNameProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -381,7 +381,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getUnrollMultiCatchProposals(context, coveringNode, resultingCollections);
 				getTryWithResourceAssistProposals(locations, context, coveringNode, coveredNodes, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
-				getFullQualifiedReplacement(context, coveringNode, resultingCollections);
+				getReplaceQualifiedNameProposals(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
 				getAddFinallyProposals(context, coveringNode, resultingCollections);
@@ -431,11 +431,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 
-	private static boolean getFullQualifiedReplacement(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
+	private static boolean getReplaceQualifiedNameProposals(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
 		ICompilationUnit cu = context.getCompilationUnit();
 		IImportDeclaration[] imports = cu.getImports();
 		if ( node instanceof SimpleName || node instanceof QualifiedName) {
- 			ASTNode curNode = node;
+			ASTNode curNode = node;
 			while ((curNode.getParent() instanceof QualifiedName)) {
 				curNode = curNode.getParent();
 			}
@@ -446,7 +446,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 						return true;
 					}
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					FixCorrectionProposal proposal= new FixCorrectionProposal(replaceFixCore, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image, context);
+					FixCorrectionProposal proposal= new FixCorrectionProposal(replaceFixCore, null, IProposalRelevance.REPLACE_QUALIFIED_NAME, image, context);
 					resultingCollections.add(proposal);
 					return true;
 				}
