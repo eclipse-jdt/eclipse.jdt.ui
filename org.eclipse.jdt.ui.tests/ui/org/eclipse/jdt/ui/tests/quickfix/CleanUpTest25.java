@@ -37,10 +37,10 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  */
 public class CleanUpTest25 extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup= new Java25ProjectTestSetup(false);
+	public ProjectTestSetup projectSetup= new Java25ProjectTestSetup();
 
 	@Rule
-	public ProjectTestSetup projectSetup2= new Java25ProjectTestSetup("project2", false);
+	public ProjectTestSetup projectSetup2= new Java25ProjectTestSetup("project2");
 
 	@After
 	public void teardown2() throws Exception {
