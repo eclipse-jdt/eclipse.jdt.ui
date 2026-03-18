@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 public class JavadocQuickFixTest25 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java25ProjectTestSetup(true);
+    public ProjectTestSetup projectSetup = new Java25ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;

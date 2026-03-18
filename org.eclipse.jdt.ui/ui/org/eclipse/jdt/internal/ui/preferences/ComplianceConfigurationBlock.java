@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -701,10 +701,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	protected boolean isBetaVersion(String compliance) {
+	protected boolean isBetaVersion(@SuppressWarnings("unused") String compliance) {
 		return false;
-		// return JavaCore.VERSION_25.equals(compliance);
+//		return JavaCore.VERSION_26.equals(compliance);
 	}
 
 	private String addsExportToSystemModule() {
