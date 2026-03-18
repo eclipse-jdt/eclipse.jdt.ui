@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
@@ -106,6 +107,7 @@ public class RenamePackageTests extends GenericRefactoringTest {
 	private boolean fUpdateTextualMatches;
 	private String fQualifiedNamesFilePatterns;
 	private boolean fRenameSubpackages;
+	private boolean fWasVerbose;
 
 	public RenamePackageTests() {
 		rts= new Java1d5Setup();
@@ -116,14 +118,24 @@ public class RenamePackageTests extends GenericRefactoringTest {
 //		super.run(result);
 //	}
 
+	@SuppressWarnings("restriction")
 	@Override
 	public void genericbefore() throws Exception {
+		fWasVerbose = JavaModelManager.VERBOSE;
+		JavaModelManager.VERBOSE = true;
 		super.genericbefore();
 		fUpdateReferences= true;
 		fUpdateTextualMatches= false;
 		fQualifiedNamesFilePatterns= null;
 		fRenameSubpackages= false;
 		// fIsPreDeltaTest= true;
+	}
+
+	@SuppressWarnings("restriction")
+	@Override
+	public void genericafter() throws Exception {
+		super.genericafter();
+		JavaModelManager.VERBOSE = fWasVerbose;
 	}
 
 	@Override
