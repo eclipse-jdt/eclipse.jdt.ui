@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
@@ -321,9 +324,56 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
 				referencedMembers.forEach(m -> {
 					fSearchResults.addMember(member, m, position, position + length, number < 1 ? 1 : number, potential);
 				});
+            } else if (node instanceof MethodInvocation mi
+                    && mi.getExpression() != null
+                    && mi.getExpression().resolveTypeBinding() == null
+                    && fMember.getCompilationUnit() != null
+                    && JavaCore.isJavaLikeFileName(
+                            fMember.getCompilationUnit()
+                                    .getElementName())) {
+                // Binding is null AND the receiver type is
+                // unresolvable in a Java source file — likely a
+                // contributed type (e.g., Kotlin class not compiled
+                // by ECJ). Search for the method declaration via
+                // contributed search participants.
+                @SuppressWarnings("unchecked")
+                List<Expression> args= mi.arguments();
+                resolveViaSearch(mi.getName().getIdentifier(),
+                        args, node);
             }
         } catch (JavaModelException jme) {
             JavaManipulationPlugin.log(jme);
+        }
+    }
+
+    private void resolveViaSearch(String methodName,
+            List<Expression> arguments, ASTNode node) {
+        String[] argTypes= null;
+        if (arguments != null && !arguments.isEmpty()) {
+            argTypes= new String[arguments.size()];
+            for (int i= 0; i < arguments.size(); i++) {
+                ITypeBinding binding=
+                        arguments.get(i).resolveTypeBinding();
+                if (binding != null) {
+                    argTypes[i]= binding.getErasure()
+                            .getQualifiedName();
+                } else {
+                    argTypes[i]= "UNKNOWN"; //$NON-NLS-1$
+                }
+            }
+        }
+        IMember found= CallHierarchyCore.findFirstDeclaration(
+                methodName, IJavaSearchConstants.METHOD,
+                getSearchScope(), fProgressMonitor,
+                arguments != null ? arguments.size() : -1,
+                null, null, argTypes);
+        if (found != null) {
+            fSearchResults.addMember(fMember, found,
+                    node.getStartPosition(),
+                    node.getStartPosition() + node.getLength(),
+                    fCompilationUnit.getLineNumber(
+                            node.getStartPosition()),
+                    false);
         }
     }
 
