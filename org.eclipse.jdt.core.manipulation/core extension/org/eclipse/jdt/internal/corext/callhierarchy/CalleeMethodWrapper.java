@@ -20,10 +20,20 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 class CalleeMethodWrapper extends MethodWrapper {
     private Comparator<MethodWrapper> fMethodWrapperComparator = new MethodWrapperComparator();
@@ -100,8 +110,80 @@ class CalleeMethodWrapper extends MethodWrapper {
 
 				cu.accept(visitor);
 				return visitor.getCallees();
+			} else {
+				return findCalleesFromParticipants(member, progressMonitor);
 			}
 		}
         return new HashMap<>(0);
     }
+
+	private Map<String, MethodCall> findCalleesFromParticipants(IMember member, IProgressMonitor monitor) {
+		try {
+			String path= null;
+			if (member.getResource() != null) {
+				path= member.getResource().getFullPath().toString();
+			} else if (member.getPath() != null) {
+				path= member.getPath().toString();
+			}
+			if (path == null)
+				return new HashMap<>(0);
+
+			CallSearchResultCollector collector= new CallSearchResultCollector();
+			SearchParticipant[] participants= SearchEngine.getSearchParticipants();
+
+			for (SearchParticipant participant : participants) {
+				SearchMatch[] calleeMatches= participant.locateCallees(
+						member, participant.getDocument(path), monitor);
+
+				for (SearchMatch match : calleeMatches) {
+					if (match.getElement() instanceof IMember callee) {
+						IMember resolved= resolveCallee(callee, monitor);
+						if (resolved != null) {
+							collector.addMember(member, resolved,
+									match.getOffset(),
+									match.getOffset() + match.getLength());
+						}
+					}
+				}
+			}
+			return collector.getCallers();
+		} catch (CoreException e) {
+			JavaManipulationPlugin.log(e);
+			return new HashMap<>(0);
+		}
+	}
+
+	private IMember resolveCallee(IMember callee, IProgressMonitor monitor) {
+		if (callee.exists()) {
+			return callee;
+		}
+		int searchFor;
+		switch (callee.getElementType()) {
+			case IJavaElement.METHOD:
+				searchFor= IJavaSearchConstants.METHOD;
+				break;
+			case IJavaElement.FIELD:
+				searchFor= IJavaSearchConstants.FIELD;
+				break;
+			default:
+				searchFor= IJavaSearchConstants.TYPE;
+				break;
+		}
+		// Extract call site context from standard JDT interfaces
+		int argCount= -1;
+		String receiverTypeFQN= null;
+		String[] argTypes= null;
+		if (callee instanceof IMethod method) {
+			argCount= method.getNumberOfParameters();
+			argTypes= method.getParameterTypes();
+			IType declType= method.getDeclaringType();
+			if (declType != null) {
+				receiverTypeFQN= declType.getFullyQualifiedName();
+			}
+		}
+		return CallHierarchyCore.findFirstDeclaration(
+				callee.getElementName(), searchFor,
+				CallHierarchyCore.getDefault().getSearchScope(), monitor,
+				argCount, receiverTypeFQN, null, argTypes);
+	}
 }
