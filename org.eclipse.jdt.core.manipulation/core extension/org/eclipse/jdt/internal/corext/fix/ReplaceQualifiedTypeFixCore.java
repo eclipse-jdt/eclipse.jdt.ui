@@ -39,7 +39,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
-import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperationsFixCore {
@@ -189,7 +188,7 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.ReplaceQualifiedName_description, cuRewrite);
+			TextEditGroup group= createTextEditGroup(CorrectionMessages.QuickAssistProcessor_replaceQualifiedName_description, cuRewrite);
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
 			for(QualifiedName itemToModify: itemsToModify) {
