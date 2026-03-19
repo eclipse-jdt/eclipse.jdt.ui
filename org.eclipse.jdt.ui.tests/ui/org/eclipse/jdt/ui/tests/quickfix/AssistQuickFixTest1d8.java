@@ -7845,7 +7845,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void  test_refactorQualifiedName_6() throws Exception {
-		// We have a superclass that contains another TestClass as private. No proposal expected.
+		// There is a private class with the same name inside the class with the fully qualified name. No proposal expected
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
 		String classToImport="""
