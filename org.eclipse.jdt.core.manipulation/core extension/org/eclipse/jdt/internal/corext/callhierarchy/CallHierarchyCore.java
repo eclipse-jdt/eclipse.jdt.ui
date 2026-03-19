@@ -23,20 +23,30 @@ import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -297,7 +307,8 @@ public class CallHierarchyCore {
     static CompilationUnit getCompilationUnitNode(IMember member, boolean resolveBindings) {
         ITypeRoot typeRoot= member.getTypeRoot();
         try {
-            if (typeRoot.exists() && typeRoot.getBuffer() != null) {
+            if (typeRoot != null && typeRoot.exists() && typeRoot.getBuffer() != null
+                    && JavaCore.isJavaLikeFileName(typeRoot.getElementName())) {
 				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				parser.setSource(typeRoot);
 				parser.setResolveBindings(resolveBindings);
@@ -305,8 +316,209 @@ public class CallHierarchyCore {
 	        }
         } catch (JavaModelException e) {
             JavaManipulationPlugin.log(e);
+        } catch (ClassCastException e) {
+            // Non-standard ITypeRoot (e.g. from a contributed search participant)
+            // that does not implement the internal compiler interfaces required
+            // by ASTParser — fall through and return null
+            JavaManipulationPlugin.log(e);
         }
         return null;
+    }
+
+    /**
+     * Searches for the first {@link IMember} declaration matching the given
+     * name, element type, and optional call-site constraints.
+     *
+     * <p>Filters are applied in order of cheapness: argument count first
+     * (O(1)), then declaring type (string compare or hierarchy lookup),
+     * then argument types (per-parameter type compatibility check).
+     *
+     * @param elementName the simple name to search for
+     * @param searchFor one of {@link IJavaSearchConstants#METHOD},
+     *            {@link IJavaSearchConstants#FIELD}, or
+     *            {@link IJavaSearchConstants#TYPE}
+     * @param scope the search scope
+     * @param monitor progress monitor, may be {@code null}
+     * @param expectedArgCount expected argument count, or {@code -1} to skip
+     * @param receiverTypeFQN receiver type FQN to match declaring type
+     *            against, or {@code null} to skip
+     * @param declaringTypeCandidates FQN candidates for the declaring type,
+     *            or {@code null} to skip
+     * @param expectedArgTypes argument type FQNs from the call site (may
+     *            contain {@code "UNKNOWN"} entries), or {@code null} to skip
+     * @return the first matching member, or {@code null} if none found
+     */
+    static IMember findFirstDeclaration(String elementName, int searchFor,
+            IJavaSearchScope scope, IProgressMonitor monitor,
+            int expectedArgCount, String receiverTypeFQN,
+            List<String> declaringTypeCandidates,
+            String[] expectedArgTypes) {
+        SearchPattern pattern= SearchPattern.createPattern(
+                elementName, searchFor,
+                IJavaSearchConstants.DECLARATIONS,
+                SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+        if (pattern == null)
+            return null;
+        final IMember[] result= { null };
+        try {
+            new SearchEngine().search(pattern,
+                    SearchEngine.getSearchParticipants(), scope,
+                    new SearchRequestor() {
+                        @Override
+                        public void acceptSearchMatch(SearchMatch match) {
+                            if (result[0] != null) {
+                                return;
+                            }
+                            if (!(match.getElement() instanceof IMember m)) {
+                                return;
+                            }
+                            if (m instanceof IMethod method
+                                    && !matchesMethod(method,
+                                            expectedArgCount,
+                                            expectedArgTypes)) {
+                                return;
+                            }
+                            if (m.getDeclaringType() != null) {
+                                String declFQN= m.getDeclaringType()
+                                        .getFullyQualifiedName();
+                                if (receiverTypeFQN != null
+                                        && !isTypeOrSupertype(declFQN,
+                                                receiverTypeFQN, m)) {
+                                    return;
+                                }
+                                if (declaringTypeCandidates != null
+                                        && !declaringTypeCandidates.isEmpty()
+                                        && !declaringTypeCandidates
+                                                .contains(declFQN)) {
+                                    return;
+                                }
+                            }
+                            result[0]= m;
+                            throw new OperationCanceledException();
+                        }
+                    }, monitor);
+        } catch (OperationCanceledException e) {
+            // short-circuit: first match found
+        } catch (CoreException e) {
+            JavaManipulationPlugin.log(e);
+        }
+        return result[0];
+    }
+
+    /**
+     * Checks if a candidate method matches the expected argument count
+     * and types from the call site.
+     */
+    private static boolean matchesMethod(IMethod method,
+            int expectedArgCount, String[] expectedArgTypes) {
+        int paramCount= method.getNumberOfParameters();
+        // Argument count filter
+        if (expectedArgCount >= 0
+                && paramCount != expectedArgCount) {
+            return false;
+        }
+        // Argument type filter
+        if (expectedArgTypes != null
+                && expectedArgTypes.length > 0
+                && expectedArgTypes.length == paramCount) {
+            String[] paramSigs= method.getParameterTypes();
+            IType declType= method.getDeclaringType();
+            for (int i= 0; i < paramCount; i++) {
+                String callSiteType= expectedArgTypes[i];
+                if ("UNKNOWN".equals(callSiteType)) { //$NON-NLS-1$
+                    continue;
+                }
+                String paramFQN= resolveParameterType(
+                        paramSigs[i], declType);
+                if (paramFQN == null) {
+                    continue;
+                }
+                if (!isTypeCompatible(callSiteType,
+                        paramFQN, method)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Resolves a JDT parameter type signature to a fully qualified
+     * name using the declaring type's context.
+     */
+    private static String resolveParameterType(String paramSig,
+            IType declaringType) {
+        if (declaringType == null) {
+            return null;
+        }
+        try {
+            String erasure= Signature.getTypeErasure(paramSig);
+            String simpleName= Signature.toString(erasure);
+            if (simpleName.contains(".")) { //$NON-NLS-1$
+                return simpleName;
+            }
+            String[][] resolved= declaringType.resolveType(simpleName);
+            if (resolved != null && resolved.length > 0) {
+                String pkg= resolved[0][0];
+                String name= resolved[0][1];
+                return pkg.isEmpty() ? name : pkg + "." + name; //$NON-NLS-1$
+            }
+        } catch (JavaModelException e) {
+            // can't resolve
+        }
+        return null;
+    }
+
+    /**
+     * Checks if the call-site argument type is compatible with the
+     * parameter type. The argument type must be the same as or a
+     * subtype of the parameter type.
+     */
+    private static boolean isTypeCompatible(String argTypeFQN,
+            String paramTypeFQN, IMember context) {
+        if (argTypeFQN.equals(paramTypeFQN)) {
+            return true;
+        }
+        // The parameter type is a supertype of the argument type
+        // (e.g., param is Object, arg is String) — check if
+        // argType is-a paramType
+        return isTypeOrSupertype(paramTypeFQN, argTypeFQN, context);
+    }
+
+    /**
+     * Checks if {@code candidateFQN} is the same as or a supertype of
+     * {@code receiverFQN}. Uses the JDT type hierarchy when available.
+     */
+    private static boolean isTypeOrSupertype(String candidateFQN,
+            String receiverFQN, IMember context) {
+        if (candidateFQN.equals(receiverFQN)) {
+            return true;
+        }
+        // Check common base types without hierarchy lookup
+        if ("java.lang.Object".equals(candidateFQN)) { //$NON-NLS-1$
+            return true;
+        }
+        // Try type hierarchy for precise check
+        try {
+            if (context.getJavaProject() != null) {
+                IType receiverType= context.getJavaProject()
+                        .findType(receiverFQN);
+                if (receiverType != null) {
+                    ITypeHierarchy hierarchy=
+                            receiverType.newSupertypeHierarchy(null);
+                    for (IType superType
+                            : hierarchy.getAllSupertypes(receiverType)) {
+                        if (candidateFQN.equals(
+                                superType.getFullyQualifiedName())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (JavaModelException e) {
+            JavaManipulationPlugin.log(e);
+        }
+        return false;
     }
 
     public static boolean isPossibleInputElement(Object element){
