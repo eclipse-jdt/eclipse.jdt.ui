@@ -7592,5 +7592,297 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
+	public void  test_refactorQualifiedName_1() throws Exception {
+		// If the classes share the same package the import will not be added
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String classToImport="""
+				package test;
+				public class TestClass {
+
+					private int var1 = 0;
+					public TestClass() {
+						var1 = 2;
+						System.out.println("Placeholder Constructor - Class just for test");
+					}
+				}
+				""";
+		pack1.createCompilationUnit("TestClass.java", classToImport, false, null);
+		String importingClass = """
+				package test
+
+				public class TestExampleClass {
+
+					private int var1 = 0;
+					public testExample() {
+						test.TestClass tCl = new test.TestClass();
+					}
+				}
+				""";
+
+		String expected = """
+				package test
+
+				public class TestExampleClass {
+
+					private int var1 = 0;
+					public testExample() {
+						TestClass tCl = new TestClass();
+					}
+				}
+				""";
+		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset = importingClass.indexOf("test.TestClass");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void  test_refactorQualifiedName_2() throws Exception {
+		// The class to refactor is in another package, we expect the import to be added
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
+		String classToImport="""
+				package test.test1;
+				public class TestClass {
+
+					private int var1 = 0;
+					public TestClass() {
+						var1 = 2;
+						System.out.println("Placeholder Constructor - Class just for test");
+					}
+				}
+				""";
+		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
+		String importingClass = """
+				package test;
+
+				public class TestExampleClass {
+
+					private int var1 = 0;
+					public testExample() {
+						test.test1.TestClass tCl = new test.test1.TestClass();
+					}
+				}
+				""";
+		String expected = """
+				package test;
+
+				import test.test1.TestClass;
+
+				public class TestExampleClass {
+
+					private int var1 = 0;
+					public testExample() {
+						TestClass tCl = new TestClass();
+					}
+				}
+				""";
+		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset = importingClass.indexOf("test.test1.TestClass");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void  test_refactorQualifiedName_3() throws Exception {
+		// There is a class being used with the same name on a different package, no proposal expected
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
+		IPackageFragment pack3= fSourceFolder.createPackageFragment("test.test2	", false, null);
+		String classToImport="""
+				package test.test1;
+				public class TestClass {
+
+					private int var1 = 0;
+					public TestClass() {
+						var1 = 2;
+						System.out.println("Placeholder Constructor - Class just for test");
+					}
+				}
+				""";
+		String classToImportSecond="""
+				package test.test2;
+				public class TestClass {
+
+					private int var1 = 0;
+					public TestClass() {
+						var1 = 2;
+						System.out.println("Placeholder Constructor - Class just for test");
+					}
+				}
+				""";
+		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
+		pack3.createCompilationUnit("TestClass.java", classToImport, false, null);
+		String importingClass = """
+				package test;
+
+				import test.test2.TestClass
+
+				public class TestExampleClass {
+
+					private int var1 = 0;
+					public testExample() {
+						TestClass tc = new TestClass();
+						test.test1.TestClass tCl = new test.test1.TestClass();
+					}
+				}
+				""";
+		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset = importingClass.indexOf("test.test1.TestClass");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	@Test
+	public void  test_refactorQualifiedName_4() throws Exception {
+		// We have an import test.test1.*, we expect the change without the class being imported
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
+		String classToImport="""
+				package test.test1;
+				public class TestClass {
+
+					private int var1 = 0;
+					public TestClass() {
+						var1 = 2;
+						System.out.println("Placeholder Constructor - Class just for test");
+					}
+				}
+				""";
+		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
+		String importingClass = """
+				package test;
+
+				import test.test1.*;
+
+				public class TestExampleClass {
+
+					private int var1 = 0;
+					public testExample() {
+						test.test1.TestClass tCl = new test.test1.TestClass();
+					}
+				}
+				""";
+		String expected = """
+				package test;
+
+				import test.test1.*;
+
+				public class TestExampleClass {
+
+					private int var1 = 0;
+					public testExample() {
+						TestClass tCl = new TestClass();
+					}
+				}
+				""";
+		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset = importingClass.indexOf("test.test1.TestClass");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void  test_refactorQualifiedName_5() throws Exception {
+		// We have a superclass that contains another TestClass as package private. No proposal expected.
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
+		String classToImport="""
+				package test.test1;
+				public class TestClass {
+
+					private int var1 = 0;
+					public TestClass() {
+						var1 = 2;
+						System.out.println("Placeholder Constructor - Class just for test");
+					}
+				}
+				""";
+		String superClass="""
+				package test.test1;
+				public class SuperTestClass {
+
+					class TestClass {
+
+					};
+
+					private int var1 = 0;
+					public TestClass() {
+						var1 = 2;
+						System.out.println("Placeholder Constructor - Class just for test");
+					}
+				}
+				""";
+		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
+		pack2.createCompilationUnit("SuperTestClass.java", superClass, false, null);
+		String importingClass = """
+				package test;
+
+				import test.test1.*;
+
+				public class TestExampleClass extends SuperTestClass{
+
+					private int var1 = 0;
+					public testExample() {
+						test.test1.TestClass tCl = new test.test1.TestClass();
+					}
+				}
+				""";
+		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset = importingClass.indexOf("test.test1.TestClass");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	@Test
+	public void  test_refactorQualifiedName_6() throws Exception {
+		// We have a superclass that contains another TestClass as private. No proposal expected.
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
+		String classToImport="""
+				package test.test1;
+				public class TestClass {
+
+					private int var1 = 0;
+					public TestClass() {
+						var1 = 2;
+						System.out.println("Placeholder Constructor - Class just for test");
+					}
+				}
+				""";
+		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
+		String importingClass = """
+				package test;
+
+				import test.test1.*;
+
+				public class TestExampleClass extends SuperTestClass{
+
+					private class TestClass {
+					};
+
+					private int var1 = 0;
+					public testExample() {
+						Testclass ptC = new ptC();
+						test.test1.TestClass tCl = new test.test1.TestClass();
+					}
+				}
+				""";
+		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset = importingClass.indexOf("test.test1.TestClass");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 0);
+	}
+
 }
 

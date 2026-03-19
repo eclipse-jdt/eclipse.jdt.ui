@@ -49,13 +49,13 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 		ArrayList<QualifiedName> searchResults;
 		String fullQualifiedName;
 		String className;
-		QualifiedName sourceBinding;
+		QualifiedName qualifiedName;
 		ITypeBinding sourceTypeBinding;
 
-		public ReplaceQualifiedTypeVisitor(QualifiedName sourceBinding, ITypeBinding sourceTypeBinding, String fullQualifiedName, String className) {
+		public ReplaceQualifiedTypeVisitor(QualifiedName qualifiedName, ITypeBinding sourceTypeBinding, String fullQualifiedName, String className) {
 			this.fullQualifiedName = fullQualifiedName;
 			this.searchResults = new ArrayList<>();
-			this.sourceBinding = sourceBinding;
+			this.qualifiedName = qualifiedName;
 			this.sourceTypeBinding = sourceTypeBinding;
 			this.className = className;
 		}
@@ -77,33 +77,31 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 
 		@Override
 		public boolean visit(EnumDeclaration edecl) {
-			declVisit(edecl.resolveBinding(), edecl);
+			declVisit(edecl.resolveBinding());
 			return true;
 		}
 
 		@Override
 		public boolean visit(TypeDeclaration tdecl) {
-			declVisit(tdecl.resolveBinding(), tdecl);
+			declVisit(tdecl.resolveBinding());
 			return true;
 		}
 
-		private boolean declVisit(ITypeBinding binding, ASTNode node) {
-			if (binding == null) {
-				return false;
+		private void declVisit(ITypeBinding binding) {
+			if (binding != null) {
+				if (binding.getName().equals(className)) {
+					throw new AbortSearchException();
+				}
+				checkTypeBinding(binding);
+				declVisit(binding.getSuperclass());
+				for(ITypeBinding curInterface : binding.getInterfaces()) {
+					checkTypeBinding(curInterface);
+					declVisit(curInterface.getSuperclass());
+				}
 			}
-			if (binding.getName().equals(className)) {
-				throw new AbortSearchException();
-			}
-			checkTypeBinding(binding, node);
-			declVisit(binding.getSuperclass(), node);
-			for(ITypeBinding curInterface : binding.getInterfaces()) {
-				checkTypeBinding(curInterface, node);
-				declVisit(curInterface.getSuperclass(), node);
-			}
-			return false;
 		}
 
-		private void checkTypeBinding(ITypeBinding typeBinding, ASTNode node) {
+		private void checkTypeBinding(ITypeBinding typeBinding) {
 			if (typeBinding == null) {
 				throw new AbortSearchException();
 			}
@@ -114,7 +112,7 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 						throw new AbortSearchException();
 					}
 				} else if(!Modifier.isPrivate(binding.getModifiers())) {
-					if(binding.getName().equals(className) && typeBinding.getPackage().getName().equals(sourceBinding.getQualifier().getFullyQualifiedName())) {
+					if(binding.getName().equals(className) && typeBinding.getPackage().getName().equals(qualifiedName.getQualifier().getFullyQualifiedName())) {
 						throw new AbortSearchException();
 					}
 				}
