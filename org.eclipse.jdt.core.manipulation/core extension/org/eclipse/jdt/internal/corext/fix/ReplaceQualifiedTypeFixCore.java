@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -142,6 +144,13 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 		String className = qualifiedNode.getName().getFullyQualifiedName();
 		String fqName = qualifiedNode.getFullyQualifiedName();
 		boolean isImportFound = false;
+		boolean isImportStatic = Modifier.isStatic(qualifiedNode.resolveBinding().getModifiers());
+		if(qualifiedNode.getParent() instanceof ImportDeclaration) {
+			return null;
+		}
+		if(qualifiedNode.resolveBinding() instanceof IVariableBinding) {
+			return null;
+		}
 		for(IImportDeclaration cur_import : imports) {
 			String fullString = cur_import.getElementName();
 			if (cur_import.isOnDemand()) {
@@ -165,7 +174,7 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 			try {
 				rootNode.accept(rfqnVisitor);
 				String label = CorrectionMessages.QuickAssistProcessor_replaceQualifiedName_description;
-				return new ReplaceQualifiedTypeFixCore(label, compilationUnit, new ReplaceQualifiedTypeOperation(qualifiedNode.getName(), rfqnVisitor.getSearchResults(), !isImportFound));
+				return new ReplaceQualifiedTypeFixCore(label, compilationUnit, new ReplaceQualifiedTypeOperation(qualifiedNode.getName(), rfqnVisitor.getSearchResults(), !isImportFound, isImportStatic));
 			} catch (AbortSearchException ase) {
 				return null;
 			}
@@ -179,11 +188,13 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 		SimpleName className;
 		String packageToAdd;
 		boolean needImport;
+		boolean isImportStatic;
 
-		public ReplaceQualifiedTypeOperation(SimpleName className, List<QualifiedName> itemsToModify ,boolean needImport) {
+		public ReplaceQualifiedTypeOperation(SimpleName className, List<QualifiedName> itemsToModify, boolean needImport, boolean isImportStatic) {
 			this.itemsToModify = itemsToModify;
 			this.className = className;
 			this.needImport = needImport;
+			this.isImportStatic = isImportStatic;
 		}
 
 		@Override
@@ -197,7 +208,12 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 			}
 			if (needImport) {
 				ImportRewrite iRewrite = cuRewrite.getImportRewrite();
-				iRewrite.addImport(itemsToModify.get(0).getFullyQualifiedName());
+
+				if(isImportStatic) {
+					iRewrite.addStaticImport(itemsToModify.get(0).resolveBinding());
+				} else {
+					iRewrite.addImport(itemsToModify.get(0).getFullyQualifiedName());
+				}
 			}
 		}
 	}
