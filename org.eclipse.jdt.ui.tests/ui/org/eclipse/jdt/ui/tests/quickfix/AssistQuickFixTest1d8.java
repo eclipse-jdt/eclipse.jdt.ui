@@ -7717,7 +7717,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				}
 				""";
 		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
-		pack3.createCompilationUnit("TestClass.java", classToImport, false, null);
+		pack3.createCompilationUnit("TestClass.java", classToImportSecond, false, null);
 		String importingClass = """
 				package test;
 

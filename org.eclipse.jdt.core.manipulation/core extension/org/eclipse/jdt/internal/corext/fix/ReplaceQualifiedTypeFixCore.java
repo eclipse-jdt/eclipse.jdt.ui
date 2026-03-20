@@ -150,7 +150,7 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 				if (sourceQualifier.equals(onDemandImport)) {
 					isImportFound = true;
 				}
-			} else if (cur_import.getElementName().equals(qualifiedNode)) {
+			} else if (cur_import.getElementName().equals(qualifiedNode.getFullyQualifiedName())) {
 				isImportFound = true;
 			} else {
 				String importClassname = fullString.substring(fullString.lastIndexOf('.')+1);
