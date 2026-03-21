@@ -346,7 +346,7 @@ public class CoreTestSearchEngine {
 					true /* wait for indexer */,
 					true /* check restrictions */,
 					null);
-			if (answer != null) {
+			if (answer != null && !answer.isNonAccessible()) {
 				return answer.type;
 			}
 		}
