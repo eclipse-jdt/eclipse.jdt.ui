@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
+import org.eclipse.jface.text.CopyOnWriteTextStore;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -78,6 +80,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	public void setUp() throws Exception {
 		wasVerbose = JavaModelManager.VERBOSE;
 		JavaModelManager.VERBOSE = true;
+		TestUtils.setDebugEnabled(CopyOnWriteTextStore.class, true);
 		super.setUp();
 
 		IEclipsePreferences node= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
@@ -90,6 +93,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	public void tearDown() throws Exception {
 		super.tearDown();
 		JavaModelManager.VERBOSE = wasVerbose;
+		TestUtils.setDebugEnabled(CopyOnWriteTextStore.class, false);
 	}
 
 	@SuppressWarnings("restriction")
