@@ -461,5 +461,40 @@ public class JavadocHoverTests extends CoreTests {
 		}
 	}
 
+	@Test
+	public void testSnippetWringIndentation() throws Exception {
+		String source=
+				"""
+				package p;
+				public class Javadoc {
+					/**
+					 * {@snippet :
+					 *     var s = "";
+					 * }
+					 */
+					void foo(){}
+				}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("Javadoc");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			int snippetStartIndex = actualHtmlContent.indexOf("{@snippet :");
+			assertNotEquals(-1, snippetStartIndex);
+		    int contentStart = snippetStartIndex + "{@snippet :".length();
+		    int contentEnd = actualHtmlContent.indexOf("}", contentStart);
+		    String actualSnippetContent = actualHtmlContent.substring(contentStart, contentEnd).trim();
+		    String expectedSnippetContent = "var s = \"\";";
+		    assertEquals(expectedSnippetContent, actualSnippetContent);
+		}
+	}
+
 }
 
