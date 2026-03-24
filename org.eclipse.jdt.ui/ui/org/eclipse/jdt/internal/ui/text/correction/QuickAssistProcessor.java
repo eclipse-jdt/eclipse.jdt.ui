@@ -432,15 +432,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getReplaceQualifiedNameProposals(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
-		ICompilationUnit cu = context.getCompilationUnit();
-		IImportDeclaration[] imports = cu.getImports();
-		if ( node instanceof SimpleName || node instanceof QualifiedName) {
-			ASTNode curNode = node;
+		ICompilationUnit cu= context.getCompilationUnit();
+		IImportDeclaration[] imports= cu.getImports();
+		if (node instanceof SimpleName || node instanceof QualifiedName) {
+			ASTNode curNode= node;
 			while ((curNode.getParent() instanceof QualifiedName)) {
-				curNode = curNode.getParent();
+				curNode= curNode.getParent();
 			}
 			if (curNode instanceof QualifiedName) {
-				ReplaceQualifiedTypeFixCore replaceFixCore = ReplaceQualifiedTypeFixCore.createReplaceType(context.getASTRoot(), curNode, imports);
+				ReplaceQualifiedTypeFixCore replaceFixCore= ReplaceQualifiedTypeFixCore.createReplaceType(context.getASTRoot(), curNode, imports);
 				if (replaceFixCore != null) {
 					if (resultingCollections == null) {
 						return true;

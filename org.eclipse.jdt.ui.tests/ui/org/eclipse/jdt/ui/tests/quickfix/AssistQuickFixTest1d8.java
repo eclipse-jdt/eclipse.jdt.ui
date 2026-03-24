@@ -7593,10 +7593,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
-	public void  test_refactorQualifiedName_1() throws Exception {
+	public void test_refactorQualifiedName_1() throws Exception {
 		// If the classes share the same package the import will not be added
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		String classToImport="""
+		String classToImport= """
 				package test;
 				public class TestClass {
 
@@ -7608,7 +7608,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				}
 				""";
 		pack1.createCompilationUnit("TestClass.java", classToImport, false, null);
-		String importingClass = """
+		String importingClass= """
 				package test
 
 				public class TestExampleClass {
@@ -7620,7 +7620,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				}
 				""";
 
-		String expected = """
+		String expected= """
 				package test
 
 				public class TestExampleClass {
@@ -7631,8 +7631,8 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
-		int offset = importingClass.indexOf("test.TestClass");
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset= importingClass.indexOf("test.TestClass");
 		AssistContext context= getCorrectionContext(cu1, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
@@ -7640,11 +7640,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
-	public void  test_refactorQualifiedName_2() throws Exception {
+	public void test_refactorQualifiedName_2() throws Exception {
 		// The class to refactor is in another package, we expect the import to be added
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
-		String classToImport="""
+		String classToImport= """
 				package test.test1;
 				public class TestClass {
 
@@ -7656,7 +7656,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				}
 				""";
 		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
-		String importingClass = """
+		String importingClass= """
 				package test;
 
 				public class TestExampleClass {
@@ -7667,7 +7667,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		String expected = """
+		String expected= """
 				package test;
 
 				import test.test1.TestClass;
@@ -7680,8 +7680,8 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
-		int offset = importingClass.indexOf("test.test1.TestClass");
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset= importingClass.indexOf("test.test1.TestClass");
 		AssistContext context= getCorrectionContext(cu1, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
@@ -7689,12 +7689,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
-	public void  test_refactorQualifiedName_3() throws Exception {
+	public void test_refactorQualifiedName_3() throws Exception {
 		// There is a class being used with the same name on a different package, no proposal expected
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
 		IPackageFragment pack3= fSourceFolder.createPackageFragment("test.test2	", false, null);
-		String classToImport="""
+		String classToImport= """
 				package test.test1;
 				public class TestClass {
 
@@ -7705,7 +7705,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		String classToImportSecond="""
+		String classToImportSecond= """
 				package test.test2;
 				public class TestClass {
 
@@ -7718,7 +7718,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				""";
 		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
 		pack3.createCompilationUnit("TestClass.java", classToImportSecond, false, null);
-		String importingClass = """
+		String importingClass= """
 				package test;
 
 				import test.test2.TestClass
@@ -7732,19 +7732,19 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
-		int offset = importingClass.indexOf("test.test1.TestClass");
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset= importingClass.indexOf("test.test1.TestClass");
 		AssistContext context= getCorrectionContext(cu1, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 0);
 	}
 
 	@Test
-	public void  test_refactorQualifiedName_4() throws Exception {
+	public void test_refactorQualifiedName_4() throws Exception {
 		// We have an import test.test1.*, we expect the change without the class being imported
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
-		String classToImport="""
+		String classToImport= """
 				package test.test1;
 				public class TestClass {
 
@@ -7756,7 +7756,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				}
 				""";
 		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
-		String importingClass = """
+		String importingClass= """
 				package test;
 
 				import test.test1.*;
@@ -7769,7 +7769,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		String expected = """
+		String expected= """
 				package test;
 
 				import test.test1.*;
@@ -7782,8 +7782,8 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
-		int offset = importingClass.indexOf("test.test1.TestClass");
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset= importingClass.indexOf("test.test1.TestClass");
 		AssistContext context= getCorrectionContext(cu1, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
@@ -7791,11 +7791,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
-	public void  test_refactorQualifiedName_5() throws Exception {
+	public void test_refactorQualifiedName_5() throws Exception {
 		// We have a superclass that contains another TestClass as package private. No proposal expected.
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
-		String classToImport="""
+		String classToImport= """
 				package test.test1;
 				public class TestClass {
 
@@ -7806,7 +7806,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		String superClass="""
+		String superClass= """
 				package test.test1;
 				public class SuperTestClass {
 
@@ -7823,7 +7823,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				""";
 		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
 		pack2.createCompilationUnit("SuperTestClass.java", superClass, false, null);
-		String importingClass = """
+		String importingClass= """
 				package test;
 
 				import test.test1.*;
@@ -7836,19 +7836,19 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
-		int offset = importingClass.indexOf("test.test1.TestClass");
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset= importingClass.indexOf("test.test1.TestClass");
 		AssistContext context= getCorrectionContext(cu1, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 0);
 	}
 
 	@Test
-	public void  test_refactorQualifiedName_6() throws Exception {
+	public void test_refactorQualifiedName_6() throws Exception {
 		// There is a private class with the same name inside the class with the fully qualified name. No proposal expected
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.test1	", false, null);
-		String classToImport="""
+		String classToImport= """
 				package test.test1;
 				public class TestClass {
 
@@ -7860,7 +7860,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				}
 				""";
 		pack2.createCompilationUnit("TestClass.java", classToImport, false, null);
-		String importingClass = """
+		String importingClass= """
 				package test;
 
 				import test.test1.*;
@@ -7877,8 +7877,8 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-		ICompilationUnit cu1 = pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
-		int offset = importingClass.indexOf("test.test1.TestClass");
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestExampleClass.java", importingClass, false, null);
+		int offset= importingClass.indexOf("test.test1.TestClass");
 		AssistContext context= getCorrectionContext(cu1, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 0);
