@@ -128,7 +128,7 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.test.performance",
 			"org.eclipse.test.performance.ui",
 			"org.eclipse.test.performance.win32",
-			"org.eclipse.text",
+//			"org.eclipse.text", https://github.com/eclipse-platform/eclipse.platform.ui/pull/3801, debug tracing for text stores
 			"org.eclipse.text.tests",
 			"org.eclipse.ui.cheatsheets",
 //			"org.eclipse.ui.console", bug 507546: debug code minings
