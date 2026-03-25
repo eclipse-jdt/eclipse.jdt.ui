@@ -94,6 +94,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		super.tearDown();
 		JavaModelManager.VERBOSE = wasVerbose;
 		TestUtils.setDebugEnabled(CopyOnWriteTextStore.class, false);
+		TestUtils.waitForReconciler(60_000L);
 	}
 
 	@SuppressWarnings("restriction")

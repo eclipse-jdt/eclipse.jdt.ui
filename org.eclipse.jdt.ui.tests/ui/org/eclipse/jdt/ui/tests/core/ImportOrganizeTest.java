@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.core.CompilationUnitElementInfo;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -97,6 +98,7 @@ public class ImportOrganizeTest extends CoreTests {
 	public void tearDown() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
+		TestUtils.waitForReconciler(60_000L);
 	}
 
 	protected IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
