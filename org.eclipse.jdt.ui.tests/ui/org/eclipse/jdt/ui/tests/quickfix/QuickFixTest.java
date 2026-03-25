@@ -70,12 +70,12 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.Propo
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ReorgCorrectionsSubProcessor;
@@ -151,6 +151,17 @@ public class QuickFixTest {
 	public static void assertProposalExists(List<? extends ICompletionProposal> actualProposals, String proposalName) {
 		assertNotNull(findProposalByName(proposalName, actualProposals));
 	}
+
+	public static void assertProposalContains(ArrayList<IJavaCompletionProposal> proposals, String expectedText) {
+	    for (IJavaCompletionProposal p : proposals) {
+	        if (p.getDisplayString().contains(expectedText)) {
+	            return; // FOUND
+	        }
+	    }
+	    fail("Did not find proposal containing: '" + expectedText
+	            + "'. Proposals were: " + proposals);
+	}
+
 
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
 		List<AbstractTypeDeclaration> types= astRoot.types();
