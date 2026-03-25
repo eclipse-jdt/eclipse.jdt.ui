@@ -1399,7 +1399,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fModifierStatus= modifiersChanged();
 			fieldName= MODIFIERS;
 		} else if (field == fSealedMdfButtons) {
-			fModifierStatus= modifiersChanged();
 			fSealedModifierStatus= sealedModifiersChanged();
 			fieldName= SEALEDMODIFIERS;
 		} else {
