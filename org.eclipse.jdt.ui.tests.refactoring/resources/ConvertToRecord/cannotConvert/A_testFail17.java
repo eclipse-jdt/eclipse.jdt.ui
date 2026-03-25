@@ -10,17 +10,14 @@ public class A {
 		private final String b;
 
 		public Inner(int a, String b) {
-			this.a= a;
+			if (a < 0) {
+				this.a = a;
+			}
 			this.b= b;
 		}
 		
 		public int getA() {
 			return a;
-		}
-
-		private void foo() {
-			a = 3;
-			System.out.println("foo");
 		}
 
 		public String getB() {

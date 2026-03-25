@@ -9,18 +9,16 @@ public class A {
 		private int a;
 		private final String b;
 
-		public Inner(int a, String b) {
+		public Inner(int a, String b) throws Exception {
+			if (a < 0) {
+				throw new Exception();
+			}
 			this.a= a;
 			this.b= b;
 		}
 		
 		public int getA() {
 			return a;
-		}
-
-		private void foo() {
-			a = 3;
-			System.out.println("foo");
 		}
 
 		public String getB() {

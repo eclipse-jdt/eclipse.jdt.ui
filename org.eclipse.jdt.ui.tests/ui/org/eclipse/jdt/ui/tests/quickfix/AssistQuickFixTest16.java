@@ -1001,7 +1001,7 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 						this.value = value;
 					}
 
-					int getValue() {
+					public int getValue() {
 						return value;
 					}
 				}
@@ -1020,6 +1020,92 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 				package test;
 
 				record PackagePrivateCls(int value) {
+				}
+				""";
+
+		assertEqualString(preview, expected);
+	}
+
+	@Test
+	public void testConvertToRecord14() throws Exception { // Non-simple constructor
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+
+		String str1 = """
+				package test;
+
+				public final class A {
+
+					private final int a;
+					private final String b;
+					private int c;
+
+					public A(int a, String b, int c) {
+						class K {
+							public static int doublex(int x) {
+								return x * 2;
+							}
+						}
+						this.a= K.doublex(a);
+						if (a < 0) {
+							this.b = massage(b);
+						} else {
+							this.b = b;
+						}
+						this.c= c;
+					}
+
+					private String massage(String s) {
+						return s.toLowerCase();
+					}
+
+					public int getA() {
+						return a;
+					}
+
+					public String getB() {
+						return b;
+					}
+
+					public int getC() {
+						return c;
+					}
+				}
+				""";
+		ICompilationUnit cu = pack.createCompilationUnit("A.java", str1, false, null);
+
+		int index= str1.indexOf("getA");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) proposals.get(0);
+		proposal.apply();
+		String preview= cu.getBuffer().getContents();
+
+		String expected = """
+				package test;
+
+				public record A(int a, String b, int c) {
+					public A(int a, String b, int c) {
+						class K {
+							public static int doublex(int x) {
+								return x * 2;
+							}
+						}
+						this.a= K.doublex(a);
+						if (a < 0) {
+							this.b = massage(b);
+						} else {
+							this.b = b;
+						}
+						this.c= c;
+					}
+					private String massage(String s) {
+						return s.toLowerCase();
+					}
 				}
 				""";
 
@@ -1166,7 +1252,7 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 	}
 
 	@Test
-	public void testNoConvertToRecord4() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2681
+	public void testNoConvertToRecord4() throws Exception { // private method reassigning field
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
@@ -1207,6 +1293,7 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 					}
 
 					private int getSum() {
+						c = 4.0;
 						return a + b.length();
 					}
 				}
@@ -1687,51 +1774,6 @@ public class AssistQuickFixTest16 extends QuickFixTest {
 				}
 				""";
 		ICompilationUnit cu = pack.createCompilationUnit("NativeCls.java", str1, false, null);
-
-		int index= str1.indexOf("getValue");
-		IInvocationContext ctx= getCorrectionContext(cu, index, 8);
-		assertNoErrors(ctx);
-		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-		assertProposalDoesNotExist(proposals, RefactoringCoreMessages.ConvertToRecordRefactoring_name);
-	}
-
-	@Test
-	public void testNoConvertToRecord14() throws Exception { // Class with Finalize Method
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set16CompilerOptions(fJProject1, false);
-		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-
-		String str= """
-			module test {
-			}
-			""";
-		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", str, false, null);
-
-		IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
-
-		String str1 = """
-				package test;
-
-				public class FinalizeCls {
-					private final int value;
-
-					public FinalizeCls(int value) {
-						this.value = value;
-					}
-
-					public int getValue() {
-						return value;
-					}
-
-					@Override
-					protected void finalize() throws Throwable {
-						super.finalize();
-					}
-				}
-				""";
-		ICompilationUnit cu = pack.createCompilationUnit("FinalizeCls.java", str1, false, null);
 
 		int index= str1.indexOf("getValue");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 8);
