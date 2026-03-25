@@ -172,6 +172,11 @@ public class ConvertToRecordTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test9() throws Exception {
+		helper1(28, 16, 28, 20);
+	}
+
+	@Test
 	public void testFail0() throws Exception {
 		helper2(12, 16, 12, 21);
 	}
@@ -249,6 +254,21 @@ public class ConvertToRecordTests extends GenericRefactoringTest {
 	@Test
 	public void testFail16() throws Exception {
 		helper2(5, 12, 5, 13);
+	}
+
+	@Test
+	public void testFail17() throws Exception {
+		helper2(12, 16, 12, 21);
+	}
+
+	@Test
+	public void testFail18() throws Exception {
+		helper2(12, 16, 12, 21);
+	}
+
+	@Test
+	public void testFail19() throws Exception {
+		helper2(12, 16, 12, 21);
 	}
 
 }

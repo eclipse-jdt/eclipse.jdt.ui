@@ -12,15 +12,11 @@ public class A {
 		public Inner(int a, String b) {
 			this.a= a;
 			this.b= b;
+			this.a= a;
 		}
 		
 		public int getA() {
 			return a;
-		}
-
-		private void foo() {
-			a = 3;
-			System.out.println("foo");
 		}
 
 		public String getB() {
