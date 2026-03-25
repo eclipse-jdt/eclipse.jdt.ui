@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
@@ -169,6 +170,7 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.PatternInstanceofToSwitchFixCore;
 import org.eclipse.jdt.internal.corext.fix.RemoveVarOrInferredLambdaParameterTypesFixCore;
 import org.eclipse.jdt.internal.corext.fix.ReplaceDeprecatedFieldFixCore;
+import org.eclipse.jdt.internal.corext.fix.ReplaceQualifiedTypeFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitTryResourceFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
@@ -340,7 +342,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertPatternInstanceofIfStmtToSwitchProposals(context, coveringNode, null)
 					|| getDeprecatedFieldProposal(context, coveringNode, null, null)
 					|| getConvertToRecordProposals(context, coveringNode, null)
-					|| getDeprecatedProposal(context, coveringNode, null, null);
+					|| getDeprecatedProposal(context, coveringNode, null, null)
+					|| getReplaceQualifiedNameProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -378,6 +381,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getUnrollMultiCatchProposals(context, coveringNode, resultingCollections);
 				getTryWithResourceAssistProposals(locations, context, coveringNode, coveredNodes, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
+				getReplaceQualifiedNameProposals(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
 				getAddFinallyProposals(context, coveringNode, resultingCollections);
@@ -425,6 +429,30 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
+	}
+
+	private static boolean getReplaceQualifiedNameProposals(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		IImportDeclaration[] imports= cu.getImports();
+		if (node instanceof SimpleName || node instanceof QualifiedName) {
+			ASTNode curNode= node;
+			while ((curNode.getParent() instanceof QualifiedName)) {
+				curNode= curNode.getParent();
+			}
+			if (curNode instanceof QualifiedName) {
+				ReplaceQualifiedTypeFixCore replaceFixCore= ReplaceQualifiedTypeFixCore.createReplaceType(context.getASTRoot(), curNode, imports);
+				if (replaceFixCore != null) {
+					if (resultingCollections == null) {
+						return true;
+					}
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					FixCorrectionProposal proposal= new FixCorrectionProposal(replaceFixCore, null, IProposalRelevance.REPLACE_QUALIFIED_NAME, image, context);
+					resultingCollections.add(proposal);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	static boolean noErrorsAtLocation(IProblemLocation[] locations) {
@@ -3150,7 +3178,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getCompilationUnit(), true);
 			ASTRewrite astRewrite= ASTRewrite.create(node.getAST());
 			ASTRewrite astRewriteReplaceAllOccurrences= ASTRewrite.create(node.getAST());
-
 			ImportRemover remover= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
 			ImportRemover removerAllOccurences= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
 			MethodInvocation mi= null;
