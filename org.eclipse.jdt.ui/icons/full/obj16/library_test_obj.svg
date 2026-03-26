@@ -2,24 +2,19 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="16"
    height="16"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="library_test_obj.svg">
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
     <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient4918-5"
        id="linearGradient4975-9"
        gradientUnits="userSpaceOnUse"
@@ -40,7 +35,6 @@
          id="stop4922-9" />
     </linearGradient>
     <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient4907-9"
        id="linearGradient4977-3"
        gradientUnits="userSpaceOnUse"
@@ -61,7 +55,6 @@
          id="stop4911-0" />
     </linearGradient>
     <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient4928-4"
        id="linearGradient4979-8"
        gradientUnits="userSpaceOnUse"
@@ -104,17 +97,6 @@
          id="stop4965-3" />
     </linearGradient>
     <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient4961-6"
-       id="linearGradient9855"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-4.625,0)"
-       x1="15.073242"
-       y1="1040.0764"
-       x2="18.744612"
-       y2="1049.2014" />
-    <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient4938-8"
        id="linearGradient9955"
        x1="-0.81249988"
@@ -131,19 +113,23 @@
        gradientTransform="translate(-4.5804832,0.69509894)"
        gradientUnits="userSpaceOnUse"
        id="linearGradient5020-3"
-       xlink:href="#linearGradient4961-6"
-       inkscape:collect="always" />
+       xlink:href="#linearGradient4961-6" />
     <filter
        style="color-interpolation-filters:sRGB;"
-       inkscape:label="Colorize"
-       id="filter4161">
+       id="filter4161"
+       x="-0.055555556"
+       y="-0.16666667"
+       width="1.1111111"
+       height="1.3333333">
       <feComposite
          in2="SourceGraphic"
          operator="arithmetic"
          k1="0"
          k2="1"
          result="composite1"
-         id="feComposite4163" />
+         id="feComposite4163"
+         k3="0"
+         k4="0" />
       <feColorMatrix
          in="composite1"
          values="1"
@@ -176,21 +162,25 @@
          in="colormatrix2"
          in2="SourceGraphic"
          operator="in"
-         k2="1"
          result="composite2"
          id="feComposite4175" />
     </filter>
     <filter
        style="color-interpolation-filters:sRGB;"
-       inkscape:label="Colorize"
-       id="filter4177">
+       id="filter4177"
+       x="-0.071428571"
+       y="-0.25"
+       width="1.1428571"
+       height="1.5">
       <feComposite
          in2="SourceGraphic"
          operator="arithmetic"
          k1="0"
          k2="1"
          result="composite1"
-         id="feComposite4179" />
+         id="feComposite4179"
+         k3="0"
+         k4="0" />
       <feColorMatrix
          in="composite1"
          values="1"
@@ -223,21 +213,25 @@
          in="colormatrix2"
          in2="SourceGraphic"
          operator="in"
-         k2="1"
          result="composite2"
          id="feComposite4191" />
     </filter>
     <filter
        style="color-interpolation-filters:sRGB;"
-       inkscape:label="Colorize"
-       id="filter4193">
+       id="filter4193"
+       x="0"
+       y="0"
+       width="1"
+       height="1">
       <feComposite
          in2="SourceGraphic"
          operator="arithmetic"
          k1="0"
          k2="1"
          result="composite1"
-         id="feComposite4195" />
+         id="feComposite4195"
+         k3="0"
+         k4="0" />
       <feColorMatrix
          in="composite1"
          values="1"
@@ -270,21 +264,25 @@
          in="colormatrix2"
          in2="SourceGraphic"
          operator="in"
-         k2="1"
          result="composite2"
          id="feComposite4207" />
     </filter>
     <filter
        style="color-interpolation-filters:sRGB;"
-       inkscape:label="Colorize"
-       id="filter4209">
+       id="filter4209"
+       x="0"
+       y="0"
+       width="1"
+       height="1">
       <feComposite
          in2="SourceGraphic"
          operator="arithmetic"
          k1="0"
          k2="1"
          result="composite1"
-         id="feComposite4211" />
+         id="feComposite4211"
+         k3="0"
+         k4="0" />
       <feColorMatrix
          in="composite1"
          values="1"
@@ -317,21 +315,25 @@
          in="colormatrix2"
          in2="SourceGraphic"
          operator="in"
-         k2="1"
          result="composite2"
          id="feComposite4223" />
     </filter>
     <filter
        style="color-interpolation-filters:sRGB;"
-       inkscape:label="Colorize"
-       id="filter4225">
+       id="filter4225"
+       x="-0.1119216"
+       y="-0.066723293"
+       width="1.2318797"
+       height="1.1219102">
       <feComposite
          in2="SourceGraphic"
          operator="arithmetic"
          k1="0"
          k2="1"
          result="composite1"
-         id="feComposite4227" />
+         id="feComposite4227"
+         k3="0"
+         k4="0" />
       <feColorMatrix
          in="composite1"
          values="1"
@@ -364,38 +366,10 @@
          in="colormatrix2"
          in2="SourceGraphic"
          operator="in"
-         k2="1"
          result="composite2"
          id="feComposite4239" />
     </filter>
   </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="39.8125"
-     inkscape:cx="8"
-     inkscape:cy="8"
-     inkscape:document-units="px"
-     inkscape:current-layer="g4969"
-     showgrid="true"
-     inkscape:window-width="1440"
-     inkscape:window-height="803"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1"
-     showguides="true"
-     inkscape:guide-bbox="true"
-     inkscape:snap-bbox="true"
-     inkscape:bbox-nodes="true"
-     inkscape:snap-global="false">
-    <inkscape:grid
-       type="xygrid"
-       id="grid3948" />
-  </sodipodi:namedview>
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -409,8 +383,6 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
      style="display:inline"
      transform="translate(0,-1036.3622)">
@@ -447,7 +419,6 @@
          id="rect4161"
          style="fill:#0595d3;fill-opacity:1;stroke:none;stroke-width:0.83589131;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter4209)" />
       <path
-         inkscape:connector-curvature="0"
          id="path4949-4"
          d="m 9.6802586,1040.2852 c 0.08839,-0.044 1.5696584,-0.9063 1.5696584,-0.9063 l 3.976711,10.3859 -1.956435,0.5243 z"
          style="display:inline;fill:#f0c028;fill-opacity:1;stroke:url(#linearGradient5020-3);stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter4225)" />

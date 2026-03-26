@@ -6,13 +6,6 @@
    height="8"
    id="svg2"
    version="1.1"
-   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
-   sodipodi:docname="run_co.svg"
-   inkscape:export-filename="run_co.png"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg"
@@ -21,16 +14,6 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
-    <linearGradient
-       gradientTransform="translate(20,0)"
-       gradientUnits="userSpaceOnUse"
-       y2="1040.053"
-       x2="-13.936629"
-       y1="1049.9579"
-       x1="-13.936629"
-       id="linearGradient4744"
-       xlink:href="#linearGradient4738"
-       inkscape:collect="always" />
     <linearGradient
        id="linearGradient4738">
       <stop
@@ -47,18 +30,7 @@
          style="stop-color:#c2dd97;stop-opacity:1" />
     </linearGradient>
     <linearGradient
-       gradientTransform="translate(-1.314993,0)"
-       gradientUnits="userSpaceOnUse"
-       y2="1049.912"
-       x2="11.0625"
-       y1="1038.5497"
-       x1="11.0625"
-       id="linearGradient4747"
-       xlink:href="#linearGradient4741"
-       inkscape:collect="always" />
-    <linearGradient
-       id="linearGradient4741"
-       inkscape:collect="always">
+       id="linearGradient4741">
       <stop
          id="stop4743"
          offset="0"
@@ -76,8 +48,7 @@
        gradientTransform="matrix(0.479092,0,0,0.43051303,9.8796097,599.01177)"
        gradientUnits="userSpaceOnUse"
        id="linearGradient6032"
-       xlink:href="#linearGradient4738"
-       inkscape:collect="always" />
+       xlink:href="#linearGradient4738" />
     <linearGradient
        y2="1049.912"
        x2="11.0625"
@@ -86,92 +57,8 @@
        gradientTransform="matrix(0.479092,0,0,0.43051303,-0.3322327,599.01177)"
        gradientUnits="userSpaceOnUse"
        id="linearGradient6034"
-       xlink:href="#linearGradient4741"
-       inkscape:collect="always" />
-    <linearGradient
-       y2="1040.053"
-       x2="-13.936629"
-       y1="1049.9579"
-       x1="-13.936629"
-       gradientTransform="translate(15.825436,0)"
-       gradientUnits="userSpaceOnUse"
-       id="linearGradient6032-1"
-       xlink:href="#linearGradient4738-7"
-       inkscape:collect="always" />
-    <linearGradient
-       id="linearGradient4738-7">
-      <stop
-         id="stop4740-4"
-         offset="0"
-         style="stop-color:#8cc861;stop-opacity:1" />
-      <stop
-         style="stop-color:#4aa766;stop-opacity:1"
-         offset="0.43753415"
-         id="stop4746-0" />
-      <stop
-         id="stop4742-9"
-         offset="1"
-         style="stop-color:#c2dd97;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient
-       y2="1049.912"
-       x2="11.0625"
-       y1="1038.5497"
-       x1="11.0625"
-       gradientTransform="translate(-5.4895565,0)"
-       gradientUnits="userSpaceOnUse"
-       id="linearGradient6034-4"
-       xlink:href="#linearGradient4741-8"
-       inkscape:collect="always" />
-    <linearGradient
-       id="linearGradient4741-8"
-       inkscape:collect="always">
-      <stop
-         id="stop4743-8"
-         offset="0"
-         style="stop-color:#30825a;stop-opacity:1" />
-      <stop
-         id="stop4745-2"
-         offset="1"
-         style="stop-color:#106643;stop-opacity:1" />
-    </linearGradient>
+       xlink:href="#linearGradient4741" />
   </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="22.4"
-     inkscape:cx="4.5089286"
-     inkscape:cy="0.20089286"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="true"
-     inkscape:window-width="933"
-     inkscape:window-height="877"
-     inkscape:window-x="1102"
-     inkscape:window-y="372"
-     inkscape:window-maximized="0"
-     inkscape:snap-global="false"
-     inkscape:showpageshadow="2"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:export-bgcolor="#ffffff00">
-    <inkscape:grid
-       type="xygrid"
-       id="grid2985"
-       empspacing="5"
-       visible="true"
-       enabled="true"
-       snapvisiblegridlinesonly="true"
-       originx="0"
-       originy="0"
-       spacingy="1"
-       spacingx="1"
-       units="px" />
-  </sodipodi:namedview>
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -185,13 +72,9 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-1044.3622)">
     <path
-       sodipodi:nodetypes="ccccccccc"
-       inkscape:connector-curvature="0"
        id="rect3968"
        d="m 1.4943055,1046.6858 v 0.873 2.1525 1.2916 h 0.479092 l 4.5737414,-1.9491 c 0.2837518,-0.1613 0.2961397,-0.2712 0,-0.4305 l -4.372597,-1.9375 z"
        style="display:inline;fill:url(#linearGradient6032);fill-opacity:1;stroke:url(#linearGradient6034);stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />

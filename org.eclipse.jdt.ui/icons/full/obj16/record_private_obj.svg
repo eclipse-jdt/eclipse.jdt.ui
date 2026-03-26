@@ -2,20 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="16"
    height="16"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="record_private_obj.svg">
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
     <linearGradient
@@ -34,22 +30,6 @@
          style="stop-color:#c7af93;stop-opacity:1" />
     </linearGradient>
     <linearGradient
-       id="linearGradient10798-1-9-3-7-6-8-9-0-9-1">
-      <stop
-         style="stop-color:#a17748;stop-opacity:1"
-         offset="0"
-         id="stop10800-5-2-1-8-20-6-4-9-8-2" />
-      <stop
-         id="stop10806-6-8-5-3-9-24-8-4-3-2"
-         offset="0.5"
-         style="stop-color:#8e5c24;stop-opacity:1" />
-      <stop
-         style="stop-color:#c7af93;stop-opacity:1"
-         offset="1"
-         id="stop10802-1-5-3-0-4-8-4-2-9-2" />
-    </linearGradient>
-    <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient4185"
        id="linearGradient4199"
        x1="376.4169"
@@ -80,48 +60,19 @@
        gradientTransform="matrix(1.1934266,0,0,1.1934266,11.623455,-194.18756)"
        gradientUnits="userSpaceOnUse"
        id="linearGradient5742"
-       xlink:href="#linearGradient5789"
-       inkscape:collect="always" />
+       xlink:href="#linearGradient5789" />
     <filter
        style="color-interpolation-filters:sRGB"
-       height="1.24"
-       y="-0.12"
-       width="1.24"
-       x="-0.12"
-       id="filter5785"
-       inkscape:collect="always">
+       height="1.4108484"
+       y="-0.20542419"
+       width="1.4108484"
+       x="-0.20542419"
+       id="filter5785">
       <feGaussianBlur
          id="feGaussianBlur5787"
-         stdDeviation="0.19985704"
-         inkscape:collect="always" />
+         stdDeviation="0.19985704" />
     </filter>
   </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="22.4"
-     inkscape:cx="-19.183036"
-     inkscape:cy="7.2555176"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1137"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1">
-    <inkscape:grid
-       type="xygrid"
-       id="grid2985"
-       empspacing="5"
-       visible="true"
-       enabled="true"
-       snapvisiblegridlinesonly="true" />
-  </sodipodi:namedview>
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -135,42 +86,33 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-1036.3622)">
     <path
-       sodipodi:type="arc"
        style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill-opacity:1.0;stroke:#8d7d3c;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans;fill:url(#linearGradient4199)"
        id="path10796-2-6-2"
-       sodipodi:cx="388.125"
-       sodipodi:cy="468.23718"
-       sodipodi:rx="10.625"
-       sodipodi:ry="10.625"
        d="m 398.75,468.23718 a 10.625,10.625 0 0 1 -10.625,10.625 10.625,10.625 0 0 1 -10.625,-10.625 10.625,10.625 0 0 1 10.625,-10.625 10.625,10.625 0 0 1 10.625,10.625 z"
        transform="matrix(0.55482947,0,0,0.55482947,-207.83019,783.0574)" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="6"
        y="1043.3622"
-       id="text4144"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
+       id="text4144"><tspan
          id="tspan4146"
          x="6"
-         y="1043.3622" /></text>
+         y="1043.3622"
+         style="font-size:10px;line-height:1.25"> </tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="6"
        y="1045.3622"
-       id="text4148"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
+       id="text4148"><tspan
          id="tspan4150"
          x="6"
-         y="1045.3622" /></text>
+         y="1045.3622"
+         style="font-size:10px;line-height:1.25"> </tspan></text>
     <g
        transform="scale(1.1435005,0.87450771)"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.30672073px;line-height:125%;font-family:KaiTi;-inkscape-font-specification:KaiTi;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -183,7 +125,6 @@
     <g
        style="display:inline"
        id="layer1-4"
-       inkscape:label="Layer 1"
        transform="translate(2.9595722,2.3992251)">
       <g
          id="g11331-3-1-1"

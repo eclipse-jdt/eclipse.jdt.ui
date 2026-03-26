@@ -2,93 +2,27 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="7"
    height="8"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="record_tsk.svg">
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
     <linearGradient
-       id="linearGradient5591"
-       osb:paint="solid">
+       id="linearGradient5591">
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
          id="stop5593" />
     </linearGradient>
     <linearGradient
-       id="linearGradient3802">
-      <stop
-         style="stop-color:#905e27;stop-opacity:0;"
-         offset="0"
-         id="stop3804" />
-      <stop
-         style="stop-color:#905e27;stop-opacity:1;"
-         offset="1"
-         id="stop3806" />
-    </linearGradient>
-    <linearGradient
-       y2="459.24786"
-       x2="388.63736"
-       y1="478.18777"
-       x1="388.63736"
-       gradientUnits="userSpaceOnUse"
-       id="linearGradient7302"
-       xlink:href="#linearGradient10798-1-9-3-7-6-8-9-0-9-1"
-       inkscape:collect="always" />
-    <linearGradient
-       id="linearGradient10798-1-9-3-7-6-8-9-0-9-1">
-      <stop
-         style="stop-color:#a17748;stop-opacity:1"
-         offset="0"
-         id="stop10800-5-2-1-8-20-6-4-9-8-2" />
-      <stop
-         id="stop10806-6-8-5-3-9-24-8-4-3-2"
-         offset="0.5"
-         style="stop-color:#8e5c24;stop-opacity:1" />
-      <stop
-         style="stop-color:#c7af93;stop-opacity:1"
-         offset="1"
-         id="stop10802-1-5-3-0-4-8-4-2-9-2" />
-    </linearGradient>
-    <linearGradient
-       y2="459.24786"
-       x2="388.63736"
-       y1="478.18777"
-       x1="388.63736"
-       gradientUnits="userSpaceOnUse"
-       id="linearGradient3030-1"
-       xlink:href="#linearGradient10798-1-9-3-7-6-8-9-0-9-1-7"
-       inkscape:collect="always" />
-    <linearGradient
-       id="linearGradient10798-1-9-3-7-6-8-9-0-9-1-7">
-      <stop
-         style="stop-color:#a17748;stop-opacity:1"
-         offset="0"
-         id="stop10800-5-2-1-8-20-6-4-9-8-2-4" />
-      <stop
-         id="stop10806-6-8-5-3-9-24-8-4-3-2-0"
-         offset="0.5"
-         style="stop-color:#8e5c24;stop-opacity:1" />
-      <stop
-         style="stop-color:#c7af93;stop-opacity:1"
-         offset="1"
-         id="stop10802-1-5-3-0-4-8-4-2-9-2-9" />
-    </linearGradient>
-    <linearGradient
        gradientTransform="matrix(0.29805626,0,0,0.30013596,-112.10335,907.34168)"
-       inkscape:collect="always"
        xlink:href="#linearGradient4185"
        id="linearGradient4199"
        x1="376.4169"
@@ -112,33 +46,6 @@
          style="stop-color:#c7af93;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="22.36"
-     inkscape:cx="-14.130749"
-     inkscape:cy="-0.81018539"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1137"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:snap-global="false">
-    <inkscape:grid
-       type="xygrid"
-       id="grid2985"
-       empspacing="5"
-       visible="true"
-       enabled="true"
-       snapvisiblegridlinesonly="true" />
-  </sodipodi:namedview>
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -152,8 +59,6 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-1044.3622)">
     <ellipse
