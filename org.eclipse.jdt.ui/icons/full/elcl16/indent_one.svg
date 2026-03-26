@@ -2,20 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="16"
    height="16"
    id="svg2"
    version="1.1"
-   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
-   sodipodi:docname="indent_one.svg">
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
     <linearGradient
@@ -30,8 +26,7 @@
          style="stop-color:#9a9990;stop-opacity:1" />
     </linearGradient>
     <linearGradient
-       id="linearGradient15990"
-       inkscape:collect="always">
+       id="linearGradient15990">
       <stop
          id="stop15992"
          offset="0"
@@ -42,7 +37,6 @@
          style="stop-color:#e0eaf8;stop-opacity:1" />
     </linearGradient>
     <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient9610"
        id="linearGradient9568"
        gradientUnits="userSpaceOnUse"
@@ -52,7 +46,6 @@
        x2="8.0137892"
        y2="1051.0103" />
     <linearGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient15990"
        id="linearGradient9571"
        gradientUnits="userSpaceOnUse"
@@ -63,71 +56,13 @@
        y2="1041.0583" />
     <clipPath
        clipPathUnits="userSpaceOnUse"
-       id="clipPath13401">
-      <rect
-         style="fill:#535353;fill-opacity:1;stroke:none;stroke-width:1.60000002;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.97777776"
-         id="rect13403"
-         width="10"
-         height="2.9998446"
-         x="2"
-         y="1039.3623"
-         ry="1.4778624"
-         rx="1.9999996" />
-    </clipPath>
-    <clipPath
-       clipPathUnits="userSpaceOnUse"
-       id="clipPath13848">
-      <rect
-         rx="2"
-         ry="1.4778624"
-         y="1045.3623"
-         x="5.9999995"
-         height="2.9998446"
-         width="8"
-         id="rect13850"
-         style="display:inline;fill:#535353;fill-opacity:1;stroke:none;stroke-width:1.5999999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.97777776" />
-    </clipPath>
-    <clipPath
-       clipPathUnits="userSpaceOnUse"
        id="clipPath14397">
       <path
          style="fill:#3079d1;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          d="m 2,1050.3622 v -7 h 0.7 l 3.3,3.5 -3.3,3.5 z"
-         id="path14399"
-         inkscape:connector-curvature="0"
-         sodipodi:nodetypes="cccccc" />
+         id="path14399" />
     </clipPath>
   </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="45.254832"
-     inkscape:cx="6.7864317"
-     inkscape:cy="6.7344458"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="true"
-     inkscape:window-width="1355"
-     inkscape:window-height="927"
-     inkscape:window-x="186"
-     inkscape:window-y="38"
-     inkscape:window-maximized="0"
-     showguides="true"
-     inkscape:guide-bbox="true"
-     inkscape:snap-global="true">
-    <inkscape:grid
-       type="xygrid"
-       id="grid3999"
-       spacingx="0.5"
-       spacingy="0.5"
-       color="#3f3fff"
-       opacity="0.03921569"
-       empspacing="2" />
-  </sodipodi:namedview>
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -141,8 +76,6 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
      style="display:inline"
      transform="translate(0,-1036.3622)">
@@ -163,8 +96,6 @@
        rx="0"
        ry="0" />
     <path
-       sodipodi:nodetypes="cccccc"
-       inkscape:connector-curvature="0"
        id="path14395"
        d="m 2,1050.3622 v -7 h 0.7 l 3.3,3.5 -3.3,3.5 z"
        style="fill:#3b7fd1;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:0.33333334;stroke-miterlimit:4;stroke-dasharray:none"
@@ -190,8 +121,6 @@
     <path
        style="fill:#588aca;fill-opacity:1;stroke:#2870c8;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 2.5,1043.8622 h 0.01 l 2.99,3 -2.99,3 H 2.5 Z"
-       id="path844"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccc" />
+       id="path844" />
   </g>
 </svg>
