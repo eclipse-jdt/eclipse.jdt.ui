@@ -211,6 +211,7 @@ public class MultiFixMessages extends NLS {
 	public static String ConstantsCleanUp_description;
 	public static String StringBufferToStringBuilderCleanUp_description;
 	public static String StringConcatToTextBlockCleanUp_description;
+	public static String StringNewLinesToTextBlockCleanUp_description;
 	public static String StringConcatToTextBlockStringBuffer_description;
 	public static String StringBuilderForLocalVarsOnlyCleanUp_description;
 
