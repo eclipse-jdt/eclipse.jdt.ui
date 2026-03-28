@@ -142,6 +142,16 @@ public abstract class NullAnnotationsCorrectionProcessorCore<T> {
 		proposals.add(fixCorrectionProposalCoreToT(proposal, CORRECTION_CHANGE));
 	}
 
+	public void getReplaceNullableAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
+		NullAnnotationsFixCore fix= NullAnnotationsFixCore.createReplaceNullableFix(context.getASTRoot(), problem);
+		if (fix == null)
+			return;
+
+		Map<String, String> options= new Hashtable<>();
+		FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(fix, new NullAnnotationsCleanUpCore(options, problem.getProblemId()), IProposalRelevance.REPLACE_NULLABLE, context);
+		proposals.add(fixCorrectionProposalCoreToT(proposal, CORRECTION_CHANGE));
+	}
+
 	public void getExtractCheckedLocalProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		CompilationUnit compilationUnit = context.getASTRoot();
 		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();

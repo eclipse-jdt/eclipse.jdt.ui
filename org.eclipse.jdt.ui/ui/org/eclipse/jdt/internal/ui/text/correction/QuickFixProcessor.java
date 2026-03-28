@@ -309,6 +309,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NullAnnotationAtQualifyingType:
 			case IProblem.IllegalAnnotationForBaseType:
 			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
+			case IProblem.NullityMismatchTypeArgument:
 			case IProblem.UndefinedModule:
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 			case IProblem.NotAccessibleType:
@@ -875,6 +876,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ParameterLackingNullableAnnotation:
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.LOCAL, proposals);
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.TARGET, proposals);
+				break;
+			case IProblem.NullityMismatchingTypeAnnotation:
+				NullAnnotationsCorrectionProcessor.addReplaceNullableAnnotationProposal(context, problem, proposals);
 				break;
 			case IProblem.RedundantNullCheckAgainstNonNullType:
 			case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
