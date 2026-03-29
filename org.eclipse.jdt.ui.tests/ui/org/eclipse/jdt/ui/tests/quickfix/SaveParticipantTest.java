@@ -18,6 +18,8 @@ import static org.junit.Assert.assertNotEquals;
 
 import java.util.Hashtable;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +35,8 @@ import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
 import org.eclipse.jface.text.CopyOnWriteTextStore;
 
+import org.eclipse.ui.internal.decorators.DecoratorManager;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,7 +45,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
@@ -64,7 +67,15 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	@Rule
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
-	private boolean wasVerbose;
+	@BeforeClass
+	public static void enableDebugTraces() {
+		setDebugTracesEnabled(true);
+	}
+
+	@AfterClass
+	public static void disableDebugTraces() {
+		setDebugTracesEnabled(false);
+	}
 
 	@Override
 	protected IJavaProject getProject() {
@@ -78,9 +89,6 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		wasVerbose = JavaModelManager.VERBOSE;
-		JavaModelManager.VERBOSE = true;
-		TestUtils.setDebugEnabled(CopyOnWriteTextStore.class, true);
 		super.setUp();
 
 		IEclipsePreferences node= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
@@ -92,8 +100,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
-		JavaModelManager.VERBOSE = wasVerbose;
-		TestUtils.setDebugEnabled(CopyOnWriteTextStore.class, false);
+		cancelDecorationJob();
 		TestUtils.waitForReconciler(60_000L);
 	}
 
@@ -101,6 +108,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws Exception {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
 		Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+		cancelDecorationJob();
 
 		cu.getBuffer().setContents(newContent);
 		editor.doSave(null);
@@ -1324,5 +1332,25 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 
+	}
+
+	@SuppressWarnings("restriction")
+	private static void cancelDecorationJob() throws InterruptedException {
+		/*
+		 * The decoration job opens and closes buffers in BufferManager,
+		 * those buffers are used by the formatter code.
+		 * We don't want the job to run in parallel to the formatting done by the test,
+		 * but waiting for the job makes the test case up to 5 times slower.
+		 * So we cancel the job and then make sure it exits before formatting.
+		 */
+		Job.getJobManager().cancel(DecoratorManager.FAMILY_DECORATE);
+		Job.getJobManager().join(DecoratorManager.FAMILY_DECORATE, null);
+	}
+
+	// Use debug tracing for: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/79
+	private static void setDebugTracesEnabled(boolean enable) {
+		TestUtils.setDebugEnabled(CopyOnWriteTextStore.class, enable);
+		TestUtils.setDebugEnabled(JavaCore.getPlugin().getBundle(), enable,
+				"/debug", "/debug/buffermanager", "/debug/javamodel");
 	}
 }

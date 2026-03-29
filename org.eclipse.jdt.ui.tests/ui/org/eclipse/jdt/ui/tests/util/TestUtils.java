@@ -52,13 +52,7 @@ public class TestUtils {
 	public static void waitForReconciler(long timeout) throws Exception {
 		JavaPlugin.getActivePage().closeAllEditors(false);
 		long s = System.currentTimeMillis();
-		while (System.currentTimeMillis() - s < timeout) {
-			Job[] jobs = Job.getJobManager().find(ReconcilerJobFamilies.FAMILY_RECONCILER);
-			if (jobs.length == 0) {
-				break;
-			}
-			Thread.sleep(50);
-		}
+		waitForJobFamily(timeout, ReconcilerJobFamilies.FAMILY_RECONCILER);
 		// the reconciler starts a background thread, wait for it here
 		while (System.currentTimeMillis() - s < timeout) {
 			boolean reconcilerDone = Thread.getAllStackTraces().keySet().stream().noneMatch(TestUtils::isReconcilerThread);
@@ -73,19 +67,51 @@ public class TestUtils {
 	}
 
 	/**
+	 * Waits for all scheduled and running jobs of the specified job {@code family}.
+	 * @param timeout wait timeout in milliseconds
+	 * @param family the job family to wait on
+	 * @throws RuntimeException if a timeout occurs while waiting
+	 */
+	public static void waitForJobFamily(long timeout, Object family) throws InterruptedException {
+		long s= System.currentTimeMillis();
+		while (System.currentTimeMillis() - s < timeout) {
+			Job[] jobs = Job.getJobManager().find(family);
+			if (jobs.length == 0) {
+				break;
+			}
+			Thread.sleep(50);
+		}
+		if (System.currentTimeMillis() - s > timeout) {
+			throw new RuntimeException("Timeout occurred while waiting on job family: " + family);
+		}
+	}
+
+	/**
 	 * Enables or disables debug traces.
 	 * @param classFromBundle A class from the bundle for which the debug tracing should be enabled or disabled.
 	 * @param enable whether to enable or disable debug tracing
 	 */
 	public static void setDebugEnabled(Class<?> classFromBundle, boolean enable) {
 		Bundle bundle= FrameworkUtil.getBundle(classFromBundle);
+		setDebugEnabled(bundle, enable, "/debug");
+	}
+
+	/**
+	 * Enables or disables debug traces for the specified bundle and debug option.
+	 * @param bundle The bundle for which the debug tracing should be enabled or disabled.
+	 * @param debugOptions The debug options to enable or disable, e.g.: {@code "/debug"}, {@code "/debug/buffermanager"}
+	 * @param enable whether to enable or disable debug tracing
+	 */
+	public static void setDebugEnabled(Bundle bundle, boolean enable, String... debugOptions) {
 		BundleContext context= bundle.getBundleContext();
 		ServiceReference<DebugOptions> reference= context.getServiceReference(DebugOptions.class);
 		try {
 			DebugOptions options= context.getService(reference);
 			options.setDebugEnabled(enable);
-			String key= bundle.getSymbolicName() + "/debug";
-			options.setOption(key, enable ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
+			for (String debugOption : debugOptions) {
+				String key= bundle.getSymbolicName() + debugOption;
+				options.setOption(key, enable ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
+			}
 		} finally {
 			context.ungetService(reference);
 		}
