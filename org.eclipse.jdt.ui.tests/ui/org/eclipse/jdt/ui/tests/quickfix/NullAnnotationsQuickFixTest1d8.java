@@ -166,11 +166,11 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str1= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type<@Nullable K> {
 				@NonNullByDefault(DefaultLocation.RETURN_TYPE)
 				K get();
-			
+
 				class U implements Type<@Nullable String> {
 					@Override
 					public @Nullable String get() { // <-- error "The default '@NonNull' conflicts..."
@@ -190,11 +190,11 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str2= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type<@Nullable K> {
 				@NonNullByDefault(DefaultLocation.RETURN_TYPE)
 				K get();
-			
+
 				class U implements Type<@Nullable String> {
 					@Override
 					public @NonNull String get() { // <-- error "The default '@NonNull' conflicts..."
@@ -214,12 +214,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str3= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type<@Nullable K> {
 				@NonNullByDefault(DefaultLocation.RETURN_TYPE)
 			    @NonNull
 				K get();
-			
+
 				class U implements Type<@Nullable String> {
 					@Override
 					public String get() { // <-- error "The default '@NonNull' conflicts..."
@@ -252,10 +252,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str1= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type<@Nullable K> {
 				void set(int i, K arg);
-			
+
 				class U implements Type<@Nullable String> {
 					@Override
 					public void set(int i, String arg) {
@@ -277,10 +277,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str2= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type<@Nullable K> {
 				void set(int i, K arg);
-			
+
 				class U implements Type<@Nullable String> {
 					@Override
 					public void set(int i, @Nullable String arg) {
@@ -299,10 +299,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str3= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type<@Nullable K> {
 				void set(int i, @NonNull K arg);
-			
+
 				class U implements Type<@Nullable String> {
 					@Override
 					public void set(int i, String arg) {
@@ -329,11 +329,11 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@NonNullByDefault(DefaultLocation.RETURN_TYPE)
 			interface Type {
 				String get();
-			
+
 				class U implements Type {
 					@Override
 					public @Nullable String get() {
@@ -356,11 +356,11 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str1= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@NonNullByDefault(DefaultLocation.RETURN_TYPE)
 			interface Type {
 				String get();
-			
+
 				class U implements Type {
 					@Override
 					public String get() {
@@ -380,12 +380,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str2= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@NonNullByDefault(DefaultLocation.RETURN_TYPE)
 			interface Type {
 				@Nullable
 			    String get();
-			
+
 				class U implements Type {
 					@Override
 					public @Nullable String get() {
@@ -417,10 +417,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str1= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type {
 				void set(@Nullable String s);
-			
+
 				class U implements Type {
 					@Override
 					public void set(String t) {
@@ -442,10 +442,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str2= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type {
 				void set(@Nullable String s);
-			
+
 				class U implements Type {
 					@Override
 					public void set(@Nullable String t) {
@@ -464,10 +464,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		String str3= """
 			package test1;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			interface Type {
 				void set(String s);
-			
+
 				class U implements Type {
 					@Override
 					public void set(String t) {
@@ -496,10 +496,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -520,12 +520,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				private Map<? extends Map<String, @Nullable Integer>, String[][]> x;
-			
+
 			    abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -543,10 +543,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g(Map<? extends Map<String, @Nullable Integer>, String[][]> x) {
 					x=f();
 				}
@@ -564,10 +564,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					Map<? extends Map<String, @Nullable Integer>, String[][]> x = f();
 				}
@@ -593,10 +593,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				abstract @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -617,12 +617,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				private @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> x;
-			
+
 			    abstract @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -640,10 +640,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				abstract @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g(@Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> x) {
 					x=f();
 				}
@@ -661,10 +661,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				abstract @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					Map<? extends Map<String, @Nullable Integer>, String[][]> x = f();
 				}
@@ -689,12 +689,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@NonNullByDefault({})
 			abstract class Test {
 				@NonNullByDefault
 				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -715,14 +715,14 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@NonNullByDefault({})
 			abstract class Test {
 				private @NonNull Map<? extends @NonNull Map<@NonNull String, @Nullable Integer>, String @NonNull [][]> x;
-			
+
 			    @NonNullByDefault
 				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -740,12 +740,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@NonNullByDefault({})
 			abstract class Test {
 				@NonNullByDefault
 				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g(@NonNull Map<? extends @NonNull Map<@NonNull String, @Nullable Integer>, String @NonNull [][]> x) {
 					x=f();
 				}
@@ -763,12 +763,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@NonNullByDefault({})
 			abstract class Test {
 				@NonNullByDefault
 				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
-			
+
 				public void g() {
 					Map<? extends @NonNull Map<@NonNull String, @Nullable Integer>, String @NonNull [][]> x = f();
 				}
@@ -787,7 +787,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				@NonNull Map<@NonNull String, @Nullable Integer> f(Object o) {
 					return o;
@@ -809,7 +809,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test {
 				@NonNull Map<@NonNull String, @Nullable Integer> f(Object o) {
 					return (Map<@NonNull String, @Nullable Integer>) o;
@@ -834,10 +834,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test<T> {
 				abstract @NonNull T f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -858,12 +858,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test<T> {
 				private @NonNull T x;
-			
+
 			    abstract @NonNull T f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -881,10 +881,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test<T> {
 				abstract @NonNull T f();
-			
+
 				public void g(@NonNull T x) {
 					x=f();
 				}
@@ -902,10 +902,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test<T> {
 				abstract @NonNull T f();
-			
+
 				public void g() {
 					@NonNull
 			        T x = f();
@@ -930,10 +930,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test<T> {
 				abstract Map<Map<@NonNull ?, Integer>, @NonNull T> f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -954,12 +954,12 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test<T> {
 				private Map<Map<@NonNull ?, Integer>, @NonNull T> x;
-			
+
 			    abstract Map<Map<@NonNull ?, Integer>, @NonNull T> f();
-			
+
 				public void g() {
 					x=f();
 				}
@@ -977,10 +977,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test<T> {
 				abstract Map<Map<@NonNull ?, Integer>, @NonNull T> f();
-			
+
 				public void g(Map<Map<@NonNull ?, Integer>, @NonNull T> x) {
 					x=f();
 				}
@@ -998,10 +998,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Map;
 			import org.eclipse.jdt.annotation.*;
-			
+
 			abstract class Test<T> {
 				abstract Map<Map<@NonNull ?, Integer>, @NonNull T> f();
-			
+
 				public void g() {
 					Map<Map<@NonNull ?, Integer>, @NonNull T> x = f();
 				}
@@ -1059,7 +1059,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      String[] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1074,7 +1074,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      String[] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1098,7 +1098,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      String @Nullable [] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1114,7 +1114,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      int[][] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1129,7 +1129,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      int[][] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1153,7 +1153,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      int @Nullable [][] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1169,7 +1169,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      String[] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1183,7 +1183,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      String @NonNull [] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1206,7 +1206,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			   public void SomeMethod(
 			      String @Nullable [] a)
 			   {
-			
+
 			   }
 			}
 			""";
@@ -1252,9 +1252,9 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			public class B extends A {
 			   @Override
 			   public String @NonNull [][][] SomeMethod()
@@ -1288,11 +1288,11 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			@NonNullByDefault
 			public class A {
 			    private @Nullable String foo;
-			
+
 			    public @Nullable String getFoo() {
 			        return foo;
 			    }
-			
+
 			    public void setFoo(@Nullable String foo) {
 			        this.foo = foo;
 			    }
@@ -1313,10 +1313,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
 			String str= """
 				package my;
-				
+
 				import java.lang.annotation.ElementType;
 				import java.lang.annotation.Target;
-				
+
 				@Target(ElementType.TYPE_USE)
 				public @interface Nullable {
 				}
@@ -1325,10 +1325,10 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str1= """
 				package my;
-				
+
 				import java.lang.annotation.ElementType;
 				import java.lang.annotation.Target;
-				
+
 				@Target(ElementType.TYPE_USE)
 				public @interface NonNull {
 				}
@@ -1337,7 +1337,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str2= """
 				package my;
-				
+
 				public enum DefaultLocation {
 					PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT
 				}
@@ -1346,9 +1346,9 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str3= """
 				package my;
-				
+
 				import static my.DefaultLocation.*;
-				
+
 				public @interface NonNullByDefault {
 					DefaultLocation[] value() default { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT };
 				}
@@ -1362,7 +1362,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 				   public void SomeMethod(
 				      String[] a)
 				   {
-				
+
 				   }
 				}
 				""";
@@ -1377,7 +1377,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 				   public void SomeMethod(
 				      String[] a)
 				   {
-				
+
 				   }
 				}
 				""";
@@ -1401,7 +1401,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 				   public void SomeMethod(
 				      String @Nullable [] a)
 				   {
-				
+
 				   }
 				}
 				""";
@@ -1449,7 +1449,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str= """
 				package my;
-				
+
 				public enum DefaultLocation {
 					PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT
 				}
@@ -1458,7 +1458,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str1= """
 				package my;
-				
+
 				public @interface TypeQualifierDefault {
 					java.lang.annotation.ElementType[] value();
 				}
@@ -1467,9 +1467,9 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str2= """
 				package my;
-				
+
 				import static my.DefaultLocation.*;
-				
+
 				public @interface NonNullByDefault {
 					DefaultLocation[] value() default { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT };
 				}
@@ -1478,9 +1478,9 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str3= """
 				package my;
-				
+
 				import java.lang.annotation.ElementType;
-				
+
 				@TypeQualifierDefault({ElementType.METHOD,ElementType.PARAMETER})
 				public @interface NNApi {
 				}
@@ -1489,9 +1489,9 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str4= """
 				package my;
-				
+
 				import java.lang.annotation.ElementType;
-				
+
 				@TypeQualifierDefault({ElementType.PARAMETER})
 				public @interface NNParams {
 				}
@@ -1500,9 +1500,9 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str5= """
 				package my;
-				
+
 				import java.lang.annotation.ElementType;
-				
+
 				@TypeQualifierDefault({ElementType.METHOD})
 				public @interface NNReturn {
 				}
@@ -1511,9 +1511,9 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str6= """
 				package my;
-				
+
 				import java.lang.annotation.ElementType;
-				
+
 				@TypeQualifierDefault(ElementType.FIELD)
 				public @interface NNFields {
 				}
@@ -1522,7 +1522,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str7= """
 				package my;
-				
+
 				public @interface NNBDBoolean {
 				boolean value() default true;
 				}
@@ -1531,7 +1531,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 			String str8= """
 				package my;
-				
+
 				public @interface NNBDUnconfigurable {
 				}
 				""";
@@ -1959,4 +1959,107 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 				Configure problem severity""",
 				actualProposals);
 	}
+
+	@Test
+	public void testGH2822_1() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				public class Test {
+				  public void doStuff() {
+				    invokeMe(getString());
+				  }
+				  public void invokeMe(@NonNull String value) {
+				    System.out.println(value.length());
+				  }
+				  public @Nullable String getString() {
+				    return "my string";
+				  }
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change 'getString()' to '@NonNull'");
+
+		String preview= getPreviewContent(proposal);
+
+		assertEqualString(preview,
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				public class Test {
+				  public void doStuff() {
+				    invokeMe(getString());
+				  }
+				  public void invokeMe(@NonNull String value) {
+				    System.out.println(value.length());
+				  }
+				  public @NonNull String getString() {
+				    return "my string";
+				  }
+				}
+				""");
+	}
+
+	@Test
+	public void testGH2822_2() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				public class Test {
+				  public void doStuff() {
+				    invokeMe(getString());
+				  }
+				  public void invokeMe(@NonNull String value) {
+				    System.out.println(value.length());
+				  }
+				  public @Nullable String getString() {
+				    return getOtherString();
+				  }
+				  public @NonNull String getOtherString() {
+				  	return "other string";
+				  }
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change 'getString()' to '@NonNull'");
+
+		String preview= getPreviewContent(proposal);
+
+		assertEqualString(preview,
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				public class Test {
+				  public void doStuff() {
+				    invokeMe(getString());
+				  }
+				  public void invokeMe(@NonNull String value) {
+				    System.out.println(value.length());
+				  }
+				  public @NonNull String getString() {
+				    return getOtherString();
+				  }
+				  public @NonNull String getOtherString() {
+				  	return "other string";
+				  }
+				}
+				""");
+	}
+
 }

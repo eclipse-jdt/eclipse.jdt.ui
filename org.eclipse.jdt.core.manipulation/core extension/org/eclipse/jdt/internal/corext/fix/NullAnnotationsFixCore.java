@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 GK Software AG and others.
+ * Copyright (c) 2011, 2026 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,16 +25,37 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TextBlock;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.RedundantNullnessTypeAnnotationsFilter;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.AddMissingDefaultNullnessRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.Builder;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
@@ -46,6 +67,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.TypeAnnotationBaseSubProcessor;
 
@@ -87,6 +109,70 @@ public class NullAnnotationsFixCore extends CompilationUnitRewriteOperationsFixC
 			selectedNode= selectedNode.getParent();
 		}
 		return selectedNode.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY;
+	}
+
+	public static NullAnnotationsFixCore createReplaceNullableFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+		MethodDeclaration methodDeclaration= NullAnnotationsFixCore.getMethodDeclarationInCU(selectedNode);
+		if (methodDeclaration != null) {
+			ASTVisitor NullReturnVisitor= new ASTVisitor() {
+				@Override
+				public boolean visit(ReturnStatement node) {
+					Expression exp= node.getExpression();
+					if (exp != null) {
+						switch (exp) {
+							case BooleanLiteral b -> {}
+							case CharacterLiteral cl ->{}
+							case StringLiteral s -> {}
+							case NumberLiteral nl -> {}
+							case TypeLiteral tl -> {}
+							case MethodReference mr -> {}
+							case TextBlock t -> {}
+							case ThisExpression th -> {}
+							case PrefixExpression pre -> {}
+							case PostfixExpression post -> {}
+							case ClassInstanceCreation ci -> {}
+							case MethodInvocation mi -> {
+								IMethodBinding miBinding= mi.resolveMethodBinding();
+								if (miBinding == null) {
+									throw new AbortSearchException();
+								}
+								IAnnotationBinding[] annotations= miBinding.getReturnType().getTypeAnnotations();
+								boolean foundNonNull= false;
+								for (IAnnotationBinding annotation : annotations) {
+									if (Bindings.isNonNullAnnotation(annotation.getAnnotationType(), compilationUnit.getJavaElement().getJavaProject())) {
+										foundNonNull= true;
+									}
+								}
+								if (!foundNonNull) {
+									throw new AbortSearchException();
+								}
+							}
+							default -> throw new AbortSearchException();
+						}
+					}
+					return false;
+				}
+			};
+			try {
+				methodDeclaration.accept(NullReturnVisitor);
+				List<IExtendedModifier> modifiers= methodDeclaration.modifiers();
+				for (IExtendedModifier modifier : modifiers) {
+					if (modifier instanceof Annotation annotation) {
+						if (annotation.getTypeName().getFullyQualifiedName().equals(NullAnnotationsFixCore.getNullableAnnotationName(compilationUnit.getJavaElement(), true))) {
+							String label= Messages.format(CorrectionMessages.NullAnnotationsCorrectionProcessor_replace_nullable_with_nonnull,
+									new Object[] {methodDeclaration.getName().getFullyQualifiedName(),
+											NullAnnotationsFixCore.getNonNullAnnotationName(compilationUnit.getJavaElement(), true)});
+							return new NullAnnotationsFixCore(label, compilationUnit,
+									new CompilationUnitRewriteOperationWithSourceRange[] {new ReplaceNullableWithNonNullOperation(annotation)});
+						}
+					}
+				}
+			} catch (AbortSearchException e) {
+				// do nothing
+			}
+		}
+		return null;
 	}
 
 	public static NullAnnotationsFixCore createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem,
@@ -328,5 +414,35 @@ public class NullAnnotationsFixCore extends CompilationUnitRewriteOperationsFixC
 		if (makeSimple && qualifiedName != null && (lastDot= qualifiedName.lastIndexOf('.')) != -1)
 			return qualifiedName.substring(lastDot + 1);
 		return qualifiedName;
+	}
+
+	public static MethodDeclaration getMethodDeclarationInCU(ASTNode selectedNode) {
+		if (!(selectedNode instanceof MethodInvocation)) {
+			return null;
+		}
+		final IMethodBinding methodBinding= ((MethodInvocation)selectedNode).resolveMethodBinding();
+		if (methodBinding == null) {
+			return null;
+		}
+		class MethodVisitor extends ASTVisitor {
+			private MethodDeclaration fMethodDeclaration;
+			public MethodDeclaration getMethodDeclaration() {
+				return fMethodDeclaration;
+			}
+			@Override
+			public boolean visit(MethodDeclaration node) {
+				IMethodBinding binding= node.resolveBinding();
+				if (binding != null) {
+					if (binding.isEqualTo(methodBinding)) {
+						fMethodDeclaration= node;
+					}
+				}
+				return true;
+			}
+		}
+		MethodVisitor visitor= new MethodVisitor();
+		ASTNode root= selectedNode.getRoot();
+		root.accept(visitor);
+		return visitor.getMethodDeclaration();
 	}
 }
