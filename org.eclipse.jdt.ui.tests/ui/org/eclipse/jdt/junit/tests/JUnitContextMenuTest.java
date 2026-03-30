@@ -13,14 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -44,13 +44,13 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  */
 public class JUnitContextMenuTest {
 
-	@Rule
+	@RegisterExtension
 	public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject;
 	private IPackageFragmentRoot fSourceFolder;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fJProject = projectSetup.getProject();
 		fSourceFolder = JavaProjectHelper.addSourceContainer(fJProject, "src");
@@ -61,7 +61,7 @@ public class JUnitContextMenuTest {
 		JavaProjectHelper.set18CompilerOptions(fJProject);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject, projectSetup.getDefaultClasspath());
 	}
@@ -88,23 +88,23 @@ public class JUnitContextMenuTest {
 		IMethod method = type.getMethod("testMethod", new String[0]);
 
 		// Initially not disabled
-		assertFalse("Initially should not be disabled", TestAnnotationModifier.isDisabled(method));
+		assertFalse(TestAnnotationModifier.isDisabled(method), "Initially should not be disabled");
 
 		// Add @Disabled annotation
 		TestAnnotationModifier.addDisabledAnnotation(method, true);
 
 		// Should now be disabled
-		assertTrue("Should be disabled after adding annotation", TestAnnotationModifier.isDisabled(method));
+		assertTrue(TestAnnotationModifier.isDisabled(method), "Should be disabled after adding annotation");
 		String afterAdd = cu.getSource();
-		assertTrue("Should contain @Disabled", afterAdd.contains("@Disabled"));
+		assertTrue(afterAdd.contains("@Disabled"), "Should contain @Disabled");
 
 		// Remove @Disabled annotation
 		TestAnnotationModifier.removeDisabledAnnotation(method);
 
 		// Should not be disabled anymore
-		assertFalse("Should not be disabled after removing annotation", TestAnnotationModifier.isDisabled(method));
+		assertFalse(TestAnnotationModifier.isDisabled(method), "Should not be disabled after removing annotation");
 		String afterRemove = cu.getSource();
-		assertFalse("Should not contain @Disabled", afterRemove.contains("@Disabled"));
+		assertFalse(afterRemove.contains("@Disabled"), "Should not contain @Disabled");
 	}
 
 	@Test
@@ -132,10 +132,10 @@ public class JUnitContextMenuTest {
 		TestAnnotationModifier.addDisabledAnnotation(method, true);
 		String afterFirstAdd = cu.getSource();
 		int firstCount = countOccurrences(afterFirstAdd, "@Disabled");
-		assertEquals("Should have exactly one @Disabled after first add", 1, firstCount);
+		assertEquals(1, firstCount, "Should have exactly one @Disabled after first add");
 
 		// Verify the check works
-		assertTrue("Should be disabled", TestAnnotationModifier.isDisabled(method));
+		assertTrue(TestAnnotationModifier.isDisabled(method), "Should be disabled");
 	}
 
 	@Test
@@ -168,15 +168,15 @@ public class JUnitContextMenuTest {
 		TestAnnotationModifier.addDisabledAnnotation(method, false);
 
 		String afterAdd = cu.getSource();
-		assertTrue("Should contain @Ignore", afterAdd.contains("@Ignore"));
-		assertTrue("Should be disabled", TestAnnotationModifier.isDisabled(method));
+		assertTrue(afterAdd.contains("@Ignore"), "Should contain @Ignore");
+		assertTrue(TestAnnotationModifier.isDisabled(method), "Should be disabled");
 
 		// Remove @Ignore annotation
 		TestAnnotationModifier.removeDisabledAnnotation(method);
 
 		String afterRemove = cu.getSource();
-		assertFalse("Should not contain @Ignore", afterRemove.contains("@Ignore"));
-		assertFalse("Should not be disabled", TestAnnotationModifier.isDisabled(method));
+		assertFalse(afterRemove.contains("@Ignore"), "Should not contain @Ignore");
+		assertFalse(TestAnnotationModifier.isDisabled(method), "Should not be disabled");
 	}
 
 	/**

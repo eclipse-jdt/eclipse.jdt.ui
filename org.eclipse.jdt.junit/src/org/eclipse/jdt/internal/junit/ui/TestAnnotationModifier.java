@@ -272,7 +272,7 @@ public class TestAnnotationModifier {
 			   JUNIT5_TEST_TEMPLATE_ANNOTATION.equals(qualifiedName);
 	}
 
-	private static void applyChanges(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, String annotationToImport) throws JavaModelException {
+	private static void applyChanges(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, String annotationToImport) {
 		try {
 			MultiTextEdit multiEdit = new MultiTextEdit();
 
@@ -298,7 +298,7 @@ public class TestAnnotationModifier {
 		}
 	}
 
-	private static void applyChangesWithImportRemoval(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, String annotationToRemove) throws JavaModelException {
+	private static void applyChangesWithImportRemoval(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, String annotationToRemove) {
 		try {
 			MultiTextEdit multiEdit = new MultiTextEdit();
 

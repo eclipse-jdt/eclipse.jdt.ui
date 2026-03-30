@@ -232,7 +232,7 @@ public class TestViewer {
 		fTestRunnerPart= runner;
 		fClipboard= clipboard;
 
-		fDisableTestAction= new DisableTestAction(runner);
+		fDisableTestAction= new DisableTestAction();
 
 		fLayoutMode= TestRunnerViewPart.LAYOUT_HIERARCHICAL;
 

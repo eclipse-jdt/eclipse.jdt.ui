@@ -47,7 +47,7 @@ public class DisableTestAction extends Action {
 	private TestElement fTestElement;
 	private boolean fIsCurrentlyDisabled = false;
 
-	public DisableTestAction(TestRunnerViewPart testRunnerPart) {
+	public DisableTestAction() {
 		super(JUnitMessages.DisableTestAction_label);
 	}
 
@@ -287,7 +287,7 @@ public class DisableTestAction extends Action {
 		return null;
 	}
 
-	private boolean isJUnit5Test(IMethod method) throws JavaModelException {
+	private boolean isJUnit5Test(IMethod method) {
 		ICompilationUnit cu = method.getCompilationUnit();
 		if (cu == null) {
 			return false;
