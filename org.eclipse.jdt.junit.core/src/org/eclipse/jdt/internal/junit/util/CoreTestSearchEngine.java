@@ -67,8 +67,19 @@ import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
  */
 public class CoreTestSearchEngine {
 
+	/*
+	 * We use these annotations to try to determine if we have a JUnit 5 or 6 test,
+	 * see: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2903
+	 */
+	private static final String[] JUNIT_JUPITER_TEST_ANNOTATIONS = {
+		JUnitCorePlugin.JUNIT5_JUPITER_TEST_ANNOTATION_NAME,
+		JUnitCorePlugin.JUNIT5_JUPITER_TEST_TEMPLATE_ANNOTATION,
+		JUnitCorePlugin.JUNIT5_JUPITER_CLASS_TEMPLATE_ANNOTATION,
+	};
+
 	private static final String JUNIT_PLATFORM_SUITE_API_PREFIX= BuildPathSupport.JUNIT_PLATFORM_SUITE_API;
 	private static final String JUNIT_PLATFORM_COMMONS_PREFIX= BuildPathSupport.JUNIT_PLATFORM_COMMONS;
+	private static final String JUNIT_JUPITER_API_PREFIX= BuildPathSupport.JUNIT_JUPITER_API;
 	private static final String JAR_EXTENSION= ".jar"; //$NON-NLS-1$
 
 	public static boolean isTestOrTestSuite(IType declaringType) throws CoreException {
@@ -143,7 +154,7 @@ public class CoreTestSearchEngine {
 	public static boolean hasJUnit4TestAnnotation(IJavaProject project) {
 		try {
 			if (project != null) {
-				IType type= project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME);
+				IType type= findAnnotations(project, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME);
 				if (type != null) {
 					// @Test annotation is not accessible if the JUnit classpath container is set to JUnit 3
 					// (although it may resolve to a JUnit 4 JAR)
@@ -159,7 +170,7 @@ public class CoreTestSearchEngine {
 	}
 
 	public static boolean hasJUnit5TestAnnotation(IJavaProject project) {
-		return hasJUnitJupiterTestAnnotation(project, 1, // we check JUnit 5 platform bundles, they range in [1.0,2.0)
+		return hasJUnitJupiterTestAnnotation(project, 5, // we check JUnit 5 platform bundles, they range in [1.0,2.0)
 				JUnitCore.JUNIT3_CONTAINER_PATH, JUnitCore.JUNIT4_CONTAINER_PATH, JUnitCore.JUNIT6_CONTAINER_PATH);
 	}
 
@@ -171,11 +182,18 @@ public class CoreTestSearchEngine {
 	private static boolean hasJUnitJupiterTestAnnotation(IJavaProject project, int junitMajorVersion, IPath... disallowedJunitContainerPaths) {
 		try {
 			if (project != null) {
-				String junitBundlePrefix = JUNIT_PLATFORM_COMMONS_PREFIX;
-				IType type= findAnnotation(project, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
+				String junitBundlePrefix = JUNIT_JUPITER_API_PREFIX;
+				IType type= findAnnotations(project, JUNIT_JUPITER_TEST_ANNOTATIONS);
 				if (type == null) {
-					junitBundlePrefix = JUNIT_PLATFORM_SUITE_API_PREFIX;
-					type= findAnnotation(project, JUnitCorePlugin.JUNIT5_SUITE_ANNOTATION_NAME);
+					if (junitMajorVersion == 5) {
+						junitMajorVersion = 1;
+					}
+					junitBundlePrefix = JUNIT_PLATFORM_COMMONS_PREFIX;
+					type= findAnnotations(project, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
+					if (type == null) {
+						junitBundlePrefix = JUNIT_PLATFORM_SUITE_API_PREFIX;
+						type= findAnnotations(project, JUnitCorePlugin.JUNIT5_SUITE_ANNOTATION_NAME);
+					}
 				}
 				if (type != null) {
 					// check if we have the right JUnit JUpiter version
@@ -335,19 +353,21 @@ public class CoreTestSearchEngine {
 		new SearchEngine().search(suitePattern, participants, scope, requestor, pm);
 	}
 
-	private static IType findAnnotation(IJavaProject project, String fullyQualifiedName) throws JavaModelException {
+	private static IType findAnnotations(IJavaProject project, String... fullyQualifiedNames) throws JavaModelException {
 		if (project instanceof JavaProject p) {
 			NameLookup lookup= p.newNameLookup(DefaultWorkingCopyOwner.PRIMARY);
-			NameLookup.Answer answer = lookup.findType(
-					fullyQualifiedName,
-					false /* no partial matches */,
-					NameLookup.ACCEPT_ANNOTATIONS,
-					false /* no secondary types */,
-					true /* wait for indexer */,
-					true /* check restrictions */,
-					null);
-			if (answer != null) {
-				return answer.type;
+			for (String fullyQualifiedName : fullyQualifiedNames) {
+				NameLookup.Answer answer = lookup.findType(
+						fullyQualifiedName,
+						false /* no partial matches */,
+						NameLookup.ACCEPT_ANNOTATIONS,
+						false /* no secondary types */,
+						true /* wait for indexer */,
+						true /* check restrictions */,
+						null);
+				if (answer != null && !answer.isNonAccessible()) {
+					return answer.type;
+				}
 			}
 		}
 		return null;

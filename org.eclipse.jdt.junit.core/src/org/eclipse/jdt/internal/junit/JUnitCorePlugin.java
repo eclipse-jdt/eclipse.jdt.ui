@@ -67,6 +67,8 @@ public class JUnitCorePlugin extends Plugin {
 	public final static String JUNIT5_SUITE_ANNOTATION_NAME= "org.junit.platform.suite.api.Suite"; //$NON-NLS-1$
 	public final static String JUNIT5_JUPITER_TEST_ANNOTATION_NAME= "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 	public final static String JUNIT5_JUPITER_NESTED_ANNOTATION_NAME= "org.junit.jupiter.api.Nested"; //$NON-NLS-1$
+	public final static String JUNIT5_JUPITER_TEST_TEMPLATE_ANNOTATION= "org.junit.jupiter.api.TestTemplate"; //$NON-NLS-1$
+	public final static String JUNIT5_JUPITER_CLASS_TEMPLATE_ANNOTATION= "org.junit.jupiter.api.ClassTemplate"; //$NON-NLS-1$
 
 	public final static String JUNIT4_ANNOTATION_NAME= "org.junit.Test"; //$NON-NLS-1$
 	public static final String SIMPLE_TEST_INTERFACE_NAME= "Test"; //$NON-NLS-1$
