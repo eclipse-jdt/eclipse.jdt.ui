@@ -36,13 +36,12 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
-import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
 /**
  * The plug-in runtime class for the JUnit core plug-in.
@@ -132,22 +131,13 @@ public class JUnitTestPlugin extends AbstractUIPlugin {
 	}
 
 	public static JUnitVersion getJUnitVersion(IJavaElement element) {
-		if (element != null) {
-			IJavaProject project = element.getJavaProject();
-			if (isRunWithJUnitPlatform(element)) {
-				return JUnitVersion.JUNIT4;
-			}
-			if (CoreTestSearchEngine.hasJUnit6TestAnnotation(project)) {
-				return JUnitVersion.JUNIT6;
-			}
-			if (CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
-				return JUnitVersion.JUNIT5;
-			}
-			if (CoreTestSearchEngine.hasJUnit4TestAnnotation(project)) {
-				return JUnitVersion.JUNIT4;
-			}
-		}
-		return JUnitVersion.JUNIT3;
+		String kind = TestKindRegistry.getContainerTestKindId(element);
+		return switch (kind) {
+		case TestKindRegistry.JUNIT6_TEST_KIND_ID -> JUnitVersion.JUNIT6;
+		case TestKindRegistry.JUNIT5_TEST_KIND_ID -> JUnitVersion.JUNIT5;
+		case TestKindRegistry.JUNIT4_TEST_KIND_ID -> JUnitVersion.JUNIT4;
+		default -> JUnitVersion.JUNIT3;
+		};
 	}
 
 	/**
