@@ -851,11 +851,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		}
 
 		@Override
-		public boolean visit(TextBlock visited) {
-			return false;
-		}
-
-		@Override
 		public boolean visit(VariableDeclarationFragment node) {
 			// TODO Auto-generated method stub
 			VariableDeclarationStatement varDeclStmt= ASTNodes.getFirstAncestorOrNull(node, VariableDeclarationStatement.class);
