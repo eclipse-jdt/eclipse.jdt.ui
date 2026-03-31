@@ -29,8 +29,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IRegion;
@@ -41,6 +39,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -64,7 +63,7 @@ public class FoldingTest {
 	public boolean newFoldingActive;
 
 	@Before
-	public void setUp() throws CoreException {
+	public void setUp() throws Exception {
 		jProject= projectSetup.getProject();
 		sourceFolder= jProject.findPackageFragmentRoot(jProject.getResource().getFullPath().append("src"));
 		if (sourceFolder == null) {
@@ -76,9 +75,10 @@ public class FoldingTest {
 	}
 
 	@After
-	public void tearDown() throws CoreException {
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(jProject);
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
+		TestUtils.waitForEditorJobs(60_000L, true);
 	}
 
 	@Test
