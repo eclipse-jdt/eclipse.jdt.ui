@@ -496,7 +496,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private BodyDeclaration fLastBodyDecl;
 		private final Set<String> fExcludedNames;
 		private final Set<IBinding> fRemovedDeclarations= new HashSet<>();
-		private StringLiteral stringLiteralToUpdate;
 
 		public StringBufferFinder(List<CompilationUnitRewriteOperation> operations, Set<String> excludedNames) {
 			super(true);
@@ -619,10 +618,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				return false;
 			}
 			return true;
-		}
-
-		public StringLiteral getStringLiteralToUpdate() {
-			return stringLiteralToUpdate;
 		}
 
 		@Override
@@ -784,7 +779,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				fRemovedDeclarations.add(originalVarName.resolveBinding());
 			}
 			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, indexOfList, argList, statements, literals,
-					fRemovedDeclarations.contains(originalVarName.resolveBinding()) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, stringLiteralToUpdate, nonNLS);
+					fRemovedDeclarations.contains(originalVarName.resolveBinding()) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, null, nonNLS);
 			fLastBodyDecl= bodyDecl;
 			fOperations.add(operation);
 			conversions.put(assignmentToConvert, operation);
@@ -853,20 +848,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				return false;
 			}
 			return true;
-		}
-
-		@Override
-		public boolean visit(StringLiteral visited) {
-			CharSequence newLine = "\n"; //$NON-NLS-1$
-			String stringContent = visited.getLiteralValue();
-			if (stringContent.contains(newLine)) {
-				ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(null, null, null, null, null,
-						null, null, null, visited, false);
-				fOperations.add(operation);
-				stringLiteralToUpdate = visited;
-				return false;
-			}
-			return false;
 		}
 
 		@Override
@@ -1014,7 +995,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			String DEFAULT_NAME= "str"; //$NON-NLS-1$
-
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
 			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
@@ -1027,7 +1007,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					return super.computeSourceRange(nodeWithComment);
 				}
 			});
-
 			if (fLiteralExpression != null) {
 				StringBuilder buf= createTextBlockBuffer(Arrays.asList(fLiteralExpression), cuRewrite);
 				TextEditGroup group= createTextEditGroup(MultiFixMessages.StringNewLinesToTextBlockCleanUp_description, cuRewrite);
@@ -1183,18 +1162,32 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		StringConcatFinder finder= new StringConcatFinder(operations, true);
 		exp.accept(finder);
+
 		String descriptionMessage= FixMessages.StringConcatToTextBlockFix_convert_msg;
 		if (operations.isEmpty()) {
 			StringBufferFinder finder2= new StringBufferFinder(operations, new HashSet<>());
 			exp.accept(finder2);
-			if(finder2.getStringLiteralToUpdate() != null) {
-				descriptionMessage = FixMessages.StringNewlinesToTextBlockFix_convert_msg;
-			}
 		}
 		if (operations.isEmpty()) {
 			return null;
 		}
 		return new StringConcatToTextBlockFixCore(descriptionMessage, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operations.get(0) });
+	}
+
+	public static StringConcatToTextBlockFixCore createStringLiteralToTextBlockFix(ASTNode exp) {
+		CompilationUnit root= (CompilationUnit) exp.getRoot();
+		if (!JavaModelUtil.is15OrHigher(root.getJavaElement().getJavaProject()))
+			return null;
+		if (exp instanceof StringLiteral) {
+			String nodeValue = ((StringLiteral) exp).getLiteralValue();
+			CharSequence newLine = "\n"; //$NON-NLS-1$
+			if (nodeValue.contains(newLine)) {
+				ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(null, null, null, null, null,
+						null, null, null, (StringLiteral)exp, false);
+				return new StringConcatToTextBlockFixCore(FixMessages.StringNewlinesToTextBlockFix_convert_msg, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operation });
+			}
+		}
+		return null;
 	}
 
 	private static StringBuilder createTextBlockBuffer(List<StringLiteral> literals, CompilationUnitRewrite cuRewrite) {

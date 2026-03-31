@@ -115,6 +115,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -2751,17 +2752,29 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 
 		IProposableFix fix= StringConcatToTextBlockFixCore.createStringConcatToTextBlockFix(exp);
-		if (fix == null)
-			return false;
+
+		boolean fixFound= false;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		Map<String, String> options= new HashMap<>();
-		options.put(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK, CleanUpOptions.TRUE);
-		options.put(CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new StringConcatToTextBlockCleanUpCore(options);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_TO_TEXT_BLOCK, image, context);
-		resultingCollections.add(proposal);
-		return true;
+		if (fix != null) {
+			Map<String, String> options= new HashMap<>();
+			options.put(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER, CleanUpOptions.TRUE);
+			ICleanUp cleanUp= new StringConcatToTextBlockCleanUpCore(options);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_TO_TEXT_BLOCK, image, context);
+			resultingCollections.add(proposal);
+			fixFound= true;
+		}
+		if (node instanceof StringLiteral) {
+			fix = StringConcatToTextBlockFixCore.createStringLiteralToTextBlockFix(node);
+			if (fix != null) {
+				fixFound= true;
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_TO_TEXT_BLOCK + 1, image, context);
+				resultingCollections.add(proposal);
+			}
+		}
+
+		return fixFound;
 	}
 
 	private static boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
