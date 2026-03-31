@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TextBlock;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -113,64 +115,100 @@ public class NullAnnotationsFixCore extends CompilationUnitRewriteOperationsFixC
 
 	public static NullAnnotationsFixCore createReplaceNullableFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
-		MethodDeclaration methodDeclaration= NullAnnotationsFixCore.getMethodDeclarationInCU(selectedNode);
-		if (methodDeclaration != null) {
-			ASTVisitor NullReturnVisitor= new ASTVisitor() {
-				@Override
-				public boolean visit(ReturnStatement node) {
-					Expression exp= node.getExpression();
-					if (exp != null) {
-						switch (exp) {
-							case BooleanLiteral b -> {}
-							case CharacterLiteral cl ->{}
-							case StringLiteral s -> {}
-							case NumberLiteral nl -> {}
-							case TypeLiteral tl -> {}
-							case MethodReference mr -> {}
-							case TextBlock t -> {}
-							case ThisExpression th -> {}
-							case PrefixExpression pre -> {}
-							case PostfixExpression post -> {}
-							case ClassInstanceCreation ci -> {}
-							case MethodInvocation mi -> {
-								IMethodBinding miBinding= mi.resolveMethodBinding();
-								if (miBinding == null) {
-									throw new AbortSearchException();
-								}
-								IAnnotationBinding[] annotations= miBinding.getReturnType().getTypeAnnotations();
-								boolean foundNonNull= false;
-								for (IAnnotationBinding annotation : annotations) {
-									if (Bindings.isNonNullAnnotation(annotation.getAnnotationType(), compilationUnit.getJavaElement().getJavaProject())) {
-										foundNonNull= true;
+		List<IExtendedModifier> modifiers= null;
+		String labelName= ""; //$NON-NLS-1$
+		if (selectedNode instanceof MethodInvocation methodInvocation) {
+			final IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+			if (methodBinding != null) {
+				MethodDeclaration methodDeclaration= NullAnnotationsFixCore.getMethodDeclarationInCU(selectedNode, methodBinding);
+				if (methodDeclaration != null) {
+					ASTVisitor NullReturnVisitor= new ASTVisitor() {
+						@Override
+						public boolean visit(ReturnStatement node) {
+							Expression exp= node.getExpression();
+							if (exp != null) {
+								switch (exp) {
+									case BooleanLiteral b -> {}
+									case CharacterLiteral cl ->{}
+									case StringLiteral s -> {}
+									case NumberLiteral nl -> {}
+									case TypeLiteral tl -> {}
+									case MethodReference mr -> {}
+									case TextBlock t -> {}
+									case ThisExpression th -> {}
+									case PrefixExpression pre -> {}
+									case PostfixExpression post -> {}
+									case ClassInstanceCreation ci -> {}
+									case MethodInvocation mi -> {
+										IMethodBinding miBinding= mi.resolveMethodBinding();
+										if (miBinding == null) {
+											throw new AbortSearchException();
+										}
+										IAnnotationBinding[] annotations= miBinding.getReturnType().getTypeAnnotations();
+										boolean foundNonNull= false;
+										for (IAnnotationBinding annotation : annotations) {
+											if (Bindings.isNonNullAnnotation(annotation.getAnnotationType(), compilationUnit.getJavaElement().getJavaProject())) {
+												foundNonNull= true;
+											}
+										}
+										if (!foundNonNull) {
+											throw new AbortSearchException();
+										}
 									}
-								}
-								if (!foundNonNull) {
-									throw new AbortSearchException();
+									default -> throw new AbortSearchException();
 								}
 							}
-							default -> throw new AbortSearchException();
+							return false;
 						}
-					}
-					return false;
-				}
-			};
-			try {
-				methodDeclaration.accept(NullReturnVisitor);
-				List<IExtendedModifier> modifiers= methodDeclaration.modifiers();
-				for (IExtendedModifier modifier : modifiers) {
-					if (modifier instanceof Annotation annotation) {
-						if (annotation.getTypeName().getFullyQualifiedName().equals(NullAnnotationsFixCore.getNullableAnnotationName(compilationUnit.getJavaElement(), true))) {
-							String label= Messages.format(CorrectionMessages.NullAnnotationsCorrectionProcessor_replace_nullable_with_nonnull,
-									new Object[] {methodDeclaration.getName().getFullyQualifiedName(),
-											NullAnnotationsFixCore.getNonNullAnnotationName(compilationUnit.getJavaElement(), true)});
-							return new NullAnnotationsFixCore(label, compilationUnit,
-									new CompilationUnitRewriteOperationWithSourceRange[] {new ReplaceNullableWithNonNullOperation(annotation)});
-						}
+					};
+					try {
+						methodDeclaration.accept(NullReturnVisitor);
+						modifiers= methodDeclaration.modifiers();
+						labelName= methodDeclaration.getName().getFullyQualifiedName() + "()"; //$NON-NLS-1$
+					} catch (AbortSearchException e) {
+						// do nothing
 					}
 				}
-			} catch (AbortSearchException e) {
-				// do nothing
 			}
+		} else if (selectedNode instanceof SimpleName name) {
+			IBinding binding= name.resolveBinding();
+			if (binding instanceof IVariableBinding varBinding) {
+				if (varBinding.isParameter()) {
+					ITypeBinding varTypeBinding= varBinding.getType();
+					IAnnotationBinding[] annotations= varTypeBinding.getTypeAnnotations();
+					for (IAnnotationBinding annotation : annotations) {
+						if (annotation.getName().equals(NullAnnotationsFixCore.getNullableAnnotationName(compilationUnit.getJavaElement(), true))) {
+							MethodDeclaration methodDeclaration= ASTNodes.getFirstAncestorOrNull(selectedNode, MethodDeclaration.class);
+							if (methodDeclaration != null) {
+								List<SingleVariableDeclaration> parameters= methodDeclaration.parameters();
+								for (SingleVariableDeclaration parameter : parameters) {
+									if (parameter.getName().getFullyQualifiedName().equals(name.getFullyQualifiedName())) {
+										if (binding.isEqualTo(parameter.getName().resolveBinding())) {
+											modifiers= parameter.modifiers();
+											labelName= name.getFullyQualifiedName();
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if (modifiers != null) {
+			for (IExtendedModifier modifier : modifiers) {
+				if (modifier instanceof Annotation annotation) {
+					if (annotation.getTypeName().getFullyQualifiedName().equals(NullAnnotationsFixCore.getNullableAnnotationName(compilationUnit.getJavaElement(), true))) {
+						String label= Messages.format(CorrectionMessages.NullAnnotationsCorrectionProcessor_replace_nullable_with_nonnull,
+								new Object[] {labelName,
+										NullAnnotationsFixCore.getNonNullAnnotationName(compilationUnit.getJavaElement(), true)});
+						return new NullAnnotationsFixCore(label, compilationUnit,
+								new CompilationUnitRewriteOperationWithSourceRange[] {new ReplaceNullableWithNonNullOperation(annotation)});
+					}
+				}
+			}
+
 		}
 		return null;
 	}
@@ -416,14 +454,7 @@ public class NullAnnotationsFixCore extends CompilationUnitRewriteOperationsFixC
 		return qualifiedName;
 	}
 
-	public static MethodDeclaration getMethodDeclarationInCU(ASTNode selectedNode) {
-		if (!(selectedNode instanceof MethodInvocation)) {
-			return null;
-		}
-		final IMethodBinding methodBinding= ((MethodInvocation)selectedNode).resolveMethodBinding();
-		if (methodBinding == null) {
-			return null;
-		}
+	public static MethodDeclaration getMethodDeclarationInCU(ASTNode selectedNode, IMethodBinding methodBinding) {
 		class MethodVisitor extends ASTVisitor {
 			private MethodDeclaration fMethodDeclaration;
 			public MethodDeclaration getMethodDeclaration() {

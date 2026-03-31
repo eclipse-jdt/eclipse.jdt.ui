@@ -877,6 +877,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.LOCAL, proposals);
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.TARGET, proposals);
 				break;
+			case IProblem.DereferencingNullableExpression:
 			case IProblem.NullityMismatchingTypeAnnotation:
 				NullAnnotationsCorrectionProcessor.addReplaceNullableAnnotationProposal(context, problem, proposals);
 				break;

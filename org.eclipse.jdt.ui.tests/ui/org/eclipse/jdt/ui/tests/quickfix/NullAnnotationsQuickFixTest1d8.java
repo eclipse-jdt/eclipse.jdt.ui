@@ -2062,4 +2062,40 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 				""");
 	}
 
+	@Test
+	public void testGH2913() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				public class Test {
+				  public void invokeMe(@Nullable String aaa) {
+				    System.out.println(aaa.length());
+				  }
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change 'aaa' to '@NonNull'");
+
+		String preview= getPreviewContent(proposal);
+
+		assertEqualString(preview,
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.*;
+				public class Test {
+				  public void invokeMe(@NonNull String aaa) {
+				    System.out.println(aaa.length());
+				  }
+				}
+				""");
+	}
+
 }
