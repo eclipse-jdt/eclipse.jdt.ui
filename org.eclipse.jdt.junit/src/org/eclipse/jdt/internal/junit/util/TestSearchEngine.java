@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
@@ -35,46 +34,43 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 
-
 /**
- * Custom Search engine for suite() methods
+ * Custom Search engine for suite() methods.
+ *
  * @see CoreTestSearchEngine
  */
 public class TestSearchEngine extends CoreTestSearchEngine {
 
-	public static Set<IType> findTests(IRunnableContext context, final IJavaElement element, final ITestKind testKind) throws InvocationTargetException, InterruptedException {
-		final Set<IType> result= new HashSet<>();
-
-		IRunnableWithProgress runnable= progressMonitor -> {
+	public static Set<IType> findTests(IRunnableContext context, IJavaElement element, ITestKind testKind) throws InvocationTargetException, InterruptedException {
+		var result= new HashSet<IType>();
+		context.run(true, true, (progressMonitor) -> {
+			ITestFinder finder= testKind.getFinder();
 			try {
-				testKind.getFinder().findTestsInContainer(element, result, progressMonitor);
+				finder.findTestsInContainer(element, result, progressMonitor);
 			} catch (CoreException e) {
 				throw new InvocationTargetException(e);
 			}
-		};
-		context.run(true, true, runnable);
+		});
 		return result;
 	}
 
-	public static Set<String> findTestMethods(IRunnableContext context, final IJavaProject javaProject, IType type, TestKind testKind) throws InvocationTargetException, InterruptedException {
-		final Set<String> result= new HashSet<>();
-
-		IRunnableWithProgress runnable= progressMonitor -> {
+	public static Set<String> findTestMethods(IRunnableContext context, IJavaProject javaProject, IType type, TestKind testKind) throws InvocationTargetException, InterruptedException {
+		var result= new HashSet<String>();
+		context.run(true, true, (progressMonitor) -> {
+			String message= Messages.format(JUnitMessages.TestSearchEngine_search_message_progress_monitor, type.getElementName());
+			SubMonitor subMonitor= SubMonitor.convert(progressMonitor, message, 1);
 			try {
-				String message= Messages.format(JUnitMessages.TestSearchEngine_search_message_progress_monitor, type.getElementName());
-				SubMonitor subMonitor= SubMonitor.convert(progressMonitor, message, 1);
-
-				collectMethodNames(type, javaProject, testKind.getId(), result, subMonitor.split(1));
+				collectMethodNames(type, javaProject, testKind.getId(), result, subMonitor);
 			} catch (CoreException e) {
 				throw new InvocationTargetException(e);
 			}
-		};
-		context.run(true, true, runnable);
+		});
 		return result;
 	}
 
