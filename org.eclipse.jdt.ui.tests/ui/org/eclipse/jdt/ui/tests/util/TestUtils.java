@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
+import org.eclipse.ui.internal.decorators.DecoratorManager;
+
 import org.eclipse.jdt.internal.core.JavaModelManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -38,19 +40,40 @@ public class TestUtils {
 	}
 
 	/**
-	 * Closes all open editors (without saving them), then waits for:
+	 * Closes all open editors (without saving them), then:
 	 *
 	 * <pre>
-	 * 1. Reconciler family, {@link ReconcilerJobFamilies#FAMILY_RECONCILER}
-	 * 2. Background reconciler threads, {@link JavaReconciler}
+	 * 1. (optional) cancels the decorator family, {@link DecoratorManager#FAMILY_DECORATE}
+	 * 2. (optional) cancels the reconciler family, {@link ReconcilerJobFamilies#FAMILY_RECONCILER}
+	 * 3. waits on the decorator family
+	 * 4. waits on the reconciler family
+	 * 5. waits on background reconciler threads, {@link JavaReconciler}
 	 * </pre>
 	 *
+	 * @param cancelJobs whether the decorator and reconciler families should be cancelled
 	 * @param timeout wait timeout in milliseconds
 	 * @throws RuntimeException if a timeout occurs while waiting
 	 */
 	@SuppressWarnings("restriction")
-	public static void waitForReconciler(long timeout) throws Exception {
+	public static void waitForEditorJobs(long timeout, boolean cancelJobs) throws Exception {
+		/*
+		 * The decoration job opens and closes buffers in BufferManager,
+		 * those buffers are used by the formatter code.
+		 * We don't want the job to run in parallel to the formatting done by the test,
+		 * but waiting for the job makes the test case up to 5 times slower.
+		 * So we cancel the job and then make sure it exits before formatting.
+		 */
 		JavaPlugin.getActivePage().closeAllEditors(false);
+		if (cancelJobs) {
+			Job.getJobManager().cancel(DecoratorManager.FAMILY_DECORATE);
+			Job.getJobManager().cancel(ReconcilerJobFamilies.FAMILY_RECONCILER);
+		}
+		Job.getJobManager().join(DecoratorManager.FAMILY_DECORATE, null);
+		TestUtils.waitForReconciler(timeout);
+	}
+
+	@SuppressWarnings("restriction")
+	private static void waitForReconciler(long timeout) throws Exception {
 		long s = System.currentTimeMillis();
 		waitForJobFamily(timeout, ReconcilerJobFamilies.FAMILY_RECONCILER);
 		// the reconciler starts a background thread, wait for it here
@@ -84,6 +107,19 @@ public class TestUtils {
 		if (System.currentTimeMillis() - s > timeout) {
 			throw new RuntimeException("Timeout occurred while waiting on job family: " + family);
 		}
+	}
+
+	@SuppressWarnings("restriction")
+	public static void cancelDecorationJob() throws InterruptedException {
+		/*
+		 * The decoration job opens and closes buffers in BufferManager,
+		 * those buffers are used by the formatter code.
+		 * We don't want the job to run in parallel to the formatting done by the test,
+		 * but waiting for the job makes the test case up to 5 times slower.
+		 * So we cancel the job and then make sure it exits before formatting.
+		 */
+		Job.getJobManager().cancel(DecoratorManager.FAMILY_DECORATE);
+		Job.getJobManager().join(DecoratorManager.FAMILY_DECORATE, null);
 	}
 
 	/**
