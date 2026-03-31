@@ -1004,7 +1004,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			});
 			if (fLiteralExpression != null) {
 				StringBuilder buf= createTextBlockBuffer(Arrays.asList(fLiteralExpression), cuRewrite);
-				TextEditGroup group= createTextEditGroup(MultiFixMessages.StringNewLinesToTextBlockCleanUp_description, cuRewrite);
+				TextEditGroup group= createTextEditGroup(MultiFixMessages.StringToTextBlock_description, cuRewrite);
 				TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
 				rewrite.replace(fLiteralExpression, textBlock, group);
 				return;

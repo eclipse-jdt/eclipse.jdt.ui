@@ -2768,9 +2768,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (node instanceof StringLiteral) {
 			fix= StringConcatToTextBlockFixCore.createStringLiteralToTextBlockFix(node);
 			if (fix != null) {
-				fixFound= true;
-				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_NEWLINES_TO_TEXTBLOCK, image, context);
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_TO_TEXT_BLOCK, image, context);
 				resultingCollections.add(proposal);
+				fixFound= true;
 			}
 		}
 
