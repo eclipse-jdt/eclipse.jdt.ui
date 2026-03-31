@@ -1179,12 +1179,13 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		if (!JavaModelUtil.is15OrHigher(root.getJavaElement().getJavaProject()))
 			return null;
 		if (exp instanceof StringLiteral) {
-			String nodeValue = ((StringLiteral) exp).getLiteralValue();
-			CharSequence newLine = "\n"; //$NON-NLS-1$
+			String nodeValue= ((StringLiteral) exp).getLiteralValue();
+			CharSequence newLine= "\n"; //$NON-NLS-1$
 			if (nodeValue.contains(newLine)) {
 				ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(null, null, null, null, null,
-						null, null, null, (StringLiteral)exp, false);
-				return new StringConcatToTextBlockFixCore(FixMessages.StringNewlinesToTextBlockFix_convert_msg, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operation });
+						null, null, null, (StringLiteral) exp, false);
+				return new StringConcatToTextBlockFixCore(FixMessages.StringNewlinesToTextBlockFix_convert_msg, root,
+						new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operation });
 			}
 		}
 		return null;

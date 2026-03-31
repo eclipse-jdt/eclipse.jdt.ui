@@ -2766,10 +2766,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			fixFound= true;
 		}
 		if (node instanceof StringLiteral) {
-			fix = StringConcatToTextBlockFixCore.createStringLiteralToTextBlockFix(node);
+			fix= StringConcatToTextBlockFixCore.createStringLiteralToTextBlockFix(node);
 			if (fix != null) {
 				fixFound= true;
-				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_TO_TEXT_BLOCK + 1, image, context);
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_NEWLINES_TO_TEXTBLOCK, image, context);
 				resultingCollections.add(proposal);
 			}
 		}
