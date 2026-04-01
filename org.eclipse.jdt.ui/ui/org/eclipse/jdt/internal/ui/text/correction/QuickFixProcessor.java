@@ -310,6 +310,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalAnnotationForBaseType:
 			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
 			case IProblem.NullityMismatchTypeArgument:
+			case IProblem.ContradictoryNullAnnotations:
 			case IProblem.UndefinedModule:
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 			case IProblem.NotAccessibleType:
@@ -902,6 +903,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.NullableFieldReference:
 				NullAnnotationsCorrectionProcessor.addExtractCheckedLocalProposal(context, problem, proposals);
+				break;
+			case IProblem.ContradictoryNullAnnotations:
+				NullAnnotationsCorrectionProcessor.addRemoveContradictoryAnnotationProposals(context, problem, proposals);
 				break;
 			case IProblem.ConflictingNullAnnotations:
 			case IProblem.ConflictingInheritedNullAnnotations:

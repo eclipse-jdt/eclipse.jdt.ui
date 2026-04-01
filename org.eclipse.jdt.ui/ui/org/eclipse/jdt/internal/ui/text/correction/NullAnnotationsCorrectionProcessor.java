@@ -60,6 +60,10 @@ public class NullAnnotationsCorrectionProcessor extends NullAnnotationsCorrectio
 		new NullAnnotationsCorrectionProcessor().getRemoveRedundantAnnotationProposal(context, problem, proposals);
 	}
 
+	public static void addRemoveContradictoryAnnotationProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		new NullAnnotationsCorrectionProcessor().getRemoveContradictoryAnnotationProposals(context, problem, proposals);
+	}
+
 	public static void addReplaceNullableAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new NullAnnotationsCorrectionProcessor().getReplaceNullableAnnotationProposal(context, problem, proposals);
 	}

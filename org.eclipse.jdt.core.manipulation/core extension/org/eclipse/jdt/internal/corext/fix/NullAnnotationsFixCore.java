@@ -26,12 +26,14 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -61,6 +63,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.AddMissingDefaultNullnessRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.Builder;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
+import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.RemoveAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.RemoveRedundantAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.TypeAnnotationRewriteOperations.MoveTypeAnnotationRewriteOperation;
@@ -397,6 +400,52 @@ public class NullAnnotationsFixCore extends CompilationUnitRewriteOperationsFixC
 		}
 	}
 
+	public static NullAnnotationsFixCore createRemoveContradictoryNullAnnotationsFix(CompilationUnit astRoot, IProblemLocation problem, String annotationName) {
+		ASTNode coveringNode= problem.getCoveringNode(astRoot);
+		if (coveringNode == null) {
+			return null;
+		}
+		coveringNode= coveringNode.getParent();
+
+		List<IExtendedModifier> modifiers= new ArrayList<>();
+		Annotation removeAnnotation= null;
+
+		if (coveringNode instanceof SingleVariableDeclaration) {
+			SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) coveringNode;
+			modifiers= singleVariableDeclaration.modifiers();
+		} else if (coveringNode instanceof FieldDeclaration) {
+			FieldDeclaration fieldDeclaration= (FieldDeclaration) coveringNode;
+			modifiers= fieldDeclaration.modifiers();
+		} else if (coveringNode instanceof MethodDeclaration) {
+			MethodDeclaration methodDeclaration= (MethodDeclaration) coveringNode;
+			modifiers= methodDeclaration.modifiers();
+		} else if (coveringNode instanceof AnnotatableType annotatableType) {
+			modifiers= annotatableType.annotations();
+		} else {
+			return null;
+		}
+
+		for (IExtendedModifier modifier : modifiers) {
+			if (modifier instanceof Annotation annotation) {
+				IAnnotationBinding binding= annotation.resolveAnnotationBinding();
+				if (binding != null) {
+					if (binding.getAnnotationType().getQualifiedName().equals(annotationName)) {
+						removeAnnotation= annotation;
+						break;
+					}
+				}
+			}
+		}
+
+		if (removeAnnotation != null) {
+			RemoveAnnotationRewriteOperation op= new RemoveAnnotationRewriteOperation(removeAnnotation);
+			String label= Messages.format(CorrectionMessages.NullAnnotationsCorrectionProcessor_remove_annotation,
+					new Object[] {removeAnnotation.getTypeName().getFullyQualifiedName()});
+			return new NullAnnotationsFixCore(label, astRoot,
+					new CompilationUnitRewriteOperationWithSourceRange[] { op });
+		}
+		return null;
+	}
 //	private static boolean isMissingNullAnnotationProblem(int id) {
 //		return id == IProblem.RequiredNonNullButProvidedNull || id == IProblem.RequiredNonNullButProvidedPotentialNull || id == IProblem.IllegalReturnNullityRedefinition
 //				|| mayIndicateParameterNullcheck(id);
@@ -476,4 +525,5 @@ public class NullAnnotationsFixCore extends CompilationUnitRewriteOperationsFixC
 		root.accept(visitor);
 		return visitor.getMethodDeclaration();
 	}
+
 }
