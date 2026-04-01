@@ -2098,4 +2098,57 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 				""");
 	}
 
+	@Test
+	public void testGH2919() throws Exception {
+		IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+		ICompilationUnit cu= my.createCompilationUnit("Test.java",
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.NonNull;
+				import org.eclipse.jdt.annotation.Nullable;
+				public class Test {
+				  public @Nullable @NonNull String invokeMe(String aaa) {
+				    return "abc";
+				  }
+				}
+				""",
+				false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Remove '@NonNull'");
+
+		String preview= getPreviewContent(proposal);
+
+		assertEqualString(preview,
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.Nullable;
+				public class Test {
+				  public @Nullable String invokeMe(String aaa) {
+				    return "abc";
+				  }
+				}
+				""");
+		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
+
+		assertEqualString(proposal2.getDisplayString(), "Remove '@Nullable'");
+
+		preview= getPreviewContent(proposal2);
+
+		assertEqualString(preview,
+				"""
+				package my;
+				import org.eclipse.jdt.annotation.NonNull;
+				public class Test {
+				  public @NonNull String invokeMe(String aaa) {
+				    return "abc";
+				  }
+				}
+				""");
+	}
+
 }
