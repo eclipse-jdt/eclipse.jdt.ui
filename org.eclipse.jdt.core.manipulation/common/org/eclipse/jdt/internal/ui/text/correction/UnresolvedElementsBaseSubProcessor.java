@@ -32,6 +32,7 @@ import org.osgi.framework.Bundle;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -45,6 +46,8 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.resource.DeleteResourceChange;
 import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -56,6 +59,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -1526,6 +1530,10 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			String qualifiedTypeName= Signature.getQualifier(Signature.getTypeErasure(curr));
 			String elementLabel= BasicElementLabels.getJavaElementName(JavaModelUtil.concatenateName(Signature.getSimpleName(qualifiedTypeName), name));
 
+			if (isForbidden(root, qualifiedTypeName)) {
+				continue;
+			}
+
 			String res= importRewrite.addStaticImport(qualifiedTypeName, name, isMethod, new ContextSensitiveImportRewriteContext(root, node.getStartPosition(), importRewrite));
 			int dot= res.lastIndexOf('.');
 			if (dot != -1) {
@@ -1544,6 +1552,30 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			if (t != null)
 				proposals.add(t);
 		}
+	}
+
+	private boolean isForbidden(CompilationUnit root, String qualifiedTypeName) throws JavaModelException {
+		String qualifiedPathName= qualifiedTypeName.replace('.', '/');
+		IJavaElement type= root.getJavaElement().getJavaProject().findElement(IPath.fromPortableString(qualifiedPathName).removeLastSegments(1));
+		while (type != null) {
+			IClasspathEntry entry= root.getJavaElement().getJavaProject().getClasspathEntryFor(type.getPath());
+			if (entry != null) {
+				for (IAccessRule rule : entry.getAccessRules()) {
+					if (CharOperation.pathMatch(rule.getPattern().toString().toCharArray(), qualifiedPathName.toCharArray(),
+							true/*case sensitive*/, '/')) {
+						switch (rule.getKind()) {
+							case IAccessRule.K_NON_ACCESSIBLE:
+							case IAccessRule.K_DISCOURAGED:
+								return true;
+							default:
+								break;
+						}
+					}
+				}
+			}
+			type= type.getParent();
+		}
+		return false;
 	}
 
 	// 1400
