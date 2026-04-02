@@ -1557,7 +1557,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testStaticImportFavorite_Issue2923() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/2923
+	public void testStaticImportFavorite_Issue2893() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2893
 		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
 		preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "test.Assertions.*");
 		try {
