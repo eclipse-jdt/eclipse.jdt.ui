@@ -1557,7 +1557,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	private boolean isForbidden(CompilationUnit root, String qualifiedTypeName) throws JavaModelException {
 		String qualifiedPathName= qualifiedTypeName.replace('.', '/');
 		IJavaElement type= root.getJavaElement().getJavaProject().findElement(IPath.fromPortableString(qualifiedPathName).removeLastSegments(1));
-		if (type != null) {
+		while (type != null) {
 			IClasspathEntry entry= root.getJavaElement().getJavaProject().getClasspathEntryFor(type.getPath());
 			if (entry != null) {
 				for (IAccessRule rule : entry.getAccessRules()) {
@@ -1573,6 +1573,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 					}
 				}
 			}
+			type= type.getParent();
 		}
 		return false;
 	}

@@ -29,8 +29,13 @@ import org.junit.Test;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -57,6 +62,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
+	IJavaProject p1= null;
+	IJavaProject referencing1= null;
+	IJavaProject referencing2= null;
+
 	private IPackageFragmentRoot fSourceFolder;
 
 	@Before
@@ -1544,6 +1553,105 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			assertExpectedExistInProposals(proposals, expected);
 		} finally {
 			preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "");
+		}
+	}
+
+	@Test
+	public void testStaticImportFavorite_Issue2923() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/2923
+		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+		preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "test.Assertions.*");
+		try {
+			p1= JavaProjectHelper.createJavaProject("p1", "bin");
+			referencing1= JavaProjectHelper.createJavaProject("p2", "bin");
+			referencing2= JavaProjectHelper.createJavaProject("p3", "bin");
+
+			JavaProjectHelper.addRTJar(p1);
+			IPackageFragmentRoot p1SourceFolder= JavaProjectHelper.addSourceContainer(p1, "src");
+			IPackageFragment pack= p1SourceFolder.createPackageFragment("test", false, null);
+
+			String str= """
+					package test;
+
+					public class Assertions {
+						public static boolean assertEquals(Object obj1, Object obj2) throws Exception {
+							if (Object.equals(obj1, obj2)) {
+								throw new Exception();
+							}
+						}
+					}
+					""";
+			pack.createCompilationUnit("Assertions.java", str, false, null);
+
+			JavaProjectHelper.addRTJar(referencing1);
+			JavaProjectHelper.addRequiredProject(referencing1, p1);
+			IPackageFragmentRoot ref1SourceFolder= JavaProjectHelper.addSourceContainer(referencing1, "src");
+			IPackageFragment pack1= ref1SourceFolder.createPackageFragment("test1", false, null);
+			String str1= """
+					package test1;
+
+					public class E {
+						public boolean foo(Object obj1, Object obj2) throws Exception {
+							assertEquals(obj1, obj2);
+						}
+					}
+					""";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E.java", str1, false, null);
+
+			JavaProjectHelper.addRTJar(referencing2);
+			IPackageFragmentRoot ref2SourceFolder= JavaProjectHelper.addSourceContainer(referencing2, "src");
+			IPackageFragment pack2= ref2SourceFolder.createPackageFragment("test2", false, null);
+			String str2= """
+					package test2;
+
+					public class E2 {
+						public boolean foo2(Object obj1, Object obj2) throws Exception {
+							assertEquals(obj1, obj2);
+						}
+					}
+					""";
+			ICompilationUnit cu2= pack2.createCompilationUnit("E2.java", str2, false, null);
+
+
+
+			IAccessRule[] accessRules2= new IAccessRule[] {
+					JavaCore.newAccessRule(new Path("**/*"), IAccessRule.K_NON_ACCESSIBLE)
+			};
+			IClasspathAttribute[] extraAttributes2= new IClasspathAttribute[] {
+					JavaCore.newClasspathAttribute("myTestAttribute", "val")
+			};
+			IClasspathEntry cpe2= JavaCore.newProjectEntry(p1.getProject().getFullPath(), accessRules2, true, extraAttributes2, false);
+			JavaProjectHelper.addToClasspath(referencing2, cpe2);
+
+			CompilationUnit astRoot2= getASTRoot(cu2);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu2, astRoot2, 1);
+			assertProposalDoesNotExist(proposals, "Add static import for 'Assertions.assertEquals'");
+			CompilationUnit astRoot1= getASTRoot(cu1);
+			ArrayList<IJavaCompletionProposal> proposals1= collectCorrections(cu1, astRoot1, 1);
+			String expected= """
+					package test1;
+
+					import static test.Assertions.assertEquals;
+
+					public class E {
+						public boolean foo(Object obj1, Object obj2) throws Exception {
+							assertEquals(obj1, obj2);
+						}
+					}
+					""";
+			assertExpectedExistInProposals(proposals1, new String[] { expected });
+		} finally {
+			preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "");
+			if (referencing1 != null && referencing1.exists())
+				JavaProjectHelper.removeSourceContainer(referencing1, "src");
+			if (referencing2 != null && referencing2.exists())
+				JavaProjectHelper.removeSourceContainer(referencing2, "src");
+
+			if (p1 != null && p1.exists())
+				JavaProjectHelper.delete(p1);
+			if (referencing1 != null && referencing1.exists())
+				JavaProjectHelper.delete(referencing1);
+			if (referencing2 != null && referencing2.exists())
+				JavaProjectHelper.delete(referencing2);
 		}
 	}
 
