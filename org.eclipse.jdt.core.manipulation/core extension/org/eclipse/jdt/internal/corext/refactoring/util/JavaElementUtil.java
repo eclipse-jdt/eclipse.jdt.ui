@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -36,10 +38,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -248,4 +252,32 @@ public class JavaElementUtil {
 			return false;
 		}
 	}
+
+	public static boolean isForbiddenOnClasspath(ITypeRoot root, String qualifiedTypeName) throws JavaModelException {
+		IJavaProject javaProject= root.getJavaProject();
+		if (javaProject != null) {
+			String qualifiedPathName= qualifiedTypeName.replace('.', '/');
+			IJavaElement type= javaProject.findElement(IPath.fromPortableString(qualifiedPathName).removeLastSegments(1));
+			while (type != null) {
+				IClasspathEntry entry= javaProject.getClasspathEntryFor(type.getPath());
+				if (entry != null) {
+					for (IAccessRule rule : entry.getAccessRules()) {
+						if (CharOperation.pathMatch(rule.getPattern().toString().toCharArray(), qualifiedPathName.toCharArray(),
+								true/*case sensitive*/, '/')) {
+							switch (rule.getKind()) {
+								case IAccessRule.K_NON_ACCESSIBLE:
+								case IAccessRule.K_DISCOURAGED:
+									return true;
+								default:
+									break;
+							}
+						}
+					}
+				}
+				type= type.getParent();
+			}
+		}
+		return false;
+	}
+
 }
