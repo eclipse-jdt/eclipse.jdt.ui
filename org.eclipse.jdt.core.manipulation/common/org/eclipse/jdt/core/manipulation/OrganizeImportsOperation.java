@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
@@ -820,9 +821,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						}
 						String[] staticFavourites= ex.getStaticImportFavorites(identifier, isMethod);
 						fResolvedStaticFavoriteImports.add(identifier);
-						if (staticFavourites.length > 0) {
-							String qualifiedTypeName= Signature.getQualifier(staticFavourites[0]);
-							importRewrite.addStaticImport(qualifiedTypeName, identifier, !isMethod);
+						int i= 0;
+						while (i < staticFavourites.length) {
+							String qualifiedTypeName= Signature.getQualifier(staticFavourites[i]);
+							if (!JavaElementUtil.isForbiddenOnClasspath(importRewrite.getCompilationUnit(), qualifiedTypeName)) {
+								importRewrite.addStaticImport(qualifiedTypeName, identifier, !isMethod);
+								break;
+							}
+							++i;
 						}
 					} catch (JavaModelException e) {
 						return;
@@ -836,7 +842,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			// ignore
 		}
 	}
-
 
 	// find type references in a compilation unit
 	private boolean collectReferences(CompilationUnit astRoot, List<SimpleName> typeReferences, List<SimpleName> staticReferences, Set<String> oldSingleImports,
