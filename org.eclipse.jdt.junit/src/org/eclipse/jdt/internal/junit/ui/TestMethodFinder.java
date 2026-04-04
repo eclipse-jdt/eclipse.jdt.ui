@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
  */
 public class TestMethodFinder {
 
-	private static final char PARAM_START = '(';
+	private static final char PARAM_START= '(';
 
 	/**
 	 * Find the IMethod for a TestSuiteElement representing a parameterized test.
@@ -38,32 +38,32 @@ public class TestMethodFinder {
 	 * @return the IMethod, or null if not found
 	 */
 	public static IMethod findMethodForParameterizedTest(TestSuiteElement testSuiteElement) {
-		String testName = testSuiteElement.getTestName();
-		int index = testName.indexOf(PARAM_START);
+		String testName= testSuiteElement.getTestName();
+		int index= testName.indexOf(PARAM_START);
 		if (index < 0) {
 			return null; // Not a parameterized test method signature
 		}
 
-		String methodName = testName.substring(0, index);
-		String className = testSuiteElement.getSuiteTypeName();
+		String methodName= testName.substring(0, index);
+		String className= testSuiteElement.getSuiteTypeName();
 
 		if (className == null || className.isEmpty()) {
 			return null;
 		}
 
-		IJavaProject javaProject = testSuiteElement.getTestRunSession().getLaunchedProject();
+		IJavaProject javaProject= testSuiteElement.getTestRunSession().getLaunchedProject();
 		if (javaProject == null) {
 			return null;
 		}
 
 		try {
-			IType type = javaProject.findType(className);
+			IType type= javaProject.findType(className);
 			if (type == null) {
 				return null;
 			}
 
 			// Find the method - for parameterized tests, method name is without parameters
-			IMethod[] methods = type.getMethods();
+			IMethod[] methods= type.getMethods();
 			for (IMethod method : methods) {
 				if (method.getElementName().equals(methodName)) {
 					return method;

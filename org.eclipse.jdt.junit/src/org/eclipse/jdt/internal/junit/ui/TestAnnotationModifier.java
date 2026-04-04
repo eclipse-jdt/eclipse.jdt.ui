@@ -53,13 +53,13 @@ import org.eclipse.jdt.ui.CodeStyleConfiguration;
  */
 public class TestAnnotationModifier {
 
-	private static final String JUNIT4_IGNORE_ANNOTATION = "org.junit.Ignore"; //$NON-NLS-1$
-	private static final String JUNIT5_DISABLED_ANNOTATION = "org.junit.jupiter.api.Disabled"; //$NON-NLS-1$
-	private static final String JUNIT5_TEST_ANNOTATION = "org.junit.jupiter.api.Test"; //$NON-NLS-1$
-	private static final String JUNIT5_PARAMETERIZED_TEST_ANNOTATION = "org.junit.jupiter.params.ParameterizedTest"; //$NON-NLS-1$
-	private static final String JUNIT5_REPEATED_TEST_ANNOTATION = "org.junit.jupiter.api.RepeatedTest"; //$NON-NLS-1$
-	private static final String JUNIT5_TEST_FACTORY_ANNOTATION = "org.junit.jupiter.api.TestFactory"; //$NON-NLS-1$
-	private static final String JUNIT5_TEST_TEMPLATE_ANNOTATION = "org.junit.jupiter.api.TestTemplate"; //$NON-NLS-1$
+	private static final String JUNIT4_IGNORE_ANNOTATION= "org.junit.Ignore"; //$NON-NLS-1$
+	private static final String JUNIT5_DISABLED_ANNOTATION= "org.junit.jupiter.api.Disabled"; //$NON-NLS-1$
+	private static final String JUNIT5_TEST_ANNOTATION= "org.junit.jupiter.api.Test"; //$NON-NLS-1$
+	private static final String JUNIT5_PARAMETERIZED_TEST_ANNOTATION= "org.junit.jupiter.params.ParameterizedTest"; //$NON-NLS-1$
+	private static final String JUNIT5_REPEATED_TEST_ANNOTATION= "org.junit.jupiter.api.RepeatedTest"; //$NON-NLS-1$
+	private static final String JUNIT5_TEST_FACTORY_ANNOTATION= "org.junit.jupiter.api.TestFactory"; //$NON-NLS-1$
+	private static final String JUNIT5_TEST_TEMPLATE_ANNOTATION= "org.junit.jupiter.api.TestTemplate"; //$NON-NLS-1$
 
 	/**
 	 * Add @Disabled (JUnit 5) or @Ignore (JUnit 4) annotation to a method.
@@ -69,35 +69,35 @@ public class TestAnnotationModifier {
 	 * @throws JavaModelException if there's an error accessing the Java model
 	 */
 	public static void addDisabledAnnotation(IMethod method, boolean isJUnit5) throws JavaModelException {
-		String annotationQualifiedName = isJUnit5 ? JUNIT5_DISABLED_ANNOTATION : JUNIT4_IGNORE_ANNOTATION;
-		String annotationSimpleName = isJUnit5 ? "Disabled" : "Ignore"; //$NON-NLS-1$ //$NON-NLS-2$
+		String annotationQualifiedName= isJUnit5 ? JUNIT5_DISABLED_ANNOTATION : JUNIT4_IGNORE_ANNOTATION;
+		String annotationSimpleName= isJUnit5 ? "Disabled" : "Ignore"; //$NON-NLS-1$ //$NON-NLS-2$
 
-		ICompilationUnit cu = method.getCompilationUnit();
+		ICompilationUnit cu= method.getCompilationUnit();
 		if (cu == null) {
 			return;
 		}
 
 		// Parse the compilation unit
-		ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
-		CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 
-		AST ast = astRoot.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		final boolean[] modified = new boolean[] { false };
+		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		final boolean[] modified= new boolean[] { false };
 
 		astRoot.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				if (node.getName().getIdentifier().equals(method.getElementName())) {
 					// Add the annotation
-					org.eclipse.jdt.core.dom.MarkerAnnotation annotation = ast.newMarkerAnnotation();
+					org.eclipse.jdt.core.dom.MarkerAnnotation annotation= ast.newMarkerAnnotation();
 					annotation.setTypeName(ast.newName(annotationSimpleName));
 
-					ListRewrite listRewrite = rewrite.getListRewrite(node, MethodDeclaration.MODIFIERS2_PROPERTY);
+					ListRewrite listRewrite= rewrite.getListRewrite(node, MethodDeclaration.MODIFIERS2_PROPERTY);
 					listRewrite.insertFirst(annotation, null);
-					modified[0] = true;
+					modified[0]= true;
 				}
 				return false;
 			}
@@ -115,45 +115,45 @@ public class TestAnnotationModifier {
 	 * @throws JavaModelException if there's an error accessing the Java model
 	 */
 	public static void removeDisabledAnnotation(IMethod method) throws JavaModelException {
-		ICompilationUnit cu = method.getCompilationUnit();
+		ICompilationUnit cu= method.getCompilationUnit();
 		if (cu == null) {
 			return;
 		}
 
 		// Parse the compilation unit
-		ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
-		CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 
-		AST ast = astRoot.getAST();
-		ASTRewrite rewrite = ASTRewrite.create(ast);
-		final boolean[] modified = new boolean[] { false };
-		final String[] removedAnnotation = new String[1];
+		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		final boolean[] modified= new boolean[] { false };
+		final String[] removedAnnotation= new String[1];
 
 		astRoot.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				if (node.getName().getIdentifier().equals(method.getElementName())) {
-					IMethodBinding methodBinding = node.resolveBinding();
+					IMethodBinding methodBinding= node.resolveBinding();
 					if (methodBinding != null) {
-						IAnnotationBinding[] annotations = methodBinding.getAnnotations();
+						IAnnotationBinding[] annotations= methodBinding.getAnnotations();
 						for (IAnnotationBinding annotationBinding : annotations) {
-							ITypeBinding annotationType = annotationBinding.getAnnotationType();
+							ITypeBinding annotationType= annotationBinding.getAnnotationType();
 							if (annotationType != null) {
-								String qualifiedName = annotationType.getQualifiedName();
+								String qualifiedName= annotationType.getQualifiedName();
 								if (JUNIT5_DISABLED_ANNOTATION.equals(qualifiedName) ||
 									JUNIT4_IGNORE_ANNOTATION.equals(qualifiedName)) {
 									// Find and remove the annotation
-									List<?> modifiers = node.modifiers();
+									List<?> modifiers= node.modifiers();
 									for (Object modifier : modifiers) {
 										if (modifier instanceof Annotation) {
-											Annotation annotation = (Annotation) modifier;
+											Annotation annotation= (Annotation) modifier;
 											if (annotation.resolveAnnotationBinding() == annotationBinding) {
-												ListRewrite listRewrite = rewrite.getListRewrite(node, MethodDeclaration.MODIFIERS2_PROPERTY);
+												ListRewrite listRewrite= rewrite.getListRewrite(node, MethodDeclaration.MODIFIERS2_PROPERTY);
 												listRewrite.remove(annotation, null);
-												removedAnnotation[0] = qualifiedName;
-												modified[0] = true;
+												removedAnnotation[0]= qualifiedName;
+												modified[0]= true;
 												break;
 											}
 										}
@@ -181,33 +181,33 @@ public class TestAnnotationModifier {
 	 * @throws JavaModelException if there's an error accessing the Java model
 	 */
 	public static boolean isDisabled(IMethod method) throws JavaModelException {
-		ICompilationUnit cu = method.getCompilationUnit();
+		ICompilationUnit cu= method.getCompilationUnit();
 		if (cu == null) {
 			return false;
 		}
 
 		// Parse the compilation unit
-		ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
-		CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 
-		final boolean[] result = new boolean[] { false };
+		final boolean[] result= new boolean[] { false };
 
 		astRoot.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				if (node.getName().getIdentifier().equals(method.getElementName())) {
-					IMethodBinding methodBinding = node.resolveBinding();
+					IMethodBinding methodBinding= node.resolveBinding();
 					if (methodBinding != null) {
-						IAnnotationBinding[] annotations = methodBinding.getAnnotations();
+						IAnnotationBinding[] annotations= methodBinding.getAnnotations();
 						for (IAnnotationBinding annotationBinding : annotations) {
-							ITypeBinding annotationType = annotationBinding.getAnnotationType();
+							ITypeBinding annotationType= annotationBinding.getAnnotationType();
 							if (annotationType != null) {
-								String qualifiedName = annotationType.getQualifiedName();
+								String qualifiedName= annotationType.getQualifiedName();
 								if (JUNIT5_DISABLED_ANNOTATION.equals(qualifiedName) ||
 									JUNIT4_IGNORE_ANNOTATION.equals(qualifiedName)) {
-									result[0] = true;
+									result[0]= true;
 									break;
 								}
 							}
@@ -225,16 +225,16 @@ public class TestAnnotationModifier {
 	 * Check if method has JUnit 5 test annotations.
 	 */
 	public static boolean isJUnit5TestMethod(MethodDeclaration methodDecl) {
-		IMethodBinding binding = methodDecl.resolveBinding();
+		IMethodBinding binding= methodDecl.resolveBinding();
 		if (binding == null) {
 			return false;
 		}
 
-		IAnnotationBinding[] annotations = binding.getAnnotations();
+		IAnnotationBinding[] annotations= binding.getAnnotations();
 		for (IAnnotationBinding annotation : annotations) {
-			ITypeBinding annotationType = annotation.getAnnotationType();
+			ITypeBinding annotationType= annotation.getAnnotationType();
 			if (annotationType != null) {
-				String qualifiedName = annotationType.getQualifiedName();
+				String qualifiedName= annotationType.getQualifiedName();
 				if (isJUnit5TestAnnotation(qualifiedName)) {
 					return true;
 				}
@@ -248,14 +248,14 @@ public class TestAnnotationModifier {
 	 * Check if method has specific annotation.
 	 */
 	public static boolean hasAnnotation(MethodDeclaration methodDecl, String annotationQualifiedName) {
-		IMethodBinding binding = methodDecl.resolveBinding();
+		IMethodBinding binding= methodDecl.resolveBinding();
 		if (binding == null) {
 			return false;
 		}
 
-		IAnnotationBinding[] annotations = binding.getAnnotations();
+		IAnnotationBinding[] annotations= binding.getAnnotations();
 		for (IAnnotationBinding annotation : annotations) {
-			ITypeBinding annotationType = annotation.getAnnotationType();
+			ITypeBinding annotationType= annotation.getAnnotationType();
 			if (annotationType != null && annotationQualifiedName.equals(annotationType.getQualifiedName())) {
 				return true;
 			}
@@ -274,20 +274,20 @@ public class TestAnnotationModifier {
 
 	private static void applyChanges(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, String annotationToImport) {
 		try {
-			MultiTextEdit multiEdit = new MultiTextEdit();
+			MultiTextEdit multiEdit= new MultiTextEdit();
 
 			// Add import if needed
 			if (annotationToImport != null) {
-				ImportRewrite importRewrite = CodeStyleConfiguration.createImportRewrite(astRoot, true);
+				ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
 				importRewrite.addImport(annotationToImport);
 
-				TextEdit importEdit = importRewrite.rewriteImports(null);
+				TextEdit importEdit= importRewrite.rewriteImports(null);
 				if (importEdit.hasChildren() || importEdit.getLength() != 0) {
 					multiEdit.addChild(importEdit);
 				}
 			}
 
-			TextEdit rewriteEdit = rewrite.rewriteAST();
+			TextEdit rewriteEdit= rewrite.rewriteAST();
 			multiEdit.addChild(rewriteEdit);
 
 			// Apply the combined edit
@@ -300,20 +300,20 @@ public class TestAnnotationModifier {
 
 	private static void applyChangesWithImportRemoval(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, String annotationToRemove) {
 		try {
-			MultiTextEdit multiEdit = new MultiTextEdit();
+			MultiTextEdit multiEdit= new MultiTextEdit();
 
 			// Remove import if needed
 			if (annotationToRemove != null) {
-				ImportRewrite importRewrite = CodeStyleConfiguration.createImportRewrite(astRoot, true);
+				ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
 				importRewrite.removeImport(annotationToRemove);
 
-				TextEdit importEdit = importRewrite.rewriteImports(null);
+				TextEdit importEdit= importRewrite.rewriteImports(null);
 				if (importEdit.hasChildren() || importEdit.getLength() != 0) {
 					multiEdit.addChild(importEdit);
 				}
 			}
 
-			TextEdit rewriteEdit = rewrite.rewriteAST();
+			TextEdit rewriteEdit= rewrite.rewriteAST();
 			if (rewriteEdit.hasChildren() || rewriteEdit.getLength() != 0) {
 				multiEdit.addChild(rewriteEdit);
 			}

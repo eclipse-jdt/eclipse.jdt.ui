@@ -15,6 +15,8 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.jface.action.Action;
 
+import org.eclipse.jdt.junit.model.ITestElement.Result;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -26,13 +28,12 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
-import org.eclipse.jdt.junit.model.ITestElement.Result;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Action to disable a test by adding @Disabled (JUnit 5) or @Ignore (JUnit 4) annotation.
@@ -45,7 +46,7 @@ import org.eclipse.jdt.ui.JavaUI;
 public class DisableTestAction extends Action {
 
 	private TestElement fTestElement;
-	private boolean fIsCurrentlyDisabled = false;
+	private boolean fIsCurrentlyDisabled= false;
 
 	public DisableTestAction() {
 		super(JUnitMessages.DisableTestAction_label);
@@ -57,13 +58,13 @@ public class DisableTestAction extends Action {
 	 * @param testElement the selected test element
 	 */
 	public void update(TestElement testElement) {
-		fTestElement = testElement;
-		fIsCurrentlyDisabled = false;
+		fTestElement= testElement;
+		fIsCurrentlyDisabled= false;
 
 		// Enable for TestSuiteElement (parameterized test method)
 		if (testElement instanceof TestSuiteElement) {
-			TestSuiteElement testSuite = (TestSuiteElement) testElement;
-			String testName = testSuite.getTestName();
+			TestSuiteElement testSuite= (TestSuiteElement) testElement;
+			String testName= testSuite.getTestName();
 
 			// Parameterized test methods have names like "testWithEnum(TestEnum)"
 			// Check for valid method signature pattern
@@ -107,9 +108,9 @@ public class DisableTestAction extends Action {
 	 * @param testElement the test element to check
 	 */
 	private void updateDisabledStatusForIgnoredTest(TestElement testElement) {
-		Result result = testElement.getTestResult(false);
+		Result result= testElement.getTestResult(false);
 		if (result == Result.IGNORED) {
-			fIsCurrentlyDisabled = true;
+			fIsCurrentlyDisabled= true;
 		}
 	}
 
@@ -120,8 +121,8 @@ public class DisableTestAction extends Action {
 	 * @return true if it matches a parameterized test method pattern
 	 */
 	private boolean isParameterizedTestMethod(String testName) {
-		int openParen = testName.indexOf('(');
-		int closeParen = testName.lastIndexOf(')');
+		int openParen= testName.indexOf('(');
+		int closeParen= testName.lastIndexOf(')');
 		return openParen > 0 && closeParen > openParen && closeParen == testName.length() - 1;
 	}
 
@@ -133,23 +134,23 @@ public class DisableTestAction extends Action {
 	 */
 	private boolean isTestMethodInSource(TestSuiteElement testSuite) {
 		try {
-			String className = testSuite.getSuiteTypeName();
-			String testName = testSuite.getTestName();
+			String className= testSuite.getSuiteTypeName();
+			String testName= testSuite.getTestName();
 
-			int index = testName.indexOf('(');
-			String methodName = index > 0 ? testName.substring(0, index) : testName;
+			int index= testName.indexOf('(');
+			String methodName= index > 0 ? testName.substring(0, index) : testName;
 
-			IJavaProject javaProject = testSuite.getTestRunSession().getLaunchedProject();
+			IJavaProject javaProject= testSuite.getTestRunSession().getLaunchedProject();
 			if (javaProject == null) {
 				return false;
 			}
 
-			IType type = javaProject.findType(className);
+			IType type= javaProject.findType(className);
 			if (type == null) {
 				return false;
 			}
 
-			IMethod method = findTestMethod(type, methodName);
+			IMethod method= findTestMethod(type, methodName);
 			return method != null;
 		} catch (Exception e) {
 			return false;
@@ -167,36 +168,36 @@ public class DisableTestAction extends Action {
 			String methodName;
 
 			if (testElement instanceof TestSuiteElement) {
-				TestSuiteElement testSuite = (TestSuiteElement) testElement;
-				className = testSuite.getSuiteTypeName();
-				String testName = testSuite.getTestName();
-				int index = testName.indexOf('(');
-				methodName = index > 0 ? testName.substring(0, index) : testName;
+				TestSuiteElement testSuite= (TestSuiteElement) testElement;
+				className= testSuite.getSuiteTypeName();
+				String testName= testSuite.getTestName();
+				int index= testName.indexOf('(');
+				methodName= index > 0 ? testName.substring(0, index) : testName;
 			} else if (testElement instanceof TestCaseElement) {
-				TestCaseElement testCase = (TestCaseElement) testElement;
-				className = testCase.getTestClassName();
-				methodName = testCase.getTestMethodName();
+				TestCaseElement testCase= (TestCaseElement) testElement;
+				className= testCase.getTestClassName();
+				methodName= testCase.getTestMethodName();
 			} else {
 				return;
 			}
 
-			IJavaProject javaProject = testElement.getTestRunSession().getLaunchedProject();
+			IJavaProject javaProject= testElement.getTestRunSession().getLaunchedProject();
 			if (javaProject == null) {
 				return;
 			}
 
-			IType type = javaProject.findType(className);
+			IType type= javaProject.findType(className);
 			if (type == null) {
 				return;
 			}
 
-			IMethod method = findTestMethod(type, methodName);
+			IMethod method= findTestMethod(type, methodName);
 			if (method != null) {
-				fIsCurrentlyDisabled = TestAnnotationModifier.isDisabled(method);
+				fIsCurrentlyDisabled= TestAnnotationModifier.isDisabled(method);
 			}
 		} catch (Exception e) {
 			// Unable to check disabled status, assume not disabled
-			fIsCurrentlyDisabled = false;
+			fIsCurrentlyDisabled= false;
 		}
 	}
 
@@ -222,35 +223,35 @@ public class DisableTestAction extends Action {
 			String methodName;
 
 			if (fTestElement instanceof TestSuiteElement) {
-				TestSuiteElement testSuite = (TestSuiteElement) fTestElement;
-				className = testSuite.getSuiteTypeName();
-				String testName = testSuite.getTestName();
-				int index = testName.indexOf('(');
-				methodName = index > 0 ? testName.substring(0, index) : testName;
+				TestSuiteElement testSuite= (TestSuiteElement) fTestElement;
+				className= testSuite.getSuiteTypeName();
+				String testName= testSuite.getTestName();
+				int index= testName.indexOf('(');
+				methodName= index > 0 ? testName.substring(0, index) : testName;
 			} else if (fTestElement instanceof TestCaseElement) {
-				TestCaseElement testCase = (TestCaseElement) fTestElement;
-				className = testCase.getTestClassName();
-				methodName = testCase.getTestMethodName();
+				TestCaseElement testCase= (TestCaseElement) fTestElement;
+				className= testCase.getTestClassName();
+				methodName= testCase.getTestMethodName();
 			} else {
 				return;
 			}
 
-			IJavaProject javaProject = fTestElement.getTestRunSession().getLaunchedProject();
+			IJavaProject javaProject= fTestElement.getTestRunSession().getLaunchedProject();
 			if (javaProject == null) {
 				return;
 			}
 
-			IType type = javaProject.findType(className);
+			IType type= javaProject.findType(className);
 			if (type == null) {
 				return;
 			}
 
-			IMethod method = findTestMethod(type, methodName);
+			IMethod method= findTestMethod(type, methodName);
 			if (method == null) {
 				return;
 			}
 
-			ICompilationUnit cu = method.getCompilationUnit();
+			ICompilationUnit cu= method.getCompilationUnit();
 			if (cu == null) {
 				return;
 			}
@@ -261,7 +262,7 @@ public class DisableTestAction extends Action {
 				TestAnnotationModifier.removeDisabledAnnotation(method);
 			} else {
 				// Determine JUnit version and add appropriate annotation
-				boolean isJUnit5 = isJUnit5Test(method);
+				boolean isJUnit5= isJUnit5Test(method);
 				TestAnnotationModifier.addDisabledAnnotation(method, isJUnit5);
 			}
 
@@ -278,7 +279,7 @@ public class DisableTestAction extends Action {
 	}
 
 	private IMethod findTestMethod(IType type, String methodName) throws JavaModelException {
-		IMethod[] methods = type.getMethods();
+		IMethod[] methods= type.getMethods();
 		for (IMethod method : methods) {
 			if (method.getElementName().equals(methodName)) {
 				return method;
@@ -288,23 +289,23 @@ public class DisableTestAction extends Action {
 	}
 
 	private boolean isJUnit5Test(IMethod method) {
-		ICompilationUnit cu = method.getCompilationUnit();
+		ICompilationUnit cu= method.getCompilationUnit();
 		if (cu == null) {
 			return false;
 		}
 
-		ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
-		CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 
-		final boolean[] isJUnit5 = new boolean[] { false };
+		final boolean[] isJUnit5= new boolean[] { false };
 		astRoot.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				if (node.getName().getIdentifier().equals(method.getElementName())) {
-					isJUnit5[0] = TestAnnotationModifier.isJUnit5TestMethod(node) ||
-								 !TestAnnotationModifier.hasAnnotation(node, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME);
+					isJUnit5[0]= TestAnnotationModifier.isJUnit5TestMethod(node) ||
+								 ! TestAnnotationModifier.hasAnnotation(node, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME);
 				}
 				return false;
 			}
