@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -185,6 +186,7 @@ public abstract class AbstractCompletionTest {
 		}
 
 		JavaProjectHelper.emptyDisplayLoop();
+		TestUtils.waitForEditorJobs(30_000, true);
 	}
 
 	protected void addImport(String imp) {
