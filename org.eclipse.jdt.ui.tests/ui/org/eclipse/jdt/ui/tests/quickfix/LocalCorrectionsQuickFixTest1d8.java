@@ -96,13 +96,13 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			import java.io.FileNotFoundException;
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			public class E {
 			    void test(int a) {
 			        throw new @Marker FileNotFoundException();
 			    }
 			}
-			
+
 			@Target(ElementType.TYPE_USE)
 			@interface Marker { }
 			""";
@@ -118,13 +118,13 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			import java.io.FileNotFoundException;
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			public class E {
 			    void test(int a) throws @Marker FileNotFoundException {
 			        throw new @Marker FileNotFoundException();
 			    }
 			}
-			
+
 			@Target(ElementType.TYPE_USE)
 			@interface Marker { }
 			""";
@@ -139,7 +139,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			package test;
 			public class C1 {
 			    Runnable r = () -> info("Processing rule #{} {}", "");
-			
+
 			    private void info(String string, Object object) throws GridException1 {}
 			}
 			@SuppressWarnings("serial")
@@ -161,7 +161,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			        } catch (GridException1 e) {
 			        }
 			    };
-			
+
 			    private void info(String string, Object object) throws GridException1 {}
 			}
 			@SuppressWarnings("serial")
@@ -180,7 +180,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    void test() {
 			        Runnable r = () -> info("Processing rule #{} {}", "");
 			    }
-			
+
 			    private void info(String string, Object object) throws GridException2 {}
 			}
 			@SuppressWarnings("serial")
@@ -206,7 +206,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			            }
 			        };
 			    }
-			
+
 			    private void info(String string, Object object) throws GridException2 {}
 			}
 			@SuppressWarnings("serial")
@@ -232,7 +232,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			            }
 			        };
 			    }
-			
+
 			    private void info(String string, Object object) throws GridException3 {}
 			}
 			@SuppressWarnings("serial")
@@ -261,7 +261,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			            }
 			        };
 			    }
-			
+
 			    private void info(String string, Object object) throws GridException3 {}
 			}
 			@SuppressWarnings("serial")
@@ -345,7 +345,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			import java.io.IOException;
 			import java.util.function.Consumer;
 			import java.util.stream.Stream;
-			
+
 			public class C5 {
 			    void foo() {
 			        Consumer<Object> s = (a) -> Files.walk(new File(".").toPath())
@@ -381,7 +381,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			import java.io.IOException;
 			import java.util.function.Consumer;
 			import java.util.stream.Stream;
-			
+
 			public class C5 {
 			    void foo() {
 			        Consumer<Object> s = (a) -> {
@@ -420,7 +420,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			import java.io.IOException;
 			import java.util.function.Consumer;
 			import java.util.stream.Stream;
-			
+
 			public class C5 {
 			    void foo() {
 			        Consumer<Object> s = (a) -> {
@@ -456,7 +456,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			import java.io.IOException;
 			import java.util.function.Consumer;
 			import java.util.stream.Stream;
-			
+
 			public class C5 {
 			    void foo() {
 			        Consumer<Object> s = (a) -> {
@@ -575,7 +575,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    private static Transformer TRANSFORMER = new Transformer();
 			    Consumer<? super String> mapper = TRANSFORMER::transform;
 			}
-			
+
 			class Transformer {
 			    void transform(String number) throws FileNotFoundException {}
 			}
@@ -602,7 +602,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    };
 			}
-			
+
 			class Transformer {
 			    void transform(String number) throws FileNotFoundException {}
 			}
@@ -672,7 +672,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			import java.io.FileNotFoundException;
 			import java.util.Optional;
 			import java.util.function.Consumer;
-			
+
 			public class E3 {
 			    private static Transformer TRANSFORMER = new Transformer();
 			    public void test() {
@@ -699,7 +699,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			import java.io.FileNotFoundException;
 			import java.util.Optional;
 			import java.util.function.Consumer;
-			
+
 			public class E3 {
 			    private static Transformer TRANSFORMER = new Transformer();
 			    public void test() {
@@ -904,7 +904,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -912,7 +912,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    default void foo(int j, String s) {}
 			}
 			public class E1 implements FI1, FI2 {
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
@@ -926,7 +926,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -934,18 +934,18 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    default void foo(int j, String s) {}
 			}
 			public class E1 implements FI1, FI2 {
-			
+
 			    @Override
 			    public void foo(int j, String s) {
 			        FI2.super.foo(j, s);
 			    }
-			
+
 			}
 			""";
 
 		expected[1]= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -953,12 +953,12 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    default void foo(int j, String s) {}
 			}
 			public class E1 implements FI1, FI2 {
-			
+
 			    @Override
 			    public void foo(int i, String s) {
 			        FI1.super.foo(i, s);
 			    }
-			
+
 			}
 			""";
 
@@ -970,7 +970,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -992,7 +992,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -1000,7 +1000,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    default void foo(int j, String s) {}
 			}
 			public interface E1 extends FI1, FI2 {
-			
+
 			    @Override
 			    default void foo(int j, String s) {
 			        FI2.super.foo(j, s);
@@ -1011,7 +1011,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -1019,7 +1019,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    default void foo(int j, String s) {}
 			}
 			public interface E1 extends FI1, FI2 {
-			
+
 			    @Override
 			    default void foo(int i, String s) {
 			        FI1.super.foo(i, s);
@@ -1036,7 +1036,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -1058,7 +1058,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -1067,7 +1067,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			}
 			public enum E1 implements FI1, FI2 {
 			    ;
-			
+
 			    @Override
 			    public void foo(int j, String s) {
 			        FI2.super.foo(j, s);
@@ -1078,7 +1078,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			interface FI1 {
 			    default void foo(int i, String s) {}
 			}
@@ -1087,7 +1087,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			}
 			public enum E1 implements FI1, FI2 {
 			    ;
-			
+
 			    @Override
 			    public void foo(int i, String s) {
 			        FI1.super.foo(i, s);
@@ -1104,7 +1104,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			interface I1 {
 			    default void m1() { }
 			}
@@ -1126,7 +1126,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			interface I1 {
 			    default void m1() { }
 			}
@@ -1135,7 +1135,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			}
 			interface I22 extends I2<String> { }
 			interface Both extends I1, I22 {
-			
+
 			    @Override
 			    default void m1() {
 			        I1.super.m1();
@@ -1145,7 +1145,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			interface I1 {
 			    default void m1() { }
 			}
@@ -1154,7 +1154,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			}
 			interface I22 extends I2<String> { }
 			interface Both extends I1, I22 {
-			
+
 			    @Override
 			    default void m1() {
 			    }
@@ -1169,9 +1169,9 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			interface I1<T1> {
 			    default void def(T1 t1) { }
 			}
@@ -1193,9 +1193,9 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			interface I1<T1> {
 			    default void def(T1 t1) { }
 			}
@@ -1204,7 +1204,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			}
 			interface I22<T22> extends I2<T22> { }
 			interface Both extends I1<List<String>>, I22<List<String>> {
-			
+
 			    @Override
 			    default void def(List<String> t2) {
 			        I22.super.def(t2);
@@ -1214,9 +1214,9 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			interface I1<T1> {
 			    default void def(T1 t1) { }
 			}
@@ -1225,7 +1225,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			}
 			interface I22<T22> extends I2<T22> { }
 			interface Both extends I1<List<String>>, I22<List<String>> {
-			
+
 			    @Override
 			    default void def(List<String> t1) {
 			        I1.super.def(t1);
@@ -1264,7 +1264,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    }
 			}
 			interface I {
-			
+
 			    void foo(int... i);
 			}
 			""";
@@ -1299,7 +1299,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    }
 			}
 			interface I {
-			
+
 			    void foo(int[]... i);
 			}
 			""";
@@ -1334,7 +1334,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    }
 			}
 			interface I {
-			
+
 			    void foo(double d, int[]... i);
 			}
 			""";
@@ -1369,7 +1369,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    }
 			}
 			interface I {
-			
+
 			    <T> void foo(T t);
 			}
 			""";
@@ -1404,7 +1404,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    }
 			}
 			interface I {
-			
+
 			    <T> void foo(T... t);
 			}
 			""";
@@ -1439,7 +1439,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			    }
 			}
 			interface I {
-			
+
 			    <T> void foo(T[]... t);
 			}
 			""";
@@ -1451,7 +1451,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			interface I1 {
 			    default void def() { }
 			}
@@ -1473,7 +1473,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			interface I1 {
 			    default void def() { }
 			}
@@ -1482,7 +1482,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			}
 			interface I22 extends I2<String> { }
 			interface Both extends I1, I22 {
-			
+
 			    @Override
 			    default void def() {
 			        I22.super.def();
@@ -1492,7 +1492,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			interface I1 {
 			    default void def() { }
 			}
@@ -1501,7 +1501,7 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			}
 			interface I22 extends I2<String> { }
 			interface Both extends I1, I22 {
-			
+
 			    @Override
 			    default void def() {
 			        I1.super.def();
@@ -1519,13 +1519,13 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Collections;
 			import java.util.List;
-			
+
 			public class Test {
-			
+
 			    public void method() {
 			        List<String> strings1 = strings().toArray(new String[0]);
 			    }
-			
+
 			    public List<String> strings() {
 			        return Collections.emptyList();
 			    }
@@ -1542,13 +1542,13 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.Collections;
 			import java.util.List;
-			
+
 			public class Test {
-			
+
 			    public void method() {
 			        String[] strings1 = strings().toArray(new String[0]);
 			    }
-			
+
 			    public List<String> strings() {
 			        return Collections.emptyList();
 			    }
@@ -1599,4 +1599,199 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);
 		}
 	}
+
+
+		@Test
+		public void testUnhandledExceptionInLambda() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        Runnable r = () -> Thread.sleep(10);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        Runnable r = () -> {
+			            try {
+			                Thread.sleep(10);
+			            } catch (InterruptedException e) {
+			            }
+			        };
+			    }
+			}
+			""";
+		assertProposalPreviewEquals(str1, "Surround with try/catch", proposals);
+	}
+
+
+
+	@Test
+	public void testMissingReturnInConditionalLambda() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.concurrent.Callable;
+			public class E {
+			    Callable<Integer> c = () -> {
+			        if (System.currentTimeMillis() > 0) {
+			            return 1;
+			        }
+			    };
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String str1= """
+			package test1;
+			import java.util.concurrent.Callable;
+			public class E {
+			    Callable<Integer> c = () -> {
+			        if (System.currentTimeMillis() > 0) {
+			            return 1;
+			        }
+			        return null;
+			    };
+			}
+			""";
+		assertProposalPreviewEquals(str1, "Add return statement", proposals);
+	}
+
+	@Test
+	public void testMissingReturnInMultipleBranches() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.concurrent.Callable;
+			public class E {
+			    Callable<Integer> c = () -> {
+			        if (System.currentTimeMillis() > 0) {
+			            return 1;
+			        } else if (System.currentTimeMillis() < 0) {
+			            return 2;
+			        }
+			    };
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String str1= """
+			package test1;
+			import java.util.concurrent.Callable;
+			public class E {
+			    Callable<Integer> c = () -> {
+			        if (System.currentTimeMillis() > 0) {
+			            return 1;
+			        } else if (System.currentTimeMillis() < 0) {
+			            return 2;
+			        }
+			        return null;
+			    };
+			}
+			""";
+		assertProposalPreviewEquals(str1, "Add return statement", proposals);
+	}
+
+	@Test
+	public void testMissingReturnAfterLoop() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.concurrent.Callable;
+			public class E {
+			    Callable<Integer> c = () -> {
+			        for (int i = 0; i < 10; i++) {
+			            if (i == 5) return i;
+			        }
+			    };
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String str1= """
+			package test1;
+			import java.util.concurrent.Callable;
+			public class E {
+			    Callable<Integer> c = () -> {
+			        for (int i = 0; i < 10; i++) {
+			            if (i == 5) return i;
+			        }
+			        return null;
+			    };
+			}
+			""";
+		assertProposalPreviewEquals(str1, "Add return statement", proposals);
+	}
+
+	@Test
+	public void testMissingReturnInTryCatch() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.concurrent.Callable;
+			public class E {
+			    Callable<Integer> c = () -> {
+			        try {
+			            return Integer.parseInt("123");
+			        } catch (Exception e) {
+			        }
+			    };
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String str1= """
+			package test1;
+			import java.util.concurrent.Callable;
+			public class E {
+			    Callable<Integer> c = () -> {
+			        try {
+			            return Integer.parseInt("123");
+			        } catch (Exception e) {
+			        }
+			        return null;
+			    };
+			}
+			""";
+		assertProposalPreviewEquals(str1, "Add return statement", proposals);
+	}
+
+
 }
+
