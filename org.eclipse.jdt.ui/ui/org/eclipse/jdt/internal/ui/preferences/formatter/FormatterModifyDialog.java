@@ -1336,6 +1336,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		Consumer<Section> modAll= s -> CheckboxPreference.addModifyAll(s, fImages);
 		fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_new_lines, "section-newlines") //$NON-NLS-1$
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_statement, DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_textblock_statement, DefaultCodeFormatterConstants.FORMATTER_PUT_NEW_LINE_ON_TEXT_BLOCK)
 				.gap()
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_after_opening_brace_of_array_initializer,
 						DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER)
