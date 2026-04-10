@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     IBM Corporation - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -39,13 +40,13 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * Create fixes which can transform pre Java50 code to Java50 code
  * @see org.eclipse.jdt.internal.corext.fix.Java50FixCore
  */
-public class Java50CleanUp extends AbstractMultiFix {
+public class Java50CleanUpCore extends AbstractMultiFix {
 
-	public Java50CleanUp(Map<String, String> options) {
+	public Java50CleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
-	public Java50CleanUp() {
+	public Java50CleanUpCore() {
 		super();
 	}
 

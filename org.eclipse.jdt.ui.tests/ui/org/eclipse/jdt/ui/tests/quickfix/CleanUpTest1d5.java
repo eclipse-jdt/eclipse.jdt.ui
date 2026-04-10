@@ -55,7 +55,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.IMultiFix;
-import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGenerator;
@@ -4608,7 +4608,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		cleanUpOptions.setOption(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpOptions.TRUE);
 		cleanUpOptions.setOption(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION, CleanUpOptions.TRUE);
 
-		Java50CleanUp cleanUp = new Java50CleanUp();
+		Java50CleanUpCore cleanUp = new Java50CleanUpCore();
 		cleanUp.setOptions(cleanUpOptions);
 
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
