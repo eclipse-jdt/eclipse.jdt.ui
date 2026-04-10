@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -81,6 +82,7 @@ public class CodeFormatterTest extends CoreTests {
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
+		TestUtils.waitForEditorJobs(60_000L, true);
 	}
 
 	protected static String format(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {

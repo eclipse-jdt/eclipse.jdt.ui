@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -59,6 +60,7 @@ public class TypeHierarchyTest {
 	public void tearDown () throws Exception {
 		JavaProjectHelper.clear(fJavaProject1, pts.getDefaultClasspath());
 		JavaProjectHelper.delete(fJavaProject2);
+		TestUtils.waitForEditorJobs(60_000L, true);
 	}
 
 	@Test

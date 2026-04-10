@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 
 /**
@@ -113,6 +114,7 @@ public class ASTProviderTest extends CoreTests {
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
+		TestUtils.waitForEditorJobs(60_000L, true);
 	}
 
 	@Test
