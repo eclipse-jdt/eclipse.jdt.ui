@@ -20,8 +20,10 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -83,8 +85,10 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
@@ -92,10 +96,12 @@ import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore.MakeTypeAbst
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUpCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposalCore;
@@ -130,6 +136,7 @@ public abstract class ModifierCorrectionSubProcessorCore<T> {
 	private static final int REMOVE_NATIVE_MODIFIER=0x400;
 	private static final int CHANGE_TO_SEALED=0x500;
 	private static final int CHANGE_TO_NONSEALED=0x501;
+	private static final int CORRECTION_CHANGE=0x502;
 	public static final int MAKE_DEPRECATED= 0x600;
 
 	private static class ModifierLinkedModeProposal extends LinkedProposalPositionGroupCore.ProposalCore {
@@ -1033,6 +1040,29 @@ public abstract class ModifierCorrectionSubProcessorCore<T> {
 		ModifierChangeCorrectionProposalCore proposal2 = new ModifierChangeCorrectionProposalCore(label, cu, typeDeclBinding, typeDecl, Modifier.NON_SEALED, 0, relevance);
 		proposals.add(modifierChangeCorrectionProposalCoreToT(proposal2, CHANGE_TO_NONSEALED));
 
+	}
+
+	public void getOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
+		IProposableFix fix= Java50FixCore.createAddOverrideAnnotationFix(context.getASTRoot(), problem);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION, CleanUpOptions.TRUE);
+			FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(fix, new Java50CleanUpCore(options), IProposalRelevance.ADD_OVERRIDE_ANNOTATION, context);
+			proposals.add(fixCorrectionProposalCoreToT(proposal, CORRECTION_CHANGE));
+		}
+	}
+
+	public void getDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
+		IProposableFix fix= Java50FixCore.createAddDeprectatedAnnotation(context.getASTRoot(), problem);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpOptions.TRUE);
+			FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(fix, new Java50CleanUpCore(options), IProposalRelevance.ADD_DEPRECATED_ANNOTATION, context);
+			proposals.add(fixCorrectionProposalCoreToT(proposal, CORRECTION_CHANGE));
+		}
 	}
 
 	static int getNeededVisibility(ASTNode currNode, ITypeBinding targetType, IBinding binding) {
