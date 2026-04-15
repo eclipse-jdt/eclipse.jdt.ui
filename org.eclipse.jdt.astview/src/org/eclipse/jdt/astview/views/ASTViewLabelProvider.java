@@ -62,17 +62,17 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fDarkGreen= display.getSystemColor(SWT.COLOR_DARK_GREEN);
 		fDarkRed= display.getSystemColor(SWT.COLOR_DARK_RED);
 
-		fSelectedElemBGColor= new Color(display, 232, 242, 254);
+		fSelectedElemBGColor= new Color(232, 242, 254);
 		String currLineColor= EditorsUI.getPreferenceStore().getString(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR);
 		String[] rgb= currLineColor.split(","); //$NON-NLS-1$
 		if (rgb.length == 3) {
 			try {
-				fSelectedElemBGColor= new Color(display, Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]));
+				fSelectedElemBGColor= new Color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]));
 			} catch (NumberFormatException e) {
 				// do nothing, colour would remain the backup value
 			}
 		}
-		fLightRed= new Color(display, 255, 190, 190);
+		fLightRed= new Color(255, 190, 190);
 
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
 		FontData[] fontData= fBold.getFontData();
