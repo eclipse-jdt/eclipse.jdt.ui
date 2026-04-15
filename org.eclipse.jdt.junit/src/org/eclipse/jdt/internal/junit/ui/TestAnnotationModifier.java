@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
+
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
 
 /**
@@ -129,7 +131,7 @@ public class TestAnnotationModifier {
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		final boolean[] modified= new boolean[] { false };
-		final String[] removedAnnotation= new String[1];
+		final Annotation[] removedAnnotationNode= new Annotation[1];
 
 		astRoot.accept(new ASTVisitor() {
 			@Override
@@ -152,7 +154,7 @@ public class TestAnnotationModifier {
 											if (annotation.resolveAnnotationBinding() == annotationBinding) {
 												ListRewrite listRewrite= rewrite.getListRewrite(node, MethodDeclaration.MODIFIERS2_PROPERTY);
 												listRewrite.remove(annotation, null);
-												removedAnnotation[0]= qualifiedName;
+												removedAnnotationNode[0]= annotation;
 												modified[0]= true;
 												break;
 											}
@@ -169,7 +171,7 @@ public class TestAnnotationModifier {
 		});
 
 		if (modified[0]) {
-			applyChangesWithImportRemoval(cu, astRoot, rewrite, removedAnnotation[0]);
+			applyChangesWithImportRemoval(cu, astRoot, rewrite, removedAnnotationNode[0]);
 		}
 	}
 
@@ -298,19 +300,20 @@ public class TestAnnotationModifier {
 		}
 	}
 
-	private static void applyChangesWithImportRemoval(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, String annotationToRemove) {
+	private static void applyChangesWithImportRemoval(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, Annotation removedAnnotationNode) {
 		try {
 			MultiTextEdit multiEdit= new MultiTextEdit();
+			ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
 
-			// Remove import if needed
-			if (annotationToRemove != null) {
-				ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
-				importRewrite.removeImport(annotationToRemove);
+			if (removedAnnotationNode != null) {
+				ImportRemover importRemover= new ImportRemover(cu.getJavaProject(), astRoot);
+				importRemover.registerRemovedNode(removedAnnotationNode);
+				importRemover.applyRemoves(importRewrite);
+			}
 
-				TextEdit importEdit= importRewrite.rewriteImports(null);
-				if (importEdit.hasChildren() || importEdit.getLength() != 0) {
-					multiEdit.addChild(importEdit);
-				}
+			TextEdit importEdit= importRewrite.rewriteImports(null);
+			if (importEdit.hasChildren() || importEdit.getLength() != 0) {
+				multiEdit.addChild(importEdit);
 			}
 
 			TextEdit rewriteEdit= rewrite.rewriteAST();

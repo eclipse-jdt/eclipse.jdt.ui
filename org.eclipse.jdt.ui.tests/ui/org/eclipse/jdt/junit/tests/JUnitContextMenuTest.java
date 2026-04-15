@@ -179,6 +179,87 @@ public class JUnitContextMenuTest {
 		assertFalse(TestAnnotationModifier.isDisabled(method), "Should not be disabled");
 	}
 
+	@Test
+	public void testDisableTestAction_ImportRetainedWhenOtherTestStillDisabled() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String original= """
+			package test1;
+
+			import org.junit.jupiter.api.Disabled;
+			import org.junit.jupiter.api.Test;
+
+			public class MyTest {
+			    @Disabled
+			    @Test
+			    public void testMethod1() {
+			        // test code
+			    }
+
+			    @Disabled
+			    @Test
+			    public void testMethod2() {
+			        // test code
+			    }
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("MyTest.java", original, false, null);
+		IType type= cu.getType("MyTest");
+		IMethod methodToEnable= type.getMethod("testMethod1", new String[0]);
+
+		TestAnnotationModifier.removeDisabledAnnotation(methodToEnable);
+
+		String source= cu.getSource();
+		int method1Index= source.indexOf("public void testMethod1()");
+		int method2Index= source.indexOf("public void testMethod2()");
+		assertTrue(method1Index > 0, "First method should remain");
+		assertTrue(method2Index > 0, "Second method should remain");
+		assertFalse(source.substring(0, method1Index).contains("@Disabled"), "Should remove @Disabled from first method");
+		assertTrue(source.substring(0, method2Index).contains("@Disabled"), "Second method should remain disabled");
+		assertTrue(source.contains("import org.junit.jupiter.api.Disabled;"), "Disabled import must remain because second method still uses it");
+	}
+
+	@Test
+	public void testDisableTestAction_ParameterizedTest() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String original= """
+			package test1;
+
+			import org.junit.jupiter.params.ParameterizedTest;
+			import org.junit.jupiter.params.provider.ValueSource;
+
+			public class MyTest {
+			    @ParameterizedTest
+			    @ValueSource(strings = {"test1", "test2"})
+			    public void parameterizedMethod(String param) {
+			        // test code
+			    }
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("MyTest.java", original, false, null);
+		IType type= cu.getType("MyTest");
+		IMethod method= type.getMethod("parameterizedMethod", new String[] { "QString;" });
+
+		assertFalse(TestAnnotationModifier.isDisabled(method), "Parameterized test should initially not be disabled");
+
+		TestAnnotationModifier.addDisabledAnnotation(method, true);
+
+		String afterAdd= cu.getSource();
+		assertTrue(afterAdd.contains("import org.junit.jupiter.api.Disabled;"), "Should add Disabled import");
+		assertTrue(afterAdd.contains("@Disabled"), "Should add @Disabled annotation");
+		assertTrue(TestAnnotationModifier.isDisabled(method), "Parameterized test should be disabled after adding annotation");
+
+		TestAnnotationModifier.removeDisabledAnnotation(method);
+
+		String afterRemove= cu.getSource();
+		assertFalse(afterRemove.contains("@Disabled"), "Should remove @Disabled annotation");
+		assertFalse(afterRemove.contains("import org.junit.jupiter.api.Disabled;"), "Should remove Disabled import when no longer used");
+		assertTrue(afterRemove.contains("import org.junit.jupiter.params.ParameterizedTest;"), "Should retain ParameterizedTest import");
+		assertTrue(afterRemove.contains("import org.junit.jupiter.params.provider.ValueSource;"), "Should retain ValueSource import");
+		assertFalse(TestAnnotationModifier.isDisabled(method), "Parameterized test should be enabled after removing annotation");
+	}
+
 	/**
 	 * Helper method to count occurrences of a string
 	 */
