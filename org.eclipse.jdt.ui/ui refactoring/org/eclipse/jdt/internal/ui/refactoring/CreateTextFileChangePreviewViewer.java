@@ -23,7 +23,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.IAdaptable;
 
@@ -149,7 +148,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 				String key, boolean useDefault) {
 			Color newColor= useDefault
 					? null
-					: createColor(styledText.getDisplay(), store, key);
+					: createColor(store, key);
 			switch (key) {
 				case AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND:
 					styledText.setForeground(newColor);
@@ -170,7 +169,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 			customColors.put(key, newColor);
 		}
 
-		private static Color createColor(Display display, IPreferenceStore store,
+		private static Color createColor(IPreferenceStore store,
 				String key) {
 			RGB rgb= null;
 			if (store.contains(key)) {
@@ -180,7 +179,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 					rgb= PreferenceConverter.getColor(store, key);
 				}
 				if (rgb != null) {
-					return new Color(display, rgb);
+					return new Color(rgb);
 				}
 			}
 			return null;

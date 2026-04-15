@@ -26,7 +26,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -255,25 +254,25 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			// ----------- foreground color --------------------
 			Color color= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT)
 			? null
-			: createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, styledText.getDisplay());
+			: createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND);
 			styledText.setForeground(color);
 
 			// ---------- background color ----------------------
 			color= fPreferenceStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)
 			? null
-			: createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, styledText.getDisplay());
+			: createColor(fPreferenceStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
 			styledText.setBackground(color);
 
 			// ----------- selection foreground color --------------------
 			color= fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR)
 				? null
-				: createColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR, styledText.getDisplay());
+				: createColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_COLOR);
 			styledText.setSelectionForeground(color);
 
 			// ---------- selection background color ----------------------
 			color= fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR)
 				? null
-				: createColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR, styledText.getDisplay());
+				: createColor(fPreferenceStore, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_COLOR);
 			styledText.setSelectionBackground(color);
 
 		}
@@ -285,11 +284,10 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
      *
      * @param store the store to read from
      * @param key the key used for the lookup in the preference store
-     * @param display the display used create the color
      * @return the created color according to the specification in the preference store
      * @since 3.0
      */
-    private Color createColor(IPreferenceStore store, String key, Display display) {
+    private Color createColor(IPreferenceStore store, String key) {
 
         RGB rgb= null;
 
@@ -301,7 +299,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
                 rgb= PreferenceConverter.getColor(store, key);
 
             if (rgb != null)
-                return new Color(display, rgb);
+                return new Color(rgb);
         }
 
         return null;
