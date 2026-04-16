@@ -50,6 +50,21 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		return fChildren.toArray(new ITestElement[fChildren.size()]);
 	}
 
+	/**
+	 * Returns the single dynamic child of this suite if it has exactly one dynamic
+	 * (parameterized / generated) child, or <code>null</code> if there are zero, two,
+	 * or more children.
+	 *
+	 * @return the single dynamic child, or <code>null</code>
+	 * @since 3.15
+	 */
+	public TestElement getSingleDynamicChild() {
+		if (fChildren.size() == 1) {
+			return fChildren.get(0);
+		}
+		return null;
+	}
+
 	public void addChild(TestElement child) {
 		fChildren.add(child);
 	}

@@ -69,7 +69,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
@@ -200,6 +202,7 @@ public class TestViewer {
 	private final IgnoredOnlyFilter fIgnoredOnlyFilter= new IgnoredOnlyFilter();
 
 	private final DisableTestAction fDisableTestAction;
+	private final ExcludeParameterValueAction fExcludeParameterValueAction;
 
 	private final TestRunnerViewPart fTestRunnerPart;
 	private final Clipboard fClipboard;
@@ -233,6 +236,7 @@ public class TestViewer {
 		fClipboard= clipboard;
 
 		fDisableTestAction= new DisableTestAction();
+		fExcludeParameterValueAction= new ExcludeParameterValueAction();
 
 		fLayoutMode= TestRunnerViewPart.LAYOUT_HIERARCHICAL;
 
@@ -302,6 +306,10 @@ public class TestViewer {
 					manager.add(new Separator());
 					manager.add(fDisableTestAction);
 				}
+
+				// Add re-include submenu for @EnumSource tests with exclusions
+				addReincludeExcludedValuesSubmenu(manager, testSuiteElement);
+
 			} else {
 				TestCaseElement testCaseElement= (TestCaseElement) testElement;
 				manager.add(getOpenTestAction(testCaseElement));
@@ -313,6 +321,13 @@ public class TestViewer {
 				if (fDisableTestAction.isEnabled()) {
 					manager.add(new Separator());
 					manager.add(fDisableTestAction);
+				}
+
+				// For @EnumSource parameterized test invocations, offer to exclude the value
+				fExcludeParameterValueAction.update(testCaseElement);
+				if (fExcludeParameterValueAction.isEnabled()) {
+					manager.add(new Separator());
+					manager.add(fExcludeParameterValueAction);
 				}
 			}
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
@@ -329,6 +344,50 @@ public class TestViewer {
 		}
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
+	}
+
+	/**
+	 * Adds a "Re-include Excluded Enum Values" submenu to the context menu for
+	 * {@code @EnumSource} parameterized tests that currently have exclusions.
+	 *
+	 * @param manager the context menu manager
+	 * @param testSuiteElement the selected test suite element
+	 */
+	private void addReincludeExcludedValuesSubmenu(IMenuManager manager, TestSuiteElement testSuiteElement) {
+		try {
+			IMethod method= TestMethodFinder.findMethodForParameterizedTest(testSuiteElement);
+			if (method == null) {
+				return;
+			}
+
+			if (!EnumSourceValidator.isExcludeMode(method)) {
+				return;
+			}
+
+			List<String> excludedNames= EnumSourceValidator.getExcludedNames(method);
+			if (excludedNames.isEmpty()) {
+				return;
+			}
+
+			manager.add(new Separator());
+			MenuManager submenu= new MenuManager(JUnitMessages.TestViewer_reinclude_submenu_label);
+
+			// "Re-include All" action
+			ReincludeAllEnumValuesAction reincludeAll= new ReincludeAllEnumValuesAction();
+			reincludeAll.update(method, testSuiteElement);
+			submenu.add(reincludeAll);
+
+			if (excludedNames.size() > 1) {
+				submenu.add(new Separator());
+				for (String name : excludedNames) {
+					submenu.add(new ReincludeEnumValueAction(method, name));
+				}
+			}
+
+			manager.add(submenu);
+		} catch (JavaModelException e) {
+			JUnitPlugin.log(e);
+		}
 	}
 
 	private void addRerunActions(IMenuManager manager, TestCaseElement testCaseElement) {

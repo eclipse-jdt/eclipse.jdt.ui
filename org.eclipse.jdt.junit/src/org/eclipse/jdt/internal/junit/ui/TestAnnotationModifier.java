@@ -25,11 +25,20 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -63,8 +72,10 @@ public class TestAnnotationModifier {
 	private static final String JUNIT5_TEST_FACTORY_ANNOTATION= "org.junit.jupiter.api.TestFactory"; //$NON-NLS-1$
 	private static final String JUNIT5_TEST_TEMPLATE_ANNOTATION= "org.junit.jupiter.api.TestTemplate"; //$NON-NLS-1$
 
-	/**
-	 * Add @Disabled (JUnit 5) or @Ignore (JUnit 4) annotation to a method.
+	private static final String JUNIT5_ENUM_SOURCE_ANNOTATION= "org.junit.jupiter.params.provider.EnumSource"; //$NON-NLS-1$
+	private static final String JUNIT5_ENUM_SOURCE_MODE_FQN= "org.junit.jupiter.params.provider.EnumSource.Mode"; //$NON-NLS-1$
+
+
 	 *
 	 * @param method the method to add the annotation to
 	 * @param isJUnit5 whether to use JUnit 5 (@Disabled) or JUnit 4 (@Ignore)
@@ -298,6 +309,164 @@ public class TestAnnotationModifier {
 		} catch (Exception e) {
 			JUnitPlugin.log(e);
 		}
+	}
+
+	/**
+	 * Adds an enum constant name to the {@code @EnumSource} exclusion list on the given method.
+	 *
+	 * <p>If the annotation currently has no mode (defaults to {@code INCLUDE}), the mode is
+	 * changed to {@code EXCLUDE} and the value is added to the names list. If the annotation
+	 * already uses {@code EXCLUDE} mode, the value is appended to the existing names.
+	 *
+	 * @param method the test method that carries the {@code @EnumSource} annotation
+	 * @param enumValueName the enum constant name to exclude
+	 * @throws JavaModelException if there is an error accessing the Java model
+	 * @since 3.15
+	 */
+	public static void excludeEnumValue(IMethod method, String enumValueName) throws JavaModelException {
+		ICompilationUnit cu= method.getCompilationUnit();
+		if (cu == null) {
+			return;
+		}
+
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+
+		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		final boolean[] modified= { false };
+
+		astRoot.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(MethodDeclaration node) {
+				if (!node.getName().getIdentifier().equals(method.getElementName())) {
+					return false;
+				}
+				for (Object modifier : node.modifiers()) {
+					if (modifier instanceof Annotation) {
+						Annotation annotation= (Annotation) modifier;
+						IAnnotationBinding annBinding= annotation.resolveAnnotationBinding();
+						if (annBinding == null) continue;
+						ITypeBinding annType= annBinding.getAnnotationType();
+						if (annType == null || !JUNIT5_ENUM_SOURCE_ANNOTATION.equals(annType.getQualifiedName())) continue;
+
+						modifyEnumSourceInMethod(ast, rewrite, annotation, annBinding, enumValueName);
+						modified[0]= true;
+						break;
+					}
+				}
+				return false;
+			}
+		});
+
+		if (modified[0]) {
+			applyChanges(cu, astRoot, rewrite, JUNIT5_ENUM_SOURCE_MODE_FQN);
+		}
+	}
+
+	/**
+	 * Replaces the {@code @EnumSource} annotation node with a new one that includes the given
+	 * value in the {@code EXCLUDE} names list.
+	 */
+	private static void modifyEnumSourceInMethod(AST ast, ASTRewrite rewrite, Annotation annotation,
+			IAnnotationBinding annBinding, String enumValueName) {
+
+		// Read current state from binding
+		String currentMode= null;
+		List<String> currentNames= new java.util.ArrayList<>();
+		org.eclipse.jdt.core.dom.Expression valueExpr= null;
+
+		// Extract existing "value" expression from annotation AST node for copying
+		if (annotation instanceof SingleMemberAnnotation) {
+			valueExpr= ((SingleMemberAnnotation) annotation).getValue();
+		} else if (annotation instanceof NormalAnnotation) {
+			for (Object o : ((NormalAnnotation) annotation).values()) {
+				MemberValuePair mvp= (MemberValuePair) o;
+				if ("value".equals(mvp.getName().getIdentifier())) { //$NON-NLS-1$
+					valueExpr= mvp.getValue();
+				}
+			}
+		}
+
+		// Read mode and names from binding (resolved)
+		for (IMemberValuePairBinding pair : annBinding.getDeclaredMemberValuePairs()) {
+			if ("mode".equals(pair.getName())) { //$NON-NLS-1$
+				Object val= pair.getValue();
+				if (val instanceof IVariableBinding) {
+					currentMode= ((IVariableBinding) val).getName();
+				}
+			} else if ("names".equals(pair.getName())) { //$NON-NLS-1$
+				Object val= pair.getValue();
+				if (val instanceof Object[]) {
+					for (Object item : (Object[]) val) {
+						if (item instanceof String) {
+							currentNames.add((String) item);
+						}
+					}
+				} else if (val instanceof String) {
+					currentNames.add((String) val);
+				}
+			}
+		}
+
+		modifyAnnotationToExclude(ast, rewrite, annotation, valueExpr, currentMode, currentNames, enumValueName);
+	}
+
+	/**
+	 * Builds and installs a replacement {@code @EnumSource} annotation that excludes the given
+	 * enum constant name.
+	 */
+	private static void modifyAnnotationToExclude(AST ast, ASTRewrite rewrite, Annotation annotation,
+			org.eclipse.jdt.core.dom.Expression valueExpr, String currentMode,
+			List<String> currentNames, String enumValueName) {
+
+		NormalAnnotation newAnnotation= ast.newNormalAnnotation();
+		newAnnotation.setTypeName(ast.newName("EnumSource")); //$NON-NLS-1$
+
+		// Preserve the "value" attribute if present
+		if (valueExpr != null) {
+			MemberValuePair valuePair= ast.newMemberValuePair();
+			valuePair.setName(ast.newSimpleName("value")); //$NON-NLS-1$
+			valuePair.setValue((org.eclipse.jdt.core.dom.Expression) rewrite.createCopyTarget(valueExpr));
+			newAnnotation.values().add(valuePair);
+		}
+
+		// If already EXCLUDE, keep it; otherwise set to EXCLUDE
+		boolean isAlreadyExclude= "EXCLUDE".equals(currentMode); //$NON-NLS-1$
+
+		// mode = EnumSource.Mode.EXCLUDE
+		MemberValuePair modePair= ast.newMemberValuePair();
+		modePair.setName(ast.newSimpleName("mode")); //$NON-NLS-1$
+		QualifiedName modeValue= ast.newQualifiedName(
+				ast.newQualifiedName(ast.newSimpleName("EnumSource"), ast.newSimpleName("Mode")), //$NON-NLS-1$ //$NON-NLS-2$
+				ast.newSimpleName("EXCLUDE")); //$NON-NLS-1$
+		modePair.setValue(modeValue);
+		newAnnotation.values().add(modePair);
+
+		// names = { existing..., newValue }
+		ArrayInitializer namesArray= ast.newArrayInitializer();
+
+		if (isAlreadyExclude) {
+			// Preserve all existing excluded names
+			for (String existingName : currentNames) {
+				StringLiteral sl= ast.newStringLiteral();
+				sl.setLiteralValue(existingName);
+				namesArray.expressions().add(sl);
+			}
+		}
+		// Add the new exclusion
+		StringLiteral newNameLiteral= ast.newStringLiteral();
+		newNameLiteral.setLiteralValue(enumValueName);
+		namesArray.expressions().add(newNameLiteral);
+
+		MemberValuePair namesPair= ast.newMemberValuePair();
+		namesPair.setName(ast.newSimpleName("names")); //$NON-NLS-1$
+		namesPair.setValue(namesArray);
+		newAnnotation.values().add(namesPair);
+
+		rewrite.replace(annotation, newAnnotation, null);
 	}
 
 	private static void applyChangesWithImportRemoval(ICompilationUnit cu, CompilationUnit astRoot, ASTRewrite rewrite, Annotation removedAnnotationNode) {

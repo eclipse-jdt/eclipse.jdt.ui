@@ -25,6 +25,21 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	private boolean fIgnored;
 	private boolean fIsDynamicTest;
 
+	/**
+	 * @since 3.15
+	 */
+	private boolean fIsParameterizedTest= false;
+
+	/**
+	 * @since 3.15
+	 */
+	private String fParameterSourceType= null;
+
+	/**
+	 * @since 3.15
+	 */
+	private String fParameterEnumType= null;
+
 	public TestCaseElement(TestSuiteElement parent, String id, String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId) {
 		super(parent, id, testName, displayName, parameterTypes, uniqueId);
 		Assert.isNotNull(parent);
@@ -85,5 +100,68 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 
 	public boolean isDynamicTest() {
 		return fIsDynamicTest;
+	}
+
+	/**
+	 * Returns whether this test case is a parameterized test invocation.
+	 *
+	 * @return <code>true</code> if this is a parameterized test
+	 * @since 3.15
+	 */
+	public boolean isParameterizedTest() {
+		return fIsParameterizedTest;
+	}
+
+	/**
+	 * Sets whether this test case is a parameterized test invocation.
+	 *
+	 * @param parameterizedTest <code>true</code> if this is a parameterized test
+	 * @since 3.15
+	 */
+	public void setParameterizedTest(boolean parameterizedTest) {
+		fIsParameterizedTest= parameterizedTest;
+	}
+
+	/**
+	 * Returns the parameter source annotation type (e.g. "EnumSource", "ValueSource").
+	 * Returns <code>null</code> if metadata has not been populated yet, or an empty string
+	 * if metadata was populated but this is not a recognized parameterized source.
+	 *
+	 * @return the parameter source type, or <code>null</code> if not yet populated
+	 * @since 3.15
+	 */
+	public String getParameterSourceType() {
+		return fParameterSourceType;
+	}
+
+	/**
+	 * Sets the parameter source annotation type.
+	 *
+	 * @param parameterSourceType the source annotation simple name (e.g. "EnumSource")
+	 * @since 3.15
+	 */
+	public void setParameterSourceType(String parameterSourceType) {
+		fParameterSourceType= parameterSourceType;
+	}
+
+	/**
+	 * Returns the fully qualified name of the enum type used in {@code @EnumSource}, or
+	 * <code>null</code> if not applicable.
+	 *
+	 * @return the enum type FQN, or <code>null</code>
+	 * @since 3.15
+	 */
+	public String getParameterEnumType() {
+		return fParameterEnumType;
+	}
+
+	/**
+	 * Sets the fully qualified name of the enum type used in {@code @EnumSource}.
+	 *
+	 * @param parameterEnumType the enum type FQN
+	 * @since 3.15
+	 */
+	public void setParameterEnumType(String parameterEnumType) {
+		fParameterEnumType= parameterEnumType;
 	}
 }
