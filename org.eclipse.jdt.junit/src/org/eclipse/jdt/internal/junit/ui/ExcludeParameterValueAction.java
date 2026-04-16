@@ -43,122 +43,122 @@ import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
  */
 public class ExcludeParameterValueAction extends Action {
 
-private TestCaseElement fTestCaseElement;
-private String fEnumValueName;
+	private TestCaseElement fTestCaseElement;
+	private String fEnumValueName;
 
-public ExcludeParameterValueAction() {
-super(JUnitMessages.ExcludeParameterValueAction_label);
-}
+	public ExcludeParameterValueAction() {
+		super(JUnitMessages.ExcludeParameterValueAction_label);
+	}
 
-/**
- * Updates the action based on the currently selected test element.
- *
- * @param testCaseElement the selected test case element
- */
-public void update(TestCaseElement testCaseElement) {
-fTestCaseElement= null;
-fEnumValueName= null;
-setEnabled(false);
+	/**
+	 * Updates the action based on the currently selected test element.
+	 *
+	 * @param testCaseElement the selected test case element
+	 */
+	public void update(TestCaseElement testCaseElement) {
+		fTestCaseElement= null;
+		fEnumValueName= null;
+		setEnabled(false);
 
-if (testCaseElement == null) {
-return;
-}
+		if (testCaseElement == null) {
+			return;
+		}
 
-// Populate metadata lazily
-ParameterizedTestMetadataExtractor.populate(testCaseElement);
+		// Populate metadata lazily
+		ParameterizedTestMetadataExtractor.populate(testCaseElement);
 
-if (!"EnumSource".equals(testCaseElement.getParameterSourceType())) { //$NON-NLS-1$
-return;
-}
+		if (!"EnumSource".equals(testCaseElement.getParameterSourceType())) { //$NON-NLS-1$
+			return;
+		}
 
-// Extract the enum constant name from the display name
-String displayName= testCaseElement.getDisplayName();
-if (displayName == null) {
-displayName= testCaseElement.getTestMethodName();
-}
-String enumValue= EnumSourceValidator.extractEnumConstantFromDisplayName(displayName);
-if (enumValue == null || enumValue.isEmpty()) {
-return;
-}
+		// Extract the enum constant name from the display name
+		String displayName= testCaseElement.getDisplayName();
+		if (displayName == null) {
+			displayName= testCaseElement.getTestMethodName();
+		}
+		String enumValue= EnumSourceValidator.extractEnumConstantFromDisplayName(displayName);
+		if (enumValue == null || enumValue.isEmpty()) {
+			return;
+		}
 
-fTestCaseElement= testCaseElement;
-fEnumValueName= enumValue;
-setEnabled(true);
-}
+		fTestCaseElement= testCaseElement;
+		fEnumValueName= enumValue;
+		setEnabled(true);
+	}
 
-@Override
-public void run() {
-if (fTestCaseElement == null || fEnumValueName == null) {
-return;
-}
+	@Override
+	public void run() {
+		if (fTestCaseElement == null || fEnumValueName == null) {
+			return;
+		}
 
-try {
-TestSuiteElement parent= fTestCaseElement.getParent();
-if (parent == null) {
-return;
-}
+		try {
+			TestSuiteElement parent= fTestCaseElement.getParent();
+			if (parent == null) {
+				return;
+			}
 
-IMethod method= findMethod(parent);
-if (method == null) {
-return;
-}
+			IMethod method= findMethod(parent);
+			if (method == null) {
+				return;
+			}
 
-// Warn if only 0 or 1 test invocations would remain
-ITestElement[] siblings= parent.getChildren();
-int remaining= siblings.length - 1;
-if (remaining <= 1) {
-String message= remaining == 0
-? Messages.format(JUnitMessages.ExcludeParameterValueAction_warning_noValues, fEnumValueName)
-: Messages.format(JUnitMessages.ExcludeParameterValueAction_warning_oneValue, fEnumValueName);
-boolean proceed= MessageDialog.openQuestion(
-null,
-JUnitMessages.ExcludeParameterValueAction_label,
-message);
-if (!proceed) {
-return;
-}
-}
+			// Warn if only 0 or 1 test invocations would remain
+			ITestElement[] siblings= parent.getChildren();
+			int remaining= siblings.length - 1;
+			if (remaining <= 1) {
+				String message= remaining == 0
+						? Messages.format(JUnitMessages.ExcludeParameterValueAction_warning_noValues, fEnumValueName)
+						: Messages.format(JUnitMessages.ExcludeParameterValueAction_warning_oneValue, fEnumValueName);
+				boolean proceed= MessageDialog.openQuestion(
+						null,
+						JUnitMessages.ExcludeParameterValueAction_label,
+						message);
+				if (!proceed) {
+					return;
+				}
+			}
 
-TestAnnotationModifier.excludeEnumValue(method, fEnumValueName);
+			TestAnnotationModifier.excludeEnumValue(method, fEnumValueName);
 
-// Open the editor at the method
-try {
-JavaUI.openInEditor(method);
-} catch (Exception e) {
-JUnitPlugin.log(e);
-}
+			// Open the editor at the method
+			try {
+				JavaUI.openInEditor(method);
+			} catch (Exception e) {
+				JUnitPlugin.log(e);
+			}
 
-} catch (JavaModelException e) {
-JUnitPlugin.log(e);
-}
-}
+		} catch (JavaModelException e) {
+			JUnitPlugin.log(e);
+		}
+	}
 
-private IMethod findMethod(TestSuiteElement testSuiteElement) {
-try {
-String className= testSuiteElement.getSuiteTypeName();
-String testName= testSuiteElement.getTestName();
-int index= testName.indexOf('(');
-String methodName= index > 0 ? testName.substring(0, index) : testName;
+	private IMethod findMethod(TestSuiteElement testSuiteElement) {
+		try {
+			String className= testSuiteElement.getSuiteTypeName();
+			String testName= testSuiteElement.getTestName();
+			int index= testName.indexOf('(');
+			String methodName= index > 0 ? testName.substring(0, index) : testName;
 
-IJavaProject javaProject= testSuiteElement.getTestRunSession().getLaunchedProject();
-if (javaProject == null) {
-return null;
-}
+			IJavaProject javaProject= testSuiteElement.getTestRunSession().getLaunchedProject();
+			if (javaProject == null) {
+				return null;
+			}
 
-IType type= javaProject.findType(className);
-if (type == null) {
-return null;
-}
+			IType type= javaProject.findType(className);
+			if (type == null) {
+				return null;
+			}
 
-IMethod[] methods= type.getMethods();
-for (IMethod method : methods) {
-if (method.getElementName().equals(methodName)) {
-return method;
-}
-}
-} catch (JavaModelException e) {
-JUnitPlugin.log(e);
-}
-return null;
-}
+			IMethod[] methods= type.getMethods();
+			for (IMethod method : methods) {
+				if (method.getElementName().equals(methodName)) {
+					return method;
+				}
+			}
+		} catch (JavaModelException e) {
+			JUnitPlugin.log(e);
+		}
+		return null;
+	}
 }

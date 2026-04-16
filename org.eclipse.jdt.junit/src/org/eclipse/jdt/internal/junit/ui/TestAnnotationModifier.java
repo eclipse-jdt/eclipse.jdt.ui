@@ -75,7 +75,8 @@ public class TestAnnotationModifier {
 	private static final String JUNIT5_ENUM_SOURCE_ANNOTATION= "org.junit.jupiter.params.provider.EnumSource"; //$NON-NLS-1$
 	private static final String JUNIT5_ENUM_SOURCE_MODE_FQN= "org.junit.jupiter.params.provider.EnumSource.Mode"; //$NON-NLS-1$
 
-
+	/**
+	 * Add @Disabled (JUnit 5) or @Ignore (JUnit 4) annotation to a method.
 	 *
 	 * @param method the method to add the annotation to
 	 * @param isJUnit5 whether to use JUnit 5 (@Disabled) or JUnit 4 (@Ignore)
