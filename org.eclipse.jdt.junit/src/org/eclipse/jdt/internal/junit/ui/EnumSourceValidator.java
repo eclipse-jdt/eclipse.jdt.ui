@@ -63,6 +63,9 @@ public class EnumSourceValidator {
 	private static final String MEMBER_MODE= "mode"; //$NON-NLS-1$
 	private static final String MEMBER_NAMES= "names"; //$NON-NLS-1$
 
+	/** Regex matching the JUnit 5 default parameterized test display-name prefix {@code "[N] "}. */
+	private static final String DISPLAY_NAME_INDEX_PREFIX_REGEX= "^\\[\\d+\\]\\s*"; //$NON-NLS-1$
+
 	/**
 	 * Returns whether the given method has an {@code @EnumSource} annotation with
 	 * {@code mode = Mode.EXCLUDE} and a non-empty names array.
@@ -417,16 +420,15 @@ public class EnumSourceValidator {
 			return null;
 		}
 		// Strip "[N] " prefix (JUnit default parameterized name format)
-		String stripped= displayName.replaceFirst("^\\[\\d+\\]\\s*", "").trim(); //$NON-NLS-1$ //$NON-NLS-2$
+		String stripped= displayName.replaceFirst(DISPLAY_NAME_INDEX_PREFIX_REGEX, "").trim(); //$NON-NLS-1$
 		return stripped.isEmpty() ? displayName : stripped;
 	}
 
 	/**
-	 * Returns all declared value pairs from the annotation, including a check for
-	 * whether the annotation on the method declares an {@code @EnumSource} annotation.
+	 * Returns whether the given method has an {@code @EnumSource} annotation.
 	 *
 	 * @param method the method to check
-	 * @return <code>true</code> if the method has {@code @EnumSource}
+	 * @return <code>true</code> if the method declares {@code @EnumSource}
 	 * @throws JavaModelException if there is an error accessing the Java model
 	 */
 	public static boolean hasEnumSource(IMethod method) throws JavaModelException {

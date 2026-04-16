@@ -256,4 +256,36 @@ public class ExcludeParameterValueDisplayNameTest {
 		assertEquals("SOME_VALUE", EnumSourceValidator.extractEnumConstantFromDisplayName("SOME_VALUE"));
 		assertEquals("MY_CONSTANT", EnumSourceValidator.extractEnumConstantFromDisplayName("[5] MY_CONSTANT"));
 	}
+
+	@Test
+	public void testComputeNamesAfterReinclude_RemovesValue() {
+		java.util.List<String> excluded= java.util.Arrays.asList("RED", "GREEN", "BLUE");
+
+		java.util.List<String> result= EnumSourceValidator.computeNamesAfterReinclude(excluded, "GREEN");
+
+		assertEquals(2, result.size(), "Should have two names after reinclude");
+		assertTrue(result.contains("RED"), "RED should remain");
+		assertFalse(result.contains("GREEN"), "GREEN should be removed");
+		assertTrue(result.contains("BLUE"), "BLUE should remain");
+	}
+
+	@Test
+	public void testComputeNamesAfterReinclude_EmptyAfterLastRemoval() {
+		java.util.List<String> excluded= java.util.Arrays.asList("RED");
+
+		java.util.List<String> result= EnumSourceValidator.computeNamesAfterReinclude(excluded, "RED");
+
+		assertTrue(result.isEmpty(), "Should be empty after removing the last name");
+	}
+
+	@Test
+	public void testComputeNamesAfterReinclude_ValueNotPresent() {
+		java.util.List<String> excluded= java.util.Arrays.asList("RED", "GREEN");
+
+		java.util.List<String> result= EnumSourceValidator.computeNamesAfterReinclude(excluded, "BLUE");
+
+		assertEquals(2, result.size(), "Should still have two names when value not present");
+		assertTrue(result.contains("RED"), "RED should remain");
+		assertTrue(result.contains("GREEN"), "GREEN should remain");
+	}
 }

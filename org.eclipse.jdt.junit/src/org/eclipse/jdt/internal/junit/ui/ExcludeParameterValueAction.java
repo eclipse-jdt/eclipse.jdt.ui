@@ -16,9 +16,7 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.junit.model.ITestElement;
 
@@ -98,7 +96,7 @@ public class ExcludeParameterValueAction extends Action {
 				return;
 			}
 
-			IMethod method= findMethod(parent);
+			IMethod method= TestMethodFinder.findMethodForParameterizedTest(parent);
 			if (method == null) {
 				return;
 			}
@@ -131,34 +129,5 @@ public class ExcludeParameterValueAction extends Action {
 		} catch (JavaModelException e) {
 			JUnitPlugin.log(e);
 		}
-	}
-
-	private IMethod findMethod(TestSuiteElement testSuiteElement) {
-		try {
-			String className= testSuiteElement.getSuiteTypeName();
-			String testName= testSuiteElement.getTestName();
-			int index= testName.indexOf('(');
-			String methodName= index > 0 ? testName.substring(0, index) : testName;
-
-			IJavaProject javaProject= testSuiteElement.getTestRunSession().getLaunchedProject();
-			if (javaProject == null) {
-				return null;
-			}
-
-			IType type= javaProject.findType(className);
-			if (type == null) {
-				return null;
-			}
-
-			IMethod[] methods= type.getMethods();
-			for (IMethod method : methods) {
-				if (method.getElementName().equals(methodName)) {
-					return method;
-				}
-			}
-		} catch (JavaModelException e) {
-			JUnitPlugin.log(e);
-		}
-		return null;
 	}
 }

@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 public class ReincludeAllEnumValuesAction extends Action {
 
 	private IMethod fMethod;
-	private TestSuiteElement fTestSuiteElement;
 
 	public ReincludeAllEnumValuesAction() {
 		super(JUnitMessages.ReincludeAllEnumValuesAction_label);
@@ -42,11 +41,10 @@ public class ReincludeAllEnumValuesAction extends Action {
 	 * Updates this action with the method to modify.
 	 *
 	 * @param method the test method carrying the {@code @EnumSource} annotation
-	 * @param testSuiteElement the corresponding test suite element
+	 * @param testSuiteElement the corresponding test suite element (unused, reserved for future use)
 	 */
 	public void update(IMethod method, TestSuiteElement testSuiteElement) {
 		fMethod= method;
-		fTestSuiteElement= testSuiteElement;
 		setEnabled(method != null);
 	}
 
