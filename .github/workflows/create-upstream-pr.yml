@@ -1,0 +1,126 @@
+name: Create Upstream PR Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number (used for branch name: upstream-pr/issue-{number})'
+        required: true
+        type: string
+      source_branch:
+        description: 'Source branch containing the commits to cherry-pick'
+        required: true
+        type: string
+      commit_shas:
+        description: 'Comma-separated list of commit SHAs to cherry-pick onto upstream/master'
+        required: true
+        type: string
+      pr_title:
+        description: 'Title for the upstream PR (informational only)'
+        required: false
+        type: string
+
+jobs:
+  create-upstream-pr-branch:
+    name: Create Clean Upstream PR Branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream master
+        run: |
+          git remote add upstream https://github.com/eclipse-jdt/eclipse.jdt.ui.git
+          git fetch upstream master
+
+      - name: Create branch based on upstream/master
+        run: |
+          BRANCH_NAME="upstream-pr/issue-${{ inputs.issue_number }}"
+          git checkout -b "$BRANCH_NAME" upstream/master
+          echo "Created branch: $BRANCH_NAME"
+
+      - name: Cherry-pick specified commits
+        id: cherry_pick
+        run: |
+          BRANCH_NAME="upstream-pr/issue-${{ inputs.issue_number }}"
+          COMMIT_SHAS="${{ inputs.commit_shas }}"
+          
+          # Convert comma-separated list to space-separated
+          SHAS=$(echo "$COMMIT_SHAS" | tr ',' ' ' | tr -s ' ')
+          
+          echo "Cherry-picking commits: $SHAS"
+          
+          SUCCESS=true
+          for SHA in $SHAS; do
+            SHA=$(echo "$SHA" | xargs)  # trim whitespace
+            if [ -z "$SHA" ]; then
+              continue
+            fi
+            echo "Cherry-picking $SHA..."
+            if ! git cherry-pick "$SHA"; then
+              echo "Cherry-pick failed for $SHA"
+              git cherry-pick --abort 2>/dev/null || true
+              SUCCESS=false
+              break
+            fi
+          done
+          
+          if [ "$SUCCESS" = "true" ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify branch contents
+        if: steps.cherry_pick.outputs.success == 'true'
+        run: |
+          echo "=== Commits on this branch (not in upstream/master) ==="
+          git log upstream/master..HEAD --oneline
+          echo ""
+          echo "=== Files changed vs upstream/master ==="
+          git diff upstream/master..HEAD --stat
+
+      - name: Force-push branch to fork
+        if: steps.cherry_pick.outputs.success == 'true'
+        run: |
+          BRANCH_NAME="upstream-pr/issue-${{ inputs.issue_number }}"
+          git push --force origin "$BRANCH_NAME"
+          echo "✅ Branch '$BRANCH_NAME' pushed to fork"
+
+      - name: Output PR creation link
+        if: steps.cherry_pick.outputs.success == 'true'
+        run: |
+          BRANCH_NAME="upstream-pr/issue-${{ inputs.issue_number }}"
+          REPO_OWNER="${{ github.repository_owner }}"
+          REPO_NAME="${{ github.event.repository.name }}"
+          PR_LINK="https://github.com/eclipse-jdt/eclipse.jdt.ui/compare/master...${REPO_OWNER}:${REPO_NAME}:${BRANCH_NAME}"
+          
+          echo ""
+          echo "=========================================="
+          echo "✅ Branch ready for upstream PR!"
+          echo "=========================================="
+          echo ""
+          echo "Branch: $BRANCH_NAME"
+          if [ -n "${{ inputs.pr_title }}" ]; then
+            echo "PR Title: ${{ inputs.pr_title }}"
+          fi
+          echo ""
+          echo "Create PR at:"
+          echo "$PR_LINK"
+          echo ""
+
+      - name: Fail if cherry-pick failed
+        if: steps.cherry_pick.outputs.success == 'false'
+        run: |
+          echo "❌ Cherry-pick failed. Check the logs above for details."
+          exit 1

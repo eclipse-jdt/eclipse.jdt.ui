@@ -1,0 +1,10 @@
+.github/dependabot.yml
+.github/workflows/codacy.yml
+.github/workflows/codeql.yml
+.github/workflows/maven.yml
+.github/workflows/rebase.yml
+.github/workflows/rebase-upstream.yml
+.github/workflows/sync-upstream.yml
+.github/workflows/create-upstream-pr.yml
+.github/fork-specific-files.txt
+README.md
