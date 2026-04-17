@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -921,6 +921,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorCodeMiningConfigurationBlock_ignoreInexactMatches_label;
 	public static String JavaEditorCodeMiningConfigurationBlock_showCodeMining_atLeastOne_label;
 	public static String JavaEditorCodeMiningConfigurationBlock_section_general;
+	public static String JavaEditorCodeMiningConfigurationBlock_section_general_select_all;
+	public static String JavaEditorCodeMiningConfigurationBlock_section_general_deselect_all;
 	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_label;
 	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onTypes_label;
 	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onFields_label;
