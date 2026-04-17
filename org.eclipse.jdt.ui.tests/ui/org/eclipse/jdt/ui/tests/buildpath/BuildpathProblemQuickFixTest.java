@@ -43,6 +43,8 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.util.Messages;
+
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 
@@ -300,7 +302,10 @@ public class BuildpathProblemQuickFixTest {
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
-		assertEquals("Project has only main sources but depends on project '7_OnlyTest' which has only test sources.", markers[0].getAttribute(IMarker.MESSAGE));
+
+		final String expected = Messages.bind(Messages.classpath_main_only_project_depends_on_test_only_project,
+								new String[] { fJavaProject1.getElementName(), fJavaProject2.getElementName() });
+		assertEquals(expected, markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
 		assertEquals(2, resolutions.length);
