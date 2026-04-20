@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -531,6 +531,7 @@ final class FormatterMessages extends NLS {
 	public static String ModifyDialogTabPage_error_msg_values_items_text_unassigned;
 	public static String ModifyDialogTabPage_NumberPreference_error_invalid_key;
 	public static String ModifyDialogTabPage_NumberPreference_error_invalid_value;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_lambda_empty_param;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, FormatterMessages.class);

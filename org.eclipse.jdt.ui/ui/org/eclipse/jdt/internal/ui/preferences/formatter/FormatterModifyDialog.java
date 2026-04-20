@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1128,7 +1128,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_brace_in_record_constructor, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_RECORD_CONSTRUCTOR))
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_lambda, "-lambdas", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_arrow_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_LAMBDA_ARROW)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_arrow_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_LAMBDA_ARROW)))
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_arrow_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_LAMBDA_ARROW)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_lambda_empty_param, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_LAMBDA_EMPTY_PARENTHESES)))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_statements, "-statements", modAll) //$NON-NLS-1$
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_blocks, "-blocks", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_brace, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_BLOCK)
