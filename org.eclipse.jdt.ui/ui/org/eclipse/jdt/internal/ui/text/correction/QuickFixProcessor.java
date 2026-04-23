@@ -309,6 +309,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NullAnnotationAtQualifyingType:
 			case IProblem.IllegalAnnotationForBaseType:
 			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
+			case IProblem.NullityMismatchTypeArgument:
+			case IProblem.ContradictoryNullAnnotations:
 			case IProblem.UndefinedModule:
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 			case IProblem.NotAccessibleType:
@@ -876,6 +878,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.LOCAL, proposals);
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.TARGET, proposals);
 				break;
+			case IProblem.DereferencingNullableExpression:
+			case IProblem.NullityMismatchingTypeAnnotation:
+				NullAnnotationsCorrectionProcessor.addReplaceNullableAnnotationProposal(context, problem, proposals);
+				break;
 			case IProblem.RedundantNullCheckAgainstNonNullType:
 			case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
 			case IProblem.RedundantNullCheckOnSpecdNonNullLocalVariable:
@@ -897,6 +903,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.NullableFieldReference:
 				NullAnnotationsCorrectionProcessor.addExtractCheckedLocalProposal(context, problem, proposals);
+				break;
+			case IProblem.ContradictoryNullAnnotations:
+				NullAnnotationsCorrectionProcessor.addRemoveContradictoryAnnotationProposals(context, problem, proposals);
 				break;
 			case IProblem.ConflictingNullAnnotations:
 			case IProblem.ConflictingInheritedNullAnnotations:

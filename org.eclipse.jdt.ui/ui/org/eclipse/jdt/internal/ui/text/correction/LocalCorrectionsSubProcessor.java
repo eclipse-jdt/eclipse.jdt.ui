@@ -101,7 +101,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUpCore;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
@@ -374,7 +374,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(options), IProposalRelevance.RAW_TYPE_REFERENCE, image, context);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUpCore(options), IProposalRelevance.RAW_TYPE_REFERENCE, image, context);
 			proposal.setCommandId(RAW_TYPE_REFERENCE_ID);
 			proposals.add(proposal);
 		}

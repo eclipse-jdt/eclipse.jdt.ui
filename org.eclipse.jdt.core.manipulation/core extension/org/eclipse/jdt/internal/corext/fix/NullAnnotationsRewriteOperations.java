@@ -390,6 +390,24 @@ public class NullAnnotationsRewriteOperations {
 		}
 	}
 
+	static class RemoveAnnotationRewriteOperation extends CompilationUnitRewriteOperationWithSourceRange {
+
+		private Annotation fAnnotation;
+		public RemoveAnnotationRewriteOperation(Annotation annotation) {
+			fAnnotation= annotation;
+		}
+
+		@Override
+		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
+			TextEditGroup group= createTextEditGroup(FixMessages.NullAnnotationsRewriteOperations_remove_annotation, cuRewrite);
+			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+			ImportRemover remover= cuRewrite.getImportRemover();
+
+			remover.registerRemovedNode(fAnnotation);
+			astRewrite.remove(fAnnotation, group);
+		}
+	}
+
 	static class AddMissingDefaultNullnessRewriteOperation extends CompilationUnitRewriteOperationWithSourceRange {
 
 		private IProblemLocation fProblem;

@@ -98,7 +98,7 @@ public class ImportOrganizeTest extends CoreTests {
 	public void tearDown() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
-		TestUtils.waitForReconciler(60_000L);
+		TestUtils.waitForEditorJobs(60_000L, true);
 	}
 
 	protected IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {

@@ -33,7 +33,7 @@ import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.LONG_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.PATH_SEPARATOR;
 import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -145,7 +145,7 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUp {
 		if (isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY)) {
 			result= computeFixSet().stream().map(e->(Messages.format(ConstantsCleanUp_description,e.toString()))).collect(Collectors.toList());
 		} else {
-			result= Collections.emptyList();
+			result= new ArrayList<>();
 		}
 
 		result.addAll(computeFixSet2(null).stream().map(e->(Messages.format(ConstantsCleanUp_description,e.toString()))).collect(Collectors.toList()));

@@ -73,7 +73,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUpCore;
@@ -1918,7 +1918,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		HashMap<String, String> map= new HashMap<>();
 		map.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpOptions.TRUE);
-		Java50CleanUp cleanUp= new Java50CleanUp(map);
+		Java50CleanUpCore cleanUp= new Java50CleanUpCore(map);
 
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);

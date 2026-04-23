@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,8 +22,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -31,50 +31,46 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 
-
 /**
- * Custom Search engine for suite() methods
+ * Custom Search engine for suite() methods.
+ *
  * @see CoreTestSearchEngine
  */
 public class TestSearchEngine extends CoreTestSearchEngine {
 
-	public static Set<IType> findTests(IRunnableContext context, final IJavaElement element, final ITestKind testKind) throws InvocationTargetException, InterruptedException {
-		final Set<IType> result= new HashSet<>();
-
-		IRunnableWithProgress runnable= progressMonitor -> {
+	public static Set<IType> findTests(IRunnableContext context, IJavaElement element, ITestKind testKind) throws InvocationTargetException, InterruptedException {
+		var result= new HashSet<IType>();
+		context.run(true, true, (progressMonitor) -> {
+			ITestFinder finder= testKind.getFinder();
 			try {
-				testKind.getFinder().findTestsInContainer(element, result, progressMonitor);
+				finder.findTestsInContainer(element, result, progressMonitor);
 			} catch (CoreException e) {
 				throw new InvocationTargetException(e);
 			}
-		};
-		context.run(true, true, runnable);
+		});
 		return result;
 	}
 
-	public static Set<String> findTestMethods(IRunnableContext context, final IJavaProject javaProject, IType type, TestKind testKind) throws InvocationTargetException, InterruptedException {
-		final Set<String> result= new HashSet<>();
-
-		IRunnableWithProgress runnable= progressMonitor -> {
+	public static Set<String> findTestMethods(IRunnableContext context, IJavaProject javaProject, IType type, TestKind testKind) throws InvocationTargetException, InterruptedException {
+		var result= new HashSet<String>();
+		context.run(true, true, (progressMonitor) -> {
+			String message= Messages.format(JUnitMessages.TestSearchEngine_search_message_progress_monitor, type.getElementName());
+			SubMonitor subMonitor= SubMonitor.convert(progressMonitor, message, 1);
 			try {
-				String message= Messages.format(JUnitMessages.TestSearchEngine_search_message_progress_monitor, type.getElementName());
-				SubMonitor subMonitor= SubMonitor.convert(progressMonitor, message, 1);
-
-				collectMethodNames(type, javaProject, testKind.getId(), result, subMonitor.split(1));
+				collectMethodNames(type, javaProject, testKind.getId(), result, subMonitor);
 			} catch (CoreException e) {
 				throw new InvocationTargetException(e);
 			}
-		};
-		context.run(true, true, runnable);
+		});
 		return result;
 	}
 
@@ -117,24 +113,28 @@ public class TestSearchEngine extends CoreTestSearchEngine {
 	}
 
 	private static void collectDeclaredMethodNames(IType type, IJavaProject javaProject, String testKindId, Set<String> methodNames) throws JavaModelException {
+		boolean isJUnit3= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKindId);
+		boolean isJUnitJupiter= !isJUnit3 && !TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId);
+
 		IMethod[] methods= type.getMethods();
 		for (IMethod method : methods) {
-			String methodName= method.getElementName();
 			int flags= method.getFlags();
-			// Only include public, non-static, no-arg methods that return void and start with "test":
-			if (Modifier.isPublic(flags) && !Modifier.isStatic(flags) &&
-					method.getNumberOfParameters() == 0 && Signature.SIG_VOID.equals(method.getReturnType()) &&
-					methodName.startsWith("test")) { //$NON-NLS-1$
+			if (Flags.isStatic(flags) || Flags.isPrivate(flags) || Flags.isAbstract(flags)) continue;
+			String methodName= method.getElementName();
+			// Only include public, no-arg methods that start with "test" and have void return type:
+			if (Flags.isPublic(flags) &&
+					method.getNumberOfParameters() == 0 &&
+					methodName.startsWith("test") && //$NON-NLS-1$
+					Signature.SIG_VOID.equals(method.getReturnType())) {
 				methodNames.add(methodName);
 			}
-			boolean isJUnit3= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKindId);
-			boolean isJUnitJupiter= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKindId);
-			if (!isJUnit3 && !Modifier.isPrivate(flags) && !Modifier.isStatic(flags)) {
+			if (!isJUnit3) {
 				IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
 				if (annotation.exists()) {
 					methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
 				} else if (isJUnitJupiter) {
-					boolean hasAnyTestAnnotation= method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
+					boolean hasAnyTestAnnotation=
+							method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
 							|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
 							|| method.getAnnotation("TestTemplate").exists() //$NON-NLS-1$
 							|| method.getAnnotation("ParameterizedTest").exists() //$NON-NLS-1$

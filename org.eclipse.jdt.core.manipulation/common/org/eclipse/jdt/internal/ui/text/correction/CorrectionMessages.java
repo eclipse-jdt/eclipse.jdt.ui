@@ -508,6 +508,8 @@ public final class CorrectionMessages extends NLS {
 	public static String VarargsWarningsSubProcessor_remove_safevarargs_label;
 	public static String NullAnnotationsCorrectionProcessor_change_local_variable_to_nonNull;
 	public static String NullAnnotationsCorrectionProcessor_create_packageInfo_with_defaultnullness;
+	public static String NullAnnotationsCorrectionProcessor_replace_nullable_with_nonnull;
+	public static String NullAnnotationsCorrectionProcessor_remove_annotation;
 	public static String PreviewFeaturesSubProcessor_enable_preview_features;
 	public static String PreviewFeaturesSubProcessor_enable_preview_features_workspace;
 	public static String PreviewFeaturesSubProcessor_enable_preview_features_info;

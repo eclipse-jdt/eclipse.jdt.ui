@@ -134,6 +134,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
@@ -1525,6 +1526,11 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			String label;
 			String qualifiedTypeName= Signature.getQualifier(Signature.getTypeErasure(curr));
 			String elementLabel= BasicElementLabels.getJavaElementName(JavaModelUtil.concatenateName(Signature.getSimpleName(qualifiedTypeName), name));
+
+			ITypeRoot typeRoot= root.getTypeRoot();
+			if (typeRoot != null && JavaElementUtil.isForbiddenOnClasspath(typeRoot, qualifiedTypeName)) {
+				continue;
+			}
 
 			String res= importRewrite.addStaticImport(qualifiedTypeName, name, isMethod, new ContextSensitiveImportRewriteContext(root, node.getStartPosition(), importRewrite));
 			int dot= res.lastIndexOf('.');

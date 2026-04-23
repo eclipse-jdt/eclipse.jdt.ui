@@ -50,7 +50,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 
 		Color color= colorTable.get(rgb);
 		if (color == null) {
-			color= new Color(Display.getCurrent(), rgb);
+			color= new Color(rgb);
 			colorTable.put(rgb, color);
 		}
 

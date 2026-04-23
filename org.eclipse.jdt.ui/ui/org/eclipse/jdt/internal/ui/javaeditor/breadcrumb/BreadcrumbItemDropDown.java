@@ -161,7 +161,7 @@ class BreadcrumbItemDropDown {
 
 			RGB blend= FormColors.blend(rgb2, rgb1, ratio);
 
-			return new Color(display, blend);
+			return new Color(blend);
 		}
 	}
 

@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -778,7 +779,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				fRemovedDeclarations.add(originalVarName.resolveBinding());
 			}
 			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, indexOfList, argList, statements, literals,
-					fRemovedDeclarations.contains(originalVarName.resolveBinding()) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, nonNLS);
+					fRemovedDeclarations.contains(originalVarName.resolveBinding()) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, null, nonNLS);
 			fLastBodyDecl= bodyDecl;
 			fOperations.add(operation);
 			conversions.put(assignmentToConvert, operation);
@@ -961,9 +962,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private final BodyDeclaration fLastBodyDecl;
 		private final boolean fNonNLS;
 		private ExpressionStatement fAssignmentToConvert;
+		private StringLiteral fLiteralExpression;
 
 		public ChangeStringBufferToTextBlock(final List<MethodInvocation> toStringList, final List<MethodInvocation> indexOfList, final List<SimpleName> argList,
-				List<Statement> statements, List<StringLiteral> literals, ExpressionStatement assignmentToConvert, Set<String> excludedNames, BodyDeclaration lastBodyDecl, boolean nonNLS) {
+				List<Statement> statements, List<StringLiteral> literals, ExpressionStatement assignmentToConvert, Set<String> excludedNames, BodyDeclaration lastBodyDecl,
+				StringLiteral fLiteralExpression , boolean nonNLS) {
 			this.fToStringList= toStringList;
 			this.fIndexOfList= indexOfList;
 			this.fArgList= argList;
@@ -973,6 +976,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			this.fExcludedNames= excludedNames;
 			this.fLastBodyDecl= lastBodyDecl;
 			this.fNonNLS= nonNLS;
+			this.fLiteralExpression = fLiteralExpression;
 		}
 
 		public List<Statement> getStatements() {
@@ -986,12 +990,8 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			String DEFAULT_NAME= "str"; //$NON-NLS-1$
-			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(fToStringList.isEmpty() ? fArgList.get(0) : fToStringList.get(0), BodyDeclaration.class);
-			if (bodyDecl != null && bodyDecl != fLastBodyDecl) {
-				fExcludedNames.clear();
-			}
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.StringConcatToTextBlockCleanUp_description, cuRewrite);
+
 			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
 				@Override
 				public SourceRange computeSourceRange(final ASTNode nodeWithComment) {
@@ -1002,8 +1002,22 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					return super.computeSourceRange(nodeWithComment);
 				}
 			});
+			if (fLiteralExpression != null) {
+				StringBuilder buf= createTextBlockBuffer(Arrays.asList(fLiteralExpression), cuRewrite);
+				TextEditGroup group= createTextEditGroup(MultiFixMessages.StringToTextBlock_description, cuRewrite);
+				TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
+				rewrite.replace(fLiteralExpression, textBlock, group);
+				return;
+			}
 
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.StringConcatToTextBlockCleanUp_description, cuRewrite);
 			StringBuilder buf= createTextBlockBuffer(fLiterals, cuRewrite);
+
+			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(fToStringList.isEmpty() ? fArgList.get(0) : fToStringList.get(0), BodyDeclaration.class);
+			if (bodyDecl != null && bodyDecl != fLastBodyDecl) {
+				fExcludedNames.clear();
+			}
+
 			AST ast= fStatements.get(0).getAST();
 			if (fToStringList.size() == 1 &&
 					fIndexOfList.isEmpty() &&
@@ -1143,6 +1157,8 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		StringConcatFinder finder= new StringConcatFinder(operations, true);
 		exp.accept(finder);
+
+		String descriptionMessage= FixMessages.StringConcatToTextBlockFix_convert_msg;
 		if (operations.isEmpty()) {
 			StringBufferFinder finder2= new StringBufferFinder(operations, new HashSet<>());
 			exp.accept(finder2);
@@ -1150,7 +1166,24 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		if (operations.isEmpty()) {
 			return null;
 		}
-		return new StringConcatToTextBlockFixCore(FixMessages.StringConcatToTextBlockFix_convert_msg, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operations.get(0) });
+		return new StringConcatToTextBlockFixCore(descriptionMessage, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operations.get(0) });
+	}
+
+	public static StringConcatToTextBlockFixCore createStringLiteralToTextBlockFix(ASTNode exp) {
+		CompilationUnit root= (CompilationUnit) exp.getRoot();
+		if (!JavaModelUtil.is15OrHigher(root.getJavaElement().getJavaProject()))
+			return null;
+		if (exp instanceof StringLiteral) {
+			String nodeValue= ((StringLiteral) exp).getLiteralValue();
+			CharSequence newLine= "\n"; //$NON-NLS-1$
+			if (nodeValue.contains(newLine)) {
+				ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(null, null, null, null, null,
+						null, null, null, (StringLiteral) exp, false);
+				return new StringConcatToTextBlockFixCore(FixMessages.StringNewlinesToTextBlockFix_convert_msg, root,
+						new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operation });
+			}
+		}
+		return null;
 	}
 
 	private static StringBuilder createTextBlockBuffer(List<StringLiteral> literals, CompilationUnitRewrite cuRewrite) {

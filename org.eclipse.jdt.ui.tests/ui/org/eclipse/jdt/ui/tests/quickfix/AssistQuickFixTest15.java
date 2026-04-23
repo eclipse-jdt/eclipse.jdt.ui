@@ -555,6 +555,8 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+
+
 	@Test
 	public void testConcatToTextBlock10() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1111
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
@@ -864,6 +866,149 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testStringToTextBlock1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String buf3= new String("a\\nbbb\\nc");
+			        System.out.println(buf3);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("bbb");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String buf3= new String(\"""
+						a
+						bbb
+						c\""");
+			        System.out.println(buf3);
+			    }
+			}
+			""";
+
+		assertProposalExists(proposals, FixMessages.StringNewlinesToTextBlockFix_convert_msg);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testStringToTextBlock2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String buf3= "a\\nbbb\\nc";
+			        System.out.println(buf3);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("bbb");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String buf3= \"""
+						a
+						bbb
+						c\""";
+			        System.out.println(buf3);
+			    }
+			}
+			""";
+
+		assertProposalExists(proposals, FixMessages.StringNewlinesToTextBlockFix_convert_msg);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testStringToTextBlock3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String buf3= "a" + "bb\\nbb" + "c";
+			        System.out.println(buf3);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("bb");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String buf3= "a" + \"""
+						bb
+						bb\""" + "c";
+			        System.out.println(buf3);
+			    }
+			}
+			""";
+
+		assertProposalExists(proposals, FixMessages.StringNewlinesToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 

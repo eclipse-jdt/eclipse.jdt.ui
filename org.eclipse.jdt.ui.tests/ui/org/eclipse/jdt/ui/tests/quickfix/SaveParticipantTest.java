@@ -35,8 +35,6 @@ import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
 import org.eclipse.jface.text.CopyOnWriteTextStore;
 
-import org.eclipse.ui.internal.decorators.DecoratorManager;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -100,15 +98,14 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
-		cancelDecorationJob();
-		TestUtils.waitForReconciler(60_000L);
+		TestUtils.waitForEditorJobs(60_000L, true);
 	}
 
 	@SuppressWarnings("restriction")
 	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws Exception {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
 		Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
-		cancelDecorationJob();
+		TestUtils.cancelDecorationJob();
 
 		cu.getBuffer().setContents(newContent);
 		editor.doSave(null);
@@ -1332,19 +1329,6 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 
-	}
-
-	@SuppressWarnings("restriction")
-	private static void cancelDecorationJob() throws InterruptedException {
-		/*
-		 * The decoration job opens and closes buffers in BufferManager,
-		 * those buffers are used by the formatter code.
-		 * We don't want the job to run in parallel to the formatting done by the test,
-		 * but waiting for the job makes the test case up to 5 times slower.
-		 * So we cancel the job and then make sure it exits before formatting.
-		 */
-		Job.getJobManager().cancel(DecoratorManager.FAMILY_DECORATE);
-		Job.getJobManager().join(DecoratorManager.FAMILY_DECORATE, null);
 	}
 
 	// Use debug tracing for: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/79

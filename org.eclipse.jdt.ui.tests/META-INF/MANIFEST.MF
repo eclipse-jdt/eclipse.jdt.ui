@@ -38,7 +38,7 @@ Export-Package:
  org.eclipse.jdt.ui.tests.refactoring;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.ui.tests.search;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.ui.tests.ui.internal.compatibility;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
- org.eclipse.jdt.ui.tests.util;x-friends:="org.eclipse.jdt.ui.tests.refactoring",
+ org.eclipse.jdt.ui.tests.util;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.ui.tests.wizardapi;x-internal:=true
 Require-Bundle: 
  org.eclipse.core.expressions,

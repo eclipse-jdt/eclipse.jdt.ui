@@ -7291,7 +7291,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.boolean_literal">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.Java50CleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.Java50CleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.java50"
             runAfter="org.eclipse.jdt.ui.cleanup.unused_code">
       </cleanUp>

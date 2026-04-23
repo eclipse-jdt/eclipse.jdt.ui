@@ -142,6 +142,32 @@ public abstract class NullAnnotationsCorrectionProcessorCore<T> {
 		proposals.add(fixCorrectionProposalCoreToT(proposal, CORRECTION_CHANGE));
 	}
 
+	public void getRemoveContradictoryAnnotationProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
+		if (problem.getProblemArguments().length == 2) {
+			NullAnnotationsFixCore fix1= NullAnnotationsFixCore.createRemoveContradictoryNullAnnotationsFix(context.getASTRoot(), problem, problem.getProblemArguments()[0]);
+			if (fix1 == null)
+				return;
+			NullAnnotationsFixCore fix2= NullAnnotationsFixCore.createRemoveContradictoryNullAnnotationsFix(context.getASTRoot(), problem, problem.getProblemArguments()[1]);
+			if (fix2 == null)
+				return;
+
+			Map<String, String> options= new Hashtable<>();
+			FixCorrectionProposalCore proposal1= new FixCorrectionProposalCore(fix1, new NullAnnotationsCleanUpCore(options, problem.getProblemId()), IProposalRelevance.REMOVE_REDUNDANT_NULLNESS_ANNOTATION, context);
+			proposals.add(fixCorrectionProposalCoreToT(proposal1, CORRECTION_CHANGE));
+			FixCorrectionProposalCore proposal2= new FixCorrectionProposalCore(fix2, new NullAnnotationsCleanUpCore(options, problem.getProblemId()), IProposalRelevance.REMOVE_REDUNDANT_NULLNESS_ANNOTATION, context);
+			proposals.add(fixCorrectionProposalCoreToT(proposal2, CORRECTION_CHANGE));
+		}
+	}
+	public void getReplaceNullableAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
+		NullAnnotationsFixCore fix= NullAnnotationsFixCore.createReplaceNullableFix(context.getASTRoot(), problem);
+		if (fix == null)
+			return;
+
+		Map<String, String> options= new Hashtable<>();
+		FixCorrectionProposalCore proposal= new FixCorrectionProposalCore(fix, new NullAnnotationsCleanUpCore(options, problem.getProblemId()), IProposalRelevance.REPLACE_NULLABLE, context);
+		proposals.add(fixCorrectionProposalCoreToT(proposal, CORRECTION_CHANGE));
+	}
+
 	public void getExtractCheckedLocalProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		CompilationUnit compilationUnit = context.getASTRoot();
 		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();

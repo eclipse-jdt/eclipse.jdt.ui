@@ -148,7 +148,7 @@ public final class FixMessages extends NLS {
 	public static String NullAnnotationsRewriteOperations_change_overridden_return_nullness;
 	public static String NullAnnotationsRewriteOperations_remove_redundant_nullness_annotation;
 	public static String NullAnnotationsRewriteOperations_add_missing_default_nullness_annotation;
-
+	public static String NullAnnotationsRewriteOperations_remove_annotation;
 	public static String ExternalNullAnnotationChangeProposals_add_nullness_annotation;
 	public static String ExternalNullAnnotationChangeProposals_add_nullness_array_annotation;
 	public static String ExternalNullAnnotationChangeProposals_remove_nullness_annotation;
@@ -184,6 +184,7 @@ public final class FixMessages extends NLS {
 	public static String ConstantsCleanUpFix_refactor;
 	public static String StringBufferToStringBuilderFix_convert_msg;
 	public static String StringConcatToTextBlockFix_convert_msg;
+	public static String StringNewlinesToTextBlockFix_convert_msg;
 	public static String LambdaExpressionAndMethodRefFix_clean_up_expression_msg;
 	public static String InlineDeprecatedMethod_msg;
 	public static String ReplaceDeprecatedField_msg;
