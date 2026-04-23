@@ -21,6 +21,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
@@ -493,6 +496,50 @@ public class JavadocHoverTests extends CoreTests {
 		    String actualSnippetContent = actualHtmlContent.substring(contentStart, contentEnd).trim();
 		    String expectedSnippetContent = "var s = \"\";";
 		    assertEquals(expectedSnippetContent, actualSnippetContent);
+		}
+	}
+
+	@Test
+	public void testSnippetInlineLinkAppliedOnCorrectSubstring() throws Exception {
+		String source="""
+					package p;
+						public class Javadoc {
+						    /**
+							 * Snippet with advanced highlighting and linking.
+							 *
+							 * {@snippet :
+							 *   List<String> items = new ArrayList<>(); // @link substring="ArrayList" target="java.util.ArrayList"
+							 *   items.add("Java 18");                   // @highlight substring="items.add" type="highlighted"
+							 *   System.out.println(items.get(0));       // @highlight regex="\".*\""
+							 * }
+							 */
+						    public static void foo(Object object) {
+						    }
+						}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		Map<String, String> options = JavaCore.getOptions();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_26, options);
+		options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED);
+		fJProject1.setOptions(options);
+		IType type= cu.getType("Javadoc");
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+			Pattern pattern = Pattern.compile("<a\\b[^>]*>.*?</a>", Pattern.DOTALL);
+	        Matcher matcher = pattern.matcher(actualHtmlContent);
+	        String lastAnchor = null;
+	        while (matcher.find()) {
+	            lastAnchor = matcher.group();
+	        }
+	        assertNotNull("Anchor tag not found", lastAnchor);
+            Pattern codePattern = Pattern.compile("<code>(.*?)</code>");
+            Matcher codeMatcher = codePattern.matcher(lastAnchor);
+
+            assertTrue("Code tag not found inside anchor", codeMatcher.find());
+        	assertEquals("sequence doesn't match", "ArrayList", codeMatcher.group(1));
 		}
 	}
 
