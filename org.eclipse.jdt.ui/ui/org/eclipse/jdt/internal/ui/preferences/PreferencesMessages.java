@@ -203,6 +203,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_closeBrackets;
 	public static String JavaEditorPreferencePage_closeBraces;
 	public static String JavaEditorPreferencePage_closeJavaDocs;
+	public static String JavaEditorPreferencePage_closeMarkdownThreeBacktick;
 	public static String JavaEditorPreferencePage_wrapStrings;
 	public static String JavaEditorPreferencePage_escapeStrings;
 	public static String JavaEditorPreferencePage_escapeStringsNonAscii;

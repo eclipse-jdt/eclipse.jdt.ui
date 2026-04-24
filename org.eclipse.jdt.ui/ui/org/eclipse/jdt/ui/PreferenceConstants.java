@@ -1205,6 +1205,15 @@ public class PreferenceConstants {
 	public final static String EDITOR_CLOSE_JAVADOCS= "closeJavaDocs"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether the 'close markdown fenced code block' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.38
+	 */
+	public final static String EDITOR_CLOSE_FENCED_CODE_BLOCK= "closeFencedCodeBlock"; //$NON-NLS-1$
+	/**
 	 * A named preference that controls whether the 'add JavaDoc tags' feature
 	 * is enabled.
 	 * <p>
@@ -4288,6 +4297,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACES, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
+		store.setDefault(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, true);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, true);
 		store.setDefault(PreferenceConstants.EDITOR_WRAP_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_ESCAPE_STRINGS, true);

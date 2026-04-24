@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.editor;
 
+import java.util.Map;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -26,6 +28,9 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -57,11 +62,29 @@ public class MarkdownTypingTest extends TestCase {
 	private ICompilationUnit createCompilationUnit() throws Exception {
 		IPackageFragment fragment= javaProject.findPackageFragment(
 				javaProject.getProject().getFullPath().append("src"));
-
 		String content= """
-					/// markdown comment
-					public class Test {}
-				""";
+				/// markdown comment
+				public class Test {}
+			""";
+		ICompilationUnit cu= fragment.createCompilationUnit(
+				"Test.java", content, true, new NullProgressMonitor());
+		javaProject.getProject().build(
+				IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+		return cu;
+	}
+
+	private ICompilationUnit createCompilationUnit(String customContent) throws Exception {
+		IPackageFragment fragment= javaProject.findPackageFragment(
+				javaProject.getProject().getFullPath().append("src"));
+		String content = null;
+		if (customContent == null) {
+			content= """
+						/// markdown comment
+						public class Test {}
+					""";
+		} else {
+			content = customContent;
+		}
 
 		ICompilationUnit cu= fragment.createCompilationUnit(
 				"Test.java", content, true, new NullProgressMonitor());
@@ -80,11 +103,20 @@ public class MarkdownTypingTest extends TestCase {
 
 	private void typeCharacter(CompilationUnitEditor editr, char c) throws Exception {
 		IDocument doc = editr.getDocumentProvider().getDocument(editr.getEditorInput());
+		var viewer = editr.getViewer();
+		var textWidget = viewer.getTextWidget();
+		int offset = doc.get().indexOf("markdown comment") + "markdown comment".length();
+		textWidget.setCaretOffset(offset);
+		org.eclipse.swt.widgets.Event event = new org.eclipse.swt.widgets.Event();
+		event.character = c;
+		event.doit = true;
+		textWidget.notifyListeners(org.eclipse.swt.SWT.KeyDown, event);
+	}
 
+	private void typeCharacter(CompilationUnitEditor editr, char c, int offset) throws Exception {
 		var viewer = editr.getViewer();
 		var textWidget = viewer.getTextWidget();
 
-		int offset = doc.get().indexOf("markdown comment") + "markdown comment".length();
 		textWidget.setCaretOffset(offset);
 
 		org.eclipse.swt.widgets.Event event = new org.eclipse.swt.widgets.Event();
@@ -149,6 +181,208 @@ public class MarkdownTypingTest extends TestCase {
 
 		String expected = """
 					/// markdown comment[
+					public class Test {}
+				""";
+		assertEquals(expected, doc.get());
+	}
+
+	public void testEnableFencedCodeBlockTypingInMarkdown_supported_java_version() throws Exception {
+		String customContent = """
+					///
+					public class Test {}
+				""";
+		ICompilationUnit cu= createCompilationUnit(customContent);
+
+		IJavaProject project = cu.getJavaProject();
+		Map<String, String> options = project.getOptions(true);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_26, options);
+		project.setOptions(options);
+
+		assertEquals(JavaCore.VERSION_26, project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+
+		editor = openEditor(cu);
+
+		PreferenceConstants.getPreferenceStore()
+        .setValue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, true);
+
+		int offset = customContent.indexOf("///") + 3;
+		typeCharacter(editor, '`', offset);
+		typeCharacter(editor, '`', offset + 1);
+		typeCharacter(editor, '`', offset + 2);
+
+		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+
+		String expected = """
+					///``````
+					public class Test {}
+				""";
+		assertEquals(expected, doc.get());
+	}
+
+	public void testEnableFencedCodeBlockTypingInMarkdown_unsupported_java_version() throws Exception {
+		String customContent = """
+					///
+					public class Test {}
+				""";
+		ICompilationUnit cu= createCompilationUnit(customContent);
+
+		IJavaProject project = cu.getJavaProject();
+		Map<String, String> options = project.getOptions(true);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_21, options);
+		project.setOptions(options);
+
+		assertEquals(JavaCore.VERSION_21, project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+
+		editor = openEditor(cu);
+
+		PreferenceConstants.getPreferenceStore()
+        .setValue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, true);
+
+		int offset = customContent.indexOf("///") + 3;
+		typeCharacter(editor, '`', offset);
+		typeCharacter(editor, '`', offset + 1);
+		typeCharacter(editor, '`', offset + 2);
+
+		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+
+		String expected = """
+					///```
+					public class Test {}
+				""";
+		assertEquals(expected, doc.get());
+	}
+
+	public void testDiableFencedCodeBlockTypingInMarkdown() throws Exception {
+		String customContent = """
+					///
+					public class Test {}
+				""";
+		ICompilationUnit cu= createCompilationUnit(customContent);
+
+		IJavaProject project = cu.getJavaProject();
+		Map<String, String> options = project.getOptions(true);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_26, options);
+		project.setOptions(options);
+
+		assertEquals(JavaCore.VERSION_26, project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+
+		editor = openEditor(cu);
+
+		PreferenceConstants.getPreferenceStore()
+        .setValue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, false);
+
+		int offset = customContent.indexOf("///") + 3;
+		typeCharacter(editor, '`', offset);
+		typeCharacter(editor, '`', offset + 1);
+		typeCharacter(editor, '`', offset + 2);
+
+		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+
+		String expected = """
+					///```
+					public class Test {}
+				""";
+		assertEquals(expected, doc.get());
+	}
+
+	public void testEnableFencedCodeBlockInsideDoubleQuote_supported_java_version() throws Exception {
+		String customContent = """
+					/// int x = "";
+					public class Test {}
+				""";
+		ICompilationUnit cu= createCompilationUnit(customContent);
+
+		IJavaProject project = cu.getJavaProject();
+		Map<String, String> options = project.getOptions(true);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_26, options);
+		project.setOptions(options);
+
+		assertEquals(JavaCore.VERSION_26, project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+
+		editor = openEditor(cu);
+
+		PreferenceConstants.getPreferenceStore()
+        .setValue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, true);
+
+		int offset = customContent.indexOf("\"\"") + 1;
+		typeCharacter(editor, '`', offset);
+		typeCharacter(editor, '`', offset + 1);
+		typeCharacter(editor, '`', offset + 2);
+
+		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+
+		String expected = """
+					/// int x = "```";
+					public class Test {}
+				""";
+		assertEquals(expected, doc.get());
+	}
+
+	public void testEnableFencedCodeBlockInsideMethod_supported_java_version() throws Exception {
+		String customContent = """
+					/// foo();
+					public class Test {}
+				""";
+		ICompilationUnit cu= createCompilationUnit(customContent);
+
+		IJavaProject project = cu.getJavaProject();
+		Map<String, String> options = project.getOptions(true);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_26, options);
+		project.setOptions(options);
+
+		assertEquals(JavaCore.VERSION_26, project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+
+		editor = openEditor(cu);
+
+		PreferenceConstants.getPreferenceStore()
+        .setValue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, true);
+
+		int offset = customContent.indexOf("()") + 1;
+		typeCharacter(editor, '`', offset);
+		typeCharacter(editor, '`', offset + 1);
+		typeCharacter(editor, '`', offset + 2);
+
+		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+
+		String expected = """
+					/// foo(```);
+					public class Test {}
+				""";
+		assertEquals(expected, doc.get());
+	}
+
+	public void testEnableFencedCodeBlockInsideJavadoc_supported_java_version() throws Exception {
+		String customContent = """
+					/**
+					 *
+					 */
+					public class Test {}
+				""";
+		ICompilationUnit cu= createCompilationUnit(customContent);
+
+		IJavaProject project = cu.getJavaProject();
+		Map<String, String> options = project.getOptions(true);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_26, options);
+		project.setOptions(options);
+
+		assertEquals(JavaCore.VERSION_26, project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+
+		editor = openEditor(cu);
+
+		PreferenceConstants.getPreferenceStore()
+        .setValue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, true);
+
+		int offset = customContent.indexOf("\n", customContent.indexOf("\n") + 1);
+		typeCharacter(editor, '`', offset);
+		typeCharacter(editor, '`', offset + 1);
+		typeCharacter(editor, '`', offset + 2);
+
+		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+
+		String expected = """
+					/**
+					 *```
+					 */
 					public class Test {}
 				""";
 		assertEquals(expected, doc.get());
