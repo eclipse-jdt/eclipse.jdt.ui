@@ -957,7 +957,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		String resolvedTypeName= null;
 		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
 		ITypeBinding simpleBinding= null;
-		if (binding != null) {
+		if (binding != null && !binding.getQualifiedName().equals("java.lang.Object")) { //$NON-NLS-1$
 			simpleBinding= binding;
 			if (simpleBinding.isArray()) {
 				simpleBinding= simpleBinding.getElementType();
@@ -1045,7 +1045,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			}
 		}
 		if (elements.length == 0) {
-			collectRequiresModuleProposals(cu, node, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
+			collectRequiresModuleProposals(cu, node, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE + 100, proposals, true);
 		}
 	}
 
@@ -1094,7 +1094,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 					String moduleRequiresChangeName= change.getName();
 					moduleRequiresChangeName= moduleRequiresChangeName.substring(0, 1).toLowerCase() + moduleRequiresChangeName.substring(1);
 					String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_combine_two_proposals_info, new String[] { importChangeName, moduleRequiresChangeName });
-					compositeProposal= new ChangeCorrectionProposalCore(changeName, null, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE) {
+					compositeProposal= new ChangeCorrectionProposalCore(changeName, null, aicpc.getRelevance()) {
 						@Override
 						protected Change createChange() throws CoreException {
 							return new CompositeChange(changeName, new Change[] { change, importChange });
