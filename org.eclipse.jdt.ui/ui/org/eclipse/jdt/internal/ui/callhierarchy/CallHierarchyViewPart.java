@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.eclipse.help.IContextProvider;
 
@@ -206,6 +207,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	private static final String GROUP_FOCUS = "group.focus"; //$NON-NLS-1$
     private static final int PAGE_EMPTY = 0;
     private static final int PAGE_VIEWER = 1;
+	private static final int FILTER_STRING_MAX_LENGTH= 80;
     private Label fNoHierarchyShownLabel;
     private PageBook fPagebook;
     private final IDialogSettings fDialogSettings;
@@ -1165,12 +1167,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 */
 	private String computeContentDescription(int includeMask) {
 		// see also HistoryAction.getElementLabel(IMember[])
-		String scopeDescription= fSearchScopeActions.getFullDescription(includeMask);
-
+		String scopeDescriptionWithFilters= computeScopeDescriptionWithFilters(includeMask);
 		if (fInputElements.length == 1) {
 			IMember element= fInputElements[0];
 			String elementName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
-			String[] args= new String[] { elementName, scopeDescription };
+			String[] args= new String[] { elementName, scopeDescriptionWithFilters };
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
 				switch (element.getElementType()) {
 					case IJavaElement.TYPE:
@@ -1209,11 +1210,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		        		return null;
 		        	case 2:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_2,
-		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescriptionWithFilters });
 
 		        	default:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_more,
-		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescriptionWithFilters });
 				}
 			} else {
 				switch (fInputElements.length) {
@@ -1222,14 +1223,40 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 						return null;
 					case 2:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_2,
-								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescriptionWithFilters });
 
 					default:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_more,
-								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescriptionWithFilters });
 				}
 			}
 		}
+	}
+
+	private String computeScopeDescriptionWithFilters(int includeMask) {
+		StringJoiner joiner= new StringJoiner(" "); //$NON-NLS-1$
+		CallHierarchy callHierarchy= CallHierarchy.getDefault();
+		if (callHierarchy.isHideTestCode()) {
+			joiner.add(CallHierarchyMessages.CallHierarchyViewPart_scopeDescriptionWithFilters_inMainCode);
+		} else if (callHierarchy.isShowTestCode()) {
+			joiner.add(CallHierarchyMessages.CallHierarchyViewPart_scopeDescriptionWithFilters_inTestCode);
+		}
+		joiner.add(fSearchScopeActions.getFullDescription(includeMask));
+		if (callHierarchy.isFilterEnabled()) {
+			String filters= truncate(callHierarchy.getFilters().trim(), FILTER_STRING_MAX_LENGTH);
+			if (!filters.isEmpty()) {
+				joiner.add(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_scopeDescriptionWithFilters_activeFilters, filters));
+			}
+		}
+		return joiner.toString();
+	}
+
+	private static String truncate(String text, int maxLength) {
+		if (text.length() <= maxLength) {
+			return text;
+		}
+		String truncated= text.substring(0, maxLength - 3);
+		return truncated + "..."; //$NON-NLS-1$
 	}
 
 	private static String getShortLabel(IMember member) {
