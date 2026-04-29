@@ -18,6 +18,7 @@ import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
 
+import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyViewPartContentDescriptionTest;
 import org.eclipse.jdt.internal.ui.callhierarchy.FiltersDialogTest;
 import org.eclipse.jdt.internal.ui.compare.JavaIgnoreWhitespaceContributorTest;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparatorTest;
@@ -63,7 +64,8 @@ ASTProviderTest.class,
 JDTFlagsTest18.class,
 JavaTokenComparatorTest.class,
 JavaIgnoreWhitespaceContributorTest.class,
-FiltersDialogTest.class
+FiltersDialogTest.class,
+CallHierarchyViewPartContentDescriptionTest.class
 })
 public class CoreTestSuite {
 }
