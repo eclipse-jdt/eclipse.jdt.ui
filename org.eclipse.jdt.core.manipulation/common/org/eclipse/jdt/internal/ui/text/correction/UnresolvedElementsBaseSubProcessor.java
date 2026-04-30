@@ -957,7 +957,8 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		String resolvedTypeName= null;
 		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
 		ITypeBinding simpleBinding= null;
-		if (binding != null && !binding.getQualifiedName().equals("java.lang.Object")) { //$NON-NLS-1$
+		if (binding != null &&
+				(!binding.getQualifiedName().equals("java.lang.Object") || elements.length == 0)) { //$NON-NLS-1$
 			simpleBinding= binding;
 			if (simpleBinding.isArray()) {
 				simpleBinding= simpleBinding.getElementType();
