@@ -29,6 +29,11 @@ class MethodReferencesSearchRequestor extends SearchRequestor {
         fSearchResults = new CallSearchResultCollector();
     }
 
+    MethodReferencesSearchRequestor(boolean requireExactMatch) {
+        this();
+        fRequireExactMatch = requireExactMatch;
+    }
+
     public Map<String, MethodCall> getCallers() {
         return fSearchResults.getCallers();
     }
