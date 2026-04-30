@@ -233,6 +233,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_newLines_pref_before_finally_statements;
 	public static String FormatterModifyDialog_newLines_pref_before_while_in_do_statements;
 	public static String FormatterModifyDialog_newLines_pref_empty_statement;
+	public static String FormatterModifyDialog_newLines_pref_textblock_statement;
 	public static String FormatterModifyDialog_newLines_pref_end_of_file;
 	public static String FormatterModifyDialog_newLines_pref_enum_constants;
 	public static String FormatterModifyDialog_newLines_pref_fields;
