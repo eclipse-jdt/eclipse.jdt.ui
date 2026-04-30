@@ -622,6 +622,10 @@ public class JavaMergeViewer extends TextMergeViewer {
 			super.doSetInput(input);
 			// the editor input has been explicitly set
 			fInputSet = true;
+
+			if (getInputJavaElement() != null) {
+				installSemanticHighlighting();
+			}
 		}
 		// called by org.eclipse.ui.texteditor.TextEditorAction.canModifyEditor()
 		@Override
