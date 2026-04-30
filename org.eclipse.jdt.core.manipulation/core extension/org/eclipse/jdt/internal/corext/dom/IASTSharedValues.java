@@ -23,7 +23,13 @@ public interface IASTSharedValues {
 	 */
 	int SHARED_AST_LEVEL= AST.getJLSLatest();
 
+	/**
+	 * Enables statement recovery to allow partial AST construction when source contains syntax errors.
+	 */
 	boolean SHARED_AST_STATEMENT_RECOVERY= true;
 
+	/**
+	 * Enables binding recovery to provide best-effort type resolution when source contains errors.
+	 */
 	boolean SHARED_BINDING_RECOVERY= true;
 }
