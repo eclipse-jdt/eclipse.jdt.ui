@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
@@ -64,36 +63,24 @@ public class TestSearchEngine extends CoreTestSearchEngine {
 		var result= new HashSet<String>();
 		context.run(true, true, (progressMonitor) -> {
 			String message= Messages.format(JUnitMessages.TestSearchEngine_search_message_progress_monitor, type.getElementName());
-			SubMonitor subMonitor= SubMonitor.convert(progressMonitor, message, 1);
+			SubMonitor subMonitor= SubMonitor.convert(progressMonitor, message, 2);
 			try {
-				collectMethodNames(type, javaProject, testKind.getId(), result, subMonitor);
+				IType[] types= type.newSupertypeHierarchy(subMonitor.split(1)).getAllTypes();
+
+				subMonitor= subMonitor.split(1);
+				subMonitor.setWorkRemaining(types.length);
+
+				for (IType it : types) {
+					if (!"java.lang.Object".equals(it.getFullyQualifiedName())) {//$NON-NLS-1$
+						collectDeclaredMethodNames(it, javaProject, testKind.getId(), result);
+					}
+					subMonitor.worked(1);
+				}
 			} catch (CoreException e) {
 				throw new InvocationTargetException(e);
 			}
 		});
 		return result;
-	}
-
-	private static void collectMethodNames(IType type, IJavaProject javaProject, String testKindId, Set<String> methodNames, IProgressMonitor monitor) throws JavaModelException {
-		if (type == null) {
-			return;
-		}
-
-		SubMonitor subMonitor= SubMonitor.convert(monitor, 3);
-
-		collectDeclaredMethodNames(type, javaProject, testKindId, methodNames);
-		subMonitor.split(1);
-
-		String superclassName= type.getSuperclassName();
-		IType superType= getResolvedType(superclassName, type, javaProject);
-		collectMethodNames(superType, javaProject, testKindId, methodNames, subMonitor.split(1));
-
-		String[] superInterfaceNames= type.getSuperInterfaceNames();
-		subMonitor.setWorkRemaining(superInterfaceNames.length);
-		for (String interfaceName : superInterfaceNames) {
-			superType= getResolvedType(interfaceName, type, javaProject);
-			collectMethodNames(superType, javaProject, testKindId, methodNames, subMonitor.split(1));
-		}
 	}
 
 	private static IType getResolvedType(String typeName, IType type, IJavaProject javaProject) throws JavaModelException {
