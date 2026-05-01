@@ -16,6 +16,8 @@ package org.eclipse.jdt.text.tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -121,7 +123,8 @@ public class AbstractSemanticHighlightingTest {
 	}
 
 	protected void assertEqualPositions(Position[] expected, Position[] actual) {
-		assertEquals(expected.length, actual.length);
+		assertEquals(expected.length, actual.length,
+				"Expected: " + Arrays.toString(expected) + ", actual: " + Arrays.toString(actual));
 		for (int i= 0, n= expected.length; i < n; i++) {
 			assertEquals(expected[i].isDeleted(), actual[i].isDeleted());
 			assertEquals(expected[i].getOffset(), actual[i].getOffset());
