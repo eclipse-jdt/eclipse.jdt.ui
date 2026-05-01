@@ -666,6 +666,8 @@ bar
  {
 @SuppressWarnings("unused") final @Positive int k;
 }
+  String s = "123" + """
+  		abcdef""" + "789";
   void foo() {    ;;   }
   void empty(@SuppressWarnings("unused") final int i) { }}
 enum MyEnum {    @Deprecated UNDEFINED(0) { }}
