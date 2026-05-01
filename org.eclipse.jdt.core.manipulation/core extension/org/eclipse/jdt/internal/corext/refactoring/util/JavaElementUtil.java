@@ -269,7 +269,7 @@ public class JavaElementUtil {
 								case IAccessRule.K_DISCOURAGED:
 									return true;
 								default:
-									break;
+									return false;
 							}
 						}
 					}
