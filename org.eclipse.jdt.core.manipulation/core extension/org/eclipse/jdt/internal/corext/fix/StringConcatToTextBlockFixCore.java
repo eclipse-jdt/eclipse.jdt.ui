@@ -295,6 +295,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			});
 
 			IJavaElement root= cuRewrite.getRoot().getJavaElement();
+			boolean needNewLineTextBlock = false;
 			if (root != null) {
 				IJavaProject project= root.getJavaProject();
 				if (project != null) {
@@ -305,6 +306,8 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 							fIndent += " "; //$NON-NLS-1$
 						}
 					}
+					String newLineTextBlockStr = project.getOption(DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE, true);
+					needNewLineTextBlock = DefaultCodeFormatterConstants.TRUE.equals(newLineTextBlockStr);
 				}
 			}
 
@@ -325,12 +328,17 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				}
 			});
 
+			if (needNewLineTextBlock) {
+				buf.append("\n" + fIndent); //$NON-NLS-1$
+			}
+
 			buf.append("\"\"\"\n"); //$NON-NLS-1$
 			boolean newLine= false;
 			boolean allWhiteSpaceStart= true;
 			boolean allEmpty= true;
+			int bufLength = (needNewLineTextBlock) ? 6 : 4;
 			for (String part : parts) {
-				if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
+				if (buf.length() > bufLength) {// the first part has been added after the text block delimiter and newline
 					if (!newLine) {
 						// no line terminator in this part: merge the line by emitting a line continuation escape
 						buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
@@ -373,6 +381,15 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					buf.append("\\t"); //$NON-NLS-1$
 				}
 			}
+
+			if (needNewLineTextBlock) {
+				if (!newLine) {
+					buf.append("\\"); //$NON-NLS-1$
+					buf.append("\n");  //$NON-NLS-1$
+					buf.append(fIndent);
+				}
+			}
+
 			buf.append("\"\"\""); //$NON-NLS-1$
 			if (!isTagged) {
 				TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
@@ -852,7 +869,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 		@Override
 		public boolean visit(VariableDeclarationFragment node) {
-			// TODO Auto-generated method stub
 			VariableDeclarationStatement varDeclStmt= ASTNodes.getFirstAncestorOrNull(node, VariableDeclarationStatement.class);
 			if (varDeclStmt == null || varDeclStmt.fragments().size() != 1) {
 				return false;
@@ -1189,6 +1205,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 	private static StringBuilder createTextBlockBuffer(List<StringLiteral> literals, CompilationUnitRewrite cuRewrite) {
 		IJavaElement root= cuRewrite.getRoot().getJavaElement();
 		String fIndent= "\t"; //$NON-NLS-1$
+		boolean needNewLineTextBlock = false;
 		if (root != null) {
 			IJavaProject project= root.getJavaProject();
 			if (project != null) {
@@ -1199,20 +1216,24 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 						fIndent += " "; //$NON-NLS-1$
 					}
 				}
+				String newLineTextBlockStr = project.getOption(DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE, true);
+				needNewLineTextBlock = DefaultCodeFormatterConstants.TRUE.equals(newLineTextBlockStr);
 			}
 		}
-
 		StringBuilder buf= new StringBuilder();
 
 		List<String> parts= new ArrayList<>();
 		literals.stream().forEach((t) -> { String value= t.getEscapedValue(); parts.addAll(unescapeBlock(value.substring(1, value.length() - 1))); });
-
+		if(needNewLineTextBlock) {
+			buf.append("\n" + fIndent); //$NON-NLS-1$
+		}
 		buf.append("\"\"\"\n"); //$NON-NLS-1$
 		boolean newLine= false;
 		boolean allWhiteSpaceStart= true;
 		boolean allEmpty= true;
+		int bufLength = (needNewLineTextBlock) ? 6 : 4;
 		for (String part : parts) {
-			if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
+			if (buf.length() > bufLength) {// the first part has been added after the text block delimiter and newline
 				if (!newLine) {
 					// no line terminator in this part: merge the line by emitting a line continuation escape
 					buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
@@ -1246,6 +1267,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			for (int i= count; i > 0; --i) {
 				buf.append("\\\""); //$NON-NLS-1$
 			}
+		}
+		if(needNewLineTextBlock) {
+			if (!newLine)
+				buf.append("\\\\n" + fIndent); //$NON-NLS-1$
 		}
 		buf.append("\"\"\""); //$NON-NLS-1$
 		return buf;
