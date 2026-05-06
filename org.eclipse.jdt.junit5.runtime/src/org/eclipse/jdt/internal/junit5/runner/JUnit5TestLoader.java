@@ -15,8 +15,11 @@
 package org.eclipse.jdt.internal.junit5.runner;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.Filter;
 import org.junit.platform.engine.discovery.ClassNameFilter;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -57,6 +60,53 @@ public class JUnit5TestLoader implements ITestLoader {
 			}
 		}
 		return refs;
+	}
+
+	@Override
+	public ITestReference[] loadTests(LinkedHashMap<Class<?>, List<String>> classToMethods, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener) {
+		fRemoteTestRunner= listener;
+		if (classToMethods == null || classToMethods.isEmpty()) {
+			return new ITestReference[0];
+		}
+		// Build a single LauncherDiscoveryRequest covering every selected method across
+		// every selected class. JUnit Platform supports multiple selectors natively, so
+		// the resulting test plan is executed in one launch, sharing per-class
+		// @BeforeAll / @AfterAll lifecycle and any cached fixture (e.g. a Spring
+		// ApplicationContext). A null/empty method list represents an unfiltered class
+		// run, which lets a single -testNameFile mix legacy class lines with
+		// Class:method lines without losing the class-only selections.
+		List<DiscoverySelector> selectors= new ArrayList<>();
+		for (Map.Entry<Class<?>, List<String>> entry : classToMethods.entrySet()) {
+			Class<?> clazz= entry.getKey();
+			if (clazz == null) {
+				continue;
+			}
+			List<String> methods= entry.getValue();
+			if (methods == null || methods.isEmpty()) {
+				selectors.add(DiscoverySelectors.selectClass(clazz.getName()));
+			} else {
+				for (String method : methods) {
+					if (method == null || method.isEmpty()) {
+						continue;
+					}
+					// Note: the protocol carries only the method name (no parameter
+					// signature), so a name like "Class#test" matches every method
+					// declared with that name. For parameterized/repeated tests this
+					// is the desired behaviour; for genuinely overloaded test
+					// methods all overloads will be discovered, which mirrors the
+					// behaviour of the single-method ATTR_TEST_NAME path.
+					selectors.add(DiscoverySelectors.selectMethod(clazz.getName() + '#' + method));
+				}
+			}
+		}
+		if (selectors.isEmpty()) {
+			return new ITestReference[0];
+		}
+		LauncherDiscoveryRequest request= LauncherDiscoveryRequestBuilder.request()
+				.selectors(selectors)
+				.filters(getTagFilters(includeExcludeTags))
+				.build();
+		return new ITestReference[] { new JUnit5TestReference(request, fLauncher, fRemoteTestRunner) };
 	}
 
 	private ITestReference createTest(Class<?> clazz, String testName, String[][] includeExcludeTags, String[] failureNames) {

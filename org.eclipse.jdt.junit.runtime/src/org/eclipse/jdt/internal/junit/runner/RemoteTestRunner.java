@@ -26,6 +26,11 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader;
@@ -65,6 +70,15 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * The name of the test (argument -test)
 	 */
 	private String fTestName;
+	/**
+	 * Optional mapping from test class name to the list of method names to execute
+	 * within that class. Populated when {@code -testNameFile} contains lines of the
+	 * form {@code ClassName:methodName}. When non-empty, multi-method dispatch is
+	 * used so that the entire selection runs in a single launch. When empty, the
+	 * legacy single-method ({@link #fTestName}) path is used and behavior is
+	 * unchanged.
+	 */
+	private LinkedHashMap<String, List<String>> fMethodsByClass= new LinkedHashMap<>();
 	/**
 	 * The names of the packages containing tests to run
 	 */
@@ -408,11 +422,48 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readTestNames(String testNameFile) throws IOException {
-		fTestClassNames= readLines(testNameFile);
+		String[] lines= readLines(testNameFile);
+		fMethodsByClass.clear();
+		// LinkedHashSet keeps insertion order (so test execution follows the order in
+		// the file) while giving O(1) deduplication. The previous ArrayList#contains
+		// approach was O(n^2) for files with many Class:method lines.
+		LinkedHashSet<String> classNames= new LinkedHashSet<>();
+		for (String line : lines) {
+			if (line == null) {
+				continue;
+			}
+			line= line.trim();
+			if (line.isEmpty()) {
+				continue;
+			}
+			int colonIdx= line.indexOf(':');
+			if (colonIdx <= 0 || colonIdx == line.length() - 1) {
+				// Legacy line: a fully-qualified class name.
+				classNames.add(line);
+			} else {
+				// Extended format: "fully.qualified.ClassName:methodName" — selects a
+				// specific method. Multiple methods of the same class may appear on
+				// separate lines and will be dispatched in a single launch via
+				// ITestLoader#loadTests(LinkedHashMap, ...).
+				String className= line.substring(0, colonIdx);
+				String methodName= line.substring(colonIdx + 1);
+				List<String> methods= fMethodsByClass.computeIfAbsent(className, k -> new ArrayList<>());
+				methods.add(methodName);
+				classNames.add(className);
+			}
+		}
+		fTestClassNames= classNames.toArray(new String[0]);
 		if (fDebugMode) {
 			System.out.println("Tests:"); //$NON-NLS-1$
 			for (String fTestClassName : fTestClassNames) {
-				System.out.println("    "+fTestClassName); //$NON-NLS-1$
+				List<String> methods= fMethodsByClass.get(fTestClassName);
+				if (methods == null || methods.isEmpty()) {
+					System.out.println("    "+fTestClassName); //$NON-NLS-1$
+				} else {
+					for (String m : methods) {
+						System.out.println("    "+fTestClassName+":"+m); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
 			}
 		}
 	}
@@ -501,7 +552,32 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * @param execution executor
 	 */
 	private void runTests(String[] testClassNames, String testName, TestExecution execution) {
-		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, fPackageNames, fIncludeExcludeTags, fUniqueId, this);
+		ITestReference[] suites;
+		if (!fMethodsByClass.isEmpty()) {
+			// Multi-method launch: each entry maps a loaded Class<?> to the list of
+			// methods that should be discovered for it. Class-only entries from the
+			// same -testNameFile are kept and represented by an empty method list,
+			// which loaders interpret as "run the whole class" — this lets a single
+			// file mix legacy class lines with Class:method lines and still execute
+			// the whole selection inside one test JVM (sharing per-class
+			// @BeforeAll / @AfterAll / Spring ApplicationContext lifecycle).
+			Class<?>[] classes= loadClasses(testClassNames);
+			LinkedHashMap<Class<?>, List<String>> classToMethods= new LinkedHashMap<>();
+			for (Class<?> clazz : classes) {
+				if (clazz == null) {
+					continue;
+				}
+				List<String> methods= fMethodsByClass.get(clazz.getName());
+				classToMethods.put(clazz, methods != null ? methods : Collections.emptyList());
+			}
+			if (!classToMethods.isEmpty()) {
+				suites= fLoader.loadTests(classToMethods, fFailureNames, fPackageNames, fIncludeExcludeTags, fUniqueId, this);
+			} else {
+				suites= new ITestReference[0];
+			}
+		} else {
+			suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, fPackageNames, fIncludeExcludeTags, fUniqueId, this);
+		}
 
 		// count all testMethods and inform ITestRunListeners
 		int count= countTests(suites);

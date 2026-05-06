@@ -17,11 +17,17 @@ package org.eclipse.jdt.internal.junit4.runner;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.runner.Description;
 import org.junit.runner.Request;
 import org.junit.runner.Runner;
+import org.junit.runner.manipulation.Filter;
 
 import org.eclipse.jdt.internal.junit.runner.ITestLoader;
 import org.eclipse.jdt.internal.junit.runner.ITestReference;
@@ -50,6 +56,102 @@ public class JUnit4TestLoader implements ITestLoader {
 			refs[i]= ref;
 		}
 		return refs;
+	}
+
+	@Override
+	public ITestReference[] loadTests(
+			LinkedHashMap<Class<?>, List<String>> classToMethods,
+			String[] failureNames,
+			String[] packages,
+			String[][] includeExcludeTags,
+			String uniqueId,
+			RemoteTestRunner listener) {
+
+		if (classToMethods == null || classToMethods.isEmpty()) {
+			return new ITestReference[0];
+		}
+		// JUnit 4 has no native multi-method selector, but a single class can be
+		// filtered down to an arbitrary set of methods via Request#filterWith. We
+		// therefore create one ITestReference per class (each running in the same JVM)
+		// instead of one per (class, method) pair.
+		List<ITestReference> refs= new ArrayList<>(classToMethods.size());
+		for (Map.Entry<Class<?>, List<String>> entry : classToMethods.entrySet()) {
+			Class<?> clazz= entry.getKey();
+			if (clazz == null) {
+				continue;
+			}
+			List<String> methods= entry.getValue();
+			if (methods == null || methods.isEmpty()) {
+				ITestReference unfiltered= createUnfilteredTest(clazz, failureNames);
+				if (unfiltered != null) {
+					refs.add(unfiltered);
+				}
+				continue;
+			}
+			ITestReference ref= createMultiMethodTest(clazz, methods, failureNames, listener);
+			if (ref != null) {
+				refs.add(ref);
+			}
+		}
+		return refs.toArray(new ITestReference[0]);
+	}
+
+	private ITestReference createMultiMethodTest(Class<?> clazz, List<String> methodNames, String[] failureNames, RemoteTestRunner listener) {
+		// Fast path: a single method behaves exactly like the legacy -test path so we
+		// preserve identical behavior (incl. JUnit 3 setUpTest detection).
+		if (methodNames.size() == 1) {
+			return createTest(clazz, methodNames.get(0), failureNames, listener);
+		}
+		Set<String> distinct= new HashSet<>(methodNames);
+		Request request= sortByFailures(Request.classWithoutSuiteMethod(clazz).filterWith(new MultiMethodFilter(distinct)), failureNames);
+		Runner runner= request.getRunner();
+		Description description= runner.getDescription();
+		return new JUnit4TestReference(runner, description);
+	}
+
+	/**
+	 * Filter that accepts any test {@link Description} whose method name (with the
+	 * trailing parameter list, if present, stripped) matches one of the requested
+	 * method names. Suites and parent descriptions are accepted when at least one
+	 * descendant matches.
+	 */
+	private static final class MultiMethodFilter extends Filter {
+		private final Set<String> fMethodNames;
+
+		MultiMethodFilter(Set<String> methodNames) {
+			fMethodNames= methodNames;
+		}
+
+		@Override
+		public boolean shouldRun(Description description) {
+			if (description.isTest()) {
+				String name= description.getMethodName();
+				if (name == null) {
+					return false;
+				}
+				int paren= name.indexOf('(');
+				if (paren > 0) {
+					name= name.substring(0, paren);
+				}
+				int bracket= name.indexOf('[');
+				if (bracket > 0) {
+					// strip parameterized invocation index, e.g. "myTest[0]" -> "myTest"
+					name= name.substring(0, bracket);
+				}
+				return fMethodNames.contains(name);
+			}
+			for (Description child : description.getChildren()) {
+				if (shouldRun(child)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public String describe() {
+			return "matches any of " + fMethodNames; //$NON-NLS-1$
+		}
 	}
 
 	private Description getRootDescription(Runner runner, DescriptionMatcher matcher) {
