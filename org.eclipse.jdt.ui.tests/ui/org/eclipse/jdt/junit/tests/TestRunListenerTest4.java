@@ -24,6 +24,7 @@ import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -348,5 +349,49 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 		};
 		String[] actual= runTreeTest(aTestCase, 12);
 		assertEqualLog(expectedSequence, actual);
+	}
+
+	/**
+	 * Verifies that selecting individual methods across multiple test classes runs all
+	 * of them in a single VM via the multi-method {@code -testNameFile} extension.
+	 */
+	@Test
+	public void testMultiMethodAcrossClasses() throws Exception {
+		String fooSource=
+				"""
+			package pack;
+			import org.junit.Test;
+			public class FooTest {
+			    @Test public void a() { }
+			    @Test public void unused() { }
+			}""";
+		String barSource=
+				"""
+			package pack;
+			import org.junit.Test;
+			public class BarTest {
+			    @Test public void b() { }
+			    @Test public void c() { }
+			}""";
+		IType fooType= createType(fooSource, "pack", "FooTest.java");
+		IType barType= createType(barSource, "pack", "BarTest.java");
+
+		IMember[] members= {
+				fooType.getMethod("a", new String[0]),
+				barType.getMethod("b", new String[0]),
+				barType.getMethod("c", new String[0]),
+		};
+
+		TestRunLog log= new TestRunLog();
+		final TestRunListener testRunListener= new TestRunListeners.SequenceTest(log);
+		JUnitCore.addTestRunListener(testRunListener);
+		String[] actual;
+		try {
+			actual= launchJUnitMultiMethod(members, fooType, TestKindRegistry.JUNIT4_TEST_KIND_ID, log);
+		} finally {
+			JUnitCore.removeTestRunListener(testRunListener);
+		}
+
+		assertMultiMethodRun(actual, "pack.FooTest#a", "pack.BarTest#b", "pack.BarTest#c");
 	}
 }
