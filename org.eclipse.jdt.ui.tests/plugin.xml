@@ -302,5 +302,14 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
    </extension>
 <!-- End of JavaLeakTest -->
-   
+
+   <extension
+         point="org.eclipse.jdt.core.searchParticipant">
+      <searchParticipant
+            class="org.eclipse.jdt.ui.tests.callhierarchy.TestCallHierarchyParticipant"
+            id="org.eclipse.jdt.ui.tests.testCallHierarchySearchParticipant"
+            fileExtensions="testlang">
+      </searchParticipant>
+   </extension>
+
 </plugin>
