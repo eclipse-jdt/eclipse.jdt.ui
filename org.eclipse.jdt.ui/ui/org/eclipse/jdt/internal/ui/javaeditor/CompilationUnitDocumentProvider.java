@@ -1250,6 +1250,15 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	@Override
 	public void connect(Object element) throws CoreException {
 		super.connect(element);
+		
+		// Initialize DocumentDirtyTracker for the document.
+		// The get() method has the side effect of creating and registering
+		// a document listener if one doesn't exist yet.
+		IDocument document= getDocument(element);
+		if (document != null) {
+			DocumentDirtyTracker.get(document);
+		}
+		
 		if (getFileInfo(element) != null)
 			return;
 
