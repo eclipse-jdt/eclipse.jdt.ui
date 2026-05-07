@@ -311,8 +311,6 @@ public class CompilationUnitRewrite {
 					String importUpdateName= RefactoringCoreMessages.ASTData_update_imports;
 					cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
 				}
-			} else {
-
 			}
 			if (isEmptyEdit(multiEdit))
 				return null;
