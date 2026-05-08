@@ -130,7 +130,6 @@ public class JavaActivationTest {
 			"org.junit",
 			"org.junit4",
 			"org.mortbay.jetty",
-			"com.ibm.icu.source",
 			"javax.servlet.jsp-api.source",
 			"javax.servlet.source",
 			"org.apache.ant.source",
