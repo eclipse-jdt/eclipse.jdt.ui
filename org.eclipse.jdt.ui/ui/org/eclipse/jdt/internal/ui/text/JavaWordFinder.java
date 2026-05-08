@@ -32,19 +32,8 @@ public class JavaWordFinder {
 
 			while (pos >= 0) {
 				c= document.getChar(pos);
-				if (!Character.isJavaIdentifierPart(c)) {
-					// Check for surrogates
-					if (Character.isSurrogate(c)) {
-						/*
-						 * XXX: Here we should create the code point and test whether
-						 * it is a Java identifier part. Currently this is not possible
-						 * because java.lang.Character in 1.4 does not support surrogates
-						 * and because com.ibm.icu.lang.UCharacter.isJavaIdentifierPart(int)
-						 * is not correctly implemented.
-						 */
-					} else {
-						break;
-					}
+				if (!Character.isJavaIdentifierPart(c) && !Character.isSurrogate(c)) {
+					break;
 				}
 				--pos;
 			}
@@ -55,19 +44,8 @@ public class JavaWordFinder {
 
 			while (pos < length) {
 				c= document.getChar(pos);
-				if (!Character.isJavaIdentifierPart(c)) {
-					if (Character.isSurrogate(c)) {
-						/*
-						 * XXX: Here we should create the code point and test whether
-						 * it is a Java identifier part. Currently this is not possible
-						 * because java.lang.Character in 1.4 does not support surrogates
-						 * and because com.ibm.icu.lang.UCharacter.isJavaIdentifierPart(int)
-						 * is not correctly implemented.
-						 */
-					} else {
-						break;
-					}
-
+				if (!Character.isJavaIdentifierPart(c) && !Character.isSurrogate(c)) {
+					break;
 				}
 				++pos;
 			}
