@@ -23,6 +23,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -38,6 +39,8 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class AssistQuickFixTest15 extends QuickFixTest {
@@ -2075,4 +2078,143 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
+	public void testStringConcatToTextBlock() throws Exception {
+		//Testing new quick assist to place text block quotes on their own lines if option is enabled
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		Hashtable<String, String> options = TestOptions.getDefaultOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE, DefaultCodeFormatterConstants.TRUE);
+		JavaCore.setOptions(options);
+
+		String example1 = """
+			package test1;
+			public class TestQuickAssistTextBlock {
+
+				String str1 = "asd" + "bsd\\n" + "cpp" + "osd";
+
+				public void foo1() {
+					System.out.println(str1);
+				}
+
+				public static void main(String[] args) {
+					TestQuickAssistTextBlock qatb = new TestQuickAssistTextBlock();
+					qatb.foo1();
+				}
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("TestQuickAssistTextBlock.java", example1, false, null);
+		int offset= example1.indexOf("asd");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		assertProposalExists(proposals, MultiFixMessages.StringConcatToTextBlockCleanUp_description);
+		String expected = """
+				package test1;
+				public class TestQuickAssistTextBlock {
+
+					String str1 =\s
+						\"\"\"
+						asd\\
+						bsd
+						cpp\\
+						osd\\
+						\"\"\";
+
+					public void foo1() {
+						System.out.println(str1);
+					}
+
+					public static void main(String[] args) {
+						TestQuickAssistTextBlock qatb = new TestQuickAssistTextBlock();
+						qatb.foo1();
+					}
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+		options.put(DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE, DefaultCodeFormatterConstants.FALSE);
+		JavaCore.setOptions(options);
+	}
+
+	@Test
+	public void testStringBufferToTextBlock() throws Exception {
+		//Testing new quick assist to place text block quotes on their own lines if option is enabled
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		Hashtable<String, String> options = TestOptions.getDefaultOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE, DefaultCodeFormatterConstants.TRUE);
+		JavaCore.setOptions(options);
+
+		String example1 = """
+			package test1;
+			public class TestQuickAssistTextBlock {
+
+				String str1 ="asd\\nbsd\\nasm\\n\\t\\tcpp\\n";
+
+				public void foo1() {
+					System.out.println(str1);
+				}
+
+				public static void main(String[] args) {
+					TestQuickAssistTextBlock qatb = new TestQuickAssistTextBlock();
+					qatb.foo1();
+				}
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("TestQuickAssistTextBlock.java", example1, false, null);
+		int offset= example1.indexOf("asd");
+		AssistContext context= getCorrectionContext(cu, offset, 10);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		assertProposalExists(proposals, MultiFixMessages.StringToTextBlock_description);
+		String expected = """
+				package test1;
+				public class TestQuickAssistTextBlock {
+
+					String str1 =
+						\"\"\"
+						asd
+						bsd
+						asm
+								cpp
+						\"\"\";
+
+					public void foo1() {
+						System.out.println(str1);
+					}
+
+					public static void main(String[] args) {
+						TestQuickAssistTextBlock qatb = new TestQuickAssistTextBlock();
+						qatb.foo1();
+					}
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+		options.put(DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE, DefaultCodeFormatterConstants.FALSE);
+		JavaCore.setOptions(options);
+	}
 }
