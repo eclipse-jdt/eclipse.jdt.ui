@@ -1270,7 +1270,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		}
 		if(needNewLineTextBlock) {
 			if (!newLine)
-				buf.append("\\\\n" + fIndent); //$NON-NLS-1$
+				buf.append("\\").append(System.lineSeparator()).append(fIndent); //$NON-NLS-1$
 		}
 		buf.append("\"\"\""); //$NON-NLS-1$
 		return buf;
