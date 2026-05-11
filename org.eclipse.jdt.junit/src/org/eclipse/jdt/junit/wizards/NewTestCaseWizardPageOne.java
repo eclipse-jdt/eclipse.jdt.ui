@@ -1107,19 +1107,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				buffer.replace(index, index + 1, OF_TAG);
 			else if (character == '?')
 				buffer.replace(index, index + 1, QUESTION_MARK_TAG);
-			else if (!Character.isJavaIdentifierPart(character)) {
-				// Check for surrogates
-				if (!Character.isSurrogate(character)) {
-					/*
-					 * XXX: Here we should create the code point and test whether
-					 * it is a Java identifier part. Currently this is not possible
-					 * because java.lang.Character in 1.4 does not support surrogates
-					 * and because com.ibm.icu.lang.UCharacter.isJavaIdentifierPart(int)
-					 * is not correctly implemented.
-					 */
-					buffer.deleteCharAt(index);
-				}
-
+			else if (!Character.isJavaIdentifierPart(character) && !Character.isSurrogate(character)) {
+				buffer.deleteCharAt(index);
 			}
 		}
 	}
