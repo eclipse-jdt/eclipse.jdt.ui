@@ -336,7 +336,6 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
                 // contributed type (e.g., Kotlin class not compiled
                 // by ECJ). Search for the method declaration via
                 // contributed search participants.
-                @SuppressWarnings("unchecked")
                 List<Expression> args= mi.arguments();
                 resolveViaSearch(mi.getName().getIdentifier(),
                         args, node);
