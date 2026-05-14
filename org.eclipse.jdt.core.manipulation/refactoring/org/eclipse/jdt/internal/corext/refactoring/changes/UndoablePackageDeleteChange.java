@@ -39,19 +39,17 @@ public class UndoablePackageDeleteChange extends DynamicValidationStateChange {
 	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		int count= fPackageDeletes.size();
-		pm.beginTask("", count * 3); //$NON-NLS-1$
+		SubMonitor subMonitor= SubMonitor.convert(pm, count * 3);
 		List<IResourceSnapshot<IResource>> snapshots = new ArrayList<>();
-		for (int i= 0; i < fPackageDeletes.size(); i++) {
-			IResource resource= fPackageDeletes.get(i);
+		for (IResource resource : fPackageDeletes) {
 			snapshots.add(ResourceSnapshotFactory.fromResource(resource));
-			pm.worked(1);
+			subMonitor.split(1);
 		}
 
-		DynamicValidationStateChange result= (DynamicValidationStateChange) super.perform(SubMonitor.convert(pm, count));
+		DynamicValidationStateChange result= (DynamicValidationStateChange) super.perform(subMonitor.split(count));
 
-		for (int i= 0; i < fPackageDeletes.size(); i++) {
-			IResourceSnapshot<IResource> resourceDescription= snapshots.get(i);
-			resourceDescription.recordStateFromHistory(SubMonitor.convert(pm, 1));
+		for (IResourceSnapshot<IResource> resourceDescription : snapshots) {
+			resourceDescription.recordStateFromHistory(subMonitor.split(1));
 			result.add(new UndoDeleteResourceChange(resourceDescription));
 		}
 		return result;
