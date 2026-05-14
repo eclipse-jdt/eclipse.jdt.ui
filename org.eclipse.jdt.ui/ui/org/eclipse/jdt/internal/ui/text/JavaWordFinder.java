@@ -32,8 +32,22 @@ public class JavaWordFinder {
 
 			while (pos >= 0) {
 				c= document.getChar(pos);
-				if (!Character.isJavaIdentifierPart(c) && !Character.isSurrogate(c)) {
-					break;
+				if (!Character.isJavaIdentifierPart(c)) {
+					if (Character.isLowSurrogate(c) && pos > 0) {
+						char c2= document.getChar(pos - 1);
+						if (Character.isHighSurrogate(c2)) {
+							int codePoint= Character.toCodePoint(c2, c);
+							if (Character.isJavaIdentifierPart(codePoint)) {
+								pos--;
+							} else {
+								break;
+							}
+						} else {
+							break;
+						}
+					} else {
+						break;
+					}
 				}
 				--pos;
 			}
@@ -44,8 +58,22 @@ public class JavaWordFinder {
 
 			while (pos < length) {
 				c= document.getChar(pos);
-				if (!Character.isJavaIdentifierPart(c) && !Character.isSurrogate(c)) {
-					break;
+				if (!Character.isJavaIdentifierPart(c)) {
+					if (Character.isHighSurrogate(c) && pos + 1 < length) {
+						char c2= document.getChar(pos + 1);
+						if (Character.isLowSurrogate(c2)) {
+							int codePoint= Character.toCodePoint(c, c2);
+							if (Character.isJavaIdentifierPart(codePoint)) {
+								pos++;
+							} else {
+								break;
+							}
+						} else {
+							break;
+						}
+					} else {
+						break;
+					}
 				}
 				++pos;
 			}
