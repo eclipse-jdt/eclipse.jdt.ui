@@ -30,12 +30,12 @@ import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
@@ -119,14 +119,6 @@ public class JUnitCorePlugin extends Plugin {
 		return CORE_PLUGIN_ID;
 	}
 
-	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e)); //$NON-NLS-1$
-	}
-
-	public static void log(IStatus status) {
-		getDefault().getLog().log(status);
-	}
-
 	/**
 	 * @see Plugin#start(BundleContext)
 	 */
@@ -199,7 +191,7 @@ public class JUnitCorePlugin extends Plugin {
 			}
 		}
 		if (!status.isOK()) {
-			JUnitCorePlugin.log(status);
+			ILog.of(JUnitCorePlugin.class).log(status);
 		}
 	}
 
