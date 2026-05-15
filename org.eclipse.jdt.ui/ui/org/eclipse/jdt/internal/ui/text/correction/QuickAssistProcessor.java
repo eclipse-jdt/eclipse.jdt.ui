@@ -416,6 +416,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getFixParenthesesInLambdaExpression(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
+				getConvertForLoopToForEachProposal(context, coveringNode, resultingCollections);
 				getUnnecessaryArrayCreationProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
@@ -437,6 +438,35 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
+	}
+
+	private static boolean getConvertForLoopToForEachProposal(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) {
+		EnhancedForStatement enhancedForStatement= getEnclosingHeader(node, EnhancedForStatement.class, EnhancedForStatement.PARAMETER_PROPERTY, EnhancedForStatement.EXPRESSION_PROPERTY);
+		if (enhancedForStatement == null)
+			return false;
+		else
+			System.out.println("not null"); //$NON-NLS-1$
+
+		if (resultingCollections == null)
+			return true;
+
+		SingleVariableDeclaration parameter= enhancedForStatement.getParameter();
+		IVariableBinding parameterBinding= parameter.resolveBinding();
+		if (parameterBinding == null) {
+			return false;
+		}
+		Expression initializer= enhancedForStatement.getExpression();
+		ITypeBinding initializerTypeBinding= initializer.resolveTypeBinding();
+		if (initializerTypeBinding == null) {
+			return false;
+		}
+
+		Statement topLabelStatement= enhancedForStatement;
+		while (topLabelStatement.getLocationInParent() == LabeledStatement.BODY_PROPERTY) {
+			topLabelStatement= (Statement) topLabelStatement.getParent();
+		}
+
+		return false;
 	}
 
 	private static boolean getReplaceQualifiedNameProposals(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
