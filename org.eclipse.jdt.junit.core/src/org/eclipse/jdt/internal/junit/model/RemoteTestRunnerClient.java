@@ -26,6 +26,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.SafeRunner;
 
@@ -41,10 +42,12 @@ import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
  */
 public class RemoteTestRunnerClient {
 
+	private static final ILog LOG = ILog.of(RemoteTestRunnerClient.class);
+
 	public abstract static class ListenerSafeRunnable implements ISafeRunnable {
 		@Override
 		public void handleException(Throwable exception) {
-			JUnitCorePlugin.log(exception);
+			LOG.error(exception.getMessage(), exception);
 		}
 	}
 	/**
@@ -293,7 +296,7 @@ public class RemoteTestRunnerClient {
 			} catch (SocketException e) {
 				notifyTestRunTerminated();
 			} catch (IOException e) {
-				JUnitCorePlugin.log(e);
+				LOG.error(e.getMessage(), e);
 				// fall through
 			}
 			shutDown();
