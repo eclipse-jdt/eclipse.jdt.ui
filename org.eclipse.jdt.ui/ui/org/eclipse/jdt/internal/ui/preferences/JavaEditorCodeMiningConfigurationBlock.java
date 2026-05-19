@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2018, 2023 Angelo ZERR.
+ *  Copyright (c) 2018, 2026 Angelo ZERR and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -11,6 +11,9 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -20,6 +23,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -94,7 +98,13 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 
 	private Button ignoreInexactReferenceMatches;
 
+	private Button selectAllInGeneral;
+
+	private Button deselectAllInGeneral;
+
 	private PreferenceTree fFilteredPrefTree;
+
+	private List<PreferenceStoreEntry> generalCodeMiningOptions= new ArrayList<>();
 
 	public JavaEditorCodeMiningConfigurationBlock(IStatusChangeListener context,
 			IWorkbenchPreferenceContainer container) {
@@ -155,6 +165,8 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		atLeastOneCheckBox.setEnabled(codeMiningEnabledCheckBox.getSelection());
 		fFilteredPrefTree.setEnabled(codeMiningEnabledCheckBox.getSelection());
 		ignoreInexactReferenceMatches.setEnabled(codeMiningEnabledCheckBox.getSelection());
+		selectAllInGeneral.setEnabled(codeMiningEnabledCheckBox.getSelection());
+		deselectAllInGeneral.setEnabled(codeMiningEnabledCheckBox.getSelection());
 		validateSettings(null, null, null);
 		return mainComp;
 	}
@@ -181,6 +193,17 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		return sc1;
 	}
 
+	private static class PreferenceStoreEntry {
+		PreferenceTreeNode<Button> node;
+
+		Key key;
+
+		PreferenceStoreEntry(PreferenceTreeNode<Button> node, Key key) {
+			this.node= node;
+			this.key= key;
+		}
+	}
+
 	private void createGeneralSection(int nColumns, Composite parent) {
 		int defaultIndent= 0;
 		int extraIndent= LayoutUtil.getIndent();
@@ -192,47 +215,105 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 
 		Composite inner= createInnerComposite(excomposite, nColumns, parent.getFont());
 
+		Group generalGroup= new Group(inner, SWT.NONE);
+		generalGroup.setLayout(new GridLayout(nColumns, false));
+		GridData groupData= new GridData(GridData.FILL_HORIZONTAL);
+		groupData.horizontalSpan= nColumns;
+		generalGroup.setLayoutData(groupData);
+		generalGroup.setFont(parent.getFont());
+		generalCodeMiningOptions.clear();
 
 		// - Show references
-		PreferenceTreeNode<Button> showReferences= fFilteredPrefTree.addCheckBox(inner,
+		PreferenceTreeNode<Button> showReferences= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_label, PREF_SHOW_REFERENCES,
 				TRUE_FALSE, defaultIndent, section);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(showReferences, PREF_SHOW_REFERENCES));
 		// - Show references (On types)
-		fFilteredPrefTree.addCheckBox(inner,
+		PreferenceTreeNode<Button> onTypes= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_onTypes_label,
 				PREF_SHOW_REFERENCES_ON_TYPES, TRUE_FALSE, extraIndent, showReferences);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(onTypes, PREF_SHOW_REFERENCES_ON_TYPES));
 		// - Show references (On fields)
-		fFilteredPrefTree.addCheckBox(inner,
+		PreferenceTreeNode<Button> onFields= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_onFields_label,
 				PREF_SHOW_REFERENCES_ON_FIELDS, TRUE_FALSE, extraIndent, showReferences);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(onFields, PREF_SHOW_REFERENCES_ON_FIELDS));
 		// - Show references (On methods)
-		fFilteredPrefTree.addCheckBox(inner,
+		PreferenceTreeNode<Button> onMethods= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_onMethods_label,
 				PREF_SHOW_REFERENCES_ON_METHODS, TRUE_FALSE, extraIndent, showReferences);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(onMethods, PREF_SHOW_REFERENCES_ON_METHODS));
 
 		// - Show implementations
-		fFilteredPrefTree.addCheckBox(inner,
+		PreferenceTreeNode<Button> impl= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showImplementations_label,
 				PREF_SHOW_IMPLEMENTATIONS, TRUE_FALSE, defaultIndent, section);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(impl, PREF_SHOW_IMPLEMENTATIONS));
 
 		// - Show parameter names
-		fFilteredPrefTree.addCheckBox(inner,
+		PreferenceTreeNode<Button> paramNames= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showParameterNames_label,
 				PREF_SHOW_PARAMETER_NAMES, TRUE_FALSE, defaultIndent, section);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(paramNames, PREF_SHOW_PARAMETER_NAMES));
 
 		// - Filter implied parameter names
-		fFilteredPrefTree.addCheckBox(inner,
+		PreferenceTreeNode<Button> implied= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_filterImpliedParameterNames_label,
 				PREF_FILTER_IMPLIED_PARAMETER_NAMES, TRUE_FALSE, extraIndent, section);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(implied, PREF_FILTER_IMPLIED_PARAMETER_NAMES));
 
 		// - Filter known method parameter names
-		fFilteredPrefTree.addCheckBox(inner,
+		PreferenceTreeNode<Button> defaultFilter= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_defaultFilterForParameterNames_label,
 				PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES, TRUE_FALSE, extraIndent, section);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(defaultFilter, PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES));
 
-		fFilteredPrefTree.addCheckBox(inner,
+		// - One parameter
+		PreferenceTreeNode<Button> oneParam= fFilteredPrefTree.addCheckBox(generalGroup,
 				PreferencesMessages.JavaEditorCodeMiningShowOneParameter_label,
 				PREF_SHOW_ONE_PARAMETER, TRUE_FALSE, extraIndent, section);
+		generalCodeMiningOptions.add(new PreferenceStoreEntry(oneParam, PREF_SHOW_ONE_PARAMETER));
+
+		Composite compositeForButtons= new Composite(generalGroup, SWT.NONE);
+		GridLayout buttonLayout= new GridLayout(2, false);
+		compositeForButtons.setLayout(buttonLayout);
+		GridData buttonCompositeData= new GridData(GridData.FILL_HORIZONTAL);
+		buttonCompositeData.horizontalAlignment= SWT.END;
+		compositeForButtons.setLayoutData(buttonCompositeData);
+
+		selectAllInGeneral= new Button(compositeForButtons, SWT.PUSH);
+		selectAllInGeneral.setText(PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_section_general_select_all);
+		GridData selectAllGridData= new GridData(SWT.END, SWT.CENTER, false, false);
+		selectAllGridData.widthHint= fPixelConverter.convertHorizontalDLUsToPixels(70);
+		selectAllInGeneral.setLayoutData(selectAllGridData);
+		selectAllInGeneral.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (PreferenceStoreEntry entry : generalCodeMiningOptions) {
+					Button button= entry.node.getControl();
+					setValue(entry.key, true);
+					button.setSelection(true);
+				}
+				updateEnableStates();
+			}
+		});
+
+		deselectAllInGeneral= new Button(compositeForButtons, SWT.PUSH);
+		deselectAllInGeneral.setText(PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_section_general_deselect_all);
+		GridData deselectAllData= new GridData(SWT.END, SWT.CENTER, false, false);
+		deselectAllData.widthHint= fPixelConverter.convertHorizontalDLUsToPixels(70);
+		deselectAllInGeneral.setLayoutData(deselectAllData);
+		deselectAllInGeneral.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (PreferenceStoreEntry entry : generalCodeMiningOptions) {
+					Button button= entry.node.getControl();
+					setValue(entry.key, false);
+					button.setSelection(false);
+				}
+				updateEnableStates();
+			}
+		});
 	}
 
 	private void updateEnableStates() {
@@ -242,6 +323,8 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 			atLeastOneCheckBox.setEnabled(true);
 			ignoreInexactReferenceMatches.setEnabled(true);
 			fFilteredPrefTree.setEnabled(true);
+			selectAllInGeneral.setEnabled(true);
+			deselectAllInGeneral.setEnabled(true);
 
 			boolean showReferences= getCheckBox(PREF_SHOW_REFERENCES).getSelection();
 			getCheckBox(PREF_SHOW_REFERENCES_ON_TYPES).setEnabled(showReferences);
@@ -259,6 +342,8 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 			atLeastOneCheckBox.setEnabled(false);
 			ignoreInexactReferenceMatches.setEnabled(false);
 			fFilteredPrefTree.setEnabled(false);
+			selectAllInGeneral.setEnabled(false);
+			deselectAllInGeneral.setEnabled(false);
 		}
 	}
 

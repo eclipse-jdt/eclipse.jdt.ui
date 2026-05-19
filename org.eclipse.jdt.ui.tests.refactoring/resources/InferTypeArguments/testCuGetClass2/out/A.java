@@ -5,7 +5,7 @@ class A {
 		someObject.getClass();
 	}
 	void m1(Object someObject) {
-		Class<? extends Object> c= someObject.getClass();
+		Class c= someObject.getClass();
 	}
 	void i(Integer someInt) {
 		someInt.getClass();

@@ -25,8 +25,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ui.ILocalWorkingSetManager;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetUpdater;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -118,7 +120,11 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		synchronized(fWorkingSets) {
 			workingSets= fWorkingSets.toArray(new IWorkingSet[fWorkingSets.size()]);
 		}
+		boolean otherFound= false;
 		for (IWorkingSet workingSet : workingSets) {
+			if (workingSet.getId() == IWorkingSetIDs.OTHERS) {
+				otherFound= true;
+			}
 			WorkingSetDelta workingSetDelta= new WorkingSetDelta(workingSet);
 			processJavaDelta(workingSetDelta, event.getDelta());
 			IResourceDelta[] resourceDeltas= event.getDelta().getResourceDeltas();
@@ -128,6 +134,21 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 				}
 			}
 			workingSetDelta.process();
+		}
+		if (!otherFound) {
+			ILocalWorkingSetManager manager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
+			IWorkingSet other= manager.getWorkingSet(WorkingSetMessages.WorkingSetModel_others_name);
+			if (other != null) {
+				WorkingSetDelta workingSetDelta= new WorkingSetDelta(other);
+				processJavaDelta(workingSetDelta, event.getDelta());
+				IResourceDelta[] resourceDeltas= event.getDelta().getResourceDeltas();
+				if (resourceDeltas != null) {
+					for (IResourceDelta resourceDelta : resourceDeltas) {
+						processResourceDelta(workingSetDelta, resourceDelta);
+					}
+				}
+				workingSetDelta.process();
+			}
 		}
 	}
 

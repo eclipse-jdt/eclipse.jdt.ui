@@ -1336,6 +1336,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		Consumer<Section> modAll= s -> CheckboxPreference.addModifyAll(s, fImages);
 		fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_new_lines, "section-newlines") //$NON-NLS-1$
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_statement, DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_textblock_statement, DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE)
 				.gap()
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_after_opening_brace_of_array_initializer,
 						DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER)
@@ -1374,7 +1375,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.build(null, (parent, label, key) -> {
 					String[] values= CheckboxPreference.DO_NOT_INSERT_INSERT;
 					if (parent.getKey().endsWith("-ifelse") || parent.getKey().endsWith("-simpleloops") //$NON-NLS-1$ //$NON-NLS-2$
-							|| DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE.equals(key)) {
+							|| DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE.equals(key) || DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE.equals(key) ) {
 						values= CheckboxPreference.FALSE_TRUE;
 					}
 					return fTree.addCheckbox(parent, label, key, values);

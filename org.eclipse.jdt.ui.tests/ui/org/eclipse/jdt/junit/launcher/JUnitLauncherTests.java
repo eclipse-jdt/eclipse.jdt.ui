@@ -20,6 +20,7 @@ import org.junit.platform.suite.api.Suite;
 @Suite
 @SelectClasses({
 AdvancedJUnitLaunchConfigurationDelegateTest.class,
+MultiMethodLaunchConfigurationDelegateTest.class,
 })
 public class JUnitLauncherTests {
 

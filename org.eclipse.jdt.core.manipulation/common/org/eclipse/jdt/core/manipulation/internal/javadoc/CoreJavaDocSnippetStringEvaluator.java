@@ -202,8 +202,7 @@ public class CoreJavaDocSnippetStringEvaluator {
 	}
 
 	private String getString(String str, List<ActionElement> actionElements) {
-		String modifiedStr= str.replaceAll(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$
-		modifiedStr= modifiedStr.replaceAll("<", "&lt;"); //$NON-NLS-1$ //$NON-NLS-2$
+		String modifiedStr = str;
 		List<StringItem> items= new ArrayList<>();
 		for (ActionElement actElem : actionElements) {
 			StringItem startItem= new StringItem(actElem.start, actElem.startTag);
@@ -236,6 +235,14 @@ public class CoreJavaDocSnippetStringEvaluator {
 				items.add(startItem);
 			}
 		}
+		items.sort((a, b) -> {
+		    if (b.index != a.index) {
+		        return Integer.compare(b.index, a.index);
+		    }
+		    boolean aIsEnd = a.tag.startsWith("</"); //$NON-NLS-1$
+		    boolean bIsEnd = b.tag.startsWith("</"); //$NON-NLS-1$
+		    return Boolean.compare(bIsEnd, aIsEnd);
+		});
 		for (StringItem item : items) {
 			modifiedStr= modifiedStr.substring(0, item.index) + item.tag + modifiedStr.substring(item.index);
 		}

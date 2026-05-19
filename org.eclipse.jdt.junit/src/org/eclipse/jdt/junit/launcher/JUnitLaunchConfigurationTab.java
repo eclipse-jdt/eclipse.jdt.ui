@@ -746,7 +746,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	}
 
 	private Set<String> getMethodsForType(IJavaProject javaProject, IType type, TestKind testKind) {
-		if (javaProject == null || type == null || testKind == null)
+		if (javaProject == null || !javaProject.isOpen() || type == null || testKind == null)
 			return Collections.emptySet();
 
 		String testKindId= testKind.getId();
@@ -768,7 +768,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		try {
 			IJavaProject javaProject= getJavaProject();
 
-			if (javaProject == null) {
+			if (javaProject == null || !javaProject.isOpen()) {
 				// can't find methods if the project
 				return;
 			}
@@ -967,6 +967,11 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotexists);
 				return;
 			}
+			if (!project.isOpen()) {
+				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotopen);
+				return;
+			}
+
 			IJavaProject javaProject= JavaCore.create(project);
 			validateJavaProject(javaProject);
 

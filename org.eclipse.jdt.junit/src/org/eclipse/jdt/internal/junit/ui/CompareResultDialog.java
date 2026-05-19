@@ -254,9 +254,9 @@ public class CompareResultDialog extends TrayDialog {
 
 	private Control createPreviewer(Composite parent) {
 	    final CompareConfiguration compareConfiguration= new CompareConfiguration();
-	    compareConfiguration.setLeftLabel(JUnitMessages.CompareResultDialog_expectedLabel);
+	    compareConfiguration.setLeftLabel(JUnitMessages.CompareResultDialog_actualLabel);
 	    compareConfiguration.setLeftEditable(false);
-	    compareConfiguration.setRightLabel(JUnitMessages.CompareResultDialog_actualLabel);
+	    compareConfiguration.setRightLabel(JUnitMessages.CompareResultDialog_expectedLabel);
 	    compareConfiguration.setRightEditable(false);
 	    compareConfiguration.setProperty(CompareConfiguration.IGNORE_WHITESPACE, Boolean.FALSE);
 	    compareConfiguration.setProperty(PREFIX_SUFFIX_PROPERTY, fPrefixSuffix);
@@ -271,7 +271,7 @@ public class CompareResultDialog extends TrayDialog {
 
 	private void setCompareViewerInput() {
 		if (!fViewer.getControl().isDisposed()) {
-			fViewer.setInput(new DiffNode(new CompareElement(fExpected), new CompareElement(fActual)));
+			fViewer.setInput(new DiffNode(new CompareElement(fActual), new CompareElement(fExpected)));
 			fCompareViewerPane.setText(fTestName);
 		}
 	}

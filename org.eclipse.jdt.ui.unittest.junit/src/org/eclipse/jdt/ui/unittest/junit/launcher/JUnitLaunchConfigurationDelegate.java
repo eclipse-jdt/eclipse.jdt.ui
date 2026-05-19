@@ -723,6 +723,21 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 						String testName = type.getFullyQualifiedName();
 						bw.write(testName);
 						bw.newLine();
+					} else if (testElement instanceof IMethod) {
+						// Extended -testNameFile format: "fully.qualified.ClassName:methodName".
+						// Allows running an arbitrary set of methods (potentially across
+						// multiple classes) within a single launch. The remote runner falls
+						// back to legacy class-only behavior when no ':' is present, so older
+						// runtime jars remain compatible.
+						IMethod method = (IMethod) testElement;
+						IType declaringType = method.getDeclaringType();
+						if (declaringType == null) {
+							abort(Messages.JUnitLaunchConfigurationDelegate_error_wrong_input, null,
+									IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+						} else {
+							bw.write(declaringType.getFullyQualifiedName() + ':' + method.getElementName());
+							bw.newLine();
+						}
 					} else {
 						abort(Messages.JUnitLaunchConfigurationDelegate_error_wrong_input, null,
 								IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);

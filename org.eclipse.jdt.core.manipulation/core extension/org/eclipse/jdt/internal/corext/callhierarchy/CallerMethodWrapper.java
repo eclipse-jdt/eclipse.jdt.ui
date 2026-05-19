@@ -26,17 +26,18 @@ import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
@@ -148,11 +149,22 @@ public class CallerMethodWrapper extends MethodWrapper {
 			}
 
 			SearchEngine searchEngine= new SearchEngine();
-			MethodReferencesSearchRequestor searchRequestor= new MethodReferencesSearchRequestor();
+			// When the search target is a non-Java element (e.g., from
+			// a contributed SearchParticipant like Kotlin), the Java
+			// MatchLocator cannot fully resolve the declaring type
+			// binding and reports matches as A_INACCURATE. These
+			// matches are still valid — the method name and parameter
+			// count match — so accept them.
+			ICompilationUnit cu= member.getCompilationUnit();
+			boolean isContributedElement= cu != null
+					&& !JavaCore.isJavaLikeFileName(cu.getElementName());
+			MethodReferencesSearchRequestor searchRequestor= isContributedElement
+					? new MethodReferencesSearchRequestor(false)
+					: new MethodReferencesSearchRequestor();
 			IJavaSearchScope defaultSearchScope= getSearchScope();
 			boolean isWorkspaceScope= SearchEngine.createWorkspaceScope().equals(defaultSearchScope);
 			IJavaSearchScope searchScope= isWorkspaceScope ? getAccurateSearchScope(defaultSearchScope, member) : defaultSearchScope;
-			searchEngine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, searchScope, searchRequestor,
+			searchEngine.search(pattern, SearchEngine.getSearchParticipants(), searchScope, searchRequestor,
 					monitor);
 			return searchRequestor.getCallers();
 

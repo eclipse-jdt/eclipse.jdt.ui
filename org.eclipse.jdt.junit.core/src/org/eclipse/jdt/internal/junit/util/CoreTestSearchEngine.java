@@ -80,6 +80,9 @@ public class CoreTestSearchEngine {
 	private static final String JUNIT_PLATFORM_SUITE_API_PREFIX= BuildPathSupport.JUNIT_PLATFORM_SUITE_API;
 	private static final String JUNIT_PLATFORM_COMMONS_PREFIX= BuildPathSupport.JUNIT_PLATFORM_COMMONS;
 	private static final String JUNIT_JUPITER_API_PREFIX= BuildPathSupport.JUNIT_JUPITER_API;
+	private static final String JUNIT_PLATFORM_CONSOLE_STANDALONE_PREFIX= "junit-platform-console-standalone"; //$NON-NLS-1$
+	private static final String ENGINE_VERSION_JUNIT_JUPITER= "Engine-Version-junit-jupiter"; //$NON-NLS-1$
+	private static final String SPECIFICATION_VERSION= "Specification-Version"; //$NON-NLS-1$
 	private static final String JAR_EXTENSION= ".jar"; //$NON-NLS-1$
 
 	public static boolean isTestOrTestSuite(IType declaringType) throws CoreException {
@@ -198,7 +201,8 @@ public class CoreTestSearchEngine {
 				if (type != null) {
 					// check if we have the right JUnit JUpiter version
 					Version version = null;
-					String filename= type.getPath().lastSegment();
+					PackageFragmentRoot root= (PackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					String filename= root != null ? root.getPath().lastSegment() : type.getPath().lastSegment();
 					boolean isJar = filename.endsWith(JAR_EXTENSION);
 					// Try matching the library name, this should be enough for many cases.
 					if (isJar && (filename.startsWith(junitBundlePrefix + "_") || filename.startsWith(junitBundlePrefix + "-"))) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -214,14 +218,13 @@ public class CoreTestSearchEngine {
 					}
 					if (isJar && version == null) {
 						try {
-							PackageFragmentRoot root= (PackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 							Manifest manifest= null;
 							if (root != null) {
 								manifest= root.getManifest();
 							}
 							if (manifest != null) {
 								Attributes attributes= manifest.getMainAttributes();
-								String versionString= attributes.getValue("Specification-Version"); //$NON-NLS-1$
+								String versionString= getJUnitVersionFromManifest(filename, attributes);
 								if (versionString != null) {
 									version= Version.parseVersion(versionString);
 								}
@@ -233,9 +236,11 @@ public class CoreTestSearchEngine {
 					if (version != null && version.getMajor() != junitMajorVersion) {
 						return false;
 					}
+					if (root == null) {
+						return false;
+					}
 					// @Testable/@Suite annotations are not accessible if the JUnit classpath container is set to JUnit 3 or JUnit 4
 					// (although it may resolve to a JUnit 5 JAR)
-					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					IClasspathEntry cpEntry= root.getRawClasspathEntry();
 					IPath entryPath= cpEntry.getPath();
 					return !Arrays.asList(disallowedJunitContainerPaths).contains(entryPath);
@@ -245,6 +250,16 @@ public class CoreTestSearchEngine {
 			// not available
 		}
 		return false;
+	}
+
+	private static String getJUnitVersionFromManifest(String filename, Attributes attributes) {
+		if (filename.startsWith(JUNIT_PLATFORM_CONSOLE_STANDALONE_PREFIX + "_") || filename.startsWith(JUNIT_PLATFORM_CONSOLE_STANDALONE_PREFIX + "-")) { //$NON-NLS-1$ //$NON-NLS-2$
+			String versionString= attributes.getValue(ENGINE_VERSION_JUNIT_JUPITER);
+			if (versionString != null) {
+				return versionString;
+			}
+		}
+		return attributes.getValue(SPECIFICATION_VERSION);
 	}
 
 	public static boolean isTestImplementor(IType type) throws JavaModelException {

@@ -130,6 +130,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationTab_error_mixedJUnitJupiterVersions;
 
+	public static String JUnitLaunchConfigurationTab_error_projectnotopen;
+
 	public static String JUnitLaunchConfigurationTab_error_testcasenotonpath;
 
 	public static String JUnitLaunchConfigurationTab_error_testnotdefined;
@@ -386,4 +388,5 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_layout_menu;
 
 	public static String TestSearchEngine_search_message_progress_monitor;
+
 }
