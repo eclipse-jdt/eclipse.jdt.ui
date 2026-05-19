@@ -125,7 +125,7 @@ public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderC
 			} catch (CoreException e1) {
 				// Should never occur
 			}
-		});
+		}, JavaCodeMiningExecutor.get());
 	}
 
 	@Override

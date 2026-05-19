@@ -116,6 +116,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
+import org.eclipse.jdt.internal.ui.javaeditor.codemining.JavaCodeMiningExecutor;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileStore;
@@ -542,6 +543,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			SpellCheckEngine.shutdownInstance();
 
 			QualifiedTypeNameHistory.getDefault().save();
+
+			JavaCodeMiningExecutor.shutdown();
 
 			// must add here to guarantee that it is the first in the listener list
 
