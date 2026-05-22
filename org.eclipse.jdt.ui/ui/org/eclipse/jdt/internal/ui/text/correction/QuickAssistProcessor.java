@@ -161,6 +161,7 @@ import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLambdaToMethodReferenceFixCore;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
 import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
+import org.eclipse.jdt.internal.corext.fix.EnhancedForLoopToForEachFixCore;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
@@ -325,6 +326,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertMethodReferenceToLambdaProposal(context, coveringNode, null)
 					|| getConvertLambdaToMethodReferenceProposal(context, coveringNode, null)
 					|| getConvertToSwitchExpressionProposals(context, coveringNode, null)
+					|| getConvertForLoopToForEachProposal(context, coveringNode, null)
 					|| getFixParenthesesInLambdaExpression(context, coveringNode, null)
 					|| getRemoveBlockProposals(context, coveringNode, null)
 					|| getMakeVariableDeclarationFinalProposals(context, null)
@@ -437,11 +439,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		EnhancedForStatement enhancedForStatement= getEnclosingHeader(node, EnhancedForStatement.class, EnhancedForStatement.PARAMETER_PROPERTY, EnhancedForStatement.EXPRESSION_PROPERTY);
 		if (enhancedForStatement == null)
 			return false;
-		else
-			System.out.println("not null"); //$NON-NLS-1$
-
-		if (resultingCollections == null)
-			return true;
 
 		SingleVariableDeclaration parameter= enhancedForStatement.getParameter();
 		IVariableBinding parameterBinding= parameter.resolveBinding();
@@ -454,9 +451,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		Statement topLabelStatement= enhancedForStatement;
-		while (topLabelStatement.getLocationInParent() == LabeledStatement.BODY_PROPERTY) {
-			topLabelStatement= (Statement) topLabelStatement.getParent();
+		EnhancedForLoopToForEachFixCore fixCore = EnhancedForLoopToForEachFixCore.createReplaceEnhancedLoop(context.getASTRoot(), enhancedForStatement);
+		if (fixCore != null) {
+			if (resultingCollections == null) {
+				return true;
+			}
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fixCore, null, IProposalRelevance.CONVERT_TO_FOR_EACH, image, context);
+			resultingCollections.add(proposal);
+			return true;
 		}
 
 		return false;
