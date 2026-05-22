@@ -85,25 +85,25 @@ public class EnhancedForLoopToForEachFixCore extends CompilationUnitRewriteOpera
 		String label = CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach;
 		return new EnhancedForLoopToForEachFixCore(label, compilationUnit, refwfeop); //new EnhancedForLoopToForEachFixCore();
 	}
-    /**
-//   * Visitor to analyze loop body for truly unconvertible control flow.
-//   *
-//   * <p>Tracks patterns that CANNOT be converted to stream operations:
-//   * <ul>
-//   *   <li>break statements</li>
-//   *   <li>labeled continue statements</li>
-//   *   <li>try-catch statements (checked exceptions require Try-with-resources or explicit handling)</li>
-//   *   <li>synchronized statements (synchronization semantics differ in streams)</li>
-//   *   <li>traditional for loops (complex control flow)</li>
-//   *   <li>while loops (complex control flow)</li>
-//   *   <li>do-while loops (complex control flow)</li>
-//   * </ul>
-//   * </p>
-//   *
-//   * <p>Note: unlabeled continue, return, and add() calls are potentially
-//   * convertible as filter, match, and collect patterns respectively.
-//   * Those are handled by analyzeAndAddOperations().</p>
-//   */
+  /**
+   * Visitor to analyze loop body for truly unconvertible control flow.
+   *
+   * <p>Tracks patterns that CANNOT be converted to stream operations:
+   * <ul>
+   *   <li>break statements</li>
+   *   <li>labeled continue statements</li>
+   *   <li>try-catch statements (checked exceptions require Try-with-resources or explicit handling)</li>
+   *   <li>synchronized statements (synchronization semantics differ in streams)</li>
+   *   <li>traditional for loops (complex control flow)</li>
+   *   <li>while loops (complex control flow)</li>
+   *   <li>do-while loops (complex control flow)</li>
+   * </ul>
+   * </p>
+   *
+   * <p>Note: unlabeled continue, return, and add() calls are potentially
+   * convertible as filter, match, and collect patterns respectively.
+   * Those are handled by analyzeAndAddOperations().</p>
+   */
   private static class LoopBodyAnalyzer extends ASTVisitor {
       private boolean hasBreak = false;
       private boolean hasLabeledContinue = false;
