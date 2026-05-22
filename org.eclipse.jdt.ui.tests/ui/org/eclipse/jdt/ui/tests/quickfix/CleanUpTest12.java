@@ -916,9 +916,8 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                return 145;
 			            default :
-			                break;
+			                return 155;
 			        }
-			        return 155;
 			    }
 
 			    public int replaceSuiteThatDoNotFallThrough(int i1) {
@@ -958,9 +957,8 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                return 145;
 			            default :
-			                break;
+			                return 155;
 			        }
-			        return 155;
 			    }
 
 			    public int replaceSuiteIgnoring(int i1) {
@@ -1000,9 +998,8 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                return 145;
 			            default :
-			                break;
+			                return 155;
 			        }
-			        return 155;
 			    }
 
 			    public void replaceWhenVariableTypesConflict(int i1) {
@@ -1065,9 +1062,8 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                return 145;
 			            default :
-			                break;
+			                return 155;
 			        }
-			        return 155;
 			    }
 			}
 			""";

@@ -82,7 +82,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -113,7 +113,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -148,7 +148,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        };
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -173,9 +173,279 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        };
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertToSwitchStatement1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo2(int x) {
+					if (x == 2) {
+						return 4;
+					}
+					if (x == 3) {
+						return 6;
+					}
+					if (x == 8) {
+						return 16;
+					}
+					if (x == 10) {
+						return 18;
+					}
+					return 7;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int startIndex= str1.indexOf("if");
+		int endIndex= str1.indexOf("return 7;");
+
+		IInvocationContext ctx= getCorrectionContext(cu, startIndex, endIndex + 9 - startIndex);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo2(int x) {
+					return switch (x) {
+						case 2 -> 4;
+						case 3 -> 6;
+						case 8 -> 16;
+						case 10 -> 18;
+						default -> 7;
+					};
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertToSwitchStatement2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo2(int x) throws Exception {
+					if (x == 2) {
+						return 4;
+					}
+					if (x == 3) {
+						return 6;
+					}
+					if (x == 8) {
+						return 16;
+					}
+					if (x == 10) {
+						return 18;
+					}
+					throw new Exception();
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int startIndex= str1.indexOf("if");
+		int endIndex= str1.indexOf("throw ");
+
+		IInvocationContext ctx= getCorrectionContext(cu, startIndex, endIndex + 22 - startIndex);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo2(int x) throws Exception {
+					return switch (x) {
+						case 2 -> 4;
+						case 3 -> 6;
+						case 8 -> 16;
+						case 10 -> 18;
+						default -> throw new Exception();
+					};
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertToSwitchStatement3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo2(int x) {
+					if (x == 2) {
+						return 4;
+					}
+					if (x == 3) {
+						return 6;
+					}
+					if (x == 8) {
+						return 16;
+					}
+					if (x == 10) {
+						return 18;
+					}
+					return 7;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int startIndex= str1.indexOf("if");
+		int endIndex= str1.indexOf("return 7;");
+
+		IInvocationContext ctx= getCorrectionContext(cu, startIndex, endIndex - startIndex);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo2(int x) {
+					switch (x) {
+						case 2 -> {
+							return 4;
+						}
+						case 3 -> {
+							return 6;
+						}
+						case 8 -> {
+							return 16;
+						}
+						case 10 -> {
+							return 18;
+						}
+						default -> {
+						}
+					}
+					return 7;
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertToSwitchStatement4() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo2(Integer x) {
+					if (x == 2) {
+						return 4;
+					}
+					if (x == 3) {
+						return 6;
+					}
+					if (x == 8) {
+						return 16;
+					}
+					if (x == 10) {
+						return 18;
+					}
+					return 7;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int startIndex= str1.indexOf("if");
+		int endIndex= str1.indexOf("return 7;");
+
+		IInvocationContext ctx= getCorrectionContext(cu, startIndex, endIndex + 9 - startIndex);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo2(Integer x) {
+					if (x != null) {
+						return switch (x) {
+							case 2 -> 4;
+							case 3 -> 6;
+							case 8 -> 16;
+							case 10 -> 18;
+							default -> 7;
+						};
+					} else {
+						return 7;
+					}
+				}
 			}
 			""";
 
