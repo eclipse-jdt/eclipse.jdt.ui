@@ -55,10 +55,6 @@ public class EnhancedForLoopToForEachFixCore extends CompilationUnitRewriteOpera
 
 	public static EnhancedForLoopToForEachFixCore createReplaceEnhancedLoop(CompilationUnit compilationUnit, EnhancedForStatement forStatement) {
 
-		/*CompilationUnit root= (CompilationUnit) forStatement.getRoot();
-		if (!JavaModelUtil.is15OrHigher(root.getJavaElement().getJavaProject()))
-			return null;*/
-
 		LoopBodyAnalyzer analyzer = new LoopBodyAnalyzer();
 		Statement body = forStatement.getBody();
 		body.accept(analyzer);
