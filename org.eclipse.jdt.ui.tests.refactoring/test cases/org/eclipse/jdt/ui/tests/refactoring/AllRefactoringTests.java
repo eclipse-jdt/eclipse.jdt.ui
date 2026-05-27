@@ -36,6 +36,7 @@ import org.junit.platform.suite.api.Suite;
 	ExtractTempTests.class,
 	ExtractTempTests1d7.class,
 	ExtractTempTests1d8.class,
+	ExtractTempTests16.class,
 	RenameTempTests.class,
 	ExtractConstantTests.class,
 	PromoteTempToFieldTests.class,
