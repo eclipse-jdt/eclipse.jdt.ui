@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
@@ -106,6 +107,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 					// Javadoc/markdown started on this line
 					if (d.getChar(firstNonWS+1) == '/') {
 						buf.append("/// "); //$NON-NLS-1$
+						if (handleMarkdownCodeFence(d, c, lineOffset, offset, indentation, buf))
+							return;
 					} else {
 						buf.append(" * "); //$NON-NLS-1$
 					}
@@ -158,6 +161,48 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		} catch (BadLocationException excp) {
 			// stop work
 		}
+	}
+
+	private boolean handleMarkdownCodeFence(IDocument d, DocumentCommand c, int lineOffset, int offset, String indentation, StringBuilder buf) {
+		try {
+			if (!isPreferenceTrue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK))
+				return false;
+			ICompilationUnit cu= getCompilationUnit();
+			if (cu == null)
+				return false;
+
+			IJavaProject project= cu.getJavaProject();
+			String compliance= project != null
+					? project.getOption(JavaCore.COMPILER_COMPLIANCE, true)
+					: JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+
+			if (JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_23) < 0)
+				return false;
+
+			String prefix= d.get(lineOffset, offset - lineOffset).trim();
+
+			// CommonMark allows up to 3 spaces of indentation before the opening code fence.
+			if (!("///```".equals(prefix) || "/// ```".equals(prefix) || "///  ```".equals(prefix) || "///   ```".equals(prefix))) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				return false;
+
+			String delimiter= TextUtilities.getDefaultLineDelimiter(d);
+
+			c.shiftsCaret= false;
+			c.caretOffset= c.offset + buf.length();
+
+			buf.append(delimiter);
+			buf.append(indentation);
+			buf.append("/// ```"); //$NON-NLS-1$
+
+			c.text= buf.toString();
+
+			return true;
+
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
+
+		return false;
 	}
 
 	/**
