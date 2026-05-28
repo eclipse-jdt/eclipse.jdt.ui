@@ -479,8 +479,9 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				}
 			});
 
-			boolean useNewStyleCase=  JavaModelUtil.is12OrHigher(cuRewrite.getCu().getJavaProject());
-			boolean useSwitchExpression= JavaModelUtil.is14OrHigher(cuRewrite.getCu().getJavaProject());
+			boolean useNewStyleCase= false;
+			boolean useSwitchExpression= false;
+			useNewStyleCase= useSwitchExpression= JavaModelUtil.is14OrHigher(cuRewrite.getCu().getJavaProject());
 			for (SwitchCaseSection aCase : cases) {
 				if (!aCase.tagList.isEmpty()) {
 					for (Boolean hasTag : aCase.tagList) {
@@ -489,7 +490,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 						}
 					}
 				}
-				Statement lastStatement= aCase.statements.get(aCase.statements.size() - 1);
+				Statement lastStatement= aCase.statements.isEmpty() ? null : aCase.statements.get(aCase.statements.size() - 1);
 				if (!(lastStatement instanceof ReturnStatement) && !(lastStatement instanceof ThrowStatement)) {
 					useSwitchExpression= false;
 				}
