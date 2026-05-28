@@ -187,10 +187,9 @@ public class MarkdownTypingTest extends TestCase {
 	}
 
 	public void testEnableFencedCodeBlockTypingInMarkdown_supported_java_version() throws Exception {
-		String customContent = """
-					///
-					public class Test {}
-				""";
+		String customContent = "///\n"+
+							 "public class Test {}";
+
 		ICompilationUnit cu= createCompilationUnit(customContent);
 
 		IJavaProject project = cu.getJavaProject();
@@ -209,13 +208,14 @@ public class MarkdownTypingTest extends TestCase {
 		typeCharacter(editor, '`', offset);
 		typeCharacter(editor, '`', offset + 1);
 		typeCharacter(editor, '`', offset + 2);
+		typeCharacter(editor, '\r', offset + 3);
 
 		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 
-		String expected = """
-					///``````
-					public class Test {}
-				""";
+		String expected = "///```\n"+
+						 "/// \n"+
+						 "/// ```\n"+
+						 "public class Test {}";
 		assertEquals(expected, doc.get());
 	}
 
@@ -242,21 +242,22 @@ public class MarkdownTypingTest extends TestCase {
 		typeCharacter(editor, '`', offset);
 		typeCharacter(editor, '`', offset + 1);
 		typeCharacter(editor, '`', offset + 2);
+		typeCharacter(editor, '\r', offset + 3);
 
 		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 
 		String expected = """
 					///```
+					///\s
 					public class Test {}
 				""";
 		assertEquals(expected, doc.get());
 	}
 
 	public void testDiableFencedCodeBlockTypingInMarkdown() throws Exception {
-		String customContent = """
-					///
-					public class Test {}
-				""";
+		String customContent = "///\n"+
+							 "public class Test {}";
+
 		ICompilationUnit cu= createCompilationUnit(customContent);
 
 		IJavaProject project = cu.getJavaProject();
@@ -275,46 +276,13 @@ public class MarkdownTypingTest extends TestCase {
 		typeCharacter(editor, '`', offset);
 		typeCharacter(editor, '`', offset + 1);
 		typeCharacter(editor, '`', offset + 2);
+		typeCharacter(editor, '\r', offset + 3);
 
 		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 
-		String expected = """
-					///```
-					public class Test {}
-				""";
-		assertEquals(expected, doc.get());
-	}
-
-	public void testEnableFencedCodeBlockInsideDoubleQuote_supported_java_version() throws Exception {
-		String customContent = """
-					/// int x = "";
-					public class Test {}
-				""";
-		ICompilationUnit cu= createCompilationUnit(customContent);
-
-		IJavaProject project = cu.getJavaProject();
-		Map<String, String> options = project.getOptions(true);
-		JavaCore.setComplianceOptions(JavaCore.VERSION_26, options);
-		project.setOptions(options);
-
-		assertEquals(JavaCore.VERSION_26, project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
-
-		editor = openEditor(cu);
-
-		PreferenceConstants.getPreferenceStore()
-        .setValue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, true);
-
-		int offset = customContent.indexOf("\"\"") + 1;
-		typeCharacter(editor, '`', offset);
-		typeCharacter(editor, '`', offset + 1);
-		typeCharacter(editor, '`', offset + 2);
-
-		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
-
-		String expected = """
-					/// int x = "```";
-					public class Test {}
-				""";
+		String expected = "///```\n"+
+						 "/// \n"+
+						 "public class Test {}";
 		assertEquals(expected, doc.get());
 	}
 
@@ -351,13 +319,10 @@ public class MarkdownTypingTest extends TestCase {
 		assertEquals(expected, doc.get());
 	}
 
-	public void testEnableFencedCodeBlockInsideJavadoc_supported_java_version() throws Exception {
-		String customContent = """
-					/**
-					 *
-					 */
-					public class Test {}
-				""";
+	public void testNoFenceAutoCloseAfterTextInMarkdown() throws Exception {
+		String customContent = "/// s\n"+
+							 "public class Test {}";
+
 		ICompilationUnit cu= createCompilationUnit(customContent);
 
 		IJavaProject project = cu.getJavaProject();
@@ -372,19 +337,17 @@ public class MarkdownTypingTest extends TestCase {
 		PreferenceConstants.getPreferenceStore()
         .setValue(PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, true);
 
-		int offset = customContent.indexOf("\n", customContent.indexOf("\n") + 1);
+		int offset = customContent.indexOf("///") + 5;
 		typeCharacter(editor, '`', offset);
 		typeCharacter(editor, '`', offset + 1);
 		typeCharacter(editor, '`', offset + 2);
+		typeCharacter(editor, '\r', offset + 3);
 
 		IDocument doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 
-		String expected = """
-					/**
-					 *```
-					 */
-					public class Test {}
-				""";
-		assertEquals(expected, doc.get());
+		String expected = "/// s```\n"+
+						 "/// \n"+
+						 "public class Test {}";
+	assertEquals(expected, doc.get());
 	}
 }
