@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -107,7 +106,6 @@ public class EnhancedForLoopToForEachFixCore extends CompilationUnitRewriteOpera
       private boolean hasSynchronized = false;
       private boolean hasNestedLoop = false;
       private boolean hasVoidReturn = false;
-      private boolean hasIfElse = false;
 
       @Override
       public boolean visit(BreakStatement node) {
@@ -123,16 +121,6 @@ public class EnhancedForLoopToForEachFixCore extends CompilationUnitRewriteOpera
               hasLabeledContinue = true;
           }
           return false;
-      }
-
-      @Override
-      public boolean visit(IfStatement node) {
-          // If-else patterns don't map cleanly to stream operations
-          // e.g., if (cond) list1.add(x) else list2.add(x)
-          if (node.getElseStatement() != null) {
-              hasIfElse = true;
-          }
-          return true; // Continue visiting to detect nested patterns
       }
 
       @Override
