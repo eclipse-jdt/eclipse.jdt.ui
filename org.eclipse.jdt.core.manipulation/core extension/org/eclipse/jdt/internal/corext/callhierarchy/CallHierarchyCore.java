@@ -92,6 +92,15 @@ public class CallHierarchyCore {
 	public boolean isHideTestCode() {
 		return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_HIDE_TEST_CODE, null));
 	}
+	public String getActiveFilter() {
+		if(isShowAll()) {
+			return PREF_SHOW_ALL_CODE;
+		} else if(isHideTestCode()) {
+			return PREF_HIDE_TEST_CODE;
+		} else {
+			return PREF_SHOW_TEST_CODE_ONLY;
+		}
+	}
 
     public Collection<IJavaElement> getImplementingMethods(IMethod method) {
         if (isSearchUsingImplementorsEnabled()) {
@@ -545,5 +554,15 @@ public class CallHierarchyCore {
 		}
 
         return true;
+    }
+
+    public String getCurrentSelection() {
+    	if(isShowAll()) {
+    		return PREF_SHOW_ALL_CODE;
+    	} else if(isHideTestCode()) {
+    		return PREF_HIDE_TEST_CODE;
+    	} else {
+			return PREF_SHOW_TEST_CODE_ONLY;
+		}
     }
 }
