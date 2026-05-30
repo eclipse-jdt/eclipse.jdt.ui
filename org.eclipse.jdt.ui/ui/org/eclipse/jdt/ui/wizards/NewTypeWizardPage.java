@@ -158,7 +158,6 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRe
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
@@ -2739,7 +2738,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			monitor= new NullProgressMonitor();
 		}
 
-		monitor.beginTask(NewWizardMessages.NewTypeWizardPage_operationdesc, 8);
+		SubMonitor subMonitor= SubMonitor.convert(monitor, NewWizardMessages.NewTypeWizardPage_operationdesc, 8);
 
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		IPackageFragment pack= getPackageFragment();
@@ -2749,9 +2748,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		if (!pack.exists()) {
 			String packName= pack.getElementName();
-			pack= root.createPackageFragment(packName, true, Progress.subMonitor(monitor, 1));
+			pack= root.createPackageFragment(packName, true, subMonitor.split(1));
 		} else {
-			monitor.worked(1);
+			subMonitor.split(1);
 		}
 
 		boolean needsSave;
@@ -2773,11 +2772,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 
 				String cuName= getCompilationUnitName(typeName);
-				ICompilationUnit parentCU= pack.createCompilationUnit(cuName, "", false, Progress.subMonitor(monitor, 2)); //$NON-NLS-1$
+				ICompilationUnit parentCU= pack.createCompilationUnit(cuName, "", false, subMonitor.split(2)); //$NON-NLS-1$
 				// create a working copy with a new owner
 
 				needsSave= true;
-				parentCU.becomeWorkingCopy(Progress.subMonitor(monitor, 1)); // cu is now a (primary) working copy
+				parentCU.becomeWorkingCopy(subMonitor.split(1)); // cu is now a (primary) working copy
 				connectedCU= parentCU;
 
 				IBuffer buffer= parentCU.getBuffer();
@@ -2812,7 +2811,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				ICompilationUnit parentCU= enclosingType.getCompilationUnit();
 
 				needsSave= !parentCU.isWorkingCopy();
-				parentCU.becomeWorkingCopy(Progress.subMonitor(monitor, 1)); // cu is now for sure (primary) a working copy
+				parentCU.becomeWorkingCopy(subMonitor.split(1)); // cu is now for sure (primary) a working copy
 				connectedCU= parentCU;
 
 				CompilationUnit astRoot= createASTForImports(parentCU);
@@ -2851,7 +2850,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					sibling = elems.length > 0 ? elems[0] : null;
 				}
 
-				createdType= enclosingType.createType(content.toString(), sibling, false, Progress.subMonitor(monitor, 2));
+				createdType= enclosingType.createType(content.toString(), sibling, false, subMonitor.split(2));
 
 				indent= StubUtility.getIndentUsed(enclosingType) + 1;
 			}
@@ -2863,7 +2862,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 			ICompilationUnit cu= createdType.getCompilationUnit();
 
-			imports.create(false, Progress.subMonitor(monitor, 1));
+			imports.create(false, subMonitor.split(1));
 
 			JavaModelUtil.reconcile(cu);
 
@@ -2875,10 +2874,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			CompilationUnit astRoot= createASTForImports(imports.getCompilationUnit());
 			imports= new ImportsManager(astRoot);
 
-			createTypeMembers(createdType, imports, Progress.subMonitor(monitor, 1));
+			createTypeMembers(createdType, imports, subMonitor.split(1));
 
 			// add imports
-			imports.create(false, Progress.subMonitor(monitor, 1));
+			imports.create(false, subMonitor.split(1));
 
 			removeUnusedImports(cu, existingImports, false);
 
@@ -2902,9 +2901,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fCreatedType= createdType;
 
 			if (needsSave) {
-				cu.commitWorkingCopy(true, Progress.subMonitor(monitor, 1));
+				cu.commitWorkingCopy(true, subMonitor.split(1));
 			} else {
-				monitor.worked(1);
+				subMonitor.split(1);
 			}
 
 			updateSealedSuperTypes();
