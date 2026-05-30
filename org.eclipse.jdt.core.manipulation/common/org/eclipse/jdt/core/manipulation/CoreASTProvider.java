@@ -57,10 +57,10 @@ public final class CoreASTProvider {
 	public static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 
 	private volatile ITypeRoot fReconcilingJavaElement;
-	private ITypeRoot fActiveJavaElement;
-	private CompilationUnit fAST;
-	private Object fReconcileLock= new Object();
-	private Object fWaitLock= new Object();
+	private volatile ITypeRoot fActiveJavaElement;
+	private volatile CompilationUnit fAST;
+	private final Object fReconcileLock= new Object();
+	private final Object fWaitLock= new Object();
 	private volatile boolean fIsReconciling;
 	private volatile Runnable fFinishReconciling;
 
@@ -69,7 +69,7 @@ public final class CoreASTProvider {
 	 */
 	public static final class WAIT_FLAG {
 
-		private String fName;
+		private final String fName;
 
 		private WAIT_FLAG(String name) {
 			fName= name;
@@ -167,26 +167,26 @@ public final class CoreASTProvider {
 
 		if (isReconciling) {
 			try {
-				notifyReconciler();
-				// Wait for AST
-				synchronized (fWaitLock) {
-					if (isReconciling(input)) {
-						if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
-							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
-						fWaitLock.wait(30000); // XXX: The 30 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
+				do {
+					notifyReconciler();
+					// Wait for AST
+					synchronized (fWaitLock) {
+						if (isReconciling(input)) {
+							if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
+								System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+							fWaitLock.wait(3000); // XXX: The 3 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
+						}
 					}
-				}
 
-				// Check whether active element is still valid
-				synchronized (this) {
-					if (activeElement == fActiveJavaElement && fAST != null) {
-						if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
-							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST: " + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-						return fAST;
+					// Check whether active element is still valid
+					synchronized (this) {
+						if (activeElement == fActiveJavaElement && fAST != null) {
+							if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
+								System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST: " + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							return fAST;
+						}
 					}
-				}
-				return getAST(input, waitFlag, progressMonitor);
+				} while (true); // notify and wait again
 			} catch (InterruptedException e) {
 				return null; // thread has been interrupted don't compute AST
 			}
