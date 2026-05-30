@@ -176,6 +176,7 @@ import org.eclipse.jdt.internal.corext.fix.SplitTryResourceFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
+import org.eclipse.jdt.internal.corext.fix.SwitchFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFixCore;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFixCore;
@@ -343,6 +344,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertPatternInstanceofIfStmtToSwitchProposals(context, coveringNode, null)
 					|| getDeprecatedFieldProposal(context, coveringNode, null, null)
 					|| getConvertToRecordProposals(context, coveringNode, null)
+					|| getConvertToSwitchProposals(context, coveringNode, null)
 					|| getDeprecatedProposal(context, coveringNode, null, null)
 					|| getReplaceQualifiedNameProposals(context, coveringNode, null);
 		}
@@ -422,6 +424,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
 				getAddStaticMemberFavoritesProposals(coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
+				getConvertToSwitchProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
 				getSplitTryResourceProposal(context, coveringNode, resultingCollections);
@@ -991,6 +994,29 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new SwitchExpressionsCleanUpCore(options), IProposalRelevance.CONVERT_TO_SWITCH_EXPRESSION, image, context);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getConvertToSwitchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		if (!(covering instanceof Block)) {
+			return false;
+		}
+		if (!(context.getCoveredNode() instanceof IfStatement)) {
+			return false;
+		}
+		Block block= (Block)covering;
+
+		IProposableFix fix= SwitchFixCore.createSwitchFix(block, context.getSelectionOffset(), context.getSelectionLength());
+		if (fix == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		// add correction proposal
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_TO_SWITCH, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}

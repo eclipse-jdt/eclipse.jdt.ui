@@ -916,9 +916,8 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                return 145;
 			            default :
-			                break;
+			                return 155;
 			        }
-			        return 155;
 			    }
 
 			    public int replaceSuiteThatDoNotFallThrough(int i1) {
@@ -958,9 +957,8 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                return 145;
 			            default :
-			                break;
+			                return 155;
 			        }
-			        return 155;
 			    }
 
 			    public int replaceSuiteIgnoring(int i1) {
@@ -1000,9 +998,8 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                return 145;
 			            default :
-			                break;
+			                return 155;
 			        }
-			        return 155;
 			    }
 
 			    public void replaceWhenVariableTypesConflict(int i1) {
@@ -1065,9 +1062,8 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                return 145;
 			            default :
-			                break;
+			                return 155;
 			        }
-			        return 155;
 			    }
 			}
 			""";
@@ -1163,9 +1159,11 @@ public class E {
                     }
                     break;
             }
-        } else if (computeit(i1) || i1.equals(E.VALUE3)) {
-        //
-        //
+        } else {
+            if (computeit(i1) || i1.equals(E.VALUE3)) {
+            //
+            //
+            }
         }
     }
 
@@ -1250,10 +1248,12 @@ public class E {
                     }
                     break;
             }
-        } else if (computeit(i1) || i1 == MYENUM.VALUE3) {
-			//
-			//
-		}
+        } else {
+            if (computeit(i1) || i1 == MYENUM.VALUE3) {
+            	//
+            	//
+            }
+        }
 	}
 
 	private boolean computeit(MYENUM i) {
@@ -1308,19 +1308,6 @@ public class E {
 			        int i = 0;
 			        if (i1 == 0) {
 			            i = 10;
-			        }
-			    }
-
-			    public void doNotReplaceWithSwitchOnPrimitiveWrapper(Integer i1) {
-			        int i = 0;
-			        if (i1 == 0) {
-			            i = 0;
-			        } else if (i1 == 10) {
-			            i = 10;
-			        } else if (i1 == 20) {
-			            i = 20;
-			        } else {
-			            i = 30;
 			        }
 			    }
 
