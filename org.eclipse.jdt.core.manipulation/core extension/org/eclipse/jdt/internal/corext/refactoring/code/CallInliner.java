@@ -821,16 +821,37 @@ public class CallInliner {
 				allblocks += blocks[i];
 			}
 			StringBuilder builder= new StringBuilder();
-			builder.append("{"); //$NON-NLS-1$
 			String[] lines= allblocks.split("\n"); //$NON-NLS-1$
+			if (fSourceProvider.getMarkerMode() == SourceProvider.EXPRESSION_MODE) {
+				String[] lastLines= lines[lines.length - 1].split(";"); //$NON-NLS-1$
+				if (lastLines.length > 1) {
+					lines= Arrays.copyOf(lines, lines.length + 1);
+					lines[lines.length - 2]= lastLines[0] + ";"; //$NON-NLS-1$
+					lines[lines.length - 1]= lastLines[1];
+				}
+			}
+			if (lines.length != 1) {
+				builder.append("{"); //$NON-NLS-1$
+			}
 			String separator= lines.length == 1 ? "" : "\n\t"; //$NON-NLS-1$ //$NON-NLS-2$
-			for (int i= 0; i < lines.length; ++i) {
+			boolean expressionMode= fSourceProvider.getMarkerMode() == SourceProvider.EXPRESSION_MODE;
+			for (int i= 0; i < lines.length - (expressionMode ? 1 : 0); ++i) {
 				builder.append(separator);
 				builder.append(lines[i]);
 				separator= "\n\t"; //$NON-NLS-1$
 			}
+			if (expressionMode) {
+				if (lines.length == 1) {
+					builder.append(lines[0]);
+				} else {
+					builder.append(separator);
+					builder.append("return " + lines[lines.length - 1] + ";"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
 			separator= lines.length == 1 ? "" : "\n"; //$NON-NLS-1$ //$NON-NLS-2$
-			builder.append(separator + "}"); //$NON-NLS-1$
+			if (lines.length != 1 || !expressionMode) {
+				builder.append(separator + "}"); //$NON-NLS-1$
+			}
 			ASTNode newNode= fRewrite.createStringPlaceholder(builder.toString(), ASTNode.BLOCK);
 			fRewrite.replace(fTargetNode, newNode, textEditGroup);
 		} else {
