@@ -215,6 +215,11 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	}
 
 	@Test
+	public void testSuperCallInOtherType() throws Exception {
+		performInvalidTestInlineMethod();
+	}
+
+	@Test
 	public void testNotMethodName() throws Exception {
 		ICompilationUnit unit= createCU(fgTestSetup.getInvalidPackage(), getName());
 		int[] selection= getSelection();

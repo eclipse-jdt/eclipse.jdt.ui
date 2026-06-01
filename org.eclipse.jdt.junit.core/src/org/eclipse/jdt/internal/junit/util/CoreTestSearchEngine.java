@@ -24,9 +24,9 @@ import org.osgi.framework.Version;
 import org.eclipse.jdt.junit.JUnitCore;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -230,7 +230,7 @@ public class CoreTestSearchEngine {
 								}
 							}
 						} catch (Throwable e) {
-							JUnitCorePlugin.log(Status.warning("Failed to determine JUnit version", e)); //$NON-NLS-1$
+							ILog.of(CoreTestSearchEngine.class).warn("Failed to determine JUnit version", e); //$NON-NLS-1$
 						}
 					}
 					if (version != null && version.getMajor() != junitMajorVersion) {

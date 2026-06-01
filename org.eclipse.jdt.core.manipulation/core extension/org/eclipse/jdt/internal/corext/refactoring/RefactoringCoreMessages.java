@@ -57,6 +57,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CallInliner_simple_functions;
 
+	public static String CallInliner_super_into_other_type;
+
 	public static String CallInliner_super_into_this_expression;
 
 	public static String CallInliner_unexpected_model_exception;
@@ -2546,6 +2548,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ConvertToRecordRefactoring_has_initializer;
 
 	public static String ConvertToRecordRefactoring_member_types_not_supported;
+
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
