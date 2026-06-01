@@ -33,11 +33,10 @@ import org.eclipse.equinox.frameworkadmin.BundleInfo;
 import org.eclipse.jdt.junit.JUnitCore;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -49,6 +48,8 @@ import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 
 
 public class BuildPathSupport {
+
+	private static final ILog LOG = ILog.of(BuildPathSupport.class);
 
 	public static final String JUNIT_JUPITER_VERSION= "[5.0.0,6.0.0)"; //$NON-NLS-1$
 	public static final String JUNIT_PLATFORM_VERSION= "[1.0.0,2.0.0)"; //$NON-NLS-1$
@@ -130,7 +131,7 @@ public class BuildPathSupport {
 						URL fileRootUrl= FileLocator.toFileURL(rootUrl);
 						return new Path(fileRootUrl.getPath());
 					} catch (IOException ex) {
-						JUnitCorePlugin.log(ex);
+						LOG.error(ex.getMessage(), ex);
 					}
 				}
 			}
@@ -172,7 +173,7 @@ public class BuildPathSupport {
 							return new Path(fileRootUrl.getPath());
 						}
 					} catch (IOException ex) {
-						JUnitCorePlugin.log(ex);
+						LOG.error(ex.getMessage(), ex);
 					}
 				}
 			}
@@ -199,7 +200,7 @@ public class BuildPathSupport {
 				ZipEntry entry= jar.getEntry(filePath);
 				if (entry != null) {
 					if (!container.toFile().exists() && !container.toFile().mkdirs()) {
-						JUnitCorePlugin.log(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, "Unable to create directory to hold " + filePath)); //$NON-NLS-1$
+						LOG.error("Unable to create directory to hold " + filePath); //$NON-NLS-1$
 						return null;
 					}
 					try (InputStream input= jar.getInputStream(entry);
@@ -213,7 +214,7 @@ public class BuildPathSupport {
 					return extractedPath;
 				}
 			} catch (IOException ex) {
-				JUnitCorePlugin.log(ex);
+				LOG.error(ex.getMessage(), ex);
 			}
 			return null;
 		}
@@ -248,7 +249,7 @@ public class BuildPathSupport {
 				return JavaCore.newLibraryEntry(bundleRootLocation, srcLocation, null, getAccessRules(), attributes, false);
 			}
 			String message = "Unable to compute bundle location for '" + bundleId + "' with range " + versionRange;  //$NON-NLS-1$//$NON-NLS-2$
-			JUnitCorePlugin.log(Status.error(message, new IllegalStateException(message)));
+			LOG.error(message, new IllegalStateException(message));
 			return null;
 		}
 

@@ -115,7 +115,7 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 			} catch (CoreException e) {
 				// Should never occur
 			}
-		});
+		}, JavaCodeMiningExecutor.get());
 	}
 
 	@Override

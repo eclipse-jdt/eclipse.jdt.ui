@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -341,6 +342,22 @@ public class CallInliner {
 					severity,
 					RefactoringCoreMessages.CallInliner_super_into_this_expression,
 					JavaStatusContext.create(fCUnit, fInvocation)));
+			} else {
+				AbstractTypeDeclaration sourceTypeDecl= ASTNodes.getFirstAncestorOrNull(fSourceProvider.getDeclaration(), AbstractTypeDeclaration.class);
+				AbstractTypeDeclaration targetTypeDecl= ASTNodes.getFirstAncestorOrNull(fInvocation, AbstractTypeDeclaration.class);
+				if (sourceTypeDecl != null && targetTypeDecl != null) {
+					ITypeBinding sourceTypeBinding= sourceTypeDecl.resolveBinding();
+					ITypeBinding targetTypeBinding= targetTypeDecl.resolveBinding();
+					if (sourceTypeBinding != null && targetTypeBinding != null) {
+						if (!sourceTypeBinding.getQualifiedName().equals(targetTypeBinding.getQualifiedName())) {
+							result.addEntry(new RefactoringStatusEntry(
+									severity,
+									RefactoringCoreMessages.CallInliner_super_into_other_type,
+									JavaStatusContext.create(fCUnit, fInvocation)));
+						}
+					}
+				}
+
 			}
 		}
 	}
