@@ -28,6 +28,7 @@ import org.eclipse.equinox.simpleconfigurator.manipulator.SimpleConfiguratorMani
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.URIUtil;
@@ -41,6 +42,8 @@ import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
  * @since 3.5
  */
 class P2Utils {
+
+	private static final ILog LOG = ILog.of(P2Utils.class);
 
 	/**
 	 * Finds the bundle info for the given arguments.
@@ -92,7 +95,7 @@ class P2Utils {
 		try {
 			bundles= manipulator.loadConfiguration(context, bundleInfoPath);
 		} catch (IOException e) {
-			JUnitCorePlugin.log(e);
+			LOG.error(e.getMessage(), e);
 		}
 
 		if (bundles != null) {
@@ -132,7 +135,7 @@ class P2Utils {
 			URI localFileURI= new URI(localFileURL.toExternalForm());
 			return new Path(localFileURI.getPath());
 		} catch (IOException | URISyntaxException e) {
-			JUnitCorePlugin.log(e);
+			LOG.error(e.getMessage(), e);
 			return null;
 		}
 	}

@@ -18,8 +18,7 @@ package org.eclipse.jdt.internal.junit.launcher;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-
-import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.core.runtime.ILog;
 
 
 public class TestKind implements ITestKind {
@@ -41,7 +40,7 @@ public class TestKind implements ITestKind {
 			try {
 				fFinder= (ITestFinder) fElement.createExecutableExtension(FINDER_CLASS_NAME);
 			} catch (CoreException e1) {
-				JUnitCorePlugin.log(e1);
+				ILog.of(TestKind.class).error(e1.getMessage(), e1);
 				fFinder= ITestFinder.NULL;
 			}
 		}
