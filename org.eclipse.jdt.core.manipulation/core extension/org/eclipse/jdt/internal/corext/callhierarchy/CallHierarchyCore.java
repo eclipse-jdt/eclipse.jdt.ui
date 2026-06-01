@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -308,7 +309,7 @@ public class CallHierarchyCore {
         ITypeRoot typeRoot= member.getTypeRoot();
         try {
             if (typeRoot != null && typeRoot.exists() && typeRoot.getBuffer() != null
-                    && JavaCore.isJavaLikeFileName(typeRoot.getElementName())) {
+                    && (typeRoot instanceof IClassFile || JavaCore.isJavaLikeFileName(typeRoot.getElementName()))) {
 				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				parser.setSource(typeRoot);
 				parser.setResolveBindings(resolveBindings);
