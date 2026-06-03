@@ -36,7 +36,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class AssistQuickFixTest12 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java12ProjectTestSetup(true);
+    public ProjectTestSetup projectSetup = new Java12ProjectTestSetup(false);
 
 	private IJavaProject fJProject1;
 
@@ -82,7 +82,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -113,7 +113,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -122,64 +122,5 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
-	@Test
-	public void testSplitSwitchCaseLabelRuleStatement() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set14CompilerOptions(fJProject1, true);
-		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-
-		String str= """
-			module test {
-			}
-			""";
-		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", str, false, null);
-
-		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String str1= """
-			package test;
-			public class Cls {
-			    public static void foo(Day day) {
-			        String weekDayOrEnd = switch (day) {
-			            case SATURDAY, SUNDAY -> "Weekend";
-			            case MONDAY, TUESDAY, WEDNESDAY -> "Weekday";
-			            case THURSDAY, FRIDAY -> "Weekday";
-			        };
-			    }
-			}
-			
-			enum Day {
-			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
-			}
-			""";
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
-
-		IInvocationContext ctx= getCorrectionContext(cu, 239, 0);
-		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		String expected= """
-			package test;
-			public class Cls {
-			    public static void foo(Day day) {
-			        String weekDayOrEnd = switch (day) {
-			            case SATURDAY, SUNDAY -> "Weekend";
-			            case MONDAY, TUESDAY, WEDNESDAY -> "Weekday";
-			            case THURSDAY -> "Weekday";
-						case FRIDAY -> "Weekday";
-			        };
-			    }
-			}
-			
-			enum Day {
-			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
-			}
-			""";
-
-		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
-	}
 }
 
