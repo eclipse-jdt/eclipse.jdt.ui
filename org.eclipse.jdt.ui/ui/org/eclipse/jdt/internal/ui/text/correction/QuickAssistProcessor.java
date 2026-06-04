@@ -111,6 +111,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -175,6 +176,7 @@ import org.eclipse.jdt.internal.corext.fix.ReplaceQualifiedTypeFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitTryResourceFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
+import org.eclipse.jdt.internal.corext.fix.SwitchCaseUnblockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
@@ -345,6 +347,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getDeprecatedFieldProposal(context, coveringNode, null, null)
 					|| getConvertToRecordProposals(context, coveringNode, null)
 					|| getConvertToSwitchProposals(context, coveringNode, null)
+					|| getUnblockSwitchExpressionCaseProposals(context, coveringNode, null)
 					|| getDeprecatedProposal(context, coveringNode, null, null)
 					|| getReplaceQualifiedNameProposals(context, coveringNode, null);
 		}
@@ -425,6 +428,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getAddStaticMemberFavoritesProposals(coveringNode, resultingCollections);
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getConvertToSwitchProposals(context, coveringNode, resultingCollections);
+				getUnblockSwitchExpressionCaseProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
 				getSplitTryResourceProposal(context, coveringNode, resultingCollections);
@@ -1008,6 +1012,56 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Block block= (Block)covering;
 
 		IProposableFix fix= SwitchFixCore.createSwitchFix(block, context.getSelectionOffset(), context.getSelectionLength());
+		if (fix == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		// add correction proposal
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_TO_SWITCH, image, context);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getUnblockSwitchExpressionCaseProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		Block block= null;
+		if (covering instanceof Block coveringBlock) {
+			block= coveringBlock;
+		} else if (covering instanceof SwitchCase switchCase) {
+			ASTNode parent= switchCase.getParent();
+			List<Statement> statements= new ArrayList<>();
+			if (parent instanceof SwitchStatement switchStatement) {
+				statements= switchStatement.statements();
+			} else if (parent instanceof SwitchExpression switchExpression) {
+				statements= switchExpression.statements();
+			}
+			int i= 0;
+			for (i= 0; i < statements.size(); ++i) {
+				if (statements.get(i) == switchCase) {
+					break;
+				}
+			}
+			if (++i < statements.size() && statements.get(i) instanceof Block b) {
+				block= b;
+			}
+		} else {
+			while (!(covering instanceof Statement) && covering != null) {
+				covering= covering.getParent();
+			}
+			if (covering != null && covering.getParent() instanceof Block parentBlock) {
+				block= parentBlock;
+			}
+		}
+		if (block == null) {
+			return false;
+		}
+		if (block.statements().size() != 1 || block.statements().get(0) instanceof ReturnStatement) {
+			return false;
+		}
+
+		IProposableFix fix= SwitchCaseUnblockFixCore.createFix(block);
 		if (fix == null)
 			return false;
 
