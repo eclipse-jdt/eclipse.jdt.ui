@@ -382,19 +382,21 @@ public class NewTestSourceFolderWizardPage extends NewElementWizardPage {
 				} else {
 					attributes= new IClasspathAttribute[] {};
 				}
-				IClasspathEntry newEntry= JavaCore.newSourceEntry(path, null, null, null, attributes);
+
+				IPath newOutputPath = fCurrJProject.getProject().getFullPath().append("bin_test"); //$NON-NLS-1$
+				IClasspathEntry newEntry= JavaCore.newSourceEntry(path, null, null, newOutputPath, attributes);
 
 				Set<IClasspathEntry> modified= new HashSet<>();
 				if (fExcludeInOthersFields.isSelected()) {
 					addExclusionPatterns(newEntry, newEntries, modified);
-					IClasspathEntry entry= JavaCore.newSourceEntry(path, null, null, null, attributes);
+					IClasspathEntry entry= JavaCore.newSourceEntry(path, null, null, newOutputPath, attributes);
 					insertAtEndOfCategory(entry, newEntries);
 				} else {
 					if (projectEntryIndex != -1) {
 						fIsProjectAsSourceFolder= true;
 						newEntries.set(projectEntryIndex, newEntry);
 					} else {
-						IClasspathEntry entry= JavaCore.newSourceEntry(path, null, null, null, attributes);
+						IClasspathEntry entry= JavaCore.newSourceEntry(path, null, null, newOutputPath, attributes);
 						insertAtEndOfCategory(entry, newEntries);
 					}
 				}
