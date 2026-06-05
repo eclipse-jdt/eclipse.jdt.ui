@@ -7092,4 +7092,23 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
+
+	@Test
+	public void testConvertEnanchedForLoopToForEach3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf = """
+			public void foo(String[] array) {
+			   for (String x : array) {
+			       System.out.println(x);
+			   }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("TestForLoop.java", buf, false, null);
+		int offset = buf.indexOf("x : ");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach);
+	}
 }

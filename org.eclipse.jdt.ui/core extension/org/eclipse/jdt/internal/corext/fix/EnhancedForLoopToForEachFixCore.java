@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -63,15 +64,23 @@ public class EnhancedForLoopToForEachFixCore extends CompilationUnitRewriteOpera
                 || analyzer.hasSynchronized()
                 || analyzer.hasNestedLoop()
                 || analyzer.hasVoidReturn();
+
 		if (hasUnconvertiblePatterns) {
 			return null;
 		}
 
 		SimpleName loopItemName = forStatement.getParameter() == null ? null : forStatement.getParameter().getName();
 		Expression expression = forStatement.getExpression() == null ? null : forStatement.getExpression();
+
 		SimpleName expressionName = expression instanceof SimpleName ? (SimpleName) expression : null;
 		if (loopItemName == null || expressionName == null) {
 			// We can't create a forEach because either the expression name or the loop item name is missing.
+			return null;
+		}
+
+		ITypeBinding binding = expressionName.resolveTypeBinding();
+
+		if (binding!= null && binding.isArray()) {
 			return null;
 		}
 
