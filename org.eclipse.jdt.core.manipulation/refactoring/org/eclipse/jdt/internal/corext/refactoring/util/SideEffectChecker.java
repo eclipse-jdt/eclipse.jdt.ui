@@ -123,7 +123,7 @@ public class SideEffectChecker extends ASTVisitor {
 			fSideEffect= true;
 			return null;
 		}
-		if (!(iTypeBinding.getJavaElement() instanceof IType))
+		if (!(iTypeBinding.getJavaElement() instanceof IType) || methodBinding.isSyntheticRecordMethod())
 			return null;
 		IType it= (IType) (iTypeBinding.getJavaElement());
 		try {

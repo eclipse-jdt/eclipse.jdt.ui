@@ -823,7 +823,22 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 		performCallTest();
 	}
 
-	/* *********************** Expression Tests ******************************* */
+	@Test
+	public void testLambdaBody1() throws Exception {
+		performCallTest();
+	}
+
+	@Test
+	public void testLambdaBody2() throws Exception {
+		performCallTest();
+	}
+
+	@Test
+	public void testLambdaBody3() throws Exception {
+		performCallTest();
+	}
+
+/* *********************** Expression Tests ******************************* */
 
 	private void performExpressionTest() throws Exception {
 		performTestInlineCall(fgTestSetup.getExpressionPackage(), getName(), COMPARE_WITH_OUTPUT, "expression_out");

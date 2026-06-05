@@ -127,9 +127,9 @@ public class SourceProvider {
 	private List<Expression> fReturnExpressions;
 	private IDocument fSource;
 
-	private static final int EXPRESSION_MODE= 1;
-	private static final int STATEMENT_MODE= 2;
-	private static final int RETURN_STATEMENT_MODE= 3;
+	public static final int EXPRESSION_MODE= 1;
+	public static final int STATEMENT_MODE= 2;
+	public static final int RETURN_STATEMENT_MODE= 3;
 	private int fMarkerMode;
 
 
@@ -328,6 +328,10 @@ public class SourceProvider {
 			}
 		}
 		return false;
+	}
+
+	public int getMarkerMode() {
+		return fMarkerMode;
 	}
 
 	public String getMethodName() {

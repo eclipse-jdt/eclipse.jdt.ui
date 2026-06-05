@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2026 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -48,12 +49,16 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -138,9 +143,27 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 
 		private List<SwitchFixOperation> fResult;
+		private int fRegionStart;
+		private int fRegionEnd;
 
 		public SwitchStatementsFinder(List<SwitchFixOperation> ops) {
 			fResult= ops;
+			fRegionStart= -1;
+			fRegionEnd= -1;
+		}
+
+		public SwitchStatementsFinder(List<SwitchFixOperation> ops, int start, int end) {
+			fResult= ops;
+			fRegionStart= start;
+			fRegionEnd= end;
+		}
+
+		public boolean isWithinRegion(ASTNode node) {
+			if (fRegionStart != -1) {
+				return node.getStartPosition() >= fRegionStart &&
+						node.getStartPosition() + node.getLength() <= fRegionEnd;
+			}
+			return true;
 		}
 
 		@Override
@@ -165,6 +188,9 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 			@Override
 			public boolean visit(final IfStatement visited) {
+				if (!isWithinRegion(visited)) {
+					return true;
+				}
 				if (!result || hasUnlabeledBreak(visited)) {
 					return true;
 				}
@@ -181,6 +207,8 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				Statement remainingStatement= null;
 
 				IfStatement ifStatement= visited;
+				ReturnStatement returnStatement= null;
+				ThrowStatement throwStatement= null;
 				boolean isFallingThrough= true;
 
 				do {
@@ -211,15 +239,29 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 					}
 
 					ifStatements.add(ifStatement);
-					ifStatement= ASTNodes.as(ASTNodes.getNextSibling(ifStatement), IfStatement.class);
-					variable= extractVariableAndValues(ifStatement);
+					Statement nextStatement= ASTNodes.getNextSibling(ifStatement);
+					ifStatement= null;
+					if (isWithinRegion(nextStatement)) {
+						returnStatement= ASTNodes.as(nextStatement, ReturnStatement.class);
+						throwStatement= ASTNodes.as(nextStatement, ThrowStatement.class);
+						ifStatement= ASTNodes.as(nextStatement, IfStatement.class);
+						variable= extractVariableAndValues(ifStatement);
+					}
 				} while (isFallingThrough
 						&& ifStatement != null
+						&& isWithinRegion(ifStatement)
 						&& !hasUnlabeledBreak(ifStatement)
 						&& remainingStatement == null
 						&& variable != null
 						&& ASTNodes.isSameVariable(switchExpression, variable.name));
 
+				if (remainingStatement == null) {
+					if (returnStatement != null) {
+						remainingStatement= returnStatement;
+					} else if (throwStatement != null) {
+						remainingStatement= throwStatement;
+					}
+				}
 				List<SwitchCaseSection> filteredCases= filterDuplicateCaseValues(cases);
 				return maybeReplaceWithSwitchStatement(ifStatements, switchExpression, filteredCases, remainingStatement);
 			}
@@ -362,7 +404,10 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				boolean isVariableEnum= variabletypeBinding != null && variabletypeBinding.isEnum();
 				boolean hasType= ASTNodes.hasType(variable, char.class.getCanonicalName(),
 						byte.class.getCanonicalName(), short.class.getCanonicalName(),
-						int.class.getCanonicalName()) || isVariableEnum;
+						int.class.getCanonicalName(), Character.class.getCanonicalName(),
+						Short.class.getCanonicalName(), Integer.class.getCanonicalName(),
+						Long.class.getCanonicalName(), Float.class.getCanonicalName(),
+						Double.class.getCanonicalName()) || isVariableEnum;
 
 				ITypeBinding constanttypeBinding= constant.resolveTypeBinding();
 				boolean isConstantEnum= constanttypeBinding != null && constanttypeBinding.isEnum();
@@ -434,8 +479,44 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				}
 			});
 
-			SwitchStatement switchStatement= ast.newSwitchStatement();
-			ASTNode newStatement= switchStatement;
+			boolean useNewStyleCase= false;
+			boolean useSwitchExpression= false;
+			useNewStyleCase= useSwitchExpression= JavaModelUtil.is14OrHigher(cuRewrite.getCu().getJavaProject());
+			for (SwitchCaseSection aCase : cases) {
+				if (!aCase.tagList.isEmpty()) {
+					for (Boolean hasTag : aCase.tagList) {
+						if (hasTag) {
+							useNewStyleCase= false;
+						}
+					}
+				}
+				Statement lastStatement= aCase.statements.isEmpty() ? null : aCase.statements.get(aCase.statements.size() - 1);
+				if (!(lastStatement instanceof ReturnStatement) && !(lastStatement instanceof ThrowStatement)) {
+					useSwitchExpression= false;
+				}
+			}
+
+			if (useSwitchExpression) {
+				if (remainingStatement == null || (!(remainingStatement instanceof ReturnStatement)
+						&& !(remainingStatement instanceof ThrowStatement))) {
+					useSwitchExpression= false;
+				}
+			}
+
+			ASTNode newStatement= null;
+			SwitchStatement switchStatement= null;
+			SwitchExpression newSwitchExpression= null;
+			if (useSwitchExpression) {
+				newSwitchExpression= ast.newSwitchExpression();
+				newSwitchExpression.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
+				ReturnStatement returnStmt= ast.newReturnStatement();
+				returnStmt.setExpression(newSwitchExpression);
+				newStatement= returnStmt;
+			} else {
+				switchStatement= ast.newSwitchStatement();
+				switchStatement.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
+			    newStatement= switchStatement;
+			}
 
 			CompilationUnit unit= cuRewrite.getRoot();
 			ICompilationUnit cu= (ICompilationUnit)unit.getJavaElement();
@@ -452,39 +533,49 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 					newIfStatement.setExpression(newInfixExpression);
 					Block newBlock= ast.newBlock();
 					newIfStatement.setThenStatement(newBlock);
-					newBlock.statements().add(switchStatement);
+					newBlock.statements().add(newStatement);
 					newStatement= newIfStatement;
 				}
 			}
 
-			switchStatement.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
 
 			for (SwitchCaseSection aCase : cases) {
-				addCaseWithStatements(rewrite, ast, switchStatement, aCase.literalExpressions, aCase.tagList, aCase.statements, isEnum);
+				addCaseWithStatements(rewrite, ast, switchStatement, newSwitchExpression, aCase.literalExpressions, aCase.tagList, aCase.statements, isEnum, useNewStyleCase);
 			}
 
 			if (remainingStatement != null) {
 				remainingStatement.setProperty(UNTOUCH_COMMENT_PROPERTY, Boolean.TRUE);
-				addCaseWithStatements(rewrite, ast, switchStatement, null, null, ASTNodes.asList(remainingStatement), isEnum);
+				addCaseWithStatements(rewrite, ast, switchStatement, newSwitchExpression, null, null, ASTNodes.asList(remainingStatement), isEnum, useNewStyleCase);
 				if (newStatement instanceof IfStatement ifStatement) {
-					ifStatement.setElseStatement((Statement) rewrite.createCopyTarget(remainingStatement));
+					Statement elseStatement= (Statement) rewrite.createCopyTarget(remainingStatement);
+					if (!(elseStatement instanceof Block)) {
+						Block b= ast.newBlock();
+						b.statements().add(elseStatement);
+						elseStatement= b;
+					}
+					ifStatement.setElseStatement(elseStatement);
 				}
 			} else {
-				addCaseWithStatements(rewrite, ast, switchStatement, null, null, Collections.emptyList(), isEnum);
+				addCaseWithStatements(rewrite, ast, switchStatement, newSwitchExpression, null, null, Collections.emptyList(), isEnum, useNewStyleCase);
 			}
 
 			for (int i= 0; i < ifStatements.size() - 1; i++) {
 				ASTNodes.removeButKeepComment(rewrite, ifStatements.get(i), group);
 			}
 
+			if (remainingStatement != null && remainingStatement.getLocationInParent() != IfStatement.ELSE_STATEMENT_PROPERTY) {
+				rewrite.remove(remainingStatement, group);
+			}
+
 			ASTNodes.replaceButKeepComment(rewrite, ifStatements.get(ifStatements.size() - 1), newStatement, group);
 		}
 
-		private void addCaseWithStatements(final ASTRewrite rewrite, final AST ast, final SwitchStatement switchStatement,
-				final List<Expression> caseValuesOrNullForDefault, final List<Boolean> tagList,
-				final List<Statement> innerStatements, boolean isEnum) {
-			List<Statement> switchStatements= switchStatement.statements();
-			boolean needBlock= checkForLocalDeclarations(innerStatements);
+		private void addCaseWithStatements(final ASTRewrite rewrite, final AST ast, final SwitchStatement newSwitchStatement,
+				final SwitchExpression newSwitchExpression, final List<Expression> caseValuesOrNullForDefault, final List<Boolean> tagList,
+				final List<Statement> innerStatements, boolean isEnum, boolean useNewStyleCase) {
+			List<Statement> switchStatements= newSwitchExpression != null ? newSwitchExpression.statements() : newSwitchStatement.statements();
+			boolean needBlock= checkForLocalDeclarations(innerStatements) || (useNewStyleCase
+					&& (innerStatements.size() != 1 || (newSwitchExpression == null && innerStatements.get(0) instanceof ReturnStatement)));
 			Boolean hasTag= false;
 
 			// Add the case statement(s)
@@ -492,6 +583,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				CompilationUnit unit= (CompilationUnit)caseValuesOrNullForDefault.get(0).getRoot();
 				ICompilationUnit cu= (ICompilationUnit)unit.getJavaElement();
 				String spaceBefore= getCoreOption(cu.getJavaProject(), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, false) ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
+				SwitchCase newSwitchCase= null;
 				for (int i= 0; i < caseValuesOrNullForDefault.size(); ++i) {
 				    Expression caseValue= caseValuesOrNullForDefault.get(i);
 				    if (isEnum && caseValue instanceof QualifiedName qName) {
@@ -503,7 +595,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 							IBuffer buffer= cu.getBuffer();
 							String newline= i == caseValuesOrNullForDefault.size() - 1 && needBlock ? "\n" : ""; //$NON-NLS-1$ //$NON-NLS-2$
 							String caseString= "case " + buffer.getText(caseValue.getStartPosition(), caseValue.getLength()) + spaceBefore + ": //$NON-NLS-1$" + newline; //$NON-NLS-1$ //$NON-NLS-2$
- 							SwitchCase newSwitchCase= (SwitchCase)rewrite.createStringPlaceholder(caseString, ASTNode.SWITCH_CASE);
+ 							newSwitchCase= (SwitchCase)rewrite.createStringPlaceholder(caseString, ASTNode.SWITCH_CASE);
  							switchStatements.add(newSwitchCase);
 						} catch (JavaModelException e) {
 							JavaManipulationPlugin.log(e);
@@ -512,27 +604,40 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 				    }
 				    if (!hasTag) {
-				    	SwitchCase newSwitchCase= ast.newSwitchCase();
+				    	if (newSwitchCase == null || !useNewStyleCase) {
+				    		newSwitchCase= ast.newSwitchCase();
+				    		newSwitchCase.setSwitchLabeledRule(useNewStyleCase);
+				    		switchStatements.add(newSwitchCase);
+				    	}
 				    	newSwitchCase.expressions().add(ASTNodes.createMoveTarget(rewrite, caseValue));
-				    	switchStatements.add(newSwitchCase);
 				    }
 				}
 			} else {
 				CompilationUnit unit= (CompilationUnit)switchExpression.getRoot();
 				ICompilationUnit cu= (ICompilationUnit)unit.getJavaElement();
+				boolean defaultExpressionAdded= false;
 				if (cu != null && JavaModelUtil.is21OrHigher(cu.getJavaProject())) {
 					ITypeBinding switchTypeBinding= switchExpression.resolveTypeBinding();
 					if (switchTypeBinding != null && !switchTypeBinding.isPrimitive()) {
 						SwitchCase newSwitchCase= ast.newSwitchCase();
+						newSwitchCase.setSwitchLabeledRule(useNewStyleCase);
 						newSwitchCase.expressions().add(ast.newNullLiteral());
+						if (useNewStyleCase) {
+							newSwitchCase.expressions().add(ast.newCaseDefaultExpression());
+							defaultExpressionAdded= true;
+						}
 						switchStatements.add(newSwitchCase);
 					}
 				}
-				switchStatements.add(ast.newSwitchCase());
+				if (!defaultExpressionAdded) {
+					SwitchCase newSwitchCase= ast.newSwitchCase();
+					newSwitchCase.setSwitchLabeledRule(useNewStyleCase);
+					switchStatements.add(newSwitchCase);
+				}
 			}
 
-			List<Statement> statementsList= switchStatement.statements();
-			boolean isBreakNeeded= true;
+			List<Statement> statementsList= newSwitchExpression != null ? newSwitchExpression.statements() : newSwitchStatement.statements();
+			boolean isBreakNeeded= !useNewStyleCase;
 			Block block= null;
 			if (needBlock) {
 				block= ast.newBlock();
@@ -542,10 +647,22 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			// Add the statement(s) for this case(s)
 			if (!innerStatements.isEmpty()) {
 				for (Statement statement : innerStatements) {
-					statementsList.add((Statement) rewrite.createCopyTarget(statement));
+					if (newSwitchExpression != null && statement instanceof ReturnStatement returnStmt) {
+						if (innerStatements.size() > 1) {
+							YieldStatement yieldStatement= ast.newYieldStatement();
+							yieldStatement.setExpression((Expression) rewrite.createCopyTarget(returnStmt.getExpression()));
+							statementsList.add(yieldStatement);
+						} else {
+							Expression exp= (Expression) rewrite.createCopyTarget(returnStmt.getExpression());
+							ExpressionStatement expStmt= ast.newExpressionStatement(exp);
+							statementsList.add(expStmt);
+						}
+					} else {
+						statementsList.add((Statement) rewrite.createCopyTarget(statement));
+					}
 				}
 
-				isBreakNeeded= !ASTNodes.fallsThrough(innerStatements.get(innerStatements.size() - 1));
+				isBreakNeeded= !useNewStyleCase && !ASTNodes.fallsThrough(innerStatements.get(innerStatements.size() - 1));
 			}
 
 			// When required: end with a break
@@ -596,6 +713,19 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 		CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[0]);
 		return new SwitchFixCore(FixMessages.SwitchFix_convert_if_to_switch, compilationUnit, ops);
+	}
+
+	public static IProposableFix createSwitchFix(final Block block, int start, int length) {
+		List<SwitchFixOperation> operations= new ArrayList<>();
+		SwitchStatementsFinder finder= new SwitchStatementsFinder(operations, start, start + length);
+		block.accept(finder);
+
+		if (operations.isEmpty()) {
+			return null;
+		}
+
+		CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[0]);
+		return new SwitchFixCore(FixMessages.SwitchFix_convert_if_to_switch, (CompilationUnit) block.getRoot(), ops);
 	}
 
 	protected SwitchFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {

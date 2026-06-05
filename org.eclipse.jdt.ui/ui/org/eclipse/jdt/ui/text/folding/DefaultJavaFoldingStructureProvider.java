@@ -1901,8 +1901,21 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private Map<IJavaElement, List<Tuple>> computeCurrentStructure(FoldingStructureComputationContext ctx) {
-		Map<IJavaElement, List<Tuple>> map= new HashMap<>();
+		Map<IJavaElement, List<Tuple>> map;
 		ProjectionAnnotationModel model= ctx.getModel();
+		synchronized (model.getLockObject()) {
+			map = mapAnnotationPositions(model);
+		}
+
+		Comparator<Tuple> comparator= (o1, o2) -> o1.position.getOffset() - o2.position.getOffset();
+		for (List<Tuple> list : map.values()) {
+			Collections.sort(list, comparator);
+		}
+		return map;
+	}
+
+	private Map<IJavaElement, List<Tuple>> mapAnnotationPositions(ProjectionAnnotationModel model) {
+		Map<IJavaElement, List<Tuple>> map= new HashMap<>();
 		Iterator<Annotation> e= model.getAnnotationIterator();
 		while (e.hasNext()) {
 			Object annotation= e.next();
@@ -1917,11 +1930,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				}
 				list.add(new Tuple(java, position));
 			}
-		}
-
-		Comparator<Tuple> comparator= (o1, o2) -> o1.position.getOffset() - o2.position.getOffset();
-		for (List<Tuple> list : map.values()) {
-			Collections.sort(list, comparator);
 		}
 		return map;
 	}
