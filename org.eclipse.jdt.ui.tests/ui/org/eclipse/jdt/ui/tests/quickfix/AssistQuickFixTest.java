@@ -8739,7 +8739,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, str.indexOf("for"), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[3];
