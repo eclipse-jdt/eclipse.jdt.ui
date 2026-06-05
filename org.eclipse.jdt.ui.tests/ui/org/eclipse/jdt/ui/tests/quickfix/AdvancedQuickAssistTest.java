@@ -6954,4 +6954,161 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		expected[0]= buf.toString();
 		assertExpectedExistInProposals(proposals, expected);
 	}
+
+	@Test
+	public void testConvertEnanchedForLoopToForEach() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf= """
+			package test;
+
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class TestForLoop {
+
+				public void testForLoop() {
+					List<String> list = List.of("a", "b", "c");
+					for (String adj : list) {
+						String newItem = adj + "blob";
+						if(newItem.equals("blob")) System.out.println("aloha");
+						System.out.println(adj);
+					}
+				}
+			}""";
+		ICompilationUnit cu= pack1.createCompilationUnit("TestForLoop.java", buf, false, null);
+		String expected = """
+			package test;
+
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class TestForLoop {
+
+				public void testForLoop() {
+					List<String> list = List.of("a", "b", "c");
+					list.forEach(adj -> {
+			            String newItem = adj + "blob";
+			            if (newItem.equals("blob"))
+			                System.out.println("aloha");
+			            System.out.println(adj);
+			        });
+				}
+			}""";
+		int offset = buf.indexOf("adj");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+		//assertProposalPreviewEquals(expected, CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach, proposals);
+	}
+
+	@Test
+	public void testConvertEnanchedForLoopToForEach1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf= """
+			package test;
+
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class TestForLoop {
+
+				public void testForLoop() {
+					List<String> list = List.of("a", "b", "c");
+					for (String adj : list) {
+						System.out.println(adj);
+					}
+				}
+			}""";
+		ICompilationUnit cu= pack1.createCompilationUnit("TestForLoop.java", buf, false, null);
+		String expected = """
+			package test;
+
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class TestForLoop {
+
+				public void testForLoop() {
+					List<String> list = List.of("a", "b", "c");
+					list.forEach(adj -> System.out.println(adj));
+				}
+			}""";
+		int offset = buf.indexOf("adj");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertEnanchedForLoopToForEach2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf= """
+			package test;
+
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class TestForLoop {
+
+				public void testForLoop() {
+					List<String> list = List.of("a", "b", "c");
+					for (String adj : list) {
+						String newItem = adj + "blob";
+						System.out.println(newItem);
+					}
+				}
+			}""";
+		ICompilationUnit cu= pack1.createCompilationUnit("TestForLoop.java", buf, false, null);
+		String expected = """
+			package test;
+
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class TestForLoop {
+
+				public void testForLoop() {
+					List<String> list = List.of("a", "b", "c");
+					list.forEach(adj -> {
+			            String newItem = adj + "blob";
+			            System.out.println(newItem);
+			        });
+				}
+			}""";
+		int offset = buf.indexOf("adj");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertEnanchedForLoopToForEach3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf = """
+			public void foo(String[] array) {
+			   for (String x : array) {
+			       System.out.println(x);
+			   }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("TestForLoop.java", buf, false, null);
+		int offset = buf.indexOf("x : ");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach);
+	}
 }
