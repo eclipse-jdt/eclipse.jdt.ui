@@ -80,7 +80,7 @@ public class EnhancedForLoopToForEachFixCore extends CompilationUnitRewriteOpera
 
 		ITypeBinding binding = expressionName.resolveTypeBinding();
 
-		if (binding!= null && binding.isArray()) {
+		if (binding == null || binding.isArray()) {
 			return null;
 		}
 
