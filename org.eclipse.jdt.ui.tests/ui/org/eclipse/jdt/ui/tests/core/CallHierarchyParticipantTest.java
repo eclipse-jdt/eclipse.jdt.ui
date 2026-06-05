@@ -24,6 +24,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -47,8 +49,6 @@ import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.ui.tests.callhierarchy.TestCallHierarchyParticipant;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 /**
  * Tests for call hierarchy integration with contributed search participants.
@@ -398,4 +398,68 @@ public class CallHierarchyParticipantTest {
 		assertTrue("Should find firstCaller", foundFirst);
 		assertTrue("Should find secondCaller", foundSecond);
 	}
+
+	/**
+	 * Regression test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/3015
+	 *
+	 * Verifies that outgoing call hierarchy works for methods in class files
+	 * from a JAR/class folder with attached source. The {@code isJavaLikeFileName}
+	 * guard must not reject {@code IClassFile} members whose element name ends
+	 * in {@code .class}.
+	 */
+	@Test
+	public void outgoingCallsWorkForClassFileWithAttachedSource() throws Exception {
+		JavaProjectHelper.addRTJar9(fSourceProject);
+		IPackageFragmentRoot src = JavaProjectHelper.addSourceContainer(fSourceProject, "src");
+		IPackageFragment pkg = src.createPackageFragment("testpkg", true, null);
+		pkg.createCompilationUnit("Lib.java",
+				"""
+				package testpkg;
+				public class Lib {
+				    public void targetMethod() {}
+				    public void anotherTarget() {}
+				    public void callerMethod() { targetMethod(); anotherTarget(); }
+				}
+				""",
+				true, null);
+		fSourceProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+		// Add source project's output as a class folder WITH source attachment
+		JavaProjectHelper.addRTJar9(fBinaryProject);
+		IPath outputPath = fSourceProject.getOutputLocation();
+		IFolder outputFolder = fSourceProject.getProject()
+				.getFolder(outputPath.removeFirstSegments(1));
+		JavaProjectHelper.addLibrary(fBinaryProject, outputFolder.getFullPath(),
+				src.getPath(), null);
+
+		IType binaryType = fBinaryProject.findType("testpkg.Lib");
+		assertNotNull("Binary type should be found", binaryType);
+		IMethod binaryCallerMethod = binaryType.getMethod("callerMethod", new String[0]);
+		assertTrue("Binary callerMethod should exist", binaryCallerMethod.exists());
+
+		// Verify preconditions: this is a class file with source attached
+		ITypeRoot typeRoot = binaryCallerMethod.getTypeRoot();
+		assertTrue("Should be a class file", typeRoot instanceof IClassFile);
+		assertNotNull("Class file with source attachment should have a buffer",
+				typeRoot.getBuffer());
+
+		MethodWrapper[] roots = CallHierarchyCore.getDefault().getCalleeRoots(
+				new IMember[] { binaryCallerMethod });
+		assertEquals(1, roots.length);
+		MethodWrapper[] callees = roots[0].getCalls(new NullProgressMonitor());
+
+		assertEquals("Should find 2 callees via Java AST from attached source",
+				2, callees.length);
+
+		boolean foundTarget = false;
+		boolean foundAnother = false;
+		for (MethodWrapper callee : callees) {
+			String name = callee.getMember().getElementName();
+			if ("targetMethod".equals(name)) foundTarget = true;
+			if ("anotherTarget".equals(name)) foundAnother = true;
+		}
+		assertTrue("Should find targetMethod as callee", foundTarget);
+		assertTrue("Should find anotherTarget as callee", foundAnother);
+	}
+
 }

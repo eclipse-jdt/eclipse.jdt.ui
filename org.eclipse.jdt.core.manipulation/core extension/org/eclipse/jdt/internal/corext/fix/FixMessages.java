@@ -189,6 +189,8 @@ public final class FixMessages extends NLS {
 	public static String InlineDeprecatedMethod_msg;
 	public static String ReplaceDeprecatedField_msg;
 
+	public static String SwitchCaseUnblockFix_unwrap_case_block;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FixMessages.class);

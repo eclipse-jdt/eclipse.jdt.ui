@@ -58,6 +58,66 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 	}
 
 	@Test
+	public void testSplitSwitchCaseLabelRuleStatement() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, true);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        String weekDayOrEnd = switch (day) {
+			            case SATURDAY, SUNDAY -> "Weekend";
+			            case MONDAY, TUESDAY, WEDNESDAY -> "Weekday";
+			            case THURSDAY, FRIDAY -> "Weekday";
+			        };
+			    }
+			}
+
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		IInvocationContext ctx= getCorrectionContext(cu, 239, 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        String weekDayOrEnd = switch (day) {
+			            case SATURDAY, SUNDAY -> "Weekend";
+			            case MONDAY, TUESDAY, WEDNESDAY -> "Weekday";
+			            case THURSDAY -> "Weekday";
+						case FRIDAY -> "Weekday";
+			        };
+			    }
+			}
+
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
 	public void testConvertToSwitchExpression1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
@@ -798,6 +858,296 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		IInvocationContext ctx= getCorrectionContext(cu, index, 0);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 		assertProposalDoesNotExist(proposals, FixMessages.SwitchExpressionsFix_convert_to_switch_expression);
+	}
+
+	@Test
+	public void testUnwrapCaseBlock1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					switch (k) {
+						case 0 -> {
+							i = 3;
+						}
+						default -> i = 22;
+					}
+					return i;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("i = 3");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					switch (k) {
+						case 0 -> i = 3;
+						default -> i = 22;
+					}
+					return i;
+				}
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testUnwrapCaseBlock2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					switch (k) {
+						case 0 -> {
+							i = 3;
+						}
+						default -> i = 22;
+					}
+					return i;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("case 0");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					switch (k) {
+						case 0 -> i = 3;
+						default -> i = 22;
+					}
+					return i;
+				}
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testUnwrapCaseBlock3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					return switch (k) {
+						case 0 -> {
+							yield 3;
+						}
+						default -> 22;
+					};
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("yield 3");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					return switch (k) {
+						case 0 -> 3;
+						default -> 22;
+					};
+				}
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotUnwrapCaseBlock1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					switch (k) {
+						case 0 -> {
+							return 3;
+						}
+						default -> i = 22;
+					}
+					return i;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("return 3");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, FixMessages.SwitchCaseUnblockFix_unwrap_case_block);
+	}
+
+	@Test
+	public void testDoNotUnwrapCaseBlock2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					switch (k) {
+						case 0 -> {
+							i = 4;
+							System.out.println(i);
+						}
+						default -> i = 22;
+					}
+					return i;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("i = 4");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, FixMessages.SwitchCaseUnblockFix_unwrap_case_block);
+	}
+
+	@Test
+	public void testDoNotUnwrapCaseBlock3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String str1= """
+			package test;
+			public class Cls {
+				public int foo(int k) {
+					int i;
+					// logic comment
+					switch (k) {
+						case 0: {
+							i = 4;
+						}
+						break;
+						default:
+							i = 22;
+						break;
+					}
+					return i;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
+
+		int index= str1.indexOf("i = 4");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 5);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+		assertProposalDoesNotExist(proposals, FixMessages.SwitchCaseUnblockFix_unwrap_case_block);
 	}
 
 }

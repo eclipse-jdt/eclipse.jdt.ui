@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -224,7 +223,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		private OutlineTreeViewer(Tree tree) {
 			super(tree);
-
+			setUseHashlookup(true);
 		}
 
 		@Override
@@ -581,7 +580,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		treeViewer.addFilter(new MemberFilter());
 
 		fInnerLabelProvider= new OutlineLabelProvider();
-		fInnerLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
 		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(fInnerLabelProvider));
 
 		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
