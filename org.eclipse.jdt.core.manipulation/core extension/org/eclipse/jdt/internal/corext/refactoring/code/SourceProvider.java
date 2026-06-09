@@ -495,7 +495,7 @@ public class SourceProvider {
 					Expression newExpression= (Expression)rewriter.createStringPlaceholder(expressionString, expression.getNodeType());
 					AST ast= rewriter.getAST();
 					ITypeBinding explicitCast= ASTNodes.getExplicitCast(expression, (Expression)element);
-					if (explicitCast != null) {
+					if (explicitCast != null && !explicitCast.isTypeVariable()) {
 						CastExpression cast= ast.newCastExpression();
 						if (NecessaryParenthesesChecker.needsParentheses(expression, cast, CastExpression.EXPRESSION_PROPERTY)) {
 							newExpression= createParenthesizedExpression(newExpression, ast);

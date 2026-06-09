@@ -1177,6 +1177,11 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	}
 
 	@Test
+	public void testNoCast2() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/3019
+		performCastTest();
+	}
+
+	@Test
 	public void testInfixExpression1() throws Exception {
 		performCastTest();
 	}
