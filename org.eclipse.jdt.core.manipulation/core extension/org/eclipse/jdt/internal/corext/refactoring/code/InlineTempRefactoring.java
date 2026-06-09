@@ -524,7 +524,7 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 
 		ITypeBinding explicitCast= ASTNodes.getExplicitCast(initializer, reference);
-		if (explicitCast != null) {
+		if (explicitCast != null && !explicitCast.isTypeVariable()) {
 			CastExpression cast= ast.newCastExpression();
 			if (NecessaryParenthesesChecker.needsParentheses(copy, cast, CastExpression.EXPRESSION_PROPERTY)) {
 				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
