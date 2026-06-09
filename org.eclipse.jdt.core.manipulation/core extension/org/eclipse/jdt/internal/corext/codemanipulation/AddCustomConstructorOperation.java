@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -44,7 +45,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Workspace runnable to add custom constructors initializing fields.
@@ -160,8 +160,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask("", 2); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.AddCustomConstructorOperation_description);
+			SubMonitor subMonitor= SubMonitor.convert(monitor, CodeGenerationMessages.AddCustomConstructorOperation_description, 2);
 
 			ICompilationUnit cu= (ICompilationUnit) fASTRoot.getTypeRoot();
 
@@ -190,10 +189,10 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 				}
 				fResultingEdit= new MultiTextEdit();
 				fResultingEdit.addChild(astRewrite.rewriteAST());
-				fResultingEdit.addChild(importRewrite.rewriteImports(Progress.subMonitor(monitor, 1)));
+				fResultingEdit.addChild(importRewrite.rewriteImports(subMonitor.split(1)));
 
 				if (fApply) {
-					JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, Progress.subMonitor(monitor, 1));
+					JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, subMonitor.split(1));
 				}
 			}
 		} finally {
