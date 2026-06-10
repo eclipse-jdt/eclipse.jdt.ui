@@ -190,6 +190,11 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	}
 
 	@Test
+	public void testPrivateEnum() throws Exception {
+		performInvalidTest();
+	}
+
+	@Test
 	public void testCompileError1() throws Exception {
 		performInvalidTest();
 	}
