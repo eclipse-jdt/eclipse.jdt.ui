@@ -398,7 +398,7 @@ class SourceAnalyzer  {
 						if (declClass == null || declClass.isLocal()) {
 							return true;
 						}
-					} else {
+					} else if (!(binding instanceof ITypeBinding)) {
 						return true;
 					}
 				}
