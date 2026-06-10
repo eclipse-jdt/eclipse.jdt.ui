@@ -2854,7 +2854,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 				indent= StubUtility.getIndentUsed(enclosingType) + 1;
 			}
-			if (monitor.isCanceled()) {
+			if (subMonitor.isCanceled()) {
 				throw new InterruptedException();
 			}
 
@@ -2866,7 +2866,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 			JavaModelUtil.reconcile(cu);
 
-			if (monitor.isCanceled()) {
+			if (subMonitor.isCanceled()) {
 				throw new InterruptedException();
 			}
 
