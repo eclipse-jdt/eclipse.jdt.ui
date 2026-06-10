@@ -382,6 +382,16 @@ class SourceAnalyzer  {
 		@Override
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
+			return checkBindingAccess(binding);
+		}
+
+		@Override
+		public boolean visit(ClassInstanceCreation node) {
+			IBinding binding= node.resolveConstructorBinding();
+			return checkBindingAccess(binding);
+		}
+
+		private boolean checkBindingAccess(IBinding binding) {
 			if (binding != null) {
 				int modifiers= binding.getModifiers();
 				boolean isPublic= Modifier.isPublic(modifiers);
