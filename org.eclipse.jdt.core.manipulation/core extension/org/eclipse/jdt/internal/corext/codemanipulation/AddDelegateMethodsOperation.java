@@ -21,7 +21,7 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.DelegateEntryComparator;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Workspace runnable to add delegate methods.
@@ -153,57 +152,50 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	 */
 	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.AddDelegateMethodsOperation_monitor_message);
-			fCreated.clear();
-			ICompilationUnit cu= (ICompilationUnit) fASTRoot.getTypeRoot();
+		SubMonitor subMonitor= SubMonitor.convert(monitor, CodeGenerationMessages.AddDelegateMethodsOperation_monitor_message, 1);
+		fCreated.clear();
+		ICompilationUnit cu= (ICompilationUnit) fASTRoot.getTypeRoot();
 
-			ASTRewrite astRewrite= ASTRewrite.create(fASTRoot.getAST());
-			ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
+		ASTRewrite astRewrite= ASTRewrite.create(fASTRoot.getAST());
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
 
-			ITypeBinding parentType= fDelegatesToCreate[0].field.getDeclaringClass();
+		ITypeBinding parentType= fDelegatesToCreate[0].field.getDeclaringClass();
 
-			ASTNode typeDecl= fASTRoot.findDeclaringNode(parentType);
+		ASTNode typeDecl= fASTRoot.findDeclaringNode(parentType);
 
-			ListRewrite listRewriter= null;
-			if (typeDecl instanceof AbstractTypeDeclaration) {
-				listRewriter= astRewrite.getListRewrite(typeDecl, ((AbstractTypeDeclaration) typeDecl).getBodyDeclarationsProperty());
-			} else if (typeDecl instanceof AnonymousClassDeclaration) {
-				listRewriter= astRewrite.getListRewrite(typeDecl, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-			}
+		ListRewrite listRewriter= null;
+		if (typeDecl instanceof AbstractTypeDeclaration) {
+			listRewriter= astRewrite.getListRewrite(typeDecl, ((AbstractTypeDeclaration) typeDecl).getBodyDeclarationsProperty());
+		} else if (typeDecl instanceof AnonymousClassDeclaration) {
+			listRewriter= astRewrite.getListRewrite(typeDecl, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+		}
 
-			if (listRewriter != null) {
-				ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(listRewriter, fInsert);
+		if (listRewriter != null) {
+			ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(listRewriter, fInsert);
 
-				ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(fASTRoot, typeDecl.getStartPosition(), importRewrite);
+			ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(fASTRoot, typeDecl.getStartPosition(), importRewrite);
 
-				Arrays.sort(fDelegatesToCreate, new DelegateEntryComparator());
+			Arrays.sort(fDelegatesToCreate, new DelegateEntryComparator());
 
-				for (DelegateEntry delegateEntry : fDelegatesToCreate) {
-					IMethodBinding delegateMethod= delegateEntry.delegateMethod;
-					IVariableBinding field= delegateEntry.field;
-					MethodDeclaration newMethod= StubUtility2Core.createDelegationStub(cu, astRewrite, importRewrite, context, delegateMethod, field, fSettings);
-					if (newMethod != null) {
-						fCreated.add(delegateMethod);
-						if (insertion != null && insertion.getParent() == typeDecl)
-							listRewriter.insertBefore(newMethod, insertion, null);
-						else
-							listRewriter.insertLast(newMethod, null);
-					}
-				}
-				fResultingEdit= new MultiTextEdit();
-				fResultingEdit.addChild(astRewrite.rewriteAST());
-				fResultingEdit.addChild(importRewrite.rewriteImports(Progress.subMonitor(monitor, 1)));
-
-				if (fApply) {
-					JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, Progress.subMonitor(monitor, 1));
+			for (DelegateEntry delegateEntry : fDelegatesToCreate) {
+				IMethodBinding delegateMethod= delegateEntry.delegateMethod;
+				IVariableBinding field= delegateEntry.field;
+				MethodDeclaration newMethod= StubUtility2Core.createDelegationStub(cu, astRewrite, importRewrite, context, delegateMethod, field, fSettings);
+				if (newMethod != null) {
+					fCreated.add(delegateMethod);
+					if (insertion != null && insertion.getParent() == typeDecl)
+						listRewriter.insertBefore(newMethod, insertion, null);
+					else
+						listRewriter.insertLast(newMethod, null);
 				}
 			}
-		} finally {
-			monitor.done();
+			fResultingEdit= new MultiTextEdit();
+			fResultingEdit.addChild(astRewrite.rewriteAST());
+			fResultingEdit.addChild(importRewrite.rewriteImports(subMonitor.split(1)));
+
+			if (fApply) {
+				JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, subMonitor.split(1));
+			}
 		}
 	}
 }

@@ -26,8 +26,8 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -313,62 +313,55 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	 */
 	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.GenerateHashCodeEqualsOperation_description);
+		SubMonitor subMonitor= SubMonitor.convert(monitor, CodeGenerationMessages.GenerateHashCodeEqualsOperation_description, 1);
 
-			fCustomHashCodeTypes.clear();
+		fCustomHashCodeTypes.clear();
 
-			// get the declaration and the rewrite
-			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.findDeclaration(fType, fRewrite.getRoot());
-			ListRewrite rewriter= fRewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
-			List<BodyDeclaration> list= declaration.bodyDeclarations();
-			if (fType != null && rewriter != null) {
+		// get the declaration and the rewrite
+		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.findDeclaration(fType, fRewrite.getRoot());
+		ListRewrite rewriter= fRewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
+		List<BodyDeclaration> list= declaration.bodyDeclarations();
+		if (fType != null && rewriter != null) {
 
-				ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
+			ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
 
-				ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(rewriter, fInsert);
+			ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(rewriter, fInsert);
 
-				// equals(..)
-				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType(JAVA_LANG_OBJECT) };
-				BodyDeclaration oldEquals= fForce ? findMethodToReplace(list, METHODNAME_EQUALS, objectAsParam) : null;
+			// equals(..)
+			ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType(JAVA_LANG_OBJECT) };
+			BodyDeclaration oldEquals= fForce ? findMethodToReplace(list, METHODNAME_EQUALS, objectAsParam) : null;
 
-				fImportRewriteContext= new ContextSensitiveImportRewriteContext(declaration, fRewrite.getImportRewrite());
-				MethodDeclaration equalsMethod= createEqualsMethod();
-				addMethod(rewriter, insertion, equalsMethod, oldEquals);
+			fImportRewriteContext= new ContextSensitiveImportRewriteContext(declaration, fRewrite.getImportRewrite());
+			MethodDeclaration equalsMethod= createEqualsMethod();
+			addMethod(rewriter, insertion, equalsMethod, oldEquals);
 
-				if (monitor.isCanceled())
-					throw new OperationCanceledException();
+			if (subMonitor.isCanceled())
+				throw new OperationCanceledException();
 
-				// hashCode()
-				BodyDeclaration oldHash= fForce ? findMethodToReplace(list, METHODNAME_HASH_CODE, new ITypeBinding[0]) : null;
+			// hashCode()
+			BodyDeclaration oldHash= fForce ? findMethodToReplace(list, METHODNAME_HASH_CODE, new ITypeBinding[0]) : null;
 
-				MethodDeclaration hashCodeMethod= createHashCodeMethod();
-				addMethod(rewriter, equalsMethod, hashCodeMethod, oldHash);
+			MethodDeclaration hashCodeMethod= createHashCodeMethod();
+			addMethod(rewriter, equalsMethod, hashCodeMethod, oldHash);
 
-				// helpers
-				for (ITypeBinding binding : fCustomHashCodeTypes) {
-					if (findMethodToReplace(list, METHODNAME_HASH_CODE, objectAsParam) == null) {
-						final MethodDeclaration helperDecl= createHashCodeHelper(binding);
-						addHelper(rewriter, null, helperDecl);
-					}
+			// helpers
+			for (ITypeBinding binding : fCustomHashCodeTypes) {
+				if (findMethodToReplace(list, METHODNAME_HASH_CODE, objectAsParam) == null) {
+					final MethodDeclaration helperDecl= createHashCodeHelper(binding);
+					addHelper(rewriter, null, helperDecl);
 				}
-
-				if (isMemberType()) {
-					if (findMethodToReplace(list, METHODNAME_GET_ENCLOSING_INSTANCE, new ITypeBinding[0]) == null) {
-						final MethodDeclaration helperDecl= createGetEnclosingInstanceHelper();
-						rewriter.insertLast(helperDecl, null);
-					}
-				}
-
-				fEdit= fRewrite.createChange(true).getEdit();
-				if (fApply)
-					JavaModelUtil.applyEdit(cu, fEdit, fSave, monitor);
 			}
-		} finally {
-			monitor.done();
+
+			if (isMemberType()) {
+				if (findMethodToReplace(list, METHODNAME_GET_ENCLOSING_INSTANCE, new ITypeBinding[0]) == null) {
+					final MethodDeclaration helperDecl= createGetEnclosingInstanceHelper();
+					rewriter.insertLast(helperDecl, null);
+				}
+			}
+
+			fEdit= fRewrite.createChange(true).getEdit();
+			if (fApply)
+				JavaModelUtil.applyEdit(cu, fEdit, fSave, subMonitor.split(1));
 		}
 	}
 

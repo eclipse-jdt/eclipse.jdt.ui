@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -88,39 +88,31 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 
 	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.GenerateToStringOperation_description);
+		SubMonitor subMonitor= SubMonitor.convert(monitor, CodeGenerationMessages.GenerateToStringOperation_description, 1);
 
 
-			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)ASTNodes.findDeclaration(fContext.getTypeBinding(), fRewrite.getRoot());
-			ListRewrite rewriter= fRewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
-			if (fContext.getTypeBinding() != null && rewriter != null) {
+		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)ASTNodes.findDeclaration(fContext.getTypeBinding(), fRewrite.getRoot());
+		ListRewrite rewriter= fRewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
+		if (fContext.getTypeBinding() != null && rewriter != null) {
 
-				MethodDeclaration toStringMethod= fGenerator.generateToStringMethod();
+			MethodDeclaration toStringMethod= fGenerator.generateToStringMethod();
 
-				List<BodyDeclaration> list= declaration.bodyDeclarations();
-				BodyDeclaration replace= findMethodToReplace(list, toStringMethod);
-				if (replace == null || ((Boolean)toStringMethod.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue())
-					insertMethod(toStringMethod, rewriter, replace);
+			List<BodyDeclaration> list= declaration.bodyDeclarations();
+			BodyDeclaration replace= findMethodToReplace(list, toStringMethod);
+			if (replace == null || ((Boolean)toStringMethod.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue())
+				insertMethod(toStringMethod, rewriter, replace);
 
-				for (MethodDeclaration method : fGenerator.generateHelperMethods()) {
-					replace= findMethodToReplace(list, method);
-					if (replace == null || ((Boolean)method.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue()) {
-						insertMethod(method, rewriter, replace);
-					}
-				}
-
-				fEdit= fRewrite.createChange(true).getEdit();
-				if (fApply) {
-					JavaModelUtil.applyEdit((ICompilationUnit)fUnit.getJavaElement(), fEdit, fSave, monitor);
+			for (MethodDeclaration method : fGenerator.generateHelperMethods()) {
+				replace= findMethodToReplace(list, method);
+				if (replace == null || ((Boolean)method.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue()) {
+					insertMethod(method, rewriter, replace);
 				}
 			}
 
-		} finally {
-			monitor.done();
+			fEdit= fRewrite.createChange(true).getEdit();
+			if (fApply) {
+				JavaModelUtil.applyEdit((ICompilationUnit)fUnit.getJavaElement(), fEdit, fSave, subMonitor.split(1));
+			}
 		}
 	}
 

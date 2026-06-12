@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Workspace runnable to add unimplemented constructors.
@@ -210,77 +209,70 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 */
 	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		try {
-			monitor.beginTask("", 2); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.AddUnimplementedMethodsOperation_description);
-			fCreatedMethods.clear();
-			ICompilationUnit cu= (ICompilationUnit) fASTRoot.getJavaElement();
+		SubMonitor subMonitor= SubMonitor.convert(monitor, CodeGenerationMessages.AddUnimplementedMethodsOperation_description, 2);
+		fCreatedMethods.clear();
+		ICompilationUnit cu= (ICompilationUnit) fASTRoot.getJavaElement();
 
-			AST ast= fASTRoot.getAST();
+		AST ast= fASTRoot.getAST();
 
-			ASTRewrite astRewrite= ASTRewrite.create(ast);
-			ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
+		ASTRewrite astRewrite= ASTRewrite.create(ast);
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
 
-			ITypeBinding currTypeBinding= fType;
-			ListRewrite memberRewriter= null;
+		ITypeBinding currTypeBinding= fType;
+		ListRewrite memberRewriter= null;
 
-			ASTNode node= fASTRoot.findDeclaringNode(currTypeBinding);
-			if (node instanceof AnonymousClassDeclaration) {
-				memberRewriter= astRewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-			} else if (node instanceof AbstractTypeDeclaration) {
-				ChildListPropertyDescriptor property= ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty();
-				memberRewriter= astRewrite.getListRewrite(node, property);
-			} else {
-				throw new IllegalArgumentException();
-				// not possible, we checked this in the constructor
+		ASTNode node= fASTRoot.findDeclaringNode(currTypeBinding);
+		if (node instanceof AnonymousClassDeclaration) {
+			memberRewriter= astRewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+		} else if (node instanceof AbstractTypeDeclaration) {
+			ChildListPropertyDescriptor property= ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty();
+			memberRewriter= astRewrite.getListRewrite(node, property);
+		} else {
+			throw new IllegalArgumentException();
+			// not possible, we checked this in the constructor
+		}
+
+		final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu);
+		settings.createComments= fCreateComments;
+
+		ASTNode insertion= getNodeToInsertBefore(memberRewriter);
+
+		IMethodBinding[] toImplement= fConstructorsToImplement;
+		if (toImplement == null) {
+			toImplement= StubUtility2Core.getVisibleConstructors(currTypeBinding, true, true);
+		}
+
+		int deprecationCount= 0;
+		for (IMethodBinding curr : toImplement) {
+			if (curr.isDeprecated()) {
+				deprecationCount++;
 			}
-
-			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu);
-			settings.createComments= fCreateComments;
-
-			ASTNode insertion= getNodeToInsertBefore(memberRewriter);
-
-			IMethodBinding[] toImplement= fConstructorsToImplement;
-			if (toImplement == null) {
-				toImplement= StubUtility2Core.getVisibleConstructors(currTypeBinding, true, true);
-			}
-
-			int deprecationCount= 0;
-			for (IMethodBinding curr : toImplement) {
-				if (curr.isDeprecated()) {
-					deprecationCount++;
+		}
+		boolean createDeprecated= deprecationCount == toImplement.length;
+		for (IMethodBinding curr : toImplement) {
+			if (!curr.isDeprecated() || createDeprecated) {
+				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, importRewrite);
+				MethodDeclaration stub= StubUtility2Core.createConstructorStub(cu, astRewrite, importRewrite, context, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, true, settings, fFormatSettings);
+				if (stub != null) {
+					fCreatedMethods.add(curr.getKey());
+					if (insertion != null)
+						memberRewriter.insertBefore(stub, insertion, null);
+					else
+						memberRewriter.insertLast(stub, null);
 				}
 			}
-			boolean createDeprecated= deprecationCount == toImplement.length;
-			for (IMethodBinding curr : toImplement) {
-				if (!curr.isDeprecated() || createDeprecated) {
-					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, importRewrite);
-					MethodDeclaration stub= StubUtility2Core.createConstructorStub(cu, astRewrite, importRewrite, context, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, true, settings, fFormatSettings);
-					if (stub != null) {
-						fCreatedMethods.add(curr.getKey());
-						if (insertion != null)
-							memberRewriter.insertBefore(stub, insertion, null);
-						else
-							memberRewriter.insertLast(stub, null);
-					}
-				}
-			}
-			fResultingEdit= new MultiTextEdit();
+		}
+		fResultingEdit= new MultiTextEdit();
 
-			TextEdit importEdits= importRewrite.rewriteImports(Progress.subMonitor(monitor, 1));
-			fCreatedImports= importRewrite.getCreatedImports();
-			if (fImports) {
-				fResultingEdit.addChild(importEdits);
-			}
-			fResultingEdit.addChild(astRewrite.rewriteAST());
+		TextEdit importEdits= importRewrite.rewriteImports(subMonitor.split(1));
+		fCreatedImports= importRewrite.getCreatedImports();
+		if (fImports) {
+			fResultingEdit.addChild(importEdits);
+		}
+		fResultingEdit.addChild(astRewrite.rewriteAST());
 
-			if (fApply) {
-				JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, Progress.subMonitor(monitor, 1));
-			}
-		} finally {
-			monitor.done();
+		if (fApply) {
+			JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, subMonitor.split(1));
 		}
 	}
 
