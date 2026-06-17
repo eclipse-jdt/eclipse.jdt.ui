@@ -108,6 +108,8 @@ public class SimplifyBooleanIfElseCleanUpCore extends AbstractMultiFix {
 		if (thenStatement instanceof ReturnStatement returnStatement) {
 			if (returnStatement.getExpression() instanceof BooleanLiteral literal) {
 				thenValue= literal.booleanValue();
+			} else {
+				return SimplifyStatus.INVALID;
 			}
 		} else if (thenStatement instanceof Block block && block.statements().size() == 1
 				&& block.statements().get(0) instanceof ReturnStatement returnStatement) {
