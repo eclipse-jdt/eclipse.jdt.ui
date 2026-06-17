@@ -72,7 +72,7 @@ public class PluginsNotLoadedTest {
 			"org.apache.lucene.analysis",
 			"org.eclipse.ant.core",
 			"org.eclipse.ant.ui",
-			"org.eclipse.compare", // caveat, see workaround for EGit in setUpTest below!
+//			"org.eclipse.compare", // loaded via UnifiedDiffCodeMiningProvider
 			"org.eclipse.core.commands",
 			"org.eclipse.core.expressions.tests",
 			"org.eclipse.core.filebuffers.tests",
@@ -121,10 +121,6 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.search.tests",
 			"org.eclipse.swt",
 			"org.eclipse.swt.win32.win32.x86",
-			"org.eclipse.team.cvs.core",
-			"org.eclipse.team.cvs.ssh",
-			"org.eclipse.team.cvs.ssh2",
-			"org.eclipse.team.cvs.ui",
 			"org.eclipse.test.performance",
 			"org.eclipse.test.performance.ui",
 			"org.eclipse.test.performance.win32",
@@ -158,8 +154,6 @@ public class PluginsNotLoadedTest {
 			"org.apache.lucene.source",
 			"org.eclipse.core.boot",
 			"org.eclipse.core.databinding.beans",
-			"org.eclipse.cvs",
-			"org.eclipse.cvs.source",
 			"org.eclipse.equinox.launcher",
 			"org.eclipse.equinox.launcher.win32.win32.x86",
 			"org.eclipse.help.appserver",
@@ -188,22 +182,7 @@ public class PluginsNotLoadedTest {
 			@Override
 			public void beforeEach(ExtensionContext context) throws Exception {
 				super.beforeEach(context);
-				/* Since https://bugs.eclipse.org/484795 in EGit 4.2, org.eclipse.egit.ui/plugin.xml contributes:
-				 * <extension point="org.eclipse.ui.services">
-				 *   <sourceProvider provider="org.eclipse.egit.ui.internal.selection.RepositorySourceProvider">
-				 *   ...
-				 * This activates the EGit UI bundle very early.
-				 * Because of that, EGit's org.eclipse.egit.ui.team.MergeTool command's handler class is loaded,
-				 * which in turn activates the org.eclipse.compare bundle on startup.
-				 *
-				 * org.eclipse.pde.ui also contributes a sourceProvider, that's why we don't test for it...
-				 *
-				 * Workaround is to remove org.eclipse.compare iff EGit is present:
-				 */
-				if (Platform.getBundle("org.eclipse.egit.ui") != null) {
-					addLoadedPlugIns("org.eclipse.compare");
-				}
-				addLoadedPlugIns("org.eclipse.core.filebuffers.tests", "org.eclipse.core.variables", "org.eclipse.team.cvs.core", "org.eclipse.test.performance");
+				addLoadedPlugIns("org.eclipse.core.filebuffers.tests", "org.eclipse.core.variables", "org.eclipse.test.performance");
 			}
 		};
 
