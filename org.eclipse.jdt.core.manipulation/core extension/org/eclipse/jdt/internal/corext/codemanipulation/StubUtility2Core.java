@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2025 IBM Corporation and others.
+ * Copyright (c) 2018, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -272,6 +272,10 @@ public final class StubUtility2Core {
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 		decl.setName(ast.newSimpleName(typeBinding.getName()));
 		decl.setConstructor(true);
+		if(typeBinding.isRecord()) {
+			decl.setCompactConstructor(true);
+		}
+
 
 		List<SingleVariableDeclaration> parameters= decl.parameters();
 		if (superConstructor != null) {
