@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewTestSourceFolderCreationWizard;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  *
- * @since 3.2
+ * @since 3.38
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
