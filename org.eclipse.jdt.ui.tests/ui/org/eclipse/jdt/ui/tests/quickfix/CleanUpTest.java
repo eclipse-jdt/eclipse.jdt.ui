@@ -16879,6 +16879,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			package test1;
 
 			public class E {
+				String text;
 			    public boolean doNotSimplifyIfBooleanSame(int x) {
 			        if (x > 0 && x < 7) {
 			            return true;
@@ -16910,6 +16911,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				    } else {
 				        return 2;
 				    }
+				}
+
+				public boolean doNotSimplifyInfixExpression(Integer x) {
+					if (text != null)
+						return text.length() > 43;
+					else
+						return false;
 				}
 			}
 		    """;

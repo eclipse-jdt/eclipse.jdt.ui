@@ -190,6 +190,16 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	}
 
 	@Test
+	public void testPrivateEnum() throws Exception {
+		performInvalidTest();
+	}
+
+	@Test
+	public void testPrivateConstructor() throws Exception {
+		performInvalidTest();
+	}
+
+	@Test
 	public void testCompileError1() throws Exception {
 		performInvalidTest();
 	}
@@ -1173,6 +1183,11 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 
 	@Test
 	public void testNoCast() throws Exception {
+		performCastTest();
+	}
+
+	@Test
+	public void testNoCast2() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/3019
 		performCastTest();
 	}
 

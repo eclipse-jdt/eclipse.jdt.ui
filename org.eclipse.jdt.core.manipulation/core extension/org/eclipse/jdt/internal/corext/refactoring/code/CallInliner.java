@@ -1040,7 +1040,7 @@ public class CallInliner {
 			return ASTNodes.isTargetAmbiguous((Expression) fTargetNode, parameterType);
 		} else {
 			ITypeBinding explicitCast= ASTNodes.getExplicitCast(returnExprs.get(0), (Expression)fTargetNode);
-			return explicitCast != null;
+			return explicitCast != null && !explicitCast.isTypeVariable();
 		}
 	}
 

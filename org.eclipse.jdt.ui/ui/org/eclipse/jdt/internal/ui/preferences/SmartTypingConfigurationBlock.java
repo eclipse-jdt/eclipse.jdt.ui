@@ -33,8 +33,12 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -42,6 +46,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -226,11 +231,42 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 0);
 		createDependency(master, slave);
 
-		if (JavaCore.compareJavaVersions(
-				JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE), JavaCore.VERSION_23) >= 0) {
+		ICompilationUnit cu= getCompilationUnit();
+		IJavaProject project= cu.getJavaProject();
+		String compliance= project != null
+				? project.getOption(JavaCore.COMPILER_COMPLIANCE, true)
+				: JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+		if (JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_23) >= 0) {
 			label= PreferencesMessages.JavaEditorPreferencePage_closeMarkdownThreeBacktick;
 			master= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_FENCED_CODE_BLOCK, 0);
 		}
+	}
+
+	/**
+	 * Returns the compilation unit of the compilation unit editor invoking the <code>AutoIndentStrategy</code>,
+	 * might return <code>null</code> on error.
+	 * @return the compilation unit represented by the document
+	 */
+	private static ICompilationUnit getCompilationUnit() {
+
+		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
+		if (window == null)
+			return null;
+
+		IWorkbenchPage page= window.getActivePage();
+		if (page == null)
+			return null;
+
+		IEditorPart editor= page.getActiveEditor();
+		if (editor == null)
+			return null;
+
+		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+		ICompilationUnit unit= manager.getWorkingCopy(editor.getEditorInput());
+		if (unit == null)
+			return null;
+
+		return unit;
 	}
 
 	private void createMessage(final Composite composite) {

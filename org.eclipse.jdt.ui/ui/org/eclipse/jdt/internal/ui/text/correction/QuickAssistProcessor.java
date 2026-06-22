@@ -162,6 +162,7 @@ import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLambdaToMethodReferenceFixCore;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
 import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
+import org.eclipse.jdt.internal.corext.fix.EnhancedForLoopToForEachFixCore;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
@@ -328,6 +329,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertMethodReferenceToLambdaProposal(context, coveringNode, null)
 					|| getConvertLambdaToMethodReferenceProposal(context, coveringNode, null)
 					|| getConvertToSwitchExpressionProposals(context, coveringNode, null)
+					|| getConvertForLoopToForEachProposal(context, coveringNode, null)
 					|| getFixParenthesesInLambdaExpression(context, coveringNode, null)
 					|| getRemoveBlockProposals(context, coveringNode, null)
 					|| getMakeVariableDeclarationFinalProposals(context, null)
@@ -416,6 +418,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getFixParenthesesInLambdaExpression(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
+				getConvertForLoopToForEachProposal(context, coveringNode, resultingCollections);
 				getUnnecessaryArrayCreationProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
@@ -437,6 +440,36 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
+	}
+
+	private static boolean getConvertForLoopToForEachProposal(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) {
+		EnhancedForStatement enhancedForStatement= getEnclosingHeader(node, EnhancedForStatement.class, EnhancedForStatement.PARAMETER_PROPERTY, EnhancedForStatement.EXPRESSION_PROPERTY);
+		if (enhancedForStatement == null)
+			return false;
+
+		SingleVariableDeclaration parameter= enhancedForStatement.getParameter();
+		IVariableBinding parameterBinding= parameter.resolveBinding();
+		if (parameterBinding == null) {
+			return false;
+		}
+		Expression initializer= enhancedForStatement.getExpression();
+		ITypeBinding initializerTypeBinding= initializer.resolveTypeBinding();
+		if (initializerTypeBinding == null) {
+			return false;
+		}
+
+		EnhancedForLoopToForEachFixCore fixCore = EnhancedForLoopToForEachFixCore.createReplaceEnhancedLoop(context.getASTRoot(), enhancedForStatement);
+		if (fixCore != null) {
+			if (resultingCollections == null) {
+				return true;
+			}
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fixCore, null, IProposalRelevance.CONVERT_TO_FOR_EACH, image, context);
+			resultingCollections.add(proposal);
+			return true;
+		}
+
+		return false;
 	}
 
 	private static boolean getReplaceQualifiedNameProposals(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) throws JavaModelException {
