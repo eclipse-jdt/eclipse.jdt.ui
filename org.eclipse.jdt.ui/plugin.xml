@@ -2443,6 +2443,7 @@
             id="org.eclipse.jdt.ui.JavaActionSet">
          <action
                definitionId="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+               icon="$nl$/icons/full/eview16/class_hi.svg"
                label="%OpenTypeInHierarchyAction.label"
                helpContextId="org.eclipse.jdt.ui.open_type_in_hierarchy_action"
                tooltip="%OpenTypeInHierarchyAction.tooltip"
@@ -2542,6 +2543,7 @@
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
+               icon="$nl$/icons/full/eview16/call_hierarchy.svg"
                label="%OpenCallHierarchyAction.label"
                retarget="true"
                menubarPath="navigate/open.ext"
@@ -2549,6 +2551,7 @@
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
+               icon="$nl$/icons/full/eview16/class_hi.svg"
                label="%OpenTypeHierarchyAction.label"
                retarget="true"
                menubarPath="navigate/open.ext"
@@ -2641,6 +2644,7 @@
 <!-- =========================================================================== -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
+               icon="$nl$/icons/full/eview16/javadoc.svg"
                label="%OpenAttachedJavadocAction.label"
                retarget="true"
                allowLabelUpdate="true"
@@ -2665,6 +2669,7 @@
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.navigate.gotopackage"
+               icon="$nl$/icons/full/eview16/package.svg"
                label="%GoToPackageAction.label"
                retarget="true"
                menubarPath="navigate/goTo/"
@@ -2672,6 +2677,7 @@
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.navigate.gototype"
+               icon="$nl$/icons/full/eview16/types.svg"
                label="%GoToTypeAction.label"
                retarget="true"
                menubarPath="navigate/goTo/"
