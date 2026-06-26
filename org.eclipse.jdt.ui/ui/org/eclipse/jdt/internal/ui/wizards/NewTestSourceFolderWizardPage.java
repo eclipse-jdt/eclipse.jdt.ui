@@ -19,24 +19,24 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
-public class NewSourceFolderWizardPage extends AbstractNewFolderWizardPage {
-	private static final String PAGE_NAME= "NewSourceFolderWizardPage"; //$NON-NLS-1$
+public class NewTestSourceFolderWizardPage extends AbstractNewFolderWizardPage {
 
-	public NewSourceFolderWizardPage() {
+	private static final String PAGE_NAME= "NewTestSourceFolderWizardPage"; //$NON-NLS-1$
+
+	public NewTestSourceFolderWizardPage() {
 		super(PAGE_NAME);
-		setTitle(NewWizardMessages.NewSourceFolderWizardPage_title);
-		setDescription(NewWizardMessages.NewSourceFolderWizardPage_description);
+		setTitle(NewWizardMessages.NewTestSourceFolderWizardPage_title);
+		setDescription(NewWizardMessages.NewTestSourceFolderWizardPage_description);
 	}
 
 	@Override
-	protected IClasspathEntry createNewClassPathEntry(IPath path, IPath[] inclusionPatterns, IPath[] exclusionPatterns, IPath newOutputPath, IClasspathAttribute[] attributes) {
-		return JavaCore.newSourceEntry(path, null, null, newOutputPath, attributes);
+	protected IClasspathEntry createNewClassPathEntry(IPath path, IPath[] inclusionPatterns, IPath[] exclusionPatterns,IPath newOutputPath, IClasspathAttribute[] attributes) {
+		return JavaCore.newSourceEntry(path, inclusionPatterns, exclusionPatterns, newOutputPath, attributes);
 	}
 
 	@Override
 	protected IPath createNewOutputPath() {
-		return null;
+		return fCurrJProject.getProject().getFullPath().append("bin_test"); //$NON-NLS-1$
 	}
-
 
 }
