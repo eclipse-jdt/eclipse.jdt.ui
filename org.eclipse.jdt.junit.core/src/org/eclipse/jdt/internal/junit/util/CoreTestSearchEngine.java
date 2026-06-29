@@ -80,7 +80,6 @@ public class CoreTestSearchEngine {
 	private static final String JUNIT_PLATFORM_SUITE_API_PREFIX= BuildPathSupport.JUNIT_PLATFORM_SUITE_API;
 	private static final String JUNIT_PLATFORM_COMMONS_PREFIX= BuildPathSupport.JUNIT_PLATFORM_COMMONS;
 	private static final String JUNIT_JUPITER_API_PREFIX= BuildPathSupport.JUNIT_JUPITER_API;
-	private static final String JUNIT_PLATFORM_CONSOLE_STANDALONE_PREFIX= "junit-platform-console-standalone"; //$NON-NLS-1$
 	private static final String ENGINE_VERSION_JUNIT_JUPITER= "Engine-Version-junit-jupiter"; //$NON-NLS-1$
 	private static final String SPECIFICATION_VERSION= "Specification-Version"; //$NON-NLS-1$
 	private static final String JAR_EXTENSION= ".jar"; //$NON-NLS-1$
@@ -224,7 +223,7 @@ public class CoreTestSearchEngine {
 							}
 							if (manifest != null) {
 								Attributes attributes= manifest.getMainAttributes();
-								String versionString= getJUnitVersionFromManifest(filename, attributes);
+								String versionString= getJUnitVersionFromManifest(attributes);
 								if (versionString != null) {
 									version= Version.parseVersion(versionString);
 								}
@@ -252,12 +251,17 @@ public class CoreTestSearchEngine {
 		return false;
 	}
 
-	private static String getJUnitVersionFromManifest(String filename, Attributes attributes) {
-		if (filename.startsWith(JUNIT_PLATFORM_CONSOLE_STANDALONE_PREFIX + "_") || filename.startsWith(JUNIT_PLATFORM_CONSOLE_STANDALONE_PREFIX + "-")) { //$NON-NLS-1$ //$NON-NLS-2$
-			String versionString= attributes.getValue(ENGINE_VERSION_JUNIT_JUPITER);
-			if (versionString != null) {
-				return versionString;
-			}
+	/*
+	 * The junit-platform-console-standalone fat JAR bundles a JUnit Jupiter engine whose version differs from the JUnit
+	 * Platform version reported by {@code Specification-Version}. It is the only JUnit artifact that advertises the bundled
+	 * Jupiter version through the {@code Engine-Version-junit-jupiter} manifest attribute, so prefer that attribute when it
+	 * is present. This works regardless of how the JAR file has been renamed. See
+	 * https://github.com/redhat-developer/vscode-java/issues/4396
+	 */
+	private static String getJUnitVersionFromManifest(Attributes attributes) {
+		String jupiterEngineVersion= attributes.getValue(ENGINE_VERSION_JUNIT_JUPITER);
+		if (jupiterEngineVersion != null) {
+			return jupiterEngineVersion;
 		}
 		return attributes.getValue(SPECIFICATION_VERSION);
 	}
