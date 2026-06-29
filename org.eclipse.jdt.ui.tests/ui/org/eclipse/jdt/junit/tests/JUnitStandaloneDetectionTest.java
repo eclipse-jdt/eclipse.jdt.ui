@@ -87,6 +87,34 @@ public class JUnitStandaloneDetectionTest {
 		assertThat(CoreTestSearchEngine.hasJUnit6TestAnnotation(javaProject)).isTrue();
 	}
 
+	@Test
+	public void testDetectJUnit5FromRenamedModuleStyleStandaloneJar() throws Exception {
+		// The standalone JAR is identified through its manifest even when the file is renamed to the
+		// OSGi/module style name, see https://github.com/redhat-developer/vscode-java/issues/4396
+		javaProject= createProjectWithStandaloneJar("org.junit.platform.console.standalone-1.13.4.jar", "1.13.4", "5.13.4");
+
+		assertThat(CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)).isTrue();
+		assertThat(CoreTestSearchEngine.hasJUnit6TestAnnotation(javaProject)).isFalse();
+	}
+
+	@Test
+	public void testDetectJUnit6FromRenamedModuleStyleStandaloneJar() throws Exception {
+		javaProject= createProjectWithStandaloneJar("org.junit.platform.console.standalone-6.0.3.jar", "6.0.3", "6.0.3");
+
+		assertThat(CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)).isFalse();
+		assertThat(CoreTestSearchEngine.hasJUnit6TestAnnotation(javaProject)).isTrue();
+	}
+
+	@Test
+	public void testDetectJUnit5FromArbitrarilyRenamedStandaloneJar() throws Exception {
+		// Detection must not depend on the file name at all; some users rename the JAR to e.g. junit4.jar,
+		// see https://github.com/redhat-developer/vscode-java/issues/4396
+		javaProject= createProjectWithStandaloneJar("junit4.jar", "1.13.4", "5.13.4");
+
+		assertThat(CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)).isTrue();
+		assertThat(CoreTestSearchEngine.hasJUnit6TestAnnotation(javaProject)).isFalse();
+	}
+
 	private static IJavaProject createProjectWithStandaloneJar(String jarName, String specificationVersion, String jupiterVersion) throws Exception {
 		IJavaProject project= JavaProjectHelper.createJavaProject("JUnitStandaloneDetectionTest", "bin");
 		JavaProjectHelper.addRTJar_17(project, false);
