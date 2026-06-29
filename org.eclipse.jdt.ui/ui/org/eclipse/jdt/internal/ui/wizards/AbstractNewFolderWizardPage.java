@@ -399,6 +399,9 @@ public abstract class AbstractNewFolderWizardPage extends NewElementWizardPage {
 						fIsProjectAsSourceFolder= true;
 						newEntries.set(projectEntryIndex, newEntry);
 					} else {
+						if (newEntry.isTest()) {
+							attributes = newEntry.getExtraAttributes();
+						}
 						IClasspathEntry entry= JavaCore.newSourceEntry(path, null, null, newOutputPath, attributes);
 						insertAtEndOfCategory(entry, newEntries);
 					}

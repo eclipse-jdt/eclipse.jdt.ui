@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -31,7 +35,11 @@ public class NewTestSourceFolderWizardPage extends AbstractNewFolderWizardPage {
 
 	@Override
 	protected IClasspathEntry createNewClassPathEntry(IPath path, IPath[] inclusionPatterns, IPath[] exclusionPatterns,IPath newOutputPath, IClasspathAttribute[] attributes) {
-		return JavaCore.newSourceEntry(path, inclusionPatterns, exclusionPatterns, newOutputPath, attributes);
+		List<IClasspathAttribute> new_attributes = new ArrayList<>(Arrays.asList(attributes));
+		new_attributes.add(JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true")); //$NON-NLS-1$
+		IClasspathAttribute[] new_attributes_array = new IClasspathAttribute[new_attributes.size()];
+		new_attributes.toArray(new_attributes_array);
+		return JavaCore.newSourceEntry(path, inclusionPatterns, exclusionPatterns, newOutputPath, new_attributes_array);
 	}
 
 	@Override
