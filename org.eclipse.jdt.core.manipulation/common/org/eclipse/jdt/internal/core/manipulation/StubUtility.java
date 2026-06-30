@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -389,6 +389,14 @@ public class StubUtility {
 			typeParametersNames[i]= typeParameters[i].getElementName();
 		}
 		return typeParametersNames;
+	}
+
+	public static String[] getRecordParameterNames(IField[] recordParameters) {
+		String[] recordParametersNames= new String[recordParameters.length];
+		for (int i= 0; i < recordParameters.length; i++) {
+			recordParametersNames[i]= recordParameters[i].getElementName();
+		}
+		return recordParametersNames;
 	}
 
 	/**
