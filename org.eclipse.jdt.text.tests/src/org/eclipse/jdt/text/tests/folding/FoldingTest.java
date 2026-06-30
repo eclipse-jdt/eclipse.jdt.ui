@@ -784,4 +784,47 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 9, 10); // if
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 11, 13); // else
 	}
+
+	/**
+	 * See <a href="https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/3031">GitHub Issue #3031</a>
+	 */
+	@Test
+	public void testFoldInnerTypesByDefault() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.EDITOR_FOLDING_INNERTYPES, true);
+
+		String str= """
+				class B { // Should not be folded
+					static class B1 { // Should be folded
+
+					}
+				}
+
+				public class A { // Should not be folded
+					static class A1 { // Should be folded
+					}
+
+					static class A2 { // Should be folded
+						public static void main(String[] args) {
+							Runnable r = new Runnable() { // Should be folded
+								@Override
+								public void run() {
+
+								}
+							};
+						}
+
+					}
+				}
+				""";
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRegionsOfPackage(packageFragment, str);
+		FoldingTestUtils.assertContainsExpandedRegionUsingStartAndEndLine(regions, str, 0, 4); // class B
+		FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 1, 3); // class B1
+		FoldingTestUtils.assertContainsExpandedRegionUsingStartAndEndLine(regions, str, 6, 21); // class A
+		FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 7, 8); // class A1
+		FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 10, 20); // class A2
+		FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 12, 17); // Runnable
+		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_FOLDING_INNERTYPES);
+
+	}
 }
