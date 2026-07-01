@@ -36,6 +36,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 @SelectClasses({
 	PluginsNotLoadedTest.class,
 	CompilationUnitDocumentProviderTest.class,
+	DocumentDirtyTrackerTest.class,
 	JavaHeuristicScannerTest.class,
 	JavaAutoIndentStrategyTest.class,
 	JavaBreakIteratorTest.class,
