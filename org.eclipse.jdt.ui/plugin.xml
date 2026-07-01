@@ -787,6 +787,17 @@
          <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
+            name="%NewTestSourceFolderCreationWizard.label"
+            icon="$nl$/icons/full/etool16/newpackfolder_wiz.svg"
+            category="org.eclipse.jdt.ui.java"
+            class="org.eclipse.jdt.internal.ui.wizards.NewTestSourceFolderCreationWizard"
+            id="org.eclipse.jdt.ui.wizards.NewTestSourceFolderCreationWizard">
+         <description>
+            %NewTestSourceFolderCreationWizard.description
+         </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
+      </wizard>
+      <wizard
             name="%NewEnumType.label"
             icon="$nl$/icons/full/etool16/newenum_wiz.svg"
             category="org.eclipse.jdt.ui.java"
@@ -6384,6 +6395,19 @@
 		          menuGroupId="org.eclipse.jdt.ui.java"
 		          type="new"
 		          wizardId="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard">
+				<enablement>
+					<or>
+						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+						<adapt type="org.eclipse.core.resources.IProject">
+							<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+						</adapt>
+					</or>
+				</enablement>
+			</commonWizard>
+			<commonWizard
+		          menuGroupId="org.eclipse.jdt.ui.java"
+		          type="new"
+		          wizardId="org.eclipse.jdt.ui.wizards.NewTestSourceFolderCreationWizard">
 				<enablement>
 					<or>
 						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
