@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2025 GK Software AG, IBM Corporation and others.
+ * Copyright (c) 2014, 2026 GK Software AG, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1280,6 +1280,331 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 				    }
 				}
 				""";
+			assertEquals(str1, doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+
+	@Test
+	public void testIssue832a() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			class K {
+			   int l;
+			   public K(int val) {
+			       l = val;
+			   }
+			   public K getThis() {
+			       return this;
+			   }
+			   public String getString() {
+			       return "abc";
+			   }
+			}
+
+			public class A {
+			    public void foo() {
+			        K k = new K(3);
+			        k.getThis()
+			    }
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "k.getThis()";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal proposal= null;
+
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("l")) {
+					proposal= p;
+				}
+			}
+			assertNotNull("no proposal for l", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			String str1= """
+			package test1;
+
+			class K {
+			   int l;
+			   public K(int val) {
+			       l = val;
+			   }
+			   public K getThis() {
+			       return this;
+			   }
+			   public String getString() {
+			       return "abc";
+			   }
+			}
+
+			public class A {
+			    public void foo() {
+			        K k = new K(3);
+			        k.getThis().l
+			    }
+			}
+			""";
+			assertEquals(str1, doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+	@Test
+	public void testIssue832b() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			class K {
+			   int l;
+			   public K(int val) {
+			       l = val;
+			   }
+			   public K getThis() {
+			       return this;
+			   }
+			   public String getString() {
+			       return "abc";
+			   }
+			}
+
+			public class A {
+			    public void foo() {
+			        K k = new K(3);
+			        k.getThis()
+			    }
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "k.getThis()";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal proposal= null;
+
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("getString")) {
+					proposal= p;
+				}
+			}
+			assertNotNull("no proposal for getString", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			String str1= """
+			package test1;
+
+			class K {
+			   int l;
+			   public K(int val) {
+			       l = val;
+			   }
+			   public K getThis() {
+			       return this;
+			   }
+			   public String getString() {
+			       return "abc";
+			   }
+			}
+
+			public class A {
+			    public void foo() {
+			        K k = new K(3);
+			        k.getThis().getString()
+			    }
+			}
+			""";
+			assertEquals(str1, doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+	@Test
+	public void testIssue832c() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			class K {
+			   int l;
+			   public K(int val) {
+			       l = val;
+			   }
+			   public K getThis() {
+			       return this;
+			   }
+			   public String getString() {
+			       return "abc";
+			   }
+			}
+
+			public class A {
+			    public void foo() {
+			        new K(3)
+			    }
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "new K(3)";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal proposal= null;
+
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("getString")) {
+					proposal= p;
+				}
+			}
+			assertNotNull("no proposal for getString", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			String str1= """
+			package test1;
+
+			class K {
+			   int l;
+			   public K(int val) {
+			       l = val;
+			   }
+			   public K getThis() {
+			       return this;
+			   }
+			   public String getString() {
+			       return "abc";
+			   }
+			}
+
+			public class A {
+			    public void foo() {
+			        new K(3).getString()
+			    }
+			}
+			""";
+			assertEquals(str1, doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+	@Test
+	public void testIssue832d() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			class K {
+			   int l;
+			   public K(int val) {
+			       l = val;
+			   }
+			   public K getThis() {
+			       return this;
+			   }
+			   public String getString() {
+			       return "abc";
+			   }
+			}
+
+			public class A {
+			    public void foo() {
+			        new K(3)
+			    }
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "new K(3)";
+
+			int offset= contents.indexOf(str) + str.length();
+
+			CompletionProposalCollector collector= createCollector(cu, offset);
+			collector.setReplacementLength(0);
+
+			codeComplete(cu, offset, collector);
+
+			IJavaCompletionProposal proposal= null;
+
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("l")) {
+					proposal= p;
+				}
+			}
+			assertNotNull("no proposal for l", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			String str1= """
+			package test1;
+
+			class K {
+			   int l;
+			   public K(int val) {
+			       l = val;
+			   }
+			   public K getThis() {
+			       return this;
+			   }
+			   public String getString() {
+			       return "abc";
+			   }
+			}
+
+			public class A {
+			    public void foo() {
+			        new K(3).l
+			    }
+			}
+			""";
 			assertEquals(str1, doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
