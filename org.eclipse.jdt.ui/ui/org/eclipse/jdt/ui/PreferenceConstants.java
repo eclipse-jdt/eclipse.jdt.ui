@@ -360,7 +360,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * @since 3.36
+	 * @since 3.39
 	 */
 	public static final String CODEGEN_USE_MARKDOWN= CodeGenerationSettingsConstants.CODEGEN_USE_MARKDOWN;
 
@@ -455,6 +455,27 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String ORGIMPORTS_IGNORELOWERCASE= CodeGenerationSettingsConstants.ORGIMPORTS_IGNORELOWERCASE;
+
+	/**
+	 * A named preference that controls whether existing on-demand (".*") imports are preserved as
+	 * on-demand imports by the "Organize Imports" operation, instead of being expanded into single
+	 * imports.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.39
+	 */
+	public static final String ORGIMPORTS_KEEP_EXISTING_ONDEMAND= CodeGenerationSettingsConstants.ORGIMPORTS_KEEP_EXISTING_ONDEMAND;
+
+	/**
+	 * A named preference that controls whether the "Organize Imports" operation may collapse single
+	 * imports into a new on-demand (".*") import once the on-demand threshold is reached.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.39
+	 */
+	public static final String ORGIMPORTS_COLLAPSE_TO_ONDEMAND= CodeGenerationSettingsConstants.ORGIMPORTS_COLLAPSE_TO_ONDEMAND;
 
 	/**
 	 * A named preference that specifies whether children of a compilation unit are shown in the package explorer.
@@ -4140,6 +4161,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
 		store.setDefault(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, 99);
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
+		store.setDefault(PreferenceConstants.ORGIMPORTS_KEEP_EXISTING_ONDEMAND, false);
+		store.setDefault(PreferenceConstants.ORGIMPORTS_COLLAPSE_TO_ONDEMAND, true);
 
 		// TypeFilterPreferencePage
 		store.setDefault(PreferenceConstants.TYPEFILTER_ENABLED, ""); //$NON-NLS-1$
