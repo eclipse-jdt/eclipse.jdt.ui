@@ -235,6 +235,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		private boolean fDoIgnoreLowerCaseNames;
 
+		private boolean fSkipWhenIndexerBusy;
+
 		private final UnresolvableImportMatcher fUnresolvableImportMatcher;
 
 		private IPackageFragment fCurrPackage;
@@ -250,12 +252,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 
 		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, Map<String, Set<String>> oldModuleImports,
-				CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher) {
+				CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, boolean skipWhenIndexerBusy, UnresolvableImportMatcher unresolvableImportMatcher) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fOldModuleImports= oldModuleImports;
 			fImpStructure= impStructure;
 			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
+			fSkipWhenIndexerBusy= skipWhenIndexerBusy;
 			fUnresolvableImportMatcher= unresolvableImportMatcher;
 			fRoot= root;
 
@@ -435,7 +438,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				boolean excludeTestCode= !((IPackageFragmentRoot)fCurrPackage.getParent()).getResolvedClasspathEntry().isTest();
 				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(excludeTestCode, new IJavaElement[] { project }, true);
 				TypeNameMatchCollector collector= new TypeNameMatchCollector(typesFound);
-				new SearchEngine().searchAllTypeNames(null, allTypes, scope, collector, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+				int waitingPolicy= fSkipWhenIndexerBusy ? IJavaSearchConstants.CANCEL_IF_NOT_READY_TO_SEARCH : IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH;
+				new SearchEngine().searchAllTypeNames(null, allTypes, scope, collector, waitingPolicy, monitor);
 
 				for (TypeNameMatch curr : typesFound) {
 					UnresolvedTypeData data= fUnresolvedTypes.get(curr.getSimpleTypeName());
@@ -598,6 +602,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	private boolean fIgnoreLowerCaseNames;
 	private boolean fRestoreExistingImports;
+	private boolean fSkipWhenIndexerBusy;
 
 	private IChooseImportQuery fChooseImportQuery;
 
@@ -657,6 +662,17 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 
 	/**
+	 * Sets whether the operation is skipped instead of waiting for the type indexer when missing
+	 * imports can only be found through an index search. Default is <code>false</code>.
+	 *
+	 * @param skipWhenIndexerBusy if set, no text edit is created while the indexer is busy
+	 * @since 1.25
+	 */
+	public void setSkipWhenIndexerBusy(boolean skipWhenIndexerBusy) {
+		fSkipWhenIndexerBusy= skipWhenIndexerBusy;
+	}
+
+	/**
 	 * Runs the operation.
 	 * @param monitor the progress monitor
 	 * @throws CoreException thrown when the operation failed
@@ -708,6 +724,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				astRoot,
 				importsRewrite,
 				fIgnoreLowerCaseNames,
+				fSkipWhenIndexerBusy,
 				unresolvableImportMatcher);
 
 		Iterator<SimpleName> refIterator= typeReferences.iterator();
@@ -716,7 +733,15 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			processor.add(typeRef);
 		}
 
-		boolean hasOpenChoices= processor.process(subMonitor.split(3));
+		boolean hasOpenChoices;
+		try {
+			hasOpenChoices= processor.process(subMonitor.split(3));
+		} catch (OperationCanceledException e) {
+			if (fSkipWhenIndexerBusy && !subMonitor.isCanceled()) {
+				return null; // the indexer is busy: skip organizing imports instead of waiting
+			}
+			throw e;
+		}
 		addStaticImports(staticReferences, importsRewrite, unresolvableImportMatcher);
 
 		if (hasOpenChoices && fChooseImportQuery != null) {

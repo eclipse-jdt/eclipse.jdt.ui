@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 
 public class ImportsFix extends TextEditFix {
 
-	public static ICleanUpFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status) throws CoreException {
+	public static ICleanUpFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status, boolean skipWhenIndexerBusy) throws CoreException {
 		if (!organizeImports)
 			return null;
 
@@ -59,6 +59,7 @@ public class ImportsFix extends TextEditFix {
 
 		final ICompilationUnit unit= (ICompilationUnit)cu.getJavaElement();
 		OrganizeImportsOperation op= new OrganizeImportsOperation(unit, cu, settings.importIgnoreLowercase, false, false, query);
+		op.setSkipWhenIndexerBusy(skipWhenIndexerBusy);
 
 		TextEdit edit= runUsingProgressService(op);
 
