@@ -66,6 +66,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String MARKDOWNGETTERCOMMENT_CONTEXTTYPE= "markdowngettercomment_context"; //$NON-NLS-1$
 	public static final String MARKDOWNSETTERCOMMENT_CONTEXTTYPE= "markdownsettercomment_context"; //$NON-NLS-1$
 	public static final String MARKDOWNMODULECOMMENT_CONTEXTTYPE= "markdownmodulecomment_context"; //$NON-NLS-1$
+	public static final String MARKDOWNOVERRIDECOMMENT_CONTEXTTYPE= "markdownoverridecomment_context"; //$NON-NLS-1$
 
 	/* templates */
 
@@ -104,6 +105,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String MARKDOWNGETTERCOMMENT_ID= CODETEMPLATES_PREFIX + "markdowngetter" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String MARKDOWNSETTERCOMMENT_ID= CODETEMPLATES_PREFIX + "markdownsetter" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String MARKDOWNMODULECOMMENT_ID= CODETEMPLATES_PREFIX + "markdownmodule" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String MARKDOWNOVERRIDECOMMENT_ID= CODETEMPLATES_PREFIX + "markdownoverride" + COMMENT_SUFFIX; //$NON-NLS-1$
 
 	/* resolver types */
 	public static final String EXCEPTION_TYPE= "exception_type"; //$NON-NLS-1$
@@ -285,6 +287,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 			addCompilationUnitVariables();
 			fIsComment= true;
 			break;
+		case MARKDOWNOVERRIDECOMMENT_CONTEXTTYPE:
 		case OVERRIDECOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
@@ -403,6 +406,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.MARKDOWNGETTERCOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.MARKDOWNSETTERCOMMENT_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.MARKDOWNOVERRIDECOMMENT_CONTEXTTYPE));
 	}
 
 	/*

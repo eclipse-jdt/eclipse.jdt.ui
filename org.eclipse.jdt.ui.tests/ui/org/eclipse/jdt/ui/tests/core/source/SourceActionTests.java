@@ -33,7 +33,8 @@ GenerateConstructorUsingFieldsTest.class,
 GenerateHashCodeEqualsTest.class,
 GenerateToStringTest.class,
 GenerateRecordConstructorTest.class,
-AddJavaDocStubOperationTest.class
+AddJavaDocStubOperationTest.class,
+GetTypeCommentMarkdownTest.class
 })
 public class SourceActionTests {
 }
