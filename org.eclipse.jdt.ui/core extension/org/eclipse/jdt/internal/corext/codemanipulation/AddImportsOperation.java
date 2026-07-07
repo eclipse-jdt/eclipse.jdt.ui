@@ -232,13 +232,11 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 
 	private class QualifiedNameVisitor extends ASTVisitor {
 		private final IBinding fBinding;
-		private final IBuffer fBuffer;
 		private final ImportRemover fImportRemover;
 
 		private List<TextEdit> edits= new ArrayList<>();
-		public QualifiedNameVisitor(IBinding binding, IBuffer buffer, ImportRemover importRemover) {
+		public QualifiedNameVisitor(IBinding binding, ImportRemover importRemover) {
 			this.fBinding= binding;
-			this.fBuffer= buffer;
 			this.fImportRemover= importRemover;
 		}
 
@@ -422,7 +420,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						// no change necessary
 						return null;
 					}
-					QualifiedNameVisitor visitor= new QualifiedNameVisitor(binding, fCompilationUnit.getBuffer(), importRemover);
+					QualifiedNameVisitor visitor= new QualifiedNameVisitor(binding, importRemover);
 					cu.accept(visitor);
 					return visitor.getEdits();
 				} else if (binding instanceof IVariableBinding || binding instanceof IMethodBinding) {
@@ -455,7 +453,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 									return null;
 								}
 							}
-							QualifiedNameVisitor visitor= new QualifiedNameVisitor(binding, fCompilationUnit.getBuffer(), importRemover);
+							QualifiedNameVisitor visitor= new QualifiedNameVisitor(binding, importRemover);
 							cu.accept(visitor);
 							return visitor.getEdits();
 						}
