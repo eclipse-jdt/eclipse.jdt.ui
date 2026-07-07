@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,7 +45,9 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -74,6 +76,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -172,15 +175,17 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			throw new OperationCanceledException();
 
 		ImportRewrite importRewrite= StubUtility.createImportRewrite(astRoot, true);
+		ImportRemover importRemover= new ImportRemover(astRoot.getJavaElement().getJavaProject(), astRoot);
 
 		MultiTextEdit res= new MultiTextEdit();
 
-		TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, subMonitor.split(1));
-		if (edit == null) {
+		TextEdit[] edits= evaluateEdits(astRoot, importRewrite, importRemover, fSelectionOffset, fSelectionLength, subMonitor.split(1));
+		if (edits == null || edits.length == 0) {
 			return;
 		}
-		res.addChild(edit);
+		res.addChildren(edits);
 
+		importRemover.applyRemoves(importRewrite);
 		TextEdit importsEdit= importRewrite.rewriteImports(subMonitor.split(1));
 		res.addChild(importsEdit);
 
@@ -224,9 +229,116 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			return false;
 		}
 	}
-	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws JavaModelException {
+
+	private class QualifiedNameVisitor extends ASTVisitor {
+		private final IBinding fBinding;
+		private final ImportRemover fImportRemover;
+
+		private List<TextEdit> edits= new ArrayList<>();
+		public QualifiedNameVisitor(IBinding binding, ImportRemover importRemover) {
+			this.fBinding= binding;
+			this.fImportRemover= importRemover;
+		}
+
+		public TextEdit[] getEdits() {
+			return edits.toArray(new TextEdit[0]);
+		}
+
+		@Override
+		public boolean visit(QualifiedName node) {
+			IBinding binding= node.resolveBinding();
+			if (fBinding.isEqualTo(binding)) {
+				edits.add(new ReplaceEdit(node.getStartPosition(), node.getQualifier().getLength() + 1, "")); //$NON-NLS-1$
+				fImportRemover.registerRemovedNode(node.getQualifier());
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(NameQualifiedType node) {
+			IBinding binding= node.resolveBinding();
+			if (fBinding.isEqualTo(binding)) {
+				edits.add(new ReplaceEdit(node.getStartPosition(), node.getQualifier().getLength() + 1, "")); //$NON-NLS-1$
+				fImportRemover.registerRemovedNode(node.getQualifier());
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(FieldAccess node) {
+			IBinding binding= node.resolveFieldBinding();
+			if (fBinding.isEqualTo(binding) && node.getExpression() != null) {
+				edits.add(new ReplaceEdit(node.getExpression().getStartPosition(), node.getExpression().getLength() + 1, "")); //$NON-NLS-1$
+				fImportRemover.registerRemovedNode(node.getExpression());
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation node) {
+			IBinding binding= node.resolveMethodBinding();
+			if (fBinding.isEqualTo(binding) && node.getExpression() != null) {
+				edits.add(new ReplaceEdit(node.getExpression().getStartPosition(), node.getExpression().getLength() + 1, "")); //$NON-NLS-1$
+				fImportRemover.registerRemovedNode(node.getExpression());
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(ClassInstanceCreation node) {
+			IBinding binding= node.resolveTypeBinding();
+			if (fBinding.isEqualTo(binding) && node.getExpression() != null) {
+				edits.add(new ReplaceEdit(node.getExpression().getStartPosition(), node.getExpression().getLength() + 1, "")); //$NON-NLS-1$
+				fImportRemover.registerRemovedNode(node.getExpression());
+			}
+			return true;
+		}
+
+//		@Override
+//		public boolean visit(FieldDeclaration node) {
+//			ITypeBinding binding= node.getType().resolveBinding();
+//			if (binding != null && binding.getComponentType() != null) {
+//				binding= binding.getComponentType();
+//			}
+//			if (fBinding.isEqualTo(binding)) {
+//				int start= node.getStartPosition();
+//				@SuppressWarnings("null")
+//				int length= binding.getQualifiedName().length();
+//				if (start + length <= fBuffer.getLength()) {
+//					if (fBuffer.getText(start, length).equals(binding.getQualifiedName())) {
+//						edits.add(new ReplaceEdit(start, length - binding.getName().length(), "")); //$NON-NLS-1$
+//					}
+//				}
+//			}
+//			return false;
+//		}
+//
+//		@Override
+//		public boolean visit(VariableDeclarationStatement node) {
+//			ITypeBinding binding= node.getType().resolveBinding();
+//			if (binding != null && binding.getComponentType() != null) {
+//				binding= binding.getComponentType();
+//			}
+//			if (fBinding.isEqualTo(binding)) {
+//				int start= node.getStartPosition();
+//				@SuppressWarnings("null")
+//				int length= binding.getQualifiedName().length();
+//				if (start + length <= fBuffer.getLength()) {
+//					if (fBuffer.getText(start, length).equals(binding.getQualifiedName())) {
+//						edits.add(new ReplaceEdit(start, length - binding.getName().length(), "")); //$NON-NLS-1$
+//					}
+//				}
+//			}
+//			return false;
+//		}
+	}
+
+	private TextEdit[] evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, ImportRemover importRemover, int offset, int length, IProgressMonitor monitor) throws JavaModelException {
 		SubMonitor subMonitor= SubMonitor.convert(monitor, 1);
 		SimpleName nameNode= null;
+		List<TextEdit> edits= new ArrayList<>();
 		if (root != null) { // got an AST
 			ASTNode node= NodeFinder.perform(root, offset, length);
 			if (node instanceof MarkerAnnotation) {
@@ -308,7 +420,9 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						// no change necessary
 						return null;
 					}
-					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+					QualifiedNameVisitor visitor= new QualifiedNameVisitor(binding, importRemover);
+					cu.accept(visitor);
+					return visitor.getEdits();
 				} else if (binding instanceof IVariableBinding || binding instanceof IMethodBinding) {
 					boolean isField= binding instanceof IVariableBinding;
 					ITypeBinding declaringClass= isField ? ((IVariableBinding) binding).getDeclaringClass() : ((IMethodBinding) binding).getDeclaringClass();
@@ -339,7 +453,9 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 									return null;
 								}
 							}
-							return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+							QualifiedNameVisitor visitor= new QualifiedNameVisitor(binding, importRemover);
+							cu.accept(visitor);
+							return visitor.getEdits();
 						}
 					}
 					return null; // no static imports for packages
@@ -380,7 +496,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_importclash, null);
 				return null;
 			} else if (res == ImportRewriteContext.RES_NAME_FOUND) {
-				return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+				return new TextEdit[] {new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, "")}; //$NON-NLS-1$
 			}
 		}
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
@@ -402,7 +518,8 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		ImportRewriteContext context= root == null ? null : new ContextSensitiveImportRewriteContext(root, simpleNameStart, importRewrite);
 		importRewrite.addImport(chosen.getFullyQualifiedName(), context);
-		return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
+		edits.add(new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, "")); //$NON-NLS-1$
+		return edits.toArray(new TextEdit[0]);
 	}
 
 
