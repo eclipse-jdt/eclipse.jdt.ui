@@ -30,16 +30,13 @@ public class ContainedLibraryFilter extends ViewerFilter {
 
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (element instanceof IPackageFragmentRoot) {
-			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-			if (root.isArchive()) {
-				// don't filter out JARs contained in the project itself
-				IResource resource= root.getResource();
-				if (resource != null) {
-					IProject jarProject= resource.getProject();
-					IProject container= root.getJavaProject().getProject();
-					return !container.equals(jarProject);
-				}
+		if (element instanceof IPackageFragmentRoot root) {
+			// don't filter out libraries contained in the project itself
+			IResource resource= root.getResource();
+			if (resource != null) {
+				IProject project= resource.getProject();
+				IProject container= root.getJavaProject().getProject();
+				return !container.equals(project);
 			}
 		}
 		return true;

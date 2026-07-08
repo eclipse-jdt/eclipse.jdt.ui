@@ -32,7 +32,8 @@ AddUnimplementedConstructorsTest.class,
 GenerateConstructorUsingFieldsTest.class,
 GenerateHashCodeEqualsTest.class,
 GenerateToStringTest.class,
-GenerateRecordConstructorTest.class
+GenerateRecordConstructorTest.class,
+AddJavaDocStubOperationTest.class
 })
 public class SourceActionTests {
 }
