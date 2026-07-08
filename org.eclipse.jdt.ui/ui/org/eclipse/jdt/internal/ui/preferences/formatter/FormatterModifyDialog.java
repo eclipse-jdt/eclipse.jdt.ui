@@ -1370,6 +1370,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_methods, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD)
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_local_variables, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE)
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_paramters, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER)
+						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_record_paramters, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_RECORD_PARAMETER)
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_type_annotations, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_TYPE_ANNOTATION))
 				.node(createKeepOnOneLineSection())
 				.build(null, (parent, label, key) -> {
