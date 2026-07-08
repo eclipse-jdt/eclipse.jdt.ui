@@ -349,8 +349,13 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			buffer.append(replacement.substring(0, replacement.lastIndexOf('.') + 1));
 		}
 
-		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION)
-			buffer.append(fProposal.getName());
+		if (fProposal.getKind() != CompletionProposal.CONSTRUCTOR_INVOCATION) {
+			if (fProposal.getCompletion().length > 0 && fProposal.getCompletion()[0] == '.') {
+				buffer.append(".").append(fProposal.getName()); //$NON-NLS-1$
+			} else {
+				buffer.append(fProposal.getName());
+			}
+		}
 
 		FormatterPrefs prefs= getFormatterPrefs();
 		if (prefs.beforeOpeningParen)

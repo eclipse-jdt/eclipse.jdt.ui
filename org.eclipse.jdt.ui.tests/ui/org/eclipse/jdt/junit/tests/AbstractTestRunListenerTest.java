@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -53,6 +54,8 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.debug.core.Launch;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.IStreamsProxy;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -64,6 +67,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class AbstractTestRunListenerTest {
@@ -142,10 +147,14 @@ public class AbstractTestRunListenerTest {
 
 		LaunchesListener listener = new LaunchesListener();
 		ILaunchConfigurationWorkingCopy configuration= createLaunchConfiguration(aTest, testKindID, testName, listener);
+		ILaunch launch = null;
 		try {
-			configuration.launch(ILaunchManager.RUN_MODE, null);
+			launch= configuration.launch(ILaunchManager.RUN_MODE, null);
 			waitForCondition(listener.fLaunchHasTerminated::get, 30 * 1000, 1000);
 		} finally {
+			if (launch != null && !listener.fLaunchHasTerminated.get()) {
+				logProcessesInfos(launch);
+			}
 			cleanUp(configuration, listener);
 		}
 		assertTrue("Launch has not terminated", listener.fLaunchHasTerminated.get());
@@ -352,6 +361,44 @@ public class AbstractTestRunListenerTest {
 		assertEquals("Expected exactly one sessionFinished event in log: " + Arrays.toString(log), 1, sessionFinishedCount);
 		assertEquals("Started test cases differ", expected, started);
 		assertEquals("Finished test cases differ", expected, finished);
+	}
+
+	private static void logProcessesInfos(ILaunch launch) {
+		try {
+			StringBuilder sb = new StringBuilder();
+			IProcess[] processes= launch.getProcesses();
+			sb.append("Launch with " + processes.length + " processes failed to terminate before timeout");
+			sb.append(System.lineSeparator());
+			for (int i = 0; i < processes.length; ++i) {
+				IProcess process = processes[i];
+				sb.append("Process " + i + ": " + process.getLabel());
+				sb.append(System.lineSeparator());
+				sb.append("Terminated: " + process.isTerminated());
+				sb.append(System.lineSeparator());
+				if (process.isTerminated()) {
+					sb.append("Exit value: " + process.getExitValue());
+					sb.append(System.lineSeparator());
+				}
+				IStreamsProxy streams= process.getStreamsProxy();
+				String output = streams.getOutputStreamMonitor().getContents();
+				if (!output.isEmpty()) {
+					sb.append("Standard output:");
+					sb.append(System.lineSeparator());
+					sb.append(output);
+					sb.append(System.lineSeparator());
+				}
+				String errors = streams.getErrorStreamMonitor().getContents();
+				if (!output.isEmpty()) {
+					sb.append("Standard error:");
+					sb.append(System.lineSeparator());
+					sb.append(errors);
+					sb.append(System.lineSeparator());
+				}
+			}
+			JavaPlugin.logErrorMessage(sb.toString());
+		} catch (Throwable t) {
+			JavaPlugin.log(Status.error("Failed to log processes info for launch", t));
+		}
 	}
 
 	protected static class LaunchesListener implements ILaunchesListener2 {

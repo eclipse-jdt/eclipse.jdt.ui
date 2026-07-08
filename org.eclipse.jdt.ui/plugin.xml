@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <!--
-     Copyright (c) 2000, 2021 IBM Corporation and others.
+     Copyright (c) 2000, 2026 IBM Corporation and others.
 
      This program and the accompanying materials
      are made available under the terms of the Eclipse Public License 2.0
@@ -783,6 +783,17 @@
             id="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard">
          <description>
             %NewSourceFolderCreationWizard.description
+         </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
+      </wizard>
+      <wizard
+            name="%NewTestSourceFolderCreationWizard.label"
+            icon="$nl$/icons/full/etool16/newpackfolder_wiz.svg"
+            category="org.eclipse.jdt.ui.java"
+            class="org.eclipse.jdt.internal.ui.wizards.NewTestSourceFolderCreationWizard"
+            id="org.eclipse.jdt.ui.wizards.NewTestSourceFolderCreationWizard">
+         <description>
+            %NewTestSourceFolderCreationWizard.description
          </description>
          <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
@@ -1636,6 +1647,12 @@
             name="%PropertyKeyHyperlinkDetector"
             targetId="org.eclipse.jdt.ui.PropertiesFileEditor">
       </hyperlinkDetector>
+      <hyperlinkDetector
+	        class="org.eclipse.jdt.internal.ui.javaeditor.JavaElementOpenInNewHyperlinkDetector"
+            id="org.eclipse.jdt.internal.ui.javaeditor.JavaElementOpenInNewHyperlinkDetector"
+            name="%JavaElementOpenInNewHyperlinkDetector"
+            targetId="org.eclipse.jdt.ui.javaCode">
+      </hyperlinkDetector>
    </extension>
 
    <extension
@@ -2443,6 +2460,7 @@
             id="org.eclipse.jdt.ui.JavaActionSet">
          <action
                definitionId="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+               icon="$nl$/icons/full/eview16/class_hi.svg"
                label="%OpenTypeInHierarchyAction.label"
                helpContextId="org.eclipse.jdt.ui.open_type_in_hierarchy_action"
                tooltip="%OpenTypeInHierarchyAction.tooltip"
@@ -2542,6 +2560,7 @@
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
+               icon="$nl$/icons/full/eview16/call_hierarchy.svg"
                label="%OpenCallHierarchyAction.label"
                retarget="true"
                menubarPath="navigate/open.ext"
@@ -2549,6 +2568,7 @@
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
+               icon="$nl$/icons/full/eview16/class_hi.svg"
                label="%OpenTypeHierarchyAction.label"
                retarget="true"
                menubarPath="navigate/open.ext"
@@ -2641,6 +2661,7 @@
 <!-- =========================================================================== -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
+               icon="$nl$/icons/full/eview16/javadoc.svg"
                label="%OpenAttachedJavadocAction.label"
                retarget="true"
                allowLabelUpdate="true"
@@ -2665,6 +2686,7 @@
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.navigate.gotopackage"
+               icon="$nl$/icons/full/eview16/package.svg"
                label="%GoToPackageAction.label"
                retarget="true"
                menubarPath="navigate/goTo/"
@@ -2672,6 +2694,7 @@
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.navigate.gototype"
+               icon="$nl$/icons/full/eview16/types.svg"
                label="%GoToTypeAction.label"
                retarget="true"
                menubarPath="navigate/goTo/"
@@ -6372,6 +6395,19 @@
 		          menuGroupId="org.eclipse.jdt.ui.java"
 		          type="new"
 		          wizardId="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard">
+				<enablement>
+					<or>
+						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+						<adapt type="org.eclipse.core.resources.IProject">
+							<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+						</adapt>
+					</or>
+				</enablement>
+			</commonWizard>
+			<commonWizard
+		          menuGroupId="org.eclipse.jdt.ui.java"
+		          type="new"
+		          wizardId="org.eclipse.jdt.ui.wizards.NewTestSourceFolderCreationWizard">
 				<enablement>
 					<or>
 						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Vector Informatik GmbH and others.
+ * Copyright (c) 2023, 2026 Vector Informatik GmbH and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -224,7 +224,7 @@ public class ChangeCalculator {
 	}
 
 	private String generateUniqueParameterName() {
-		String className= ((TypeDeclaration) fTargetMethodDeclaration.getParent()).getName().toString();
+		String className= ((AbstractTypeDeclaration) fTargetMethodDeclaration.getParent()).getName().toString();
 		List<SingleVariableDeclaration> parameters= fTargetMethodDeclaration.parameters();
 
 		String baseParameterName= Character.toLowerCase(className.charAt(0)) + className.substring(1);
@@ -282,7 +282,7 @@ public class ChangeCalculator {
 	}
 
 	private SingleVariableDeclaration generateNewParameter() throws JavaModelException {
-		String className= ((TypeDeclaration) fTargetMethodDeclaration.getParent()).getName().toString();
+		String className= ((AbstractTypeDeclaration) fTargetMethodDeclaration.getParent()).getName().toString();
 		IType parentType= fTargetMethod.getDeclaringType();
 		ITypeParameter[] classTypeParameters= parentType.getTypeParameters();
 		SingleVariableDeclaration newParam= fTargetMethodDeclarationAST.newSingleVariableDeclaration();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -562,12 +562,10 @@ public class AddImportTest extends CoreTests {
 			package test2;
 
 			import static test1.T.foo;
-
-			import test1.TSub;
 			public class S {
 			    public S() {
 			        foo();
-			        TSub.foo();
+			        foo();
 			    }
 			}
 			""";
