@@ -24,11 +24,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
@@ -40,14 +37,16 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public final class FoldingTestUtils {
-	private record StartEnd(int start, int end) {}
+	private record StartEnd(int start, int end) {
+	}
 
-	public record ProjectionRegion(IRegion region, boolean collapsed) {}
+	public record ProjectionRegion(int offset, int length, boolean collapsed) {
+	}
 
 	private FoldingTestUtils() {
 	}
 
-	public static List<IRegion> getProjectionRangesOfPackage(IPackageFragment packageFragment, String code) throws Exception {
+	public static List<ProjectionRegion> getProjectionRangesOfPackage(IPackageFragment packageFragment, String code) throws Exception {
 		ICompilationUnit cu= packageFragment.createCompilationUnit("A.java", code, true, null);
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
 		try {
@@ -59,26 +58,14 @@ public final class FoldingTestUtils {
 		}
 	}
 
-	public static List<ProjectionRegion> getProjectionRegionsOfPackage(IPackageFragment packageFragment, String code) throws Exception {
-		ICompilationUnit cu= packageFragment.createCompilationUnit("A.java", code, true, null);
-		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
-		try {
-			ProjectionAnnotationModel model= editor.getAdapter(ProjectionAnnotationModel.class);
-
-			return extractProjectionRegions(model);
-		} finally {
-			editor.close(false);
-		}
-	}
-
-	public static List<IRegion> extractRegions(ProjectionAnnotationModel model) {
-		List<IRegion> regions= new ArrayList<>();
+	public static List<ProjectionRegion> extractRegions(ProjectionAnnotationModel model) {
+		List<ProjectionRegion> regions= new ArrayList<>();
 		Iterator<Annotation> it= model.getAnnotationIterator();
 		while (it.hasNext()) {
 			Annotation a= it.next();
-			if (a instanceof ProjectionAnnotation) {
+			if (a instanceof ProjectionAnnotation projectionAnnotation) {
 				Position p= model.getPosition(a);
-				regions.add(new Region(p.getOffset(), p.getLength()));
+				regions.add(new ProjectionRegion(p.getOffset(), p.getLength(), projectionAnnotation.isCollapsed()));
 			}
 		}
 		assertNoDuplicatedRegions(regions);
@@ -86,34 +73,18 @@ public final class FoldingTestUtils {
 		return regions;
 	}
 
-	public static List<ProjectionRegion> extractProjectionRegions(ProjectionAnnotationModel model) {
-		List<ProjectionRegion> regions= new ArrayList<>();
-		Iterator<Annotation> it= model.getAnnotationIterator();
-		while (it.hasNext()) {
-			Annotation a= it.next();
-			if (a instanceof ProjectionAnnotation projectionAnnotation) {
-				Position p= model.getPosition(a);
-				regions.add(new ProjectionRegion(new Region(p.getOffset(), p.getLength()), projectionAnnotation.isCollapsed()));
-			}
-		}
-		List<IRegion> projectionRanges= regions.stream().map(ProjectionRegion::region).collect(Collectors.toList());
-		assertNoDuplicatedRegions(projectionRanges);
-		assertNoRegionsStartInTheSameOffset(projectionRanges);
-		return regions;
-	}
-
-	private static void assertNoDuplicatedRegions(List<IRegion> regions) {
+	private static void assertNoDuplicatedRegions(List<ProjectionRegion> regions) {
 		long distinctRegions= regions.stream()
-				.map(r -> Map.entry(r.getOffset(), r.getLength())) // map to offset-length pairs
+				.map(r -> Map.entry(r.offset(), r.length())) // map to offset-length pairs
 				.distinct()
 				.count();
 		assertEquals(regions.size(), distinctRegions,
 				"Some regions are duplicated: " + sorted(regions));
 	}
 
-	private static void assertNoRegionsStartInTheSameOffset(Collection<IRegion> regions) {
+	private static void assertNoRegionsStartInTheSameOffset(Collection<ProjectionRegion> regions) {
 		long distinctOffsets= regions.stream()
-				.map(IRegion::getOffset)
+				.map(ProjectionRegion::offset)
 				.distinct()
 				.count();
 
@@ -122,27 +93,27 @@ public final class FoldingTestUtils {
 	}
 
 	public static void assertCodeHasRegions(IPackageFragment packageFragment, String code, int regionsCount) throws Exception {
-		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, code);
+		List<ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, code);
 		assertEquals(regionsCount, regions.size(), String.format("Expected %d regions but saw %d.", regionsCount, regions.size()));
 	}
 
-	public static void assertDoesNotContainRegionUsingStartLine(List<IRegion> projectionRanges, String input, int startLine) {
+	public static void assertDoesNotContainRegionUsingStartLine(List<ProjectionRegion> projectionRanges, String input, int startLine) {
 		int startLineBegin= findLineStartIndex(input, startLine);
-		for (IRegion region : projectionRanges) {
-			if (region.getOffset() == startLineBegin) {
-				fail("found unexpected region at offset=" + region.getOffset() + ", length=" + region.getLength() +
+		for (ProjectionRegion region : projectionRanges) {
+			if (region.offset() == startLineBegin) {
+				fail("found unexpected region at offset=" + region.offset() + ", length=" + region.length() +
 						" starting at line " + startLine + " (line offset: " + startLineBegin + ")");
 			}
 		}
 	}
 
-	public static void assertDoesNotContainRegionUsingStartAndEndLine(List<IRegion> projectionRanges, String input, int startLine, int endLine) {
-		StartEnd startEnd = getStartEnd(input, startLine, endLine);
+	public static void assertDoesNotContainRegionUsingStartAndEndLine(List<ProjectionRegion> projectionRanges, String input, int startLine, int endLine) {
+		StartEnd startEnd= getStartEnd(input, startLine, endLine);
 		assertDoesNotContainRegionWithOffsetAndLength(projectionRanges, startLine, endLine, startEnd.start(), startEnd.end());
 	}
 
-	public static void assertContainsRegionUsingStartAndEndLine(List<IRegion> projectionRanges, String input, int startLine, int endLine) {
-		StartEnd startEnd = getStartEnd(input, startLine, endLine);
+	public static void assertContainsRegionUsingStartAndEndLine(List<ProjectionRegion> projectionRanges, String input, int startLine, int endLine) {
+		StartEnd startEnd= getStartEnd(input, startLine, endLine);
 		assertContainsRegionWithOffsetAndLength(projectionRanges, startLine, endLine, startEnd.start(), startEnd.end());
 	}
 
@@ -160,8 +131,7 @@ public final class FoldingTestUtils {
 		int expectedRegionLength= startEnd.end() - startEnd.start() + 1;
 
 		for (ProjectionRegion projectionRegion : projectionRanges) {
-			IRegion region= projectionRegion.region();
-			if (region.getOffset() == expectedRegionBegin && region.getLength() == expectedRegionLength) {
+			if (projectionRegion.offset() == expectedRegionBegin && projectionRegion.length() == expectedRegionLength) {
 				assertEquals(collapsed, projectionRegion.collapsed(),
 						"incorrect collapsed state for region from line " + startLine + " to line " + endLine + " (offset: " + expectedRegionBegin
 								+ ", length: " + expectedRegionLength + ")");
@@ -172,7 +142,7 @@ public final class FoldingTestUtils {
 		fail(
 				"missing region from line " + startLine + " to line " + endLine + " (offset: " + expectedRegionBegin
 						+ ", length: " + expectedRegionLength + ")" +
-						", actual regions: " + sorted(projectionRanges.stream().map(ProjectionRegion::region).collect(Collectors.toList())));
+						", actual regions: " + sorted(projectionRanges));
 	}
 
 	private static StartEnd getStartEnd(String input, int startLine, int endLine) {
@@ -186,11 +156,11 @@ public final class FoldingTestUtils {
 		return new StartEnd(expectedRegionBegin, expectedRegionEnd);
 	}
 
-	static void assertDoesNotContainRegionWithOffsetAndLength(List<IRegion> projectionRanges, int startLine, int endLine, int expectedRegionBegin, int expectedRegionEnd) {
+	static void assertDoesNotContainRegionWithOffsetAndLength(List<ProjectionRegion> projectionRanges, int startLine, int endLine, int expectedRegionBegin, int expectedRegionEnd) {
 		int expectedRegionLength= expectedRegionEnd - expectedRegionBegin + 1;
 
-		for (IRegion region : projectionRanges) {
-			if (region.getOffset() == expectedRegionBegin && region.getLength() == expectedRegionLength) {
+		for (ProjectionRegion region : projectionRanges) {
+			if (region.offset() == expectedRegionBegin && region.length() == expectedRegionLength) {
 				fail(
 						"The region from line " + startLine + " to line " + endLine + " (offset: " + expectedRegionBegin
 								+ ", length: " + expectedRegionLength + ")" +
@@ -199,11 +169,11 @@ public final class FoldingTestUtils {
 		}
 	}
 
-	static void assertContainsRegionWithOffsetAndLength(List<IRegion> projectionRanges, int startLine, int endLine, int expectedRegionBegin, int expectedRegionEnd) {
+	static void assertContainsRegionWithOffsetAndLength(List<ProjectionRegion> projectionRanges, int startLine, int endLine, int expectedRegionBegin, int expectedRegionEnd) {
 		int expectedRegionLength= expectedRegionEnd - expectedRegionBegin + 1;
 
-		for (IRegion region : projectionRanges) {
-			if (region.getOffset() == expectedRegionBegin && region.getLength() == expectedRegionLength) {
+		for (ProjectionRegion region : projectionRanges) {
+			if (region.offset() == expectedRegionBegin && region.length() == expectedRegionLength) {
 				return;
 			}
 		}
@@ -221,9 +191,9 @@ public final class FoldingTestUtils {
 	 *         <li>Then by length (descending i.e. longer regions first)</li>
 	 *         </ul>
 	 */
-	private static Collection<IRegion> sorted(Collection<IRegion> regions) {
-		List<IRegion> sortedRegions= new ArrayList<>(regions);
-		sortedRegions.sort(Comparator.comparingInt(IRegion::getOffset).thenComparing(Comparator.comparingInt(IRegion::getLength).reversed()));
+	private static Collection<ProjectionRegion> sorted(Collection<ProjectionRegion> regions) {
+		List<ProjectionRegion> sortedRegions= new ArrayList<>(regions);
+		sortedRegions.sort(Comparator.comparingInt(ProjectionRegion::offset).thenComparing(Comparator.comparingInt(ProjectionRegion::length).reversed()));
 		return sortedRegions;
 	}
 

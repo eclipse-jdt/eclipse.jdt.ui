@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -88,7 +87,7 @@ public class MarkdownJavadocFoldingTest {
 				class HeaderCommentTest {
 				}
 				""";
-		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(fPackageFragment, str);
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(fPackageFragment, str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 3); // Javadoc
 	}
 
@@ -105,8 +104,9 @@ public class MarkdownJavadocFoldingTest {
 				    }
 				}
 				""";
-		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(fPackageFragment, str);
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(fPackageFragment, str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // Javadoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 7); // foo method
 	}
 }
+

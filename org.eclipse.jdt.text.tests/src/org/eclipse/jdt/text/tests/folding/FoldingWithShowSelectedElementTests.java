@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -82,7 +81,7 @@ public class FoldingWithShowSelectedElementTests {
 					}
 				}
 				""";
-		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4);
 	}
 
@@ -115,7 +114,7 @@ public class FoldingWithShowSelectedElementTests {
 						}
 					""", editor.getViewer().getTextWidget().getText());
 
-			List<IRegion> regions= FoldingTestUtils.extractRegions(model);
+			List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.extractRegions(model);
 
 			IDocument document= editor.getViewer().getDocument();
 			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6); // region (custom)
@@ -162,3 +161,4 @@ public class FoldingWithShowSelectedElementTests {
 		}
 	}
 }
+
