@@ -37,7 +37,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
@@ -101,7 +100,7 @@ public class CustomFoldingRegionTest {
 				package org.example.test;
 				public class Test { }
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		assertEquals(0, projectionRanges.size());
 	}
 
@@ -118,7 +117,7 @@ public class CustomFoldingRegionTest {
 					// endregion
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 1, 3); // region 1
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 5, 7); // region 2
 	}
@@ -136,7 +135,7 @@ public class CustomFoldingRegionTest {
 					// endregion inner
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		assertEquals(3, projectionRanges.size());
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 2, 8);//class Test
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 7);//outer
@@ -157,7 +156,7 @@ public class CustomFoldingRegionTest {
 					// endregion inner
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 3);//outer
 	}
 
@@ -173,7 +172,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 5); // region 1
 	}
 
@@ -184,7 +183,7 @@ public class CustomFoldingRegionTest {
 
 				import java.util.List;
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		assertEquals(0, projectionRanges.size());
 	}
 
@@ -197,7 +196,7 @@ public class CustomFoldingRegionTest {
 				import java.util.List;
 				// endregion
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 2, 4); // imports
 	}
 
@@ -225,7 +224,7 @@ public class CustomFoldingRegionTest {
 
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 6, 15); // region 1
 	}
 
@@ -247,7 +246,7 @@ public class CustomFoldingRegionTest {
 				}
 				// endregion outside class
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		assertEquals(5, projectionRanges.size());
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 2, 12);//class Test
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 1, 13);//outside class
@@ -269,7 +268,7 @@ public class CustomFoldingRegionTest {
 				}
 				// endregion outside class
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 4);//region inside method
 	}
 
@@ -289,7 +288,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		if (extendedFoldingActive) {
 			assertEquals(5, projectionRanges.size());
 			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 2, 11);//class SpecialCommentTypes
@@ -323,7 +322,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 7);//region 1
 	}
 
@@ -348,7 +347,7 @@ public class CustomFoldingRegionTest {
 
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 3);// region outside
 	}
 
@@ -367,7 +366,7 @@ public class CustomFoldingRegionTest {
 					// endregion
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 9);//region 1
 	}
 
@@ -387,7 +386,7 @@ public class CustomFoldingRegionTest {
 					// endregion should be ignored
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 4); // this is the region
 	}
 
@@ -403,7 +402,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 5);//region 1
 	}
 
@@ -419,7 +418,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 3);
 	}
 
@@ -435,7 +434,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 3);
 	}
 
@@ -451,7 +450,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 5);//region 1
 	}
 
@@ -468,7 +467,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 6);//region 1
 	}
 
@@ -485,7 +484,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 6);//region 1
 	}
 
@@ -501,7 +500,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 4);//region 1
 	}
 
@@ -515,7 +514,7 @@ public class CustomFoldingRegionTest {
 					/* endregion */
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 2);
 	}
 
@@ -529,7 +528,7 @@ public class CustomFoldingRegionTest {
 					void a(){/* endregion*/}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 2);
 	}
 
@@ -549,7 +548,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 4);//region 1
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 5, 6);//region 1
 	}
@@ -574,7 +573,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 3);// region 1
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 6);// region 2
 		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(projectionRanges, str, 9);// region 3
@@ -591,7 +590,7 @@ public class CustomFoldingRegionTest {
 					/* endregion */ void test(){}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 4); // region 1
 	}
 
@@ -611,7 +610,7 @@ public class CustomFoldingRegionTest {
 
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 4);//first start
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 5, 6);//second start
 	}
@@ -641,7 +640,7 @@ public class CustomFoldingRegionTest {
 					// ----
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 7);//variables
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 8, 13);//methods
 	}
@@ -675,7 +674,7 @@ public class CustomFoldingRegionTest {
 					}
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 6, 9);//inner
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 10, 12);//inner 2
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 15, 19);//outer 2
@@ -699,7 +698,7 @@ public class CustomFoldingRegionTest {
 
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 3, 8);//no end marker
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 5, 6);//first
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 7, 8);//second
@@ -721,7 +720,7 @@ public class CustomFoldingRegionTest {
 
 				// regend second
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionWithOffsetAndLength(projectionRanges, 2, 7, //no end marker
 		FoldingTestUtils.findLineStartIndex(str, 2), str.length() - 1);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 5);//first
@@ -751,7 +750,7 @@ public class CustomFoldingRegionTest {
 					// reg end
 				}
 		""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 6, 7);//first
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 10, 11);//second
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 12, 13);//third
@@ -767,7 +766,7 @@ public class CustomFoldingRegionTest {
 		// reg my region
 
 		// some comment without line break""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 0, 2);
 	}
 
@@ -782,7 +781,7 @@ public class CustomFoldingRegionTest {
 
 
 		""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 0, 3);
 	}
 
@@ -809,7 +808,7 @@ public class CustomFoldingRegionTest {
 
 				}
 				""";
-		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		List<FoldingTestUtils.ProjectionRegion> projectionRanges= getProjectionRangesOfFile(str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 12);//custom region
 	}
 
@@ -838,7 +837,7 @@ public class CustomFoldingRegionTest {
 		try {
 			ProjectionAnnotationModel model= editor.getAdapter(ProjectionAnnotationModel.class);
 
-			List<IRegion> initialRegions= FoldingTestUtils.extractRegions(model);
+			List<FoldingTestUtils.ProjectionRegion> initialRegions= FoldingTestUtils.extractRegions(model);
 
 			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 2, 15);//outer
 			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(initialRegions, code, 5, 12);//middle
@@ -856,8 +855,8 @@ public class CustomFoldingRegionTest {
 
 			// check that regions are in the same order as before and not modified in another way
 			for(int i= 0; i < positions.size(); i++) {
-				assertEquals(initialRegions.get(i).getOffset(), positions.get(i).getOffset());
-				assertEquals(initialRegions.get(i).getLength() + additionalText.length(), positions.get(i).getLength());
+				assertEquals(initialRegions.get(i).offset(), positions.get(i).getOffset());
+				assertEquals(initialRegions.get(i).length() + additionalText.length(), positions.get(i).getLength());
 			}
 		} finally {
 			editor.close(false);
@@ -946,8 +945,9 @@ public class CustomFoldingRegionTest {
 		return positions;
 	}
 
-	private List<IRegion> getProjectionRangesOfFile(String str) throws Exception {
+	private List<FoldingTestUtils.ProjectionRegion> getProjectionRangesOfFile(String str) throws Exception {
 		return FoldingTestUtils.getProjectionRangesOfPackage(fPackageFragment, str);
 	}
 
 }
+

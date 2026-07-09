@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -95,7 +94,7 @@ public class FoldingIncludeClosingBracketTests {
 				    };
 				}
 				""";
-		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 5); // if
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 6, 8); // for
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 9, 11); // while
@@ -119,7 +118,7 @@ public class FoldingIncludeClosingBracketTests {
 				    }
 				}
 				""";
-		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 11); // x()
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 6); // s
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 8, 9); // s2
@@ -148,10 +147,11 @@ public class FoldingIncludeClosingBracketTests {
 				@interface SomeAnnotation {}
 				@interface OtherAnnotation {}
 				""";
-		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 3); // A
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 6); // B
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 8, 9); // C
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 11, 14); // someMethod
 	}
 }
+
