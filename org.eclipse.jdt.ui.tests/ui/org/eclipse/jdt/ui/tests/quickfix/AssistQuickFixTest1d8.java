@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2025 IBM Corporation and others.
+ * Copyright (c) 2013, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3945,7 +3945,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		String expected= """
@@ -3998,7 +3998,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -4051,7 +4051,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -4104,7 +4104,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -4157,7 +4157,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -4210,7 +4210,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -7884,5 +7884,51 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
+	public void testIssue3061() throws Exception {
+		// We have a superclass that contains another TestClass as package private. No proposal expected.
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src1= """
+				package test.test1;
+				public class Second {
+
+				    public void consume1(String s) {
+				    }
+				}
+				""";
+		pack1.createCompilationUnit("Second.java", src1, false, null);
+
+		String src= """
+				package test.test1;
+				import java.util.function.Consumer;
+
+				public class First {
+				    void f(Consumer<String> s) {
+				    }
+
+				    void g() {
+				        Second second = new Second();
+				        f(second::consume1);
+				        f(second::consume2);
+				    }
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("First.java", src, false, null);
+		int offset= src.indexOf("second::consume2");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		String expected= """
+				package test.test1;
+				public class Second {
+
+				    public void consume1(String s) {
+				    }
+
+				    public void consume2(String string1) {
+				    }
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
 }
 

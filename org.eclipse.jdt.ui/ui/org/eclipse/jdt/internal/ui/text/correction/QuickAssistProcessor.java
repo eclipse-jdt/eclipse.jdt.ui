@@ -227,6 +227,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.AddStaticFavoritePr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConvertFieldNamingConventionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
@@ -1247,7 +1248,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image, context);
+			// Create a proposal that properly handles the change to the target compilation unit
+			// The fix may modify a different file than the current one, so we need special handling
+			ICompilationUnit targetCU= fix.getCompilationUnit();
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image, context,
+					new FixCorrectionProposalCore(fix, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, context) {
+						@Override
+						public ICompilationUnit getCompilationUnit() {
+							// Return the target compilation unit, not the current one from the context
+							return targetCU;
+						}
+					}) {
+			};
 			resultingCollections.add(proposal);
 			return true;
 		}
