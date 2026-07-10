@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -331,16 +332,12 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 				ITypeBinding[] parameterTypesFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getParameterTypes();
 				ITypeBinding returnTypeBindingFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getReturnType();
 				MethodDeclaration newMethodDeclaration= ast.newMethodDeclaration();
-//				CompilationUnit root= (CompilationUnit) methodReferenceNode.getRoot();
-				newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
-//				if (root.subtreeMatch(new ASTMatcher(), cuRewrite.getRoot())) {
-//					newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
-//				} else {
-//					PackageDeclaration pkgdecl= root.getPackage();
-//					if (!pkgdecl.subtreeMatch(new ASTMatcher(), cuRewrite.getRoot().getPackage())) {
-//						newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
-//					}
-//				}
+				CompilationUnit root= (CompilationUnit) methodReferenceNode.getRoot();
+				if (root.subtreeMatch(new ASTMatcher(), cuRewrite.getRoot())) {
+					newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
+				} else {
+					newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
+				}
 				if (addStaticModifier) {
 					newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));
 				}
