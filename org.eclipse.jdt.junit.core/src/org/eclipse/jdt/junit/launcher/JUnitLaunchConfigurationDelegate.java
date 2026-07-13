@@ -124,7 +124,20 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		}
 	}
 
-	private VMRunnerConfiguration getVMRunnerConfiguration(ILaunchConfiguration configuration, ILaunch launch, String mode, IProgressMonitor monitor) throws CoreException {
+	/**
+	 * Creates the VM runner configuration for the given JUnit launch configuration.
+	 * Subclasses can use this method to obtain the fully resolved launch configuration
+	 * while customizing the existing protected launch hooks.
+	 *
+	 * @param configuration the launch configuration
+	 * @param launch the launch
+	 * @param mode the launch mode
+	 * @param monitor the progress monitor
+	 * @return the VM runner configuration, or {@code null} if the operation was canceled
+	 * @throws CoreException if the launch configuration cannot be resolved
+	 * @since 3.15
+	 */
+	protected final VMRunnerConfiguration getVMRunnerConfiguration(ILaunchConfiguration configuration, ILaunch launch, String mode, IProgressMonitor monitor) throws CoreException {
 		SubMonitor subMon= SubMonitor.convert(monitor, JUnitMessages.JUnitLaunchConfigurationDelegate_verifying_attriburtes_description, 4);
 		// check for cancellation
 		if (subMon.isCanceled()) {
