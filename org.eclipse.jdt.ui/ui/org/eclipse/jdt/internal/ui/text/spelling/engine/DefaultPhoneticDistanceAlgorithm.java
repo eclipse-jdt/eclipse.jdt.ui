@@ -42,35 +42,55 @@ public final class DefaultPhoneticDistanceAlgorithm implements IPhoneticDistance
 	@Override
 	public int getDistance(final String from, final String to) {
 
+		return getDistance(from, to, Integer.MAX_VALUE);
+	}
+
+	@Override
+	public int getDistance(final String from, final String to, final int threshold) {
+
+		// If this already meets or exceeds the threshold we can skip the full
+		// computation entirely.  With DISTANCE_THRESHOLD=160 and min-cost=95 this
+		// rejects every candidate whose length differs by two or more characters
+		int lengthDiff= Math.abs(from.length() - to.length());
+		if (lengthDiff > 0) {
+			int lowerBound= lengthDiff * Math.min(COST_INSERT, COST_REMOVE);
+			if (lowerBound >= threshold)
+				return lowerBound;
+		}
+
 		final char[] first= (" " + from).toCharArray(); //$NON-NLS-1$
 		final char[] second= (" " + to).toCharArray(); //$NON-NLS-1$
 
 		final int rows= first.length;
 		final int columns= second.length;
 
-		final int[][] metric= new int[rows][columns];
-		for (int column= 1; column < columns; column++)
-			metric[0][column]= metric[0][column - 1] + COST_REMOVE;
+		// Use three rolling 1-D arrays instead of a full n×m matrix
+		int[] prev2= new int[columns]; // row - 2  (needed for swap cost)
+		int[] prev1= new int[columns]; // row - 1
+		int[] curr=  new int[columns]; // row  (current)
 
-		for (int row= 1; row < rows; row++)
-			metric[row][0]= metric[row - 1][0] + COST_INSERT;
+		// Initialise row 0: only COST_REMOVE accumulates along columns.
+		for (int column= 1; column < columns; column++)
+			prev1[column]= prev1[column - 1] + COST_REMOVE;
 
 		char source, target;
+		int swap, change, minimum, diagonal, insert, remove;
 
-		int swap= Integer.MAX_VALUE;
-		int change= Integer.MAX_VALUE;
-
-		int minimum, diagonal, insert, remove;
 		for (int row= 1; row < rows; row++) {
 
 			source= first[row];
+			curr[0]= prev1[0] + COST_INSERT;
+			int rowMin= Integer.MAX_VALUE;
+
 			for (int column= 1; column < columns; column++) {
 
 				target= second[column];
-				diagonal= metric[row - 1][column - 1];
+				diagonal= prev1[column - 1];
 
 				if (source == target) {
-					metric[row][column]= diagonal;
+					curr[column]= diagonal;
+					if (diagonal < rowMin)
+						rowMin= diagonal;
 					continue;
 				}
 
@@ -80,25 +100,40 @@ public final class DefaultPhoneticDistanceAlgorithm implements IPhoneticDistance
 
 				swap= Integer.MAX_VALUE;
 				if (row != 1 && column != 1 && source == second[column - 1] && first[row - 1] == target)
-					swap= COST_SWAP + metric[row - 2][column - 2];
+					swap= COST_SWAP + prev2[column - 2];
 
 				minimum= COST_SUBSTITUTE + diagonal;
 				if (swap < minimum)
 					minimum= swap;
 
-				remove= metric[row][column - 1];
+				remove= curr[column - 1];
 				if (COST_REMOVE + remove < minimum)
 					minimum= COST_REMOVE + remove;
 
-				insert= metric[row - 1][column];
+				insert= prev1[column];
 				if (COST_INSERT + insert < minimum)
 					minimum= COST_INSERT + insert;
 				if (change < minimum)
 					minimum= change;
 
-				metric[row][column]= minimum;
+				curr[column]= minimum;
+
+				if (minimum < rowMin)
+					rowMin= minimum;
 			}
+			
+			// If the smallest value in this row already meets or exceeds the
+			// threshold, the final distance cannot be below it (all remaining
+			// edit costs are non-negative), so abort early
+			if (rowMin >= threshold)
+				return rowMin;
+
+			// Rotate the three row references without allocating new arrays
+			int[] tmp= prev2;
+			prev2= prev1;
+			prev1= curr;
+			curr= tmp;
 		}
-		return metric[rows - 1][columns - 1];
+		return prev1[columns - 1];
 	}
 }
