@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -513,6 +513,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @noreference This field is not intended to be referenced by clients.
 	 */
 	public static final int RECORD_TYPE = 5;
+
+	/**
+	 * Constant to signal that the created type is an compact file source.
+	 * @since 3.39
+	 */
+	public static final int COMPACT_TYPE = 6;
 
 	/**
 	 * Creates a new <code>NewTypeWizardPage</code>.
@@ -1090,6 +1096,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 
 			DialogField.createEmptySpace(composite);
+		}
+		if (fTypeKind == COMPACT_TYPE) {
+			fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, false);
+			fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, true);
+			fAccMdfButtons.enableSelectionButton(DEFAULT_INDEX, true);
+			fAccMdfButtons.enableSelectionButton(PUBLIC_INDEX, true);
+			fAccMdfButtons.setSelection(DEFAULT_INDEX, true);
+			fAccMdfButtons.setSelection(PUBLIC_INDEX, false);
 		}
 	}
 
@@ -1884,6 +1898,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		    	}
 	    	} else {
 	    		return new StatusInfo(IStatus.WARNING, NewWizardMessages.NewTypeWizardPage_warning_RecordClassNotFound);
+	    	}
+	    }
+		if (fTypeKind == COMPACT_TYPE && !status.matches(IStatus.ERROR)) {
+	    	if (root != null) {
+	    		if (!JavaModelUtil.is25OrHigher(root.getJavaProject())) {
+	    			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant2, new String[] {BasicElementLabels.getJavaElementName(root.getJavaProject().getElementName()), "25" })); //$NON-NLS-1$
+	    		}
 	    	}
 	    }
 
@@ -2780,10 +2801,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				connectedCU= parentCU;
 
 				IBuffer buffer= parentCU.getBuffer();
-
 				String simpleTypeStub= constructSimpleTypeStub();
-				String cuContent= constructCUContent(parentCU, simpleTypeStub, lineDelimiter);
-				buffer.setContents(cuContent);
+				String cuContent;
+				if (fTypeKind == COMPACT_TYPE) {
+					cuContent= simpleTypeStub;
+					buffer.setContents(cuContent);
+				} else {
+					cuContent= constructCUContent(parentCU, simpleTypeStub, lineDelimiter);
+					buffer.setContents(cuContent);
+				}
 
 				CompilationUnit astRoot= createASTForImports(parentCU);
 				existingImports= getExistingImports(astRoot);
@@ -2884,7 +2910,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			JavaModelUtil.reconcile(cu);
 
 			ISourceRange range= createdType.getSourceRange();
-
 			IBuffer buf= cu.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
 
@@ -2898,6 +2923,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					buf.replace(0, 0, fileComment + lineDelimiter);
 				}
 			}
+
 			fCreatedType= createdType;
 
 			if (needsSave) {
@@ -3081,10 +3107,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 
 	private String constructSimpleTypeStub() {
+		if (fTypeKind == COMPACT_TYPE) {
+			return ""; //$NON-NLS-1$
+		}
 		StringBuilder buf= new StringBuilder("public class "); //$NON-NLS-1$
 		buf.append(getTypeName());
 		buf.append("{ }"); //$NON-NLS-1$
 		return buf.toString();
+
+
 	}
 
 	/*
@@ -3092,6 +3123,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	private String constructTypeStub(ICompilationUnit parentCU, ImportsManager imports, String lineDelimiter) throws CoreException {
 		StringBuffer buf= new StringBuffer();
+		if(fTypeKind == COMPACT_TYPE) {
+			return buf.toString();
+		}
 
 		int modifiers= getModifiers();
 		buf.append(Flags.toString(modifiers));
