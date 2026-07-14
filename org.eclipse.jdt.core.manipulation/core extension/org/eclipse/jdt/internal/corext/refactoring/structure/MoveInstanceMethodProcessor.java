@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -97,6 +97,8 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -1713,7 +1715,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final RefactoringStatus status= new RefactoringStatus();
 		fChangeManager= new TextChangeManager();
 		try {
-			monitor.beginTask("", 6); //$NON-NLS-1$
+			monitor.beginTask("", 7); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			if (!status.hasError()) {
@@ -1732,6 +1734,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 								checkConflictingTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingMethod(Progress.subMonitor(monitor, 1), status);
 								checkOverrideOuterMethod(Progress.subMonitor(monitor, 1), status);
+								checkTargetNullCheck(Progress.subMonitor(monitor,  1), status);
 								checkFinalMethod(status);
 
 								Checks.addModifiedFilesToChecker(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), context);
@@ -1749,6 +1752,44 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			monitor.done();
 		}
 		return status;
+	}
+
+	private void checkTargetNullCheck(IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
+		Assert.isNotNull(monitor);
+		Assert.isNotNull(status);
+		try {
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
+			ASTVisitor visitor= new ASTVisitor() {
+				@Override
+				public boolean visit(InfixExpression node) {
+					if (node.getOperator() == Operator.EQUALS || node.getOperator() == Operator.NOT_EQUALS) {
+						Expression rightOperand= node.getRightOperand();
+						if (rightOperand instanceof NullLiteral) {
+							Expression leftOperand= node.getLeftOperand();
+							if (leftOperand instanceof Name name) {
+								IBinding nameBinding= name.resolveBinding();
+								if (nameBinding.isEqualTo(fTarget)) {
+									throw new AbortSearchException();
+								}
+							}
+						}
+					}
+					return true;
+				}
+			};
+			try {
+				final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
+				if (declaration != null) {
+					declaration.accept(visitor);
+				}
+			} catch (AbortSearchException e) {
+				status.merge(RefactoringStatus.createErrorStatus(
+						Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_target_null_comparison, new String[] {fTarget.getName()}), JavaStatusContext.create(fMethod)));
+			}
+		} finally {
+			monitor.done();
+		}
 	}
 
 	/**
