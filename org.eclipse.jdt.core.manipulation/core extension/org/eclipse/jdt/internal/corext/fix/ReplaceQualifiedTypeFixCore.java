@@ -126,7 +126,8 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 
 		@Override
 		public boolean visit(QualifiedName qname) {
-			if (qname.getFullyQualifiedName().equals(fullQualifiedName)) {
+			if (qname.getFullyQualifiedName().equals(fullQualifiedName) && !(qname.getParent() instanceof ImportDeclaration)) {
+				// I will add the qname if and only if is not an instance of an ImportDeclaration
 				searchResults.add(qname);
 			}
 			return false;
@@ -219,7 +220,17 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 				ImportRewrite iRewrite= cuRewrite.getImportRewrite();
 
 				if (isImportStatic) {
-					iRewrite.addStaticImport(itemsToModify.get(0).resolveBinding());
+					QualifiedName itemToModify = itemsToModify.get(0);
+					if (itemToModify.resolveBinding() instanceof ITypeBinding) {
+						// When an static class is used within another, we don't need to use import static
+						// but we still need to import it.
+						String itemToImport = itemToModify.resolveTypeBinding().getQualifiedName();
+						if(itemToImport != null) {
+							iRewrite.addImport(itemToImport);
+						}
+					} else {
+						iRewrite.addStaticImport(itemsToModify.get(0).resolveBinding());
+					}
 				} else {
 					iRewrite.addImport(itemsToModify.get(0).getFullyQualifiedName());
 				}
