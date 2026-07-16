@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -368,6 +369,99 @@ public class JavadocHoverTests extends CoreTests {
 			int index= actualHtmlContent.indexOf(member.getElementName().equals("foo") ? "The foo." : "The bar.");
 			assertNotEquals("Expected HTML not found, instead found : " + actualHtmlContent,  -1, index);
 		}
+	}
+
+	@Test
+	public void testRecordConstructor1() throws Exception {
+		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/931
+		String source=
+				"""
+			package p;
+			public class X {}
+			/**
+			 * A foo bar.
+			 * @param foo The foo.
+			 * @param bar The bar.
+			 */
+			record FooBar(String foo, String bar) {
+				public FooBar {
+					if (foo == null) {
+						foo = "abc";
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/X.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType recordType= cu.getType("FooBar");
+		boolean found= false;
+		for (IJavaElement member : recordType.getChildren()) {
+			if (member.getElementName().equals("FooBar")) {
+				assertTrue("not a constructor", member instanceof IMethod method && method.isConstructor());
+				found= true;
+				IJavaElement[] elements= { member };
+				ISourceRange range= ((ISourceReference) member).getNameRange();
+				// copy logic from JavadocHover
+				if (elements.length == 1 && elements[0] instanceof IMethod method && method.isConstructor()
+						&& method.getJavadocRange() == null && method.getParent() instanceof IType type && type.isRecord()) {
+					elements[0]= method.getParent();
+				}
+				JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+				String actualHtmlContent= hoverInfo.getHtml();
+				int index= actualHtmlContent.indexOf("A foo bar.");
+				assertNotEquals("Expected HTML not found, instead found : " + actualHtmlContent,  -1, index);
+			}
+		}
+		assertTrue("constructor not found", found);
+	}
+
+	@Test
+	public void testRecordConstructor2() throws Exception {
+		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/931
+		String source=
+				"""
+			package p;
+			public class X {}
+			/**
+			 * A foo bar.
+			 * @param foo The foo.
+			 * @param bar The bar.
+			 */
+			record FooBar(String foo, String bar) {
+				/**
+				 * Foobar constructor
+				 */
+				public FooBar {
+					if (foo == null) {
+						foo = "abc";
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/X.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType recordType= cu.getType("FooBar");
+		boolean found= false;
+		for (IJavaElement member : recordType.getChildren()) {
+			if (member.getElementName().equals("FooBar")) {
+				assertTrue("not a constructor", member instanceof IMethod method && method.isConstructor());
+				found= true;
+				IJavaElement[] elements= { member };
+				ISourceRange range= ((ISourceReference) member).getNameRange();
+				// copy logic from JavadocHover
+				if (elements.length == 1 && elements[0] instanceof IMethod method && method.isConstructor()
+						&& method.getJavadocRange() == null && method.getParent() instanceof IType type && type.isRecord()) {
+					elements[0]= method.getParent();
+				}
+				JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+				String actualHtmlContent= hoverInfo.getHtml();
+				int index= actualHtmlContent.indexOf("Foobar constructor");
+				assertNotEquals("Expected HTML not found, instead found : " + actualHtmlContent,  -1, index);
+			}
+		}
+		assertTrue("constructor not found", found);
 	}
 
 	@Test
