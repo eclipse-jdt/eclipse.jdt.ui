@@ -288,21 +288,9 @@ class SourceAnalyzer  {
 		@Override
 		public boolean visit(ClassInstanceCreation node) {
 			Expression receiver= node.getExpression();
-			if (receiver == null && !isStaticallyImported(node.getName())) {
-				if (fTypeCounter == 0) {
+			if (receiver == null) {
+				if (node.resolveTypeBinding().isMember())
 					fImplicitReceivers.add(node);
-				} else if (fLocalTypeCounter > 0) {
-					IMethodBinding methodBinding= node.resolveConstructorBinding();
-					if (methodBinding != null) {
-						ITypeBinding typeBinding= methodBinding.getDeclaringClass();
-						while (typeBinding != null && typeBinding.isMember()) {
-							typeBinding= typeBinding.getDeclaringClass();
-						}
-						if (typeBinding != null && !typeBinding.isLocal()) {
-							fImplicitReceivers.add(node);
-						}
-					}
-				}
 			}
 			return true;
 		}
