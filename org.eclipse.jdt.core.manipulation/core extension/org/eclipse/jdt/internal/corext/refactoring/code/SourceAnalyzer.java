@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.manipulation.ImportReferencesCollector;
 
@@ -175,6 +176,7 @@ class SourceAnalyzer  {
 
 	private class UpdateCollector extends ASTVisitor {
 		private int fTypeCounter;
+		private int fLocalTypeCounter;
 		@Override
 		public boolean visit(TypeDeclaration node) {
 			return visitType(node);
@@ -190,6 +192,15 @@ class SourceAnalyzer  {
 		@Override
 		public void endVisit(EnumDeclaration node) {
 			fTypeCounter--;
+		}
+		@Override
+		public boolean visit(TypeDeclarationStatement node) {
+			fLocalTypeCounter++;
+			return true;
+		}
+		@Override
+		public void endVisit(TypeDeclarationStatement node) {
+			fLocalTypeCounter--;
 		}
 		@Override
 		public boolean visit(AnnotationTypeDeclaration node) {
@@ -234,10 +245,21 @@ class SourceAnalyzer  {
 		}
 		@Override
 		public boolean visit(MethodInvocation node) {
-			if (fTypeCounter == 0) {
-				Expression receiver= node.getExpression();
-				if (receiver == null && !isStaticallyImported(node.getName())) {
+			Expression receiver= node.getExpression();
+			if (receiver == null && !isStaticallyImported(node.getName())) {
+				if (fTypeCounter == 0) {
 					fImplicitReceivers.add(node);
+				} else if (fLocalTypeCounter > 0) {
+					IMethodBinding methodBinding= node.resolveMethodBinding();
+					if (methodBinding != null) {
+						ITypeBinding typeBinding= methodBinding.getDeclaringClass();
+						while (typeBinding != null && typeBinding.isMember()) {
+							typeBinding= typeBinding.getDeclaringClass();
+						}
+						if (typeBinding != null && !typeBinding.isLocal()) {
+							fImplicitReceivers.add(node);
+						}
+					}
 				}
 			}
 			return true;
@@ -265,12 +287,10 @@ class SourceAnalyzer  {
 		}
 		@Override
 		public boolean visit(ClassInstanceCreation node) {
-			if (fTypeCounter == 0) {
-				Expression receiver= node.getExpression();
-				if (receiver == null) {
-					if (node.resolveTypeBinding().isMember())
-						fImplicitReceivers.add(node);
-				}
+			Expression receiver= node.getExpression();
+			if (receiver == null) {
+				if (node.resolveTypeBinding().isMember())
+					fImplicitReceivers.add(node);
 			}
 			return true;
 		}
@@ -303,7 +323,17 @@ class SourceAnalyzer  {
 						StructuralPropertyDescriptor location= node.getLocationInParent();
 						if (location != SingleVariableDeclaration.NAME_PROPERTY
 							&& location != VariableDeclarationFragment.NAME_PROPERTY) {
-							fImplicitReceivers.add(node);
+							if (fTypeCounter == 0) {
+								fImplicitReceivers.add(node);
+							} else if (fLocalTypeCounter > 0) {
+								ITypeBinding typeBinding= vb.getDeclaringClass();
+								while (typeBinding != null && typeBinding.isMember()) {
+									typeBinding= typeBinding.getDeclaringClass();
+								}
+								if (typeBinding != null && !typeBinding.isLocal()) {
+									fImplicitReceivers.add(node);
+								}
+							}
 						}
 					}
 				} else if (!vb.isField()) {
