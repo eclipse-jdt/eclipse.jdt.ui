@@ -7931,6 +7931,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void test_refactorQualifiedName_bug_3060() throws Exception {
 		// If the classes share the same package the import will not be added
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
@@ -7966,7 +7967,6 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected= """
 				package test2;
 
-				import test3.Test;
 				import test3.Test.Test2;
 
 				public class TestStaticImport {

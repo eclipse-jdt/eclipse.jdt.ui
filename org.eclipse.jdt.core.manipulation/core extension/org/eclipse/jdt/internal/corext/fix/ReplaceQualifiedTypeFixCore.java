@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
@@ -212,13 +213,14 @@ public class ReplaceQualifiedTypeFixCore extends CompilationUnitRewriteOperation
 			TextEditGroup group= createTextEditGroup(CorrectionMessages.QuickAssistProcessor_replaceQualifiedName_description, cuRewrite);
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			ImportRemover iRemover= cuRewrite.getImportRemover();
 			for (QualifiedName itemToModify : itemsToModify) {
 				SimpleName newItem= ast.newSimpleName(className.getFullyQualifiedName());
+				iRemover.registerRemovedNode(itemToModify);
 				ASTNodes.replaceButKeepComment(rewrite, itemToModify, newItem, group);
 			}
 			if (needImport) {
 				ImportRewrite iRewrite= cuRewrite.getImportRewrite();
-
 				if (isImportStatic) {
 					QualifiedName itemToModify = itemsToModify.get(0);
 					if (itemToModify.resolveBinding() instanceof ITypeBinding) {
