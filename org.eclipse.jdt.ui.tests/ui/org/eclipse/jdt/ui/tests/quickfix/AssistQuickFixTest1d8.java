@@ -7930,5 +7930,111 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				""";
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
+
+	@Test
+	public void test_refactorQualifiedName_bug_3060() throws Exception {
+		// If the classes share the same package the import will not be added
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
+		String classToImport= """
+				package test3;
+
+				public class Test {
+
+					public static class Test2 {
+						public static int x;
+						public static int getX() {
+							return x;
+						}
+					}
+				}
+				""";
+		pack1.createCompilationUnit("Test.java", classToImport, false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		String importingClass= """
+				package test2;
+
+				import test3.Test;
+
+				public class TestStaticImport {
+
+					public int foo3() {
+						return Test.Test2.getX();
+					}
+
+				}
+				""";
+
+		String expected= """
+				package test2;
+
+				import test3.Test.Test2;
+
+				public class TestStaticImport {
+
+					public int foo3() {
+						return Test2.getX();
+					}
+
+				}
+				""";
+		ICompilationUnit cu1= pack2.createCompilationUnit("TestStaticImport.java", importingClass, false, null);
+		int offset= importingClass.indexOf("Test.Test2");
+		AssistContext context= getCorrectionContext(cu1, offset+2, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void test_refactorQualifiedName_bug_3060_2() throws Exception {
+		// If the classes share the same package the import will not be added
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
+		String classToImport= """
+				package test3;
+
+				public class Test {
+
+					public static class Test2 {
+						public static int x;
+						public static int getX() {
+							return x;
+						}
+					}
+				}
+				""";
+		pack1.createCompilationUnit("Test.java", classToImport, false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		String importingClass= """
+				package test2;
+
+				public class TestStaticImport {
+
+					public int foo4() {
+						return test3.Test.Test2.getX();
+					}
+
+				}
+				""";
+
+		String expected= """
+				package test2;
+
+				import test3.Test.Test2;
+
+				public class TestStaticImport {
+
+					public int foo4() {
+						return Test2.getX();
+					}
+
+				}
+				""";
+		ICompilationUnit cu1= pack2.createCompilationUnit("TestStaticImport.java", importingClass, false, null);
+		int offset= importingClass.indexOf("Test.Test2");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
 }
 
