@@ -31,4 +31,23 @@ public interface IPhoneticDistanceAlgorithm {
 	 * @return The non-negative phonetic distance between the words.
 	 */
 	int getDistance(String from, String to);
+
+	/**
+	 * Returns the non-negative phonetic distance between two words, aborting
+	 * early and returning a value &gt;= <code>threshold</code> as soon as it is
+	 * determined that the distance cannot be below the threshold.
+	 *
+	 * @param from
+	 *                  The first word
+	 * @param to
+	 *                  The second word
+	 * @param threshold
+	 *                  The distance threshold above which computation can be aborted
+	 * @return The non-negative phonetic distance between the words, or a value
+	 *         &gt;= <code>threshold</code> if the distance meets or exceeds it.
+	 * @since 3.20
+	 */
+	default int getDistance(String from, String to, int threshold) {
+		return getDistance(from, to);
+	}
 }
