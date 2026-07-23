@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -452,7 +452,9 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= createUnManaged(T_WIZBAN, "newclass_wiz.svg"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWINT= createUnManaged(T_WIZBAN, "newint_wiz.svg"); 				//$NON-NLS-1$
-	public static final ImageDescriptor DESC_WIZBAN_NEWENUM= createUnManaged(T_WIZBAN, "newenum_wiz.svg"); 				//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWENUM= createUnManaged(T_WIZBAN, "newenum_wiz.svg"); //$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_WIZBAN_NEWCOMP= createUnManaged(T_WIZBAN, "newcomp_wiz.svg"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWRECORD= createUnManaged(T_WIZBAN, "newrecord_wiz.svg"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWANNOT= createUnManaged(T_WIZBAN, "newannotation_wiz.svg"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= createUnManaged(T_WIZBAN, "newjprj_wiz.svg"); 			//$NON-NLS-1$
