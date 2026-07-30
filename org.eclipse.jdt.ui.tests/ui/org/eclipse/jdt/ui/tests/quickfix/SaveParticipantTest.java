@@ -35,6 +35,8 @@ import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
 import org.eclipse.jface.text.CopyOnWriteTextStore;
 
+import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -105,6 +107,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws Exception {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
 		Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+		Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
 		TestUtils.cancelDecorationJob();
 
 		cu.getBuffer().setContents(newContent);

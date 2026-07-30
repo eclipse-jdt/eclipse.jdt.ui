@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -708,7 +709,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		IJavaElement[] elements= JavaCore.callReadOnly(() -> getJavaElementsAt(textViewer, hoverRegion));
 		if (elements == null || elements.length == 0)
 			return null;
-
+		try {
+			if (elements.length == 1 && elements[0] instanceof IMethod method && method.isConstructor()
+					&& method.getJavadocRange() == null && method.getParent() instanceof IType type && type.isRecord()) {
+				elements[0]= method.getParent();
+			}
+		} catch (JavaModelException e) {
+			// do nothing
+		}
 		return getHoverInfo(elements, getEditorInputJavaElement(), hoverRegion, null);
 	}
 

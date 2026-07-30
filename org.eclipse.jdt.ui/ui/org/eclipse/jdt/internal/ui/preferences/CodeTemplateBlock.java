@@ -230,6 +230,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 						return 14;
 					case CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID:
 						return 15;
+					case CodeTemplateContextType.MARKDOWNOVERRIDECOMMENT_ID:
+						return 16;
 					case CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID:
 						return 17;
 					case CodeTemplateContextType.MARKDOWNGETTERCOMMENT_ID:
@@ -298,6 +300,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 					case CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_methodcomment_label;
 					case CodeTemplateContextType.OVERRIDECOMMENT_ID:
+					case CodeTemplateContextType.MARKDOWNOVERRIDECOMMENT_ID:
 						return PreferencesMessages.CodeTemplateBlock_overridecomment_label;
 					case CodeTemplateContextType.DELEGATECOMMENT_ID:
 					case CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID:

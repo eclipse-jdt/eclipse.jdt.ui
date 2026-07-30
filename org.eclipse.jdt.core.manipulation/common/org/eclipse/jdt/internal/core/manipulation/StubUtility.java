@@ -326,6 +326,11 @@ public class StubUtility {
 				throw new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatus.ERROR, e.getMessage(), e));
 			}
 		}
+		if (useMarkdown && typeParameterNames.length == 0 && params.length == 0 ) {
+			str = document.get();
+			str = str.replace("\n/// ", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			return str;
+		}
 		return document.get();
 	}
 
@@ -444,7 +449,7 @@ public class StubUtility {
 			if (delegate)
 				templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID : CodeTemplateContextType.DELEGATECOMMENT_ID;
 			else
-				templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
+				templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNOVERRIDECOMMENT_ID : CodeTemplateContextType.OVERRIDECOMMENT_ID;
 		}
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
@@ -720,7 +725,7 @@ public class StubUtility {
 			if (delegate)
 				templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNDELEGATECOMMENT_ID : CodeTemplateContextType.DELEGATECOMMENT_ID;
 			else
-				templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
+				templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNOVERRIDECOMMENT_ID : CodeTemplateContextType.OVERRIDECOMMENT_ID;
 		}
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {

@@ -789,6 +789,48 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 		failHelper1("p1.A", 5, 26, 5, 29, PARAMETER, "b", true, true);
 	}
 
+	// Cannot move static method
+	@Test
+	public void testFail2() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);
+	}
+
+	// Cannot move native method
+	@Test
+	public void testFail3() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);
+	}
+
+	// Cannot move method that references "super"
+	@Test
+	public void testFail4() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 11, 20, 11, 21, PARAMETER, "b", true, true);
+	}
+
+	// Cannot move method that references an enclosing instance
+	@Test
+	public void testFail5() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 8, 21, 8, 21, PARAMETER, "b", true, true);
+	}
+
+	// Cannot move potentially directly recursive method
+	@Test
+	public void testFail6() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 16, 6, 17, PARAMETER, "b", true, true);
+	}
+
+	// Cannot move synchronized method
+	@Test
+	public void testFail8() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 29, 6, 29, PARAMETER, "b", true, true);
+	}
+
+	// Cannot move method if there's no new potential receiver
+	@Test
+	public void testFail9() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true);
+	}
+
 	// Cannot move method if there's no new potential receiver
 	@Test
 	public void testFail10() throws Exception {
@@ -857,45 +899,9 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 		failHelper1(new String[] { "p1.A" }, "p1.A", 6, 17, 6, 23, FIELD, "b", true, true);
 	}
 
-	// Cannot move static method
+	// Issue 3035
 	@Test
-	public void testFail2() throws Exception {
-		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);
-	}
-
-	// Cannot move native method
-	@Test
-	public void testFail3() throws Exception {
-		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);
-	}
-
-	// Cannot move method that references "super"
-	@Test
-	public void testFail4() throws Exception {
-		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 11, 20, 11, 21, PARAMETER, "b", true, true);
-	}
-
-	// Cannot move method that references an enclosing instance
-	@Test
-	public void testFail5() throws Exception {
-		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 8, 21, 8, 21, PARAMETER, "b", true, true);
-	}
-
-	// Cannot move potentially directly recursive method
-	@Test
-	public void testFail6() throws Exception {
-		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 16, 6, 17, PARAMETER, "b", true, true);
-	}
-
-	// Cannot move synchronized method
-	@Test
-	public void testFail8() throws Exception {
-		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 29, 6, 29, PARAMETER, "b", true, true);
-	}
-
-	// Cannot move method if there's no new potential receiver
-	@Test
-	public void testFail9() throws Exception {
-		failHelper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true);
+	public void testFail21() throws Exception {
+		failHelper1(new String[] { "p1.A", "p1.B" }, "p1.A", 6, 9, 6, 10, FIELD, "b", true, true);
 	}
 }

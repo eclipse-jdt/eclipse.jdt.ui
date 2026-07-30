@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -73,6 +73,7 @@ public class TemplateStoreTest extends CoreTests {
 		CodeTemplateContextType.MARKDOWNGETTERCOMMENT_ID,
 		CodeTemplateContextType.MARKDOWNSETTERCOMMENT_ID,
 		CodeTemplateContextType.MARKDOWNMODULECOMMENT_ID,
+		CodeTemplateContextType.MARKDOWNOVERRIDECOMMENT_ID,
 	};
 
 	private TemplatePersistenceData find(String id, TemplatePersistenceData[] templateData) {

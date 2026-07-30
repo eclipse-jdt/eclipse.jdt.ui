@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2025 IBM Corporation and others.
+ * Copyright (c) 2013, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3945,7 +3945,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		String expected= """
@@ -3998,7 +3998,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -4051,7 +4051,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -4104,7 +4104,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -4157,7 +4157,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -4210,7 +4210,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		expected= """
@@ -7884,5 +7884,157 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
+	public void testIssue3061() throws Exception {
+		// We have a superclass that contains another TestClass as package private. No proposal expected.
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src1= """
+				package test.test1;
+				public class Second {
+
+				    public void consume1(String s) {
+				    }
+				}
+				""";
+		pack1.createCompilationUnit("Second.java", src1, false, null);
+
+		String src= """
+				package test.test1;
+				import java.util.function.Consumer;
+
+				public class First {
+				    void f(Consumer<String> s) {
+				    }
+
+				    void g() {
+				        Second second = new Second();
+				        f(second::consume1);
+				        f(second::consume2);
+				    }
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("First.java", src, false, null);
+		int offset= src.indexOf("second::consume2");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		String expected= """
+				package test.test1;
+				public class Second {
+
+				    public void consume1(String s) {
+				    }
+
+				    public void consume2(String string1) {
+				    }
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void test_refactorQualifiedName_bug_3060() throws Exception {
+		// If the classes share the same package the import will not be added
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
+		String classToImport= """
+				package test3;
+
+				public class Test {
+
+					public static class Test2 {
+						public static int x;
+						public static int getX() {
+							return x;
+						}
+					}
+				}
+				""";
+		pack1.createCompilationUnit("Test.java", classToImport, false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		String importingClass= """
+				package test2;
+
+				import test3.Test;
+
+				public class TestStaticImport {
+
+					public int foo3() {
+						return Test.Test2.getX();
+					}
+
+				}
+				""";
+
+		String expected= """
+				package test2;
+
+				import test3.Test.Test2;
+
+				public class TestStaticImport {
+
+					public int foo3() {
+						return Test2.getX();
+					}
+
+				}
+				""";
+		ICompilationUnit cu1= pack2.createCompilationUnit("TestStaticImport.java", importingClass, false, null);
+		int offset= importingClass.indexOf("Test.Test2");
+		AssistContext context= getCorrectionContext(cu1, offset+2, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void test_refactorQualifiedName_bug_3060_2() throws Exception {
+		// If the classes share the same package the import will not be added
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
+		String classToImport= """
+				package test3;
+
+				public class Test {
+
+					public static class Test2 {
+						public static int x;
+						public static int getX() {
+							return x;
+						}
+					}
+				}
+				""";
+		pack1.createCompilationUnit("Test.java", classToImport, false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		String importingClass= """
+				package test2;
+
+				public class TestStaticImport {
+
+					public int foo4() {
+						return test3.Test.Test2.getX();
+					}
+
+				}
+				""";
+
+		String expected= """
+				package test2;
+
+				import test3.Test.Test2;
+
+				public class TestStaticImport {
+
+					public int foo4() {
+						return Test2.getX();
+					}
+
+				}
+				""";
+		ICompilationUnit cu1= pack2.createCompilationUnit("TestStaticImport.java", importingClass, false, null);
+		int offset= importingClass.indexOf("Test.Test2");
+		AssistContext context= getCorrectionContext(cu1, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
 }
 

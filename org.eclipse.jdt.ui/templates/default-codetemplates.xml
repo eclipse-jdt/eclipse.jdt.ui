@@ -76,6 +76,8 @@
 <template name="markdowndelegatecomment" id="org.eclipse.jdt.ui.text.codetemplates.markdowndelegatecomment" description="%CodeTemplates.markdowndelegatecomment" context="markdowndelegatecomment_context" enabled="true">/// ${tags}
 /// ${see_to_target}</template>
  
+ <template name="markdownoverridecomment" id="org.eclipse.jdt.ui.text.codetemplates.markdownoverridecomment" description="%CodeTemplates.markdownoverridecomment" context="markdownoverridecomment_context" enabled="true">/// ${see_to_overridden}</template>
+ 
  <template name="newtype" id="org.eclipse.jdt.ui.text.codetemplates.newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">${filecomment}
 ${package_declaration}
 

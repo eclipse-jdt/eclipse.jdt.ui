@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
@@ -36,6 +37,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -194,6 +196,15 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			return fMaxEntries;
 		}
 
+		@Override
+		protected IDialogSettings getDialogBoundsSettings() {
+			return JavaPlugin.getDefault().getDialogSettingsSection(getClass().getName());
+		}
+
+		@Override
+		protected int getDialogBoundsStrategy() {
+			return DIALOG_PERSISTSIZE;
+		}
 	}
 
 	private final class TestRunLabelProvider extends LabelProvider {

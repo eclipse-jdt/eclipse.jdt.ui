@@ -232,7 +232,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		createDependency(master, slave);
 
 		ICompilationUnit cu= getCompilationUnit();
-		IJavaProject project= cu.getJavaProject();
+		IJavaProject project= cu != null ? cu.getJavaProject() : null;
 		String compliance= project != null
 				? project.getOption(JavaCore.COMPILER_COMPLIANCE, true)
 				: JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);

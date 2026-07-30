@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation and others.
+ * Copyright (c) 2024, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,9 +16,14 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -33,7 +38,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -42,9 +46,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
@@ -52,8 +59,32 @@ import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
 
 public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOperationsFixCore {
 
+	private final CompilationUnit fCompilationUnit;
+
 	public AddMissingMethodDeclarationFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
 		super(name, compilationUnit, operation);
+		fCompilationUnit= compilationUnit;
+	}
+
+	/**
+	 * Returns the compilation unit being modified by this fix.
+	 * This may be different from the compilation unit containing the quick assist invocation.
+	 *
+	 * @return the target compilation unit
+	 */
+	public ICompilationUnit getCompilationUnit() {
+		return (ICompilationUnit) fCompilationUnit.getJavaElement();
+	}
+
+	@Override
+	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
+		CompilationUnitChange change= super.createChange(progressMonitor);
+		if (change != null) {
+			// When modifying a file that may not be open in an editor, we need to ensure
+			// the change is saved. The default LEAVE_DIRTY mode doesn't work for unopened files.
+			change.setSaveMode(org.eclipse.ltk.core.refactoring.TextFileChange.FORCE_SAVE);
+		}
+		return change;
 	}
 
 	public static AddMissingMethodDeclarationFixCore createAddMissingMethodDeclaration(CompilationUnit compilationUnit, ASTNode node) {
@@ -64,7 +95,37 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 			return null;
 		}
 
-		TypeDeclaration typeDeclaration= ASTNodes.getParent(methodReferenceNode, TypeDeclaration.class);
+		IMethodBinding refBinding= methodReferenceNode.resolveMethodBinding();
+		if (refBinding != null) {
+			return null;
+		}
+
+		Expression exp= methodReferenceNode.getExpression();
+		ITypeBinding expBinding= exp.resolveTypeBinding();
+		if (expBinding == null) {
+			return null;
+		}
+
+		IJavaElement element= expBinding.getJavaElement();
+		CompilationUnit cu= null;
+		if (element == null) {
+			return null;
+		}
+		element= element.getAncestor(IJavaElement.COMPILATION_UNIT);
+		if (element instanceof ICompilationUnit icu) {
+			cu= Checks.convertICUtoCU(icu);
+		}
+		if (cu == null) {
+			return null;
+		}
+
+		TypeDeclaration typeDeclaration= null;
+		TypeDeclarationFinder finder= new TypeDeclarationFinder(expBinding);
+		try {
+			cu.accept(finder);
+		} catch (AbortSearchException e) {
+			typeDeclaration= finder.getTypeDeclaration();
+		}
 		if (typeDeclaration == null) {
 			return null;
 		}
@@ -85,7 +146,7 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 		Assignment variableAssignment= ASTNodes.getParent(methodReferenceNode, Assignment.class);
 
 		String label= Messages.format(CorrectionMessages.AddUnimplementedMethodReferenceOperation_AddMissingMethod_group,
-				new String[] { methodReferenceNode.getName().getIdentifier(), typeDeclaration.getName().getIdentifier() });
+				new String[] { methodReferenceNode.getName().getIdentifier(), expBinding.getName() });
 
 		if ((variableAssignment != null || variableDeclarationStatement != null) && methodInvocationNode == null) {
 			/*
@@ -109,7 +170,9 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 			if (returnType.binding == null) {
 				return null;
 			}
-			return new AddMissingMethodDeclarationFixCore(label, compilationUnit, new AddMissingMethodDeclarationProposalOperation(methodReferenceNode, returnType, null));
+			// Note: passing cu (the target compilation unit) instead of compilationUnit (the current one)
+			// This fix modifies the target type's compilation unit, which may be different from the current file
+			return new AddMissingMethodDeclarationFixCore(label, cu, new AddMissingMethodDeclarationProposalOperation(methodReferenceNode, typeDeclaration, returnType, null));
 		} else {
 			if (methodInvocationNode == null) {
 				return null;
@@ -132,7 +195,9 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 				// node not found
 				return null;
 			}
-			return new AddMissingMethodDeclarationFixCore(label, compilationUnit, new AddMissingMethodDeclarationProposalOperation(methodReferenceNode, null, methodBinding));
+			// Note: passing cu (the target compilation unit) instead of compilationUnit (the current one)
+			// This fix modifies the target type's compilation unit, which may be different from the current file
+			return new AddMissingMethodDeclarationFixCore(label, cu, new AddMissingMethodDeclarationProposalOperation(methodReferenceNode, typeDeclaration, null, methodBinding));
 		}
 	}
 
@@ -160,6 +225,28 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 		public ITypeBinding binding;
 	}
 
+	private static class TypeDeclarationFinder extends ASTVisitor {
+		private TypeDeclaration foundDeclaration;
+		private final ITypeBinding fTypeBinding;
+
+		public TypeDeclarationFinder(ITypeBinding typeBinding) {
+			this.fTypeBinding= typeBinding;
+		}
+
+		public TypeDeclaration getTypeDeclaration() {
+			return foundDeclaration;
+		}
+
+		@Override
+		public boolean visit(TypeDeclaration node) {
+			if (this.fTypeBinding.isEqualTo(node.resolveBinding())) {
+				foundDeclaration= node;
+				throw new AbortSearchException();
+			}
+			return true;
+		}
+	}
+
 	private static class AddMissingMethodDeclarationProposalOperation extends CompilationUnitRewriteOperation {
 
 
@@ -167,9 +254,12 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 
 		private ReturnType returnType;
 
+		private TypeDeclaration typeDeclaration;
+
 		private IMethodBinding methodBinding;
 
-		public AddMissingMethodDeclarationProposalOperation(ExpressionMethodReference methodReferenceNode, ReturnType returnType, IMethodBinding methodBinding) {
+
+		public AddMissingMethodDeclarationProposalOperation(ExpressionMethodReference methodReferenceNode, TypeDeclaration typeDeclaration, ReturnType returnType, IMethodBinding methodBinding) {
 			if (returnType == null && methodBinding == null) {
 				throw new IllegalArgumentException("both returnType and methodBinding cannot be null."); //$NON-NLS-1$
 			}
@@ -177,12 +267,13 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 			this.methodReferenceNode= methodReferenceNode;
 			this.returnType= returnType;
 			this.methodBinding= methodBinding;
+			this.typeDeclaration= typeDeclaration;
 		}
+
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 			boolean addStaticModifier= false;
-			TypeDeclaration typeDeclaration= ASTNodes.getParent(this.methodReferenceNode, TypeDeclaration.class);
 
 			if (QuickAssistProcessorUtil.isTypeReferenceToInstanceMethod(methodReferenceNode)) {
 				addStaticModifier= true;
@@ -201,7 +292,7 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 				returnType.type= importRewrite.addImport(returnType.binding, ast);
 
 				MethodDeclaration newMethodDeclaration= ast.newMethodDeclaration();
-				newMethodDeclaration.setName((SimpleName) rewrite.createCopyTarget(methodReferenceNode.getName()));
+				newMethodDeclaration.setName(ast.newSimpleName(methodReferenceNode.getName().getFullyQualifiedName()));
 				newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
 				if (addStaticModifier) {
 					newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));
@@ -241,7 +332,12 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 				ITypeBinding[] parameterTypesFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getParameterTypes();
 				ITypeBinding returnTypeBindingFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getReturnType();
 				MethodDeclaration newMethodDeclaration= ast.newMethodDeclaration();
-				newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
+				CompilationUnit root= (CompilationUnit) methodReferenceNode.getRoot();
+				if (root.subtreeMatch(new ASTMatcher(), cuRewrite.getRoot())) {
+					newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
+				} else {
+					newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
+				}
 				if (addStaticModifier) {
 					newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));
 				}
@@ -263,7 +359,7 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 						addIfMissing(newMethodDeclaration, newTypeParameter);
 					}
 				}
-				newMethodDeclaration.setName((SimpleName) rewrite.createCopyTarget(methodReferenceNode.getName()));
+				newMethodDeclaration.setName(ast.newSimpleName(methodReferenceNode.getName().getFullyQualifiedName()));
 				newMethodDeclaration.setReturnType2(newReturnType);
 				pLoop: for (int i= 0; i < parameterTypesFunctionalInterface.length; i++) {
 					ITypeBinding parameterType2= parameterTypesFunctionalInterface[i];

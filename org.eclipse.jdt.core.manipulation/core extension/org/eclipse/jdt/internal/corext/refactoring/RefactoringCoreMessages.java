@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1405,6 +1405,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_target_name_already_used;
 
+	public static String MoveInstanceMethodProcessor_target_null_comparison;
+
 	public static String MoveInstanceMethodProcessor_this_reference;
 
 	public static String MoveInstanceMethodProcessor_uses_super;
@@ -2548,6 +2550,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ConvertToRecordRefactoring_has_initializer;
 
 	public static String ConvertToRecordRefactoring_member_types_not_supported;
+
 
 
 	static {
