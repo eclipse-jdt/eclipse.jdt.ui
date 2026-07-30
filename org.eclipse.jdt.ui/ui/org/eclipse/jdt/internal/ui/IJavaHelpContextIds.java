@@ -373,6 +373,8 @@ public interface IJavaHelpContextIds {
 	String NEW_JAVAPROJECT_WIZARD_PAGE= 								PREFIX + "new_javaproject_wizard_page_context"; //$NON-NLS-1$
 	String NEW_PACKAGE_WIZARD_PAGE= 									PREFIX + "new_package_wizard_page_context"; //$NON-NLS-1$
 	String NEW_CLASS_WIZARD_PAGE= 										PREFIX + "new_class_wizard_page_context"; //$NON-NLS-1$
+
+	String NEW_COMPACT_WIZARD_PAGE= 									PREFIX + "new_compact_wizard_page_context"; //$NON-NLS-1$
 	String NEW_INTERFACE_WIZARD_PAGE= 									PREFIX + "new_interface_wizard_page_context"; //$NON-NLS-1$
 
 	// since 3.1

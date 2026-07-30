@@ -1,0 +1,40 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+	<defs>
+		<radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-4.555,-4.555,4.555,-4.555,12.505,5.634)">
+			<stop offset="0" stop-color="#e0c576"/>
+			<stop offset="1" stop-color="#9e7916"/>
+		</radialGradient>
+		<linearGradient id="g2" x2="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,6.277,-6.238,0,11.893,2.194)">
+			<stop offset="0" stop-color="#f7f9fb"/>
+			<stop offset="1" stop-color="#ffd680"/>
+		</linearGradient>
+	</defs>
+	<style>
+		.s0 { fill: #571919;stroke: #14733c;stroke-linecap: round;stroke-linejoin: round;stroke-width: 1 } 
+		.s1 { fill: #ffffff } 
+		.s2 { fill: url(#g1);stroke: #a27d18;stroke-width: 1 } 
+		.s3 { fill: url(#g2) } 
+	</style>
+	<g id="layer1">
+		<g id="g6124-3">
+			<g id="g6438">
+				<g id="g4193">
+					<g id="g6124-3-3">
+						<g id="g6438-8">
+							<path id="path10796-2-6-2" fill-rule="evenodd" class="s0" d="m8.54 14.51c-3.31 0-5.99-2.69-5.99-6.01 0-3.33 2.68-6.02 5.99-6.02 3.32 0 5.99 2.69 5.99 6.02 0 3.32-2.67 6.01-5.99 6.01z"/>
+						</g>
+					</g>
+					<path id="path3817" class="s1" d="m9.96 7.09c-0.29-0.4-0.23-0.32-0.47-0.53q-0.36-0.32-0.95-0.32-0.77 0-1.23 0.56c-0.31 0.36-0.46 0.6-0.46 1.46 0 0.96 0.16 1.39 0.46 1.78 0.32 0.4 0.8 0.59 1.26 0.59 0.46 0 0.71-0.14 0.97-0.34 0.26-0.2 0.28-0.2 0.53-0.73l2.03-0.01c-0.21 0.96-0.62 1.6-1.21 2.09q-0.9 0.74-2.41 0.74-1.72 0-2.74-1.12c-0.68-0.75-1.02-1.53-1.02-2.85 0-1.33 0.34-1.99 1.03-2.73q1.02-1.12 2.76-1.12 1.43 0 2.27 0.64c0.57 0.42 1.04 0.99 1.28 1.85z"/>
+				</g>
+			</g>
+			<g id="g6432">
+				<g id="g4514">
+					<g id="g4522">
+						<path id="rect3910" fill-rule="evenodd" class="s2" d="m12.54 7.89l-3.24-3.24 3.15-3.15 3.24 3.24z"/>
+						<path id="path5581-5-5" class="s3" d="m11.99 2.08h1v1.95h1.99v1.01h-1.99v2.05h-1v-2.05h-1.99v-1.01h1.99z"/>
+					</g>
+				</g>
+			</g>
+		</g>
+	</g>
+</svg>

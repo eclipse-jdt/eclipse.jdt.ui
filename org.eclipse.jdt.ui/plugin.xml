@@ -763,6 +763,19 @@
          <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
       </wizard>
       <wizard
+            name="%NewCompact.label"
+            icon="$nl$/icons/full/etool16/newcompact_wiz.svg"
+            category="org.eclipse.jdt.ui.java"
+            id="org.eclipse.jdt.ui.wizards.NewCompactCreationWizard">
+         <class class="org.eclipse.jdt.internal.ui.wizards.NewCompactCreationWizard">
+            <parameter name="javatype" value="true"/>
+         </class>
+         <description>
+            %NewCompact.description
+         </description>
+         <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
+      </wizard>
+      <wizard
             name="%NewJavaInterface.label"
             icon="$nl$/icons/full/etool16/newint_wiz.svg"
             category="org.eclipse.jdt.ui.java"
@@ -6318,6 +6331,22 @@
 		        menuGroupId="org.eclipse.jdt.ui.java"
 		        type="new"
 		        wizardId="org.eclipse.jdt.ui.wizards.NewClassCreationWizard">
+		     <enablement>
+		        <or>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
+		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
+		           <adapt type="org.eclipse.core.resources.IProject">
+		              <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		           </adapt>
+		        </or>
+		     </enablement>
+		  </commonWizard>
+
+		  <commonWizard
+		        menuGroupId="org.eclipse.jdt.ui.java"
+		        type="new"
+		        wizardId="org.eclipse.jdt.ui.wizards.NewCompactCreationWizard">
 		     <enablement>
 		        <or>
 		           <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
