@@ -1096,4 +1096,22 @@ public class MarkdownCommentTests extends CoreTests {
 		assertEquals("sequence doesn't match", expectedContent, actualSnippet);
 	}
 
+	@Test
+	public void testReturnWithLink_01() throws CoreException {
+		String source= """
+				/// {@return [Object#hashCode]}
+				public class Markdown {}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Markdown.java", source, null);
+		assertNotNull("Markdown.java", cu);
+
+		String expectedContent = "Returns:</dt><dd><code><a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BMarkdown.java%E2%98%83Markdown%E2%98%82Object%E2%98%82hashCode'>Object.hashCode</a></code></dd>";
+		IType type= cu.getType("Markdown");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		int index= actualHtmlContent.lastIndexOf("Returns");
+		assertNotEquals(-1, index);
+		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
+		assertEquals("sequence doesn't match", expectedContent, actualSnippet);
+	}
+
 }
