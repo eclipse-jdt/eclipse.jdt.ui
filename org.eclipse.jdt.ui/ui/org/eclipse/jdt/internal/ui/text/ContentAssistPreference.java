@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -96,6 +96,13 @@ public class ContentAssistPreference {
 		return null;
 	}
 
+	private static JavadocCompletionProcessor getJavaDocMarkdownProcessor(ContentAssistant assistant) {
+		IContentAssistProcessor p= assistant.getContentAssistProcessor(IJavaPartitions.JAVA_MARKDOWN_COMMENT);
+		if (p instanceof JavadocCompletionProcessor)
+			return (JavadocCompletionProcessor) p;
+		return null;
+	}
+
 	private static void configureJavaProcessor(ContentAssistant assistant, IPreferenceStore store) {
 		JavaCompletionProcessor jcp= getJavaProcessor(assistant);
 		if (jcp == null)
@@ -122,6 +129,15 @@ public class ContentAssistPreference {
 			jdcp.setCompletionProposalAutoActivationCharacters(triggers.toCharArray());
 
 		boolean enabled= store.getBoolean(CASE_SENSITIVITY);
+		jdcp.restrictProposalsToMatchingCases(enabled);
+
+		jdcp= getJavaDocMarkdownProcessor(assistant);
+		if (jdcp == null)
+			return;
+
+		if (triggers != null)
+			jdcp.setCompletionProposalAutoActivationCharacters(triggers.toCharArray());
+
 		jdcp.restrictProposalsToMatchingCases(enabled);
 	}
 
@@ -196,6 +212,18 @@ public class ContentAssistPreference {
 
 	private static void changeJavaDocProcessor(ContentAssistant assistant, IPreferenceStore store, String key) {
 		JavadocCompletionProcessor jdcp= getJavaDocProcessor(assistant);
+		if (jdcp == null)
+			return;
+
+		if (AUTOACTIVATION_TRIGGERS_JAVADOC.equals(key)) {
+			String triggers= store.getString(AUTOACTIVATION_TRIGGERS_JAVADOC);
+			if (triggers != null)
+				jdcp.setCompletionProposalAutoActivationCharacters(triggers.toCharArray());
+		} else if (CASE_SENSITIVITY.equals(key)) {
+			boolean enabled= store.getBoolean(CASE_SENSITIVITY);
+			jdcp.restrictProposalsToMatchingCases(enabled);
+		}
+		jdcp= getJavaDocMarkdownProcessor(assistant);
 		if (jdcp == null)
 			return;
 
