@@ -977,6 +977,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewCompactCreationWizard_title;
 	public static String NewCompactWizardPage_description;
 	public static String NewCompactWizardModuleError;
+	public static String NewCompactCreationWizard_HeadTitle;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);
