@@ -68,7 +68,7 @@ public class NewCompactWizardPage extends NewTypeWizardPage {
 	 */
 	public NewCompactWizardPage() {
 		super(TYPE, PAGE_NAME);
-		setTitle(NewWizardMessages.NewCompactCreationWizard_title);
+		setTitle(NewWizardMessages.NewCompactCreationWizard_HeadTitle);
 		setDescription(NewWizardMessages.NewCompactWizardPage_description);
 	}
 
