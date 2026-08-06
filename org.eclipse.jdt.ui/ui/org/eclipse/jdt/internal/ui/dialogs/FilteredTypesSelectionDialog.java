@@ -1206,7 +1206,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		@Override
 		public int compare(TypeNameMatch leftInfo, TypeNameMatch rightInfo) {
-			int result= compareOriginalTextMatchLength(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
+			int result= compareWithOriginalText(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
 			if (result != 0)
 				return result;
 			result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
@@ -1231,15 +1231,63 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return compareContainerName(leftInfo, rightInfo);
 		}
 
-		private int compareOriginalTextMatchLength(String leftString, String rightString) {
+		private int compareWithOriginalText(String leftString, String rightString) {
 			if (fOriginalPrefix != null && !fOriginalPrefix.isEmpty()) {
 				int iLeft= 0;
-				while (iLeft < fOriginalPrefix.length() && iLeft < leftString.length() && leftString.charAt(iLeft) == fOriginalPrefix.charAt(iLeft)) {
+				int leftLength= leftString.length();
+				int prefixLength= fOriginalPrefix.length();
+				while (iLeft < prefixLength && iLeft < leftLength && leftString.charAt(iLeft) == fOriginalPrefix.charAt(iLeft)) {
 					++iLeft;
 				}
 				int iRight= 0;
-				while (iRight < fOriginalPrefix.length() && iRight < rightString.length() && rightString.charAt(iRight) == fOriginalPrefix.charAt(iRight)) {
+				int rightLength= rightString.length();
+				while (iRight < prefixLength && iRight < rightLength && rightString.charAt(iRight) == fOriginalPrefix.charAt(iRight)) {
 					++iRight;
+				}
+				int index= iLeft;
+				if (iRight == iLeft) {
+					while (index < prefixLength && (iLeft < leftLength || iRight < rightLength)) {
+						// Find next char in original prefix
+						char nextChar= fOriginalPrefix.charAt(index++);
+						if (Character.isUpperCase(nextChar)) {
+							int leftMatch= 0;
+							int rightMatch= 0;
+							do {
+								char leftChar= 0;
+								char rightChar= 0;
+								while (iLeft < leftLength && !Character.isUpperCase(leftChar= leftString.charAt(iLeft))) {
+									++iLeft;
+								}
+								if (leftChar == nextChar) {
+									leftMatch= 1;
+								}
+								while (iRight < rightLength && !Character.isUpperCase(rightChar= rightString.charAt(iRight))) {
+									++iRight;
+								}
+								if (rightChar == nextChar) {
+									rightMatch= 1;
+								}
+								if (rightMatch != leftMatch) {
+									return rightMatch - leftMatch;
+								}
+								++iLeft;
+								++iRight;
+							} while (leftMatch == 0 && rightMatch == 0 && (iLeft < leftLength || iRight < rightLength));
+						} else {
+							int originalLeft= iLeft;
+							int originalRight= iRight;
+							while (iLeft < leftLength && leftString.charAt(iLeft) != nextChar) {
+								++iLeft;
+							}
+							while (iRight < rightLength && rightString.charAt(iRight) != nextChar) {
+								++iRight;
+							}
+							int diffLeft= iLeft - originalLeft;
+							int diffRight= iRight - originalRight;
+							return diffLeft - diffRight;
+						}
+					}
+					return 0;
 				}
 				return iRight - iLeft;
 			}
