@@ -676,7 +676,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
 
 				// Open attached Javadoc links
-				OpenBrowserUtil.open(url, display);
+				OpenBrowserUtil.openAsync(url, display);
 
 				return true;
 			}
