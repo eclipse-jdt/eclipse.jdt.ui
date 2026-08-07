@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.eclipse.help.IContextProvider;
 
@@ -1165,12 +1166,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 */
 	private String computeContentDescription(int includeMask) {
 		// see also HistoryAction.getElementLabel(IMember[])
-		String scopeDescription= fSearchScopeActions.getFullDescription(includeMask);
-
+		String scopeDescriptionWithFilters= computeScopeDescriptionWithFilters(includeMask);
 		if (fInputElements.length == 1) {
 			IMember element= fInputElements[0];
 			String elementName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
-			String[] args= new String[] { elementName, scopeDescription };
+			String[] args= new String[] { elementName, scopeDescriptionWithFilters };
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
 				switch (element.getElementType()) {
 					case IJavaElement.TYPE:
@@ -1209,11 +1209,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		        		return null;
 		        	case 2:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_2,
-		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescriptionWithFilters });
 
 		        	default:
 		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_more,
-		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescriptionWithFilters });
 				}
 			} else {
 				switch (fInputElements.length) {
@@ -1222,14 +1222,31 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 						return null;
 					case 2:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_2,
-								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescriptionWithFilters });
 
 					default:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_more,
-								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescriptionWithFilters });
 				}
 			}
 		}
+	}
+
+	private String computeScopeDescriptionWithFilters(int includeMask) {
+		StringJoiner joiner= new StringJoiner(" "); //$NON-NLS-1$
+		if (CallHierarchy.getDefault().isHideTestCode()) {
+			joiner.add(CallHierarchyMessages.CallHierarchyViewPart_scopeDescriptionWithFilters_inMainCode);
+		} else if (CallHierarchy.getDefault().isShowTestCode()) {
+			joiner.add(CallHierarchyMessages.CallHierarchyViewPart_scopeDescriptionWithFilters_inTestCode);
+		}
+		joiner.add(fSearchScopeActions.getFullDescription(includeMask));
+		if (CallHierarchy.getDefault().isFilterEnabled()) {
+			String filters= CallHierarchy.getDefault().getFilters().trim();
+			if (!filters.isEmpty()) {
+				joiner.add(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_scopeDescriptionWithFilters_activeFilters, filters));
+			}
+		}
+		return joiner.toString();
 	}
 
 	private static String getShortLabel(IMember member) {
