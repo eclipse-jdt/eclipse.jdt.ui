@@ -38,6 +38,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
 
 	private CodeGenerationSettings fCodeGeneratorSettings;
 	private RefactoringStatus fStatus;
+	private boolean fSkipWhenIndexerBusy;
 
 	public ImportsCleanUp(Map<String, String> options) {
 		super(options);
@@ -60,7 +61,16 @@ public class ImportsCleanUp extends AbstractCleanUp {
     		return null;
 
 		return ImportsFix.createCleanUp(compilationUnit, fCodeGeneratorSettings,
-				isEnabled(CleanUpConstants.ORGANIZE_IMPORTS), fStatus);
+				isEnabled(CleanUpConstants.ORGANIZE_IMPORTS), fStatus, fSkipWhenIndexerBusy);
+	}
+
+	/**
+	 * Sets whether organize imports is skipped instead of waiting when the type indexer is busy.
+	 *
+	 * @param skipWhenIndexerBusy if set, no fix is created while the indexer is busy
+	 */
+	public void setSkipWhenIndexerBusy(boolean skipWhenIndexerBusy) {
+		fSkipWhenIndexerBusy= skipWhenIndexerBusy;
 	}
 
     @Override

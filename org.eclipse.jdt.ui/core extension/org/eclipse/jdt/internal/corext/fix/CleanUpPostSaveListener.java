@@ -104,6 +104,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantPreferenceConfigurationConstants;
@@ -455,6 +456,10 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 		for (ICleanUp cleanUp : result) {
 			cleanUp.setOptions(new MapCleanUpOptions(settings));
+			if (cleanUp instanceof ImportsCleanUp importsCleanUp) {
+				// saving must not block on background indexing
+				importsCleanUp.setSkipWhenIndexerBusy(true);
+			}
 		}
 
 		return result;
