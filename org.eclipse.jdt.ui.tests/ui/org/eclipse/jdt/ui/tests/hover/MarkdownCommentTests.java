@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.tests.hover;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
@@ -505,8 +506,8 @@ public class MarkdownCommentTests extends CoreTests {
 		String superURI= makeEncodedClassUri("p", "Spec03Tags", "Super");
 		String superMURI= makeEncodedMethodUri(true, "p", "Spec03Tags", "Super","m", "I");
 		String expectedContent= """
-				<p>super doc
-				In addition, this methods calls <code><a href='METHOD_URI'>wait()</a></code>.<div><b>Overrides:</b> <a href='SUPER_M_URI'>m(...)</a> in <a href='SUPER_URI'>Super</a></div></p>
+				<p>super doc</p>
+				<p>In addition, this methods calls <code><a href='METHOD_URI'>wait()</a></code>.<div><b>Overrides:</b> <a href='SUPER_M_URI'>m(...)</a> in <a href='SUPER_URI'>Super</a></div></p>
 				<dl><dt>Parameters:</dt><dd><b>i</b> the index</dd></dl>
 				"""
 				.replace("METHOD_URI", waitURI)
@@ -1112,6 +1113,41 @@ public class MarkdownCommentTests extends CoreTests {
 		assertNotEquals(-1, index);
 		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
 		assertEquals("sequence doesn't match", expectedContent, actualSnippet);
+	}
+
+	@Test
+	public void testInheritedMethod() throws CoreException {
+		String source= """
+				public class Base {
+				    /// ## Title
+				    /// *Some* `formatted` {@code text}
+				    /// ```
+				    /// block
+				    /// ```
+				    ///
+				    void m() {}
+
+				    class A1 extends Base {
+				        @Override
+				        void m() {}
+				    }
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Base.java", source, null);
+		assertNotNull("Base.java", cu);
+
+		String expectedContent= """
+				<p><em>Some</em> <code>formatted</code> <code>text
+				</code></p>
+				<pre><code>block
+				</code></pre>
+				<div><b>Overrides:</b> <a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BBase.java%E2%98%83Base~m'>m()</a> in <a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BBase.java%E2%98%83Base'>Base</a></div>
+				""";
+		IType type0= cu.getType("Base");
+		IType type= type0.getType("A1");
+		IMethod method= type.getMethods()[0];
+		String actualHtmlContent= getHoverHtmlContent(cu, method);
+		assertTrue("Doesn't contain expected content", actualHtmlContent.contains(expectedContent));
 	}
 
 }
