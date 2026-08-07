@@ -58,6 +58,8 @@ public class BulletListBlock extends Composite {
 //		fStyledText.setCaret(null);
 
 		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+		data.heightHint = fStyledText.computeSize(SWT.DEFAULT, 300).y;
+
 		fStyledText.setLayoutData(data);
 		configureStyledText(fText, fEnabled);
 
