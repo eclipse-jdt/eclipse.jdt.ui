@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dialogs;
 
+
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -27,6 +31,7 @@ import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.ActiveShellExpression;
 import org.eclipse.ui.IWorkbenchCommandConstants;
@@ -38,11 +43,16 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.util.TypeInfoFilter;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /**
  * A type selection dialog used for opening types.
@@ -50,6 +60,8 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class OpenTypeSelectionDialog extends FilteredTypesSelectionDialog {
 
 	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2"; //$NON-NLS-1$
+
+	private SelectionButtonDialogField fOpenTypesInferWildcards;
 
 	public OpenTypeSelectionDialog(Shell parent, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds) {
 		this(parent, multi, context, scope, elementKinds, null);
@@ -74,6 +86,36 @@ public class OpenTypeSelectionDialog extends FilteredTypesSelectionDialog {
 		}
 
 		return settings;
+	}
+
+	private void doDialogFieldChanged(DialogField field) {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+
+		if (field == fOpenTypesInferWildcards)
+			preferenceStore.setValue(PreferenceConstants.OPEN_TYPES_INFER_WILDCARDS, fOpenTypesInferWildcards.isSelected());
+		applyFilter();
+	}
+
+	@Override
+	protected Control createButtonBar(Composite parent) {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		IDialogFieldListener listener= this::doDialogFieldChanged;
+
+		Composite newComposite= new Composite(parent, NONE);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 1;
+		layout.marginLeft= 5;
+		newComposite.setLayout(layout);
+		GridData gd= new GridData();
+		gd.horizontalIndent= 5;
+		newComposite.setLayoutData(gd);
+		fOpenTypesInferWildcards= new SelectionButtonDialogField(SWT.CHECK);
+		fOpenTypesInferWildcards.setDialogFieldListener(listener);
+		fOpenTypesInferWildcards.setLabelText(PreferencesMessages.OpenTypesDialog_default_wildcard_between_camel_case_parts_label);
+		fOpenTypesInferWildcards.doFillIntoGrid(newComposite, 1);
+		fOpenTypesInferWildcards.setSelection(preferenceStore.getBoolean(PreferenceConstants.OPEN_TYPES_INFER_WILDCARDS));
+
+		return super.createButtonBar(parent);
 	}
 
 	@Override

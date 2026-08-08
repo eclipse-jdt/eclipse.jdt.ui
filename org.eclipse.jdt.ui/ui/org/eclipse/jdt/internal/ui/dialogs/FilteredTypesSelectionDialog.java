@@ -50,6 +50,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
@@ -104,6 +105,7 @@ import org.eclipse.jdt.launching.LibraryLocation;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoImageProvider;
 import org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent;
@@ -942,7 +944,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			 */
 			super(new TypeSearchPattern());
 			fOriginalPattern= patternMatcher.getPattern();
-			String pattern= getModifiedPatternText(fOriginalPattern);
+			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+			boolean inferWildcards= preferenceStore.getBoolean(PreferenceConstants.OPEN_TYPES_INFER_WILDCARDS);
+			String pattern= inferWildcards ? getModifiedPatternText(fOriginalPattern) : fOriginalPattern;
 			fTypeInfoFilter= new TypeInfoFilter(pattern, scope, elementKind, extension);
 		}
 
