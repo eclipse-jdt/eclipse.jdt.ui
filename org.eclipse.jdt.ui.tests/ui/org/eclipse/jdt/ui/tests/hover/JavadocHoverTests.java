@@ -637,5 +637,67 @@ public class JavadocHoverTests extends CoreTests {
 		}
 	}
 
+	@Test
+	public void testLinkInInlineReturn1() throws Exception {
+		String source=
+				"""
+				package p;
+				public class Javadoc {
+					/**
+					 * {@return a {@link String}}
+					 */
+					String foo(){ return "abc";}
+				}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("Javadoc");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			int snippetStartIndex = actualHtmlContent.indexOf("Returns");
+			assertNotEquals(-1, snippetStartIndex);
+		    String expectedContent = "Returns  a <code><a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BJavadoc.java%E2%98%83Javadoc~foo%E2%98%82String'>String</a></code>.<dl>";
+		    String actualSnippetContent = actualHtmlContent.substring(snippetStartIndex, snippetStartIndex + expectedContent.length());
+		    assertEquals(expectedContent, actualSnippetContent);
+		}
+	}
+
+	@Test
+	public void testLinkInInlineReturn2() throws Exception {
+		String source=
+				"""
+				package p;
+				public class Javadoc {
+					/**
+					 * {@return a {@link String} which is abc}
+					 */
+					String foo(){ return "abc";}
+				}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("Javadoc");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			int snippetStartIndex = actualHtmlContent.indexOf("Returns");
+			assertNotEquals(-1, snippetStartIndex);
+		    String expectedContent = "Returns  a <code><a href='eclipse-javadoc:%E2%98%82=TestSetupProject/src%3Cp%7BJavadoc.java%E2%98%83Javadoc~foo%E2%98%82String'>String</a></code> which is abc.<dl>";
+		    String actualSnippetContent = actualHtmlContent.substring(snippetStartIndex, snippetStartIndex + expectedContent.length());
+		    assertEquals(expectedContent, actualSnippetContent);
+		}
+	}
+
 }
 
