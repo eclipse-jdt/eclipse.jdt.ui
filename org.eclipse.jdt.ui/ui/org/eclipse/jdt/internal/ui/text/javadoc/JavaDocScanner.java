@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,7 +47,6 @@ import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
  * A rule based JavaDoc scanner.
  */
 public final class JavaDocScanner extends JavaCommentScanner {
-
 
 	/**
 	 * Detector for HTML comment delimiters.
@@ -136,7 +135,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 	};
 
 
-	public JavaDocScanner(IColorManager manager, IPreferenceStore store, Preferences coreStore) {
+	public JavaDocScanner(IColorManager manager, IPreferenceStore store, @SuppressWarnings("deprecation") Preferences coreStore) {
 		super(manager, store, coreStore, IJavaColorConstants.JAVADOC_DEFAULT, fgTokenProperties);
 	}
 
@@ -180,11 +179,13 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		list.add(new MultiLineRule("{@link", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 		list.add(new MultiLineRule("{@value", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 		list.add(new MultiLineRule("{@inheritDoc", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new SingleLineRule(" [", "]", token)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// Add rules for @code and @literals
 		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
 		list.add(new MultiLineRule("{@code", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 		list.add(new MultiLineRule("{@literal", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new MultiLineRule("```", "```", token)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// Add generic whitespace rule
 		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
