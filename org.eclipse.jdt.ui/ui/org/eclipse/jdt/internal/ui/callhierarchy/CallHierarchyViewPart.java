@@ -236,7 +236,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private CancelSearchAction fCancelSearchAction;
     private ExpandWithConstructorsAction fExpandWithConstructorsAction;
     private RemoveFromViewAction fRemoveFromViewAction;
-    private ShowSearchInDialogAction fShowSearchInDialogAction;
     private CompositeActionGroup fActionGroups;
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
@@ -245,6 +244,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	private boolean fIsPinned;
 	private PinCallHierarchyViewAction fPinViewAction;
 	private ShowCallHierarchyFilterDialogAction fFiltersAction;
+	private final SearchInSelectionManager searchInManager;
 
 
     public CallHierarchyViewPart() {
@@ -252,6 +252,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         fDialogSettings = JavaPlugin.getDefault().getDialogSettings();
 
+        searchInManager= new SearchInSelectionManager(this);
         fIsPinned= false;
     }
 
@@ -719,8 +720,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			fieldSubMenu.add(fToggleFieldModeAction);
 		}
         viewMenu.add(fieldSubMenu);
-        viewMenu.add(fShowSearchInDialogAction);
+        viewMenu.add(searchInManager.createSearchInMenu());
     }
+
 
 	@Override
 	public void dispose() {
@@ -1040,7 +1042,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fFocusOnSelectionAction = new FocusOnSelectionAction(this);
         fCopyAction= new CopyCallHierarchyAction(this, fClipboard, fCallHierarchyViewer);
         fSearchScopeActions = new SearchScopeActionGroup(this, fDialogSettings);
-        fShowSearchInDialogAction= new ShowSearchInDialogAction(this, fCallHierarchyViewer);
         fFiltersActionGroup = new CallHierarchyFiltersActionGroup(this,
                 fCallHierarchyViewer);
         fHistoryDropDownAction = new HistoryDropDownAction(this);
@@ -1153,7 +1154,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * @since 3.7
 	 */
 	private int getIncludeMask() {
-		return fShowSearchInDialogAction.getSearchInDialog().getIncludeMask();
+		return this.searchInManager.getIncludeMask();
 	}
 
 	/**
