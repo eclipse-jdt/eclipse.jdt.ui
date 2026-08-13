@@ -20,6 +20,7 @@ import static org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SavePartici
 import static org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantPreferenceConfigurationConstants.POSTSAVELISTENER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -70,6 +71,8 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.CompilationUnitElementInfo;
+import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.jdt.internal.core.search.indexing.IndexManager;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -357,6 +360,47 @@ public class ImportOrganizeTest extends CoreTests {
 			"test.IB",
 			"test.IC",
 			"test.ID",
+		});
+	}
+
+	@Test
+	public void testSkipWhenIndexerBusy() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack= sourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+
+			public class C {
+				ArrayList list;
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("C.java", str, false, null);
+
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		IndexManager indexManager= JavaModelManager.getIndexManager();
+		indexManager.disable();
+		try {
+			// enqueue indexing work that the disabled indexer cannot process
+			indexManager.indexAll(fJProject1.getProject());
+
+			OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+			op.setSkipWhenIndexerBusy(true);
+			assertNull("expected no edit while the indexer is busy", op.createTextEdit(null));
+		} finally {
+			indexManager.enable();
+		}
+
+		TestUtils.waitForIndexer();
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.setSkipWhenIndexerBusy(true);
+		op.run(null);
+
+		assertImports(cu, new String[] {
+			"java.util.ArrayList"
 		});
 	}
 
