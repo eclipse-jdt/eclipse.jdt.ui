@@ -198,7 +198,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 						JavaPlugin.log(e);
 						return result;
 					}
-					distance= fDistanceAlgorithm.getDistance(word, candidate);
+					distance= fDistanceAlgorithm.getDistance(word, candidate, DISTANCE_THRESHOLD);
 					if (distance < DISTANCE_THRESHOLD) {
 						buffer.setLength(0);
 						buffer.append(candidate);
@@ -220,7 +220,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 					JavaPlugin.log(e);
 					return result;
 				}
-				distance= fDistanceAlgorithm.getDistance(word, candidate);
+				distance= fDistanceAlgorithm.getDistance(word, candidate, DISTANCE_THRESHOLD);
 
 				if (distance < DISTANCE_THRESHOLD) {
 
@@ -290,7 +290,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 				JavaPlugin.log(e);
 				return;
 			}
-			distance= fDistanceAlgorithm.getDistance(word, candidate);
+			distance= fDistanceAlgorithm.getDistance(word, candidate, minimum);
 
 			if (distance <= minimum) {
 
