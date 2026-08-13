@@ -86,6 +86,18 @@ public class HistoryAction extends Action {
 	 * @since 3.7
 	 */
 	static String getElementLabel(IJavaElement[] elements) {
+		return getElementLabel(elements, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED);
+	}
+
+	/**
+	 * Fetches the label for all the java elements.
+	 *
+	 * @param elements the java elements
+	 * @param flags flags for label generation
+	 * @return the label for all the java elements
+	 * @since 3.35
+	 */
+	static String getElementLabel(IJavaElement[] elements, long flags) {
 		switch (elements.length) {
 			case 0:
 				Assert.isTrue(false);
@@ -93,13 +105,13 @@ public class HistoryAction extends Action {
 
 			case 1:
 				return Messages.format(TypeHierarchyMessages.HistoryAction_inputElements_1,
-						new String[] { getShortLabel(elements[0]) });
+						new String[] { getShortLabel(elements[0], flags) });
 			case 2:
 				return Messages.format(TypeHierarchyMessages.HistoryAction_inputElements_2,
-						new String[] { getShortLabel(elements[0]), getShortLabel(elements[1]) });
+						new String[] { getShortLabel(elements[0], flags), getShortLabel(elements[1], flags) });
 			default:
 				return Messages.format(TypeHierarchyMessages.HistoryAction_inputElements_more,
-						new String[] { getShortLabel(elements[0]), getShortLabel(elements[1]), getShortLabel(elements[2]) });
+						new String[] { getShortLabel(elements[0], flags), getShortLabel(elements[1], flags), getShortLabel(elements[2], flags) });
 		}
 	}
 
@@ -111,7 +123,19 @@ public class HistoryAction extends Action {
 	 * @since 3.7
 	 */
 	static String getShortLabel(IJavaElement element) {
-		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED);
+		return getShortLabel(element, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED);
+	}
+
+	/**
+	 * Fetches the short label for the java element.
+	 *
+	 * @param element the java element
+	 * @param flags flags for label generation
+	 * @return the short label for the java element
+	 * @since 3.35
+	 */
+	static String getShortLabel(IJavaElement element, long flags) {
+		return JavaElementLabels.getElementLabel(element, flags);
 	}
 
 }
