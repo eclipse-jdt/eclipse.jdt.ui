@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IModuleBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImplicitTypeDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -323,7 +324,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			while (parent instanceof Type) {
 				parent= parent.getParent();
 			}
-			if (parent instanceof AbstractTypeDeclaration && parent.getParent() instanceof CompilationUnit) {
+			if ((parent instanceof AbstractTypeDeclaration && parent.getParent() instanceof CompilationUnit)
+					|| (parent instanceof ImplicitTypeDeclaration && parent.getParent() instanceof CompilationUnit)){
 				return true;
 			}
 
@@ -373,7 +375,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 							}
 							return;
 						}
-						if (fImplicitImports.contains(qualifier)) {
+						if (fImplicitImports.contains(qualifier) && !typeNameAmbiguousForImplicitModule(typeName)) {
 							return;
 						}
 					}
@@ -394,6 +396,25 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			fImportsAdded.add(typeName);
 			fUnresolvedTypes.put(typeName, new UnresolvedTypeData(ref));
+		}
+
+		private boolean typeNameAmbiguousForImplicitModule(String typeName) {
+			IJavaProject project= fCurrPackage.getJavaProject();
+			IType foundType= null;
+			for (String packageName : fImplicitImports) {
+				try {
+					IType type= project.findType(packageName + "." + typeName); //$NON-NLS-1$
+					if (type != null) {
+						if (foundType != null) {
+							return true;
+						}
+						foundType= type;
+					}
+				} catch (JavaModelException e) {
+					return false;
+				}
+			}
+			return false;
 		}
 
 		private boolean typeNameAmbiguousForImportedModules(String typeName) {
