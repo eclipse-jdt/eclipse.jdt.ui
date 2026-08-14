@@ -27,6 +27,8 @@ import java.util.function.LongSupplier;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
@@ -197,8 +199,9 @@ public class ParameterNamesCodeMiningTest {
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
-	@Test
-	public void testCollapsedFolding() throws Exception {
+	@ParameterizedTest
+	@ValueSource(ints= {ProjectionViewer.COLLAPSE, ProjectionViewer.COLLAPSE_ALL}) // ensure no error with both comment and everything collapsed
+	public void testCollapsedFolding(int collapseAction) throws Exception {
 		String contents= """
 			/**
 			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -217,7 +220,7 @@ public class ParameterNamesCodeMiningTest {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
-		viewer.doOperation(ProjectionViewer.COLLAPSE_ALL);
+		viewer.doOperation(collapseAction);
 		viewer.setCodeMiningProviders(new ICodeMiningProvider[] {
 			fParameterNameCodeMiningProvider
 		});
@@ -265,7 +268,7 @@ public class ParameterNamesCodeMiningTest {
 			}
 		}.waitForCondition(widget.getDisplay(), 2000), "Code mining not available on expected chars");
 		//
-		viewer.doOperation(ProjectionViewer.COLLAPSE_ALL);
+		viewer.doOperation(ProjectionViewer.COLLAPSE); // collapse comment to check code mining/highlighting after folded region
 		assertTrue(new DisplayHelper() {
 			@Override
 			protected boolean condition() {
