@@ -367,6 +367,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	String MODIFY_METHOD_PARAMETERS= "org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the refactor -> modify record parameters action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"</code>).
+	 */
+	String MODIFY_RECORD_PARAMETERS= "org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the refactor -> move element action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.move.element"</code>).
 	 */
