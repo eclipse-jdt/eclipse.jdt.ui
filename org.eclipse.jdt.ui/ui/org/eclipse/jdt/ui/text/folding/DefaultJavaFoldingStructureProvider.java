@@ -1130,7 +1130,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			// Line numbers (0-based)
 			int start= document.getLineOfOffset(region.getOffset());
-			int end= document.getLineOfOffset(region.getOffset() + region.getLength());
+			int end= document.getLineOfOffset(Math.min(region.getOffset() + region.getLength(), ctx.getDocument().getLength()));
 
 			if (end >= document.getNumberOfLines()) {
 				end= document.getNumberOfLines() - 1;
@@ -1158,6 +1158,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			return new Region(offset, endOffset - offset);
 		} catch (BadLocationException x) {
+			JavaPlugin.log(x);
 			return null;
 		}
 	}
@@ -1551,6 +1552,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			regions.toArray(result);
 			return result;
 		} catch (JavaModelException | InvalidInputException e) {
+			JavaPlugin.log(e);
 		}
 
 		return new IRegion[0];
