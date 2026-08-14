@@ -2783,6 +2783,13 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
                id="org.eclipse.jdt.ui.actions.ModifyParameters">
          </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"
+               label="%Refactoring.modifyRecordParameterAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+               id="org.eclipse.jdt.ui.actions.ModifyRecordParameters">
+         </action>
 
 <!-- reorg group 2 -->
          <action
@@ -4140,6 +4147,12 @@
             id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters">
       </command>
       <command
+            name="%ActionDefinition.modifyRecordParameters.name"
+            description="%ActionDefinition.modifyRecordParameters.description"
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.modify.record.parameters">
+      </command>
+      <command
             name="%ActionDefinition.convertAnonymousToNested.name"
             description="%ActionDefinition.convertAnonymousToNested.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
@@ -4913,6 +4926,11 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
       <key
+            sequence="M2+M3+C"
+            commandId="org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key
             platform="carbon"
             sequence="M2+M3+C"
             commandId=""
@@ -4920,7 +4938,7 @@
       <key
             platform="carbon"
             sequence="COMMAND+ALT+C"
-            commandId="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
+            commandId="org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
       <key
