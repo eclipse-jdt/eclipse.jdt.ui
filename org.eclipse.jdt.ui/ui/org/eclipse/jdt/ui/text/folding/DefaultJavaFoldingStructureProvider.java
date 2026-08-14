@@ -1258,6 +1258,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			case IJavaElement.TYPE:
 				// only inner types may be collapsed
 				collapse= ctx.collapseInnerTypes() && isInnerType((IType) element);
+				try {
+					if (((IType) element).isImplicitlyDeclared()) {
+						return;
+					}
+				} catch (JavaModelException e) {
+					return;
+				}
 				break;
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
