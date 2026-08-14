@@ -345,6 +345,12 @@ public class JdtActionConstants {
 	public static final String MODIFY_PARAMETERS= "org.eclipse.jdt.ui.actions.ModifyParameters"; //$NON-NLS-1$
 
 	/**
+	 * Refactor menu: name of standard Modify Record Parameters global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ModifyParameters"</code>).
+	 */
+	public static final String MODIFY_RECORD_PARAMETERS= "org.eclipse.jdt.ui.actions.ModifyRecordParameters"; //$NON-NLS-1$
+
+	/**
 	 * Refactor menu: name of standard Pull Up global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.PullUp"</code>).
 	 */

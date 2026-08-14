@@ -159,8 +159,12 @@ public final class RefactoringAvailabilityTester {
 
 	public static IMethod getSelectedMethod(final JavaTextSelection selection) throws JavaModelException {
 		final IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length == 1 && (elements[0] instanceof IMethod))
+		ASTNode nodeToCheck = selection.resolveCoveringNode().getParent();
+
+
+		if (elements.length == 1 && (elements[0] instanceof IMethod)) {
 			return ((IMethod) elements[0]);
+		}
 		final IJavaElement element= selection.resolveEnclosingElement();
 		return (element instanceof IMethod) ? (IMethod)element : null;
 	}
