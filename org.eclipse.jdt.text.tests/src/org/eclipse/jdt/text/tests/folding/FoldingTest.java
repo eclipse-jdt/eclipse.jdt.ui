@@ -15,6 +15,7 @@ package org.eclipse.jdt.text.tests.folding;
 
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
@@ -30,7 +31,6 @@ import org.junit.runners.Parameterized.Parameters;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -825,6 +825,25 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 12, 17); // Runnable
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_FOLDING_INNERTYPES);
 
+	}
+
+	@Test
+	public void testSimpleMainDoesNotContainRegionSurroundingImplicitClass() throws Exception {
+		String str = """
+				import module java.base;
+
+				int i;
+				int j;
+
+				void main() {
+					// main
+				}
+
+				""";
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 7); // main
+		FoldingTestUtils.assertDoesNotContainRegionUsingStartLine(regions, str, 2); // int i
+		assertEquals(1, regions.size()); // no other unexpected regions anywhere else
 	}
 }
 
