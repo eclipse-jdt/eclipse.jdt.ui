@@ -31,7 +31,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -119,6 +118,17 @@ public class FoldingTest {
 				""";
 		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 2); // class
+	}
+
+	@Test
+	public void testFoldClassEndingAtEOF() throws Exception {
+		String str= """
+				package org.example.test;
+				class A {		//here should be an annotation
+					// content
+				}""";
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 3); // class
 	}
 
 	@Test
