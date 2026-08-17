@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class OpenBrowserUtil {
 
 	/**
-	 * Opens the given url in the browser as choosen in the preferences.
+	 * Opens the given url in the browser as chosen in the preferences.
 	 *
 	 * @param url the URL
 	 * @param display the display
@@ -37,6 +37,16 @@ public class OpenBrowserUtil {
 	 */
 	public static void open(final URL url, Display display) {
 		display.syncExec(() -> internalOpen(url, false));
+	}
+
+	/**
+	 * Asynchronously opens the given url in the browser as chosen in the preferences.
+	 *
+	 * @param url the URL
+	 * @param display the display
+	 */
+	public static void openAsync(final URL url, Display display) {
+		display.asyncExec(() -> internalOpen(url, false));
 	}
 
 	/**

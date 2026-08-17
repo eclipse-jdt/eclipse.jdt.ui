@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2023 IBM Corporation and others.
+ * Copyright (c) 2008, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -433,7 +433,39 @@ public class CoreJavadocAccess {
 		}
 
 		if (CoreJavadocContentAccessUtility.canInheritJavadoc(member)) {
-			IMethod method= (IMethod) member;
+			IMethod method= (IMethod)member;
+			IType declaringType= method.getDeclaringType();
+
+			IMethod overridden= null;
+			if (rawJavadoc.equals("/***/")) { //$NON-NLS-1$
+				try {
+					// we have assumed we have old-style Javadoc...check if
+					// we have an overridden method with Javadoc where we can check if
+					// it is markdown in which case, update rawJavadoc string and
+					// recalculate javadoc based on using a markdown processor
+					if (!method.isConstructor()) {
+						ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
+						MethodOverrideTester tester= new MethodOverrideTester(declaringType, hierarchy);
+						overridden= tester.findOverriddenMethod(method, true);
+					}
+					if (overridden != null) {
+						IBuffer buf= overridden.getOpenable().getBuffer();
+						if (buf != null) {
+							ISourceRange javadocRange= overridden.getJavadocRange();
+							if (javadocRange != null) {
+								String javadocStart= buf.getText(javadocRange.getOffset(), 3);
+								if (javadocStart.equals("///")) { //$NON-NLS-1$
+									rawJavadoc= "///\n"; //$NON-NLS-1$
+									javadoc= CoreJavadocContentAccessUtility.getJavadocNode(member, rawJavadoc);
+								}
+							}
+						}
+					}
+				} catch (JavaModelException e2) {
+					JavaManipulationPlugin.log(e2);
+				}
+			}
+
 			return this.fFactory.createJavadocAccess(element, javadoc, rawJavadoc, new JavadocLookup(method.getDeclaringType(), this.fFactory)).toHTML();
 		}
 		return this.fFactory.createJavadocAccess(element, javadoc, rawJavadoc, null).toHTML();

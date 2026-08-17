@@ -578,7 +578,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 
 			fBuf= null;
 		}
-		return fMainDescription.length() > 0 ? fMainDescription : null;
+		return fMainDescription.length() > 0 ? fMainDescription.append("\n") : null; //$NON-NLS-1$
 	}
 
 	@Override
