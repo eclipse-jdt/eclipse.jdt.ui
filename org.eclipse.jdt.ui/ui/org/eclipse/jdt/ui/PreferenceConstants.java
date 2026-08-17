@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2880,6 +2880,19 @@ public class PreferenceConstants {
 	public final static String SPELLING_ENABLE_CONTENTASSIST= "spelling_enable_contentassist"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that specifies whether the open types dialog should infer wildcards before
+	 * upper-case characters in a camel-case specificier.  The option does not apply when there are
+	 * only upper-case characters in the string.
+	 *
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.39
+	 */
+	public final static String OPEN_TYPES_INFER_WILDCARDS= "open_types_infer_wildcards"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether code snippets are formatted
 	 * in Javadoc comments.
 	 * <p>
@@ -4438,6 +4451,8 @@ public class PreferenceConstants {
 
 		store.setToDefault(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE); // global
 
+		// Open types dialog
+		store.setDefault(PreferenceConstants.OPEN_TYPES_INFER_WILDCARDS, true);
 
 		//Code Clean Up
 		CleanUpConstantsOptions.initDefaults(store);

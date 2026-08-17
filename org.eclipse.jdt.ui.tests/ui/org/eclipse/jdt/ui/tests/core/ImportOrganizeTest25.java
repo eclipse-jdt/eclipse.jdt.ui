@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 IBM Corporation and others.
+ * Copyright (c) 2025, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -342,6 +342,40 @@ public class ImportOrganizeTest25 extends CoreTests {
 				"mod2",
 				"java.base",
 				"java.util.List",
+		});
+	}
+
+	@Test
+	public void testImplicitClass() throws Exception {
+		IPackageFragmentRoot sourceFolder2= JavaProjectHelper.addSourceContainer(fJProject2, "src");
+
+		IPackageFragment defaultPkg= sourceFolder2.createPackageFragment("", false, null);
+		String code= """
+			import java.security.cert.Certificate;
+			import java.util.List;
+
+			Certificate certificate;
+
+			public static void main(String[] args) {
+				Certificate certificate;
+				List<String> list;
+			}
+			""";
+		ICompilationUnit cu= defaultPkg.createCompilationUnit("MyClass.java", code, false, null);
+
+		Map<String, String> options= new HashMap<>();
+		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_25);
+		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_25);
+		cu.setOptions(options);
+
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("E", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		assertImports(cu, new String[] {
+				"java.security.cert.Certificate"
 		});
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -55,6 +56,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.rules.Java25ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -71,7 +73,10 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 public class ReorgQuickFixTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new ProjectTestSetup();
+	   public ProjectTestSetup projectSetup = new ProjectTestSetup();
+
+	@Rule
+	public ProjectTestSetup projectSetup25= new Java25ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -95,6 +100,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(projectSetup25.getProject(), projectSetup25.getDefaultClasspath());
 	}
 
 	@Test
@@ -1126,9 +1132,9 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				}
 
 				@Override
-				public IPath getPath() {
-					return containerPath;
-				}
+					public IPath getPath() {
+						return containerPath;
+					}
 			};
 			ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(JavaCore.USER_LIBRARY_CONTAINER_ID);
 			initializer.requestClasspathContainerUpdate(containerPath, otherProject, newContainer);
@@ -1147,6 +1153,28 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		}
 	}
 
+	@Test
+	public void testWrongPackageStatementImplicitClass() throws Exception {
+		fJProject1= projectSetup25.getProject();
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			void main() {
+			    System.out.println("implicit");
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Hello.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		for (IJavaCompletionProposal proposal : proposals) {
+			assertFalse(
+				"\"Correct package declaration\" must not be offered for implicit classes",
+				proposal instanceof FixCorrectionProposal);
+		}
+	}
 
 
 

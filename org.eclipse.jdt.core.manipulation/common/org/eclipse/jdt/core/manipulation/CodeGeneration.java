@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -158,6 +158,21 @@ public class CodeGeneration {
 	 * @param typeQualifiedName The name of the type to which the comment is added. For inner types the name must be qualified and include the outer
 	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}.
 	 * @param typeParameterNames The type parameter names
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the new content or <code>null</code> if the code template is undefined or empty. The returned content is unformatted and is not indented.
+	 * @throws CoreException Thrown when the evaluation of the code template fails.
+	 * @since 1.25
+	 */
+	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelimiter, boolean useMarkdown) throws CoreException {
+		return StubUtility.getTypeComment(cu, typeQualifiedName, typeParameterNames, EMPTY, lineDelimiter, useMarkdown);
+	}
+
+	/**
+	 * Returns the content for a new type comment using the 'type comment' code template. The returned content is unformatted and is not indented.
+	 * @param cu The compilation unit where the type is contained. The compilation unit does not need to exist.
+	 * @param typeQualifiedName The name of the type to which the comment is added. For inner types the name must be qualified and include the outer
+	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}.
+	 * @param typeParameterNames The type parameter names
 	 * @param params The parameter names - currently useful only for records
 	 * @param lineDelimiter The line delimiter to be used.
 	 * @return Returns the new content or <code>null</code> if the code template is undefined or empty. The returned content is unformatted and is not indented.
@@ -306,6 +321,30 @@ public class CodeGeneration {
 	 * <code>null</code> is returned if the template is empty.
 	 * <p>The returned string is unformatted and not indented.
 	 *
+	 * @param method The method to be documented. The method must exist.
+	 * @param overridden The method that will be overridden by the created method or
+	 * <code>null</code> for non-overriding methods. If not <code>null</code>, the method must exist.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @param useMarkdown True if markdown templates should be used, false if regular javadoc templates
+	 * @return Returns the constructed comment or <code>null</code> if
+	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
+	 * @throws CoreException Thrown when the evaluation of the code template fails.
+	 * @since 1.25
+	 */
+	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter, boolean useMarkdown) throws CoreException {
+		String retType= method.isConstructor() ? null : method.getReturnType();
+		String[] paramNames= method.getParameterNames();
+		String[] typeParameterNames= StubUtility.getTypeParameterNames(method.getTypeParameters());
+
+		return StubUtility.getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
+			method.getElementName(), paramNames, method.getExceptionTypes(), retType, typeParameterNames, overridden, false, lineDelimiter, useMarkdown);
+	}
+
+	/**
+	 * Returns the comment for a method or constructor using the comment code templates (constructor / method / overriding method).
+	 * <code>null</code> is returned if the template is empty.
+	 * <p>The returned string is unformatted and not indented.
+	 *
 	 * @param cu The compilation unit to which the method belongs. The compilation unit does not need to exist.
 	 * @param declaringTypeName Name of the type to which the method belongs. For inner types the name must be qualified and include the outer
 	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}.
@@ -358,6 +397,20 @@ public class CodeGeneration {
 	 */
 	public static String getModuleComment(ICompilationUnit cu, IModuleDescription desc, String lineDelimiter) throws CoreException {
 		return StubUtility.getModuleComment(cu, desc.getElementName(), desc.getProvidedServiceNames(), desc.getUsedServiceNames(), lineDelimiter);
+	}
+
+	/**
+	 * Returns the comment for a module based on code templates
+	 *
+	 * @param cu The compilation unit for the module
+	 * @param desc The module description
+	 * @param lineDelimiter The line delimiter to use
+	 * @return Module comment
+	 * @throws CoreException Thrown when the evaluation of the code template fails
+	 * @since 1.25
+	 */
+	public static String getModuleComment(ICompilationUnit cu, IModuleDescription desc, String lineDelimiter, boolean useMarkdown) throws CoreException {
+		return StubUtility.getModuleComment(cu, desc.getElementName(), desc.getProvidedServiceNames(), desc.getUsedServiceNames(), lineDelimiter, useMarkdown);
 	}
 
 	/**

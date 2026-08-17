@@ -288,10 +288,19 @@ public class StubUtility {
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
-	 * @see CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
+	 * @see CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String, boolean)
 	 */
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String[] params, String lineDelim) throws CoreException {
 		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		return getTypeComment(cu, typeQualifiedName, typeParameterNames, params, lineDelim, useMarkdown);
+	}
+
+	/*
+	 * Don't use this method directly, use CodeGeneration.
+	 * @see CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
+	 */
+	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String[] params,
+			String lineDelim, boolean useMarkdown) throws CoreException {
 		Template template= getCodeTemplate(useMarkdown ? CodeTemplateContextType.MARKDOWNTYPECOMMENT_ID : CodeTemplateContextType.TYPECOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
@@ -442,6 +451,15 @@ public class StubUtility {
 	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames,
 			IMethod target, boolean delegate, String lineDelimiter) throws CoreException {
 		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		return getMethodComment(cu, typeName, methodName, paramNames, excTypeSig, retTypeSig, typeParameterNames, target, delegate, lineDelimiter, useMarkdown);
+	}
+
+	/*
+	 * Don't use this method directly, use CodeGeneration.
+	 * @see CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, String[], IMethod, String)
+	 */
+	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames,
+			IMethod target, boolean delegate, String lineDelimiter, boolean useMarkdown) throws CoreException {
 		String templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNMETHODCOMMENT_ID : CodeTemplateContextType.METHODCOMMENT_ID;
 		if (retTypeSig == null) {
 			templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNCONSTRUCTORCOMMENT_ID : CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
@@ -540,6 +558,15 @@ public class StubUtility {
 	public static String getModuleComment(ICompilationUnit cu, String moduleName, String[] providesNames,
 			String[] usesNames, String lineDelimiter) throws CoreException {
 		boolean useMarkdown= useMarkdown(cu.getJavaProject());
+		return getModuleComment(cu, moduleName, providesNames, usesNames, lineDelimiter, useMarkdown);
+	}
+
+	/*
+	 * Don't use this method directly, use CodeGeneration.
+	 * @see CodeGeneration#getModuleComment(IJavaProject, String, String, String[], String[], String[], String[], String[], String)
+	 */
+	public static String getModuleComment(ICompilationUnit cu, String moduleName, String[] providesNames,
+			String[] usesNames, String lineDelimiter, boolean useMarkdown) throws CoreException {
 		String templateName= useMarkdown ? CodeTemplateContextType.MARKDOWNMODULECOMMENT_ID : CodeTemplateContextType.MODULECOMMENT_ID;
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {

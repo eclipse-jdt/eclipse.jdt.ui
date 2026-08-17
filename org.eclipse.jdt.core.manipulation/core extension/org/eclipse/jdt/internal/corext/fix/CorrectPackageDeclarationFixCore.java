@@ -62,8 +62,8 @@ public class CorrectPackageDeclarationFixCore implements IProposableFix {
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		try {
 			IPackageDeclaration[] decls= cu.getPackageDeclarations();
+			IJavaProject jProject = parentPack.getJavaProject();
 			if (parentPack.isDefaultPackage() && decls.length > 0) {
-				IJavaProject jProject = parentPack.getJavaProject();
 				if (jProject != null && JavaModelUtil.is9OrHigher(jProject)) {
 					try {
 						IModuleDescription desc= jProject.getModuleDescription();
@@ -71,9 +71,13 @@ public class CorrectPackageDeclarationFixCore implements IProposableFix {
 							isValid= false;
 						}
 					} catch (JavaModelException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						JavaManipulationPlugin.log(e);
 					}
+				}
+			}
+			if (jProject != null && JavaModelUtil.is25OrHigher(jProject)) {
+				if(cu.getTypes()[0].isImplicitlyDeclared()) {
+					isValid= false;
 				}
 			}
 		} catch(JavaModelException e) {
