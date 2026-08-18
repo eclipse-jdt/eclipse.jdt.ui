@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
 
@@ -64,6 +65,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
@@ -90,6 +92,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldCompositeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeRecordSignatureProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractClassRefactoring;
@@ -189,6 +192,20 @@ public final class RefactoringExecutionStarter {
 				return RenameSupport.create((IModuleDescription) element, newName, flags);
 		}
 		return null;
+	}
+
+	public static void startChangeRecordSignatureRefactoring(final ASTNode node, final IType type, final SelectionDispatchAction action, final Shell shell) {
+		// Grab access to the ASTNode
+		// Instantiate the preocessor
+		ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type, node);
+		try {
+			RefactoringStatus status = processor.checkInitialConditions(new NullProgressMonitor());
+			Checks.checkIfCuBroken(type);
+		} catch (OperationCanceledException | CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return;
 	}
 
 	public static void startChangeSignatureRefactoring(final IMethod method, final SelectionDispatchAction action, final Shell shell) throws JavaModelException {
