@@ -23,8 +23,10 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Statement;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class ChangeRecordSignatureProcessor extends RefactoringProcessor implements IDelegateUpdating{
 
@@ -32,23 +34,20 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 
 	ASTNode fNode;
 
+	ClassInstanceCreation fClassInstanceCreation;
+
 	private List<ParameterInfo> fParameterInfos;
+
+	private int fVisibility;
 
 	public ChangeRecordSignatureProcessor(IType type, ASTNode node) {
 		this.fType = type;
 		this.fNode = node;
-
-		ClassInstanceCreation cic = resolveClassInstanceCreation(node);
+		this.fClassInstanceCreation= resolveClassInstanceCreation(node);
+		this.fVisibility= JdtFlags.getVisibilityCode(this.fClassInstanceCreation.getType().resolveBinding());
 		if (node != null) {
-			this.fParameterInfos = getTypeParameters(cic);
+			this.fParameterInfos = getTypeParameters(this.fClassInstanceCreation);
 		}
-/*		try {
-			//String[] typeNames = type.getTypeParameters();
-
-		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 	}
 
 	private List<ParameterInfo> getTypeParameters(ClassInstanceCreation cic) {
@@ -61,7 +60,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		List<ParameterInfo> result= new ArrayList<>(parametersTypes.length);
 		for (int i= 0; i < parametersTypes.length; i++) {
 			ParameterInfo parameterInfo;
-			//We don't have  var args for record parameters
+			//We don't have  var args for record parameters so we don't need to check them.
 			parameterInfo= new ParameterInfo(parametersTypes[i].getName(), parametersNames[i], i);
 			result.add(parameterInfo);
 		}
@@ -141,8 +140,17 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		// TODO Auto-generated method stub
-
-		return null;
+		pm.beginTask("", 2); //$NON-NLS-1$
+		RefactoringStatus result= Checks.checkIfCuBroken(fType);
+		if (result.hasFatalError()) {
+			return result;
+		}
+		pm.worked(1);
+		if (fClassInstanceCreation == null) {
+			return null;
+		}
+		pm.worked(2);
+		return result;
 	}
 
 	@Override
