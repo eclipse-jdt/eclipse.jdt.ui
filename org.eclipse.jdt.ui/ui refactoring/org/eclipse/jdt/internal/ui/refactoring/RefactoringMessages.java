@@ -788,6 +788,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RefactoringGroup_modify_Parameters_label;
 
+	public static String RefactoringGroup_modify_Record_Parameters_label;
+
 	public static String RefactoringGroup_move_label;
 
 	public static String RefactoringGroup_pull_Up_label;
