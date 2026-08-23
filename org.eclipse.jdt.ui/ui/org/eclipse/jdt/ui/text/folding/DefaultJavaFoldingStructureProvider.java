@@ -48,6 +48,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.IProjectionPosition;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
@@ -361,6 +362,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		void setIsComment(boolean isComment) {
 			fIsComment= isComment;
+		}
+
+		@Override
+		protected boolean includeInCollapseAll() {
+			return fJavaElement.getElementType() != IJavaElement.TYPE || isInnerType((IType) fJavaElement);
 		}
 
 		/*
@@ -939,6 +945,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		return createContext(true);
 	}
 
+	private IAnnotationModelListener annotationModelListener;
+
 	private FoldingStructureComputationContext createContext(boolean allowCollapse) {
 		if (!isInstalled())
 			return null;
@@ -948,6 +956,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		IDocument doc= getDocument();
 		if (doc == null)
 			return null;
+
+		if (annotationModelListener == null) {
+			annotationModelListener = m -> {
+				// TODO if everything is being collapsed: uncollapse outer type?
+			};
+			model.addAnnotationModelListener(annotationModelListener);
+		}
 
 		IScanner scanner= null;
 		if (fUpdatingCount == 1)
@@ -1293,7 +1308,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * @param type the type to test
 	 * @return <code>true</code> if <code>type</code> is an inner type
 	 */
-	private boolean isInnerType(IType type) {
+	private static boolean isInnerType(IType type) {
 		return type.getDeclaringType() != null;
 	}
 
