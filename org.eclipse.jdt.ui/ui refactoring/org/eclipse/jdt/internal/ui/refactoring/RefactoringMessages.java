@@ -88,6 +88,10 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_modify_Parameters;
 
+	public static String ChangeSignatureRefactoring_modify_Record_Parameters;
+
+	public static String ChangeSignatureRefactoring_records_modify_Parameters;
+
 	public static String ChangeTypeAction_description;
 
 	public static String ChangeTypeAction_dialog_title;

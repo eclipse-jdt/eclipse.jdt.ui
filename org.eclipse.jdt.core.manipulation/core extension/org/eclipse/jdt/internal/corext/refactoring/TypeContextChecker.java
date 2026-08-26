@@ -365,6 +365,7 @@ public class TypeContextChecker {
 	private static class MethodTypesSyntaxChecker {
 
 		private final IMethod fMethod;
+		private final IType fType;
 		private final List<ParameterInfo> fParameterInfos;
 		private final ReturnTypeInfo fReturnTypeInfo;
 
@@ -372,12 +373,21 @@ public class TypeContextChecker {
 			fMethod= method;
 			fParameterInfos= parameterInfos;
 			fReturnTypeInfo= returnTypeInfo;
+			fType = null;
+		}
+
+		public MethodTypesSyntaxChecker(IType recordType, List<ParameterInfo> parameterInfos) {
+			fType = recordType;
+			fParameterInfos= parameterInfos;
+			fReturnTypeInfo = null;
+			fMethod= null;
 		}
 
 		public RefactoringStatus[] checkSyntax() {
 			int parameterCount= fParameterInfos.size();
 			RefactoringStatus[] results= new RefactoringStatus[parameterCount + 1];
-			results[parameterCount]= checkReturnTypeSyntax();
+			if (fMethod != null)
+				results[parameterCount]= checkReturnTypeSyntax();
 			for (int i= 0; i < parameterCount; i++) {
 				ParameterInfo info= fParameterInfos.get(i);
 				if (!info.isDeleted())
@@ -389,6 +399,10 @@ public class TypeContextChecker {
 		private RefactoringStatus checkParameterTypeSyntax(ParameterInfo info) {
 			if (!info.isAdded() && !info.isTypeNameChanged() && !info.isDeleted())
 				return null;
+			IJavaProject jp;
+			if (fType != null)
+				//If fType is not null we know this is a recordType. so we have to pass fType.getJavaProject.
+				return TypeContextChecker.checkParameterTypeSyntax(info.getNewTypeName(), fType.getJavaProject());
 			return TypeContextChecker.checkParameterTypeSyntax(info.getNewTypeName(), fMethod.getJavaProject());
 		}
 
@@ -481,6 +495,11 @@ public class TypeContextChecker {
 
 	public static RefactoringStatus[] checkMethodTypesSyntax(IMethod method, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) {
 		MethodTypesSyntaxChecker checker= new MethodTypesSyntaxChecker(method, parameterInfos, returnTypeInfo);
+		return checker.checkSyntax();
+	}
+
+	public static RefactoringStatus[] checkRecordTypesSyntax(IType recordType, List<ParameterInfo> parameterInfos) {
+		MethodTypesSyntaxChecker checker= new MethodTypesSyntaxChecker(recordType, parameterInfos);
 		return checker.checkSyntax();
 	}
 

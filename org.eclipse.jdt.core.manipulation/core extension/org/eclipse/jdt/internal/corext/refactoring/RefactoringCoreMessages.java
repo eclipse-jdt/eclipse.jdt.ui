@@ -115,6 +115,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_modify_Parameters;
 
+	public static String ChangeSignatureRefactoring_modify_RecordParameters;
+
 	public static String ChangeSignatureRefactoring_native;
 
 	public static String ChangeSignatureRefactoring_new_name_pattern;

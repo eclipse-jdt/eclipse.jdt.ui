@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
 
@@ -117,6 +116,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.ChangeRecordSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ConvertAnonymousToNestedWizard;
@@ -194,16 +194,20 @@ public final class RefactoringExecutionStarter {
 		return null;
 	}
 
-	public static void startChangeRecordSignatureRefactoring(final ASTNode node, final IType type, final SelectionDispatchAction action, final Shell shell) {
+	public static void startChangeRecordSignatureRefactoring(final ASTNode node, final IType type, ITextSelection selection, final SelectionDispatchAction action, final Shell shell) {
 		// Grab access to the ASTNode
 		// Instantiate the preocessor
-		ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type, node);
 		try {
+			ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type, node, selection);
 			RefactoringStatus status = processor.checkInitialConditions(new NullProgressMonitor());
-			Checks.checkIfCuBroken(type);
-		} catch (OperationCanceledException | CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (status.hasFatalError()) {
+
+			}
+			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+			ChangeRecordSignatureWizard wizard= new ChangeRecordSignatureWizard(processor, refactoring);
+			new RefactoringStarter().activate(wizard, shell, wizard.getDefaultPageTitle(), IRefactoringSaveModes.SAVE_REFACTORING);
+		} catch (CoreException e) {
+				ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.RefactoringStarter_unexpected_exception);
 		}
 		return;
 	}
