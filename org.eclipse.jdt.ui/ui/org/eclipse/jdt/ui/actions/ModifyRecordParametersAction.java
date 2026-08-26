@@ -12,9 +12,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -53,8 +51,6 @@ public class ModifyRecordParametersAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
 
-	private IType fType;
-
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
@@ -86,18 +82,25 @@ public class ModifyRecordParametersAction extends SelectionDispatchAction {
 	}
 
 	private boolean isRecord(ASTNode node) {
-		// We can check if the node is a record if its type is ClassInstanceException.
-		if (node instanceof ClassInstanceCreation) {
-			ClassInstanceCreation cic = (ClassInstanceCreation)node;
+		return getRecordClassInstanceCreation(node) != null;
+	}
+
+	/**
+	 * Walks up the AST from <code>node</code> to find the enclosing
+	 * {@link ClassInstanceCreation} whose resolved type is a record.
+	 * Returns <code>null</code> if no such node exists.
+	 */
+	private ClassInstanceCreation getRecordClassInstanceCreation(ASTNode node) {
+		if (node instanceof ClassInstanceCreation cic) {
 			ITypeBinding binding = cic.resolveTypeBinding();
-			return binding != null && binding.isRecord();
+			if (binding != null && binding.isRecord()) {
+				return cic;
+			}
 		}
-		// If the current node is a Statement, or a Compilation unit or a BodyDeclarataion
-		// we can safely assume is not a Record
-		if(node == null || node instanceof Statement || node instanceof CompilationUnit || node instanceof BodyDeclaration ) {
-			return false;
+		if (node == null || node instanceof Statement || node instanceof CompilationUnit || node instanceof BodyDeclaration) {
+			return null;
 		}
-		return isRecord(node.getParent());
+		return getRecordClassInstanceCreation(node.getParent());
 	}
 
 	@Override
@@ -120,24 +123,22 @@ public class ModifyRecordParametersAction extends SelectionDispatchAction {
      */
 	@Override
 	public void run(ITextSelection selection) {
-		if (! ActionUtil.isEditable(fEditor))
+		// We need to identify the IType for the current record.
+		// To do that I first need to get the CompilationUnit
+		// And then with Nodefinder.perform() search for the astNode related to the selection.
+		if (!ActionUtil.isEditable(fEditor))
 			return;
 		CompilationUnit cu = getASTCompilationUnit(fEditor);
 		ASTNode node = NodeFinder.perform(cu, selection.getOffset(), selection.getLength());
-		boolean isRecordNode = isRecord(node);
-		if (isRecordNode) {
-			try {
-				IType type = SelectionConverter.getTypeAtOffset(fEditor);
-				RefactoringExecutionStarter.startChangeRecordSignatureRefactoring(node, type, this, getShell());
-				IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
-				type.toString();
-				elements.toString();
-			} catch (JavaModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		ClassInstanceCreation cic = getRecordClassInstanceCreation(node);
+		if (cic != null) {
+			ITypeBinding typeBinding = cic.resolveTypeBinding();
+			if (typeBinding == null || !(typeBinding.getJavaElement() instanceof IType))
+				return;
+
+			IType recordType = (IType) typeBinding.getJavaElement();
+			RefactoringExecutionStarter.startChangeRecordSignatureRefactoring(node, recordType, selection, this, getShell());
 		}
-		System.out.println(isRecordNode);
 	}
 
 	private CompilationUnit getASTCompilationUnit(JavaEditor editor) {
