@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -86,6 +87,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -667,7 +669,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private RefactoringStatus checkExpression() throws JavaModelException {
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression();
 		if (selectedExpression != null) {
-			final ASTNode parent= selectedExpression.getParent();
+			ASTNode parent= selectedExpression.getParent();
 			if (selectedExpression instanceof NullLiteral) {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_null_literals);
 			} else if (selectedExpression instanceof ArrayInitializer) {
@@ -675,8 +677,22 @@ public class ExtractTempRefactoring extends Refactoring {
 			} else if (selectedExpression instanceof Assignment) {
 				if (parent instanceof Expression && !(parent instanceof ParenthesizedExpression))
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment);
-				else
+				else {
+					while (parent != null) {
+						parent= parent.getParent();
+						if (parent instanceof Statement) {
+							break;
+						} else if (parent instanceof InfixExpression infixExpression) {
+							if (infixExpression.getOperator() == Operator.CONDITIONAL_AND ||
+									infixExpression.getOperator() == Operator.CONDITIONAL_OR) {
+								return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_side_effects_possible);
+							}
+						} else if (parent instanceof ConditionalExpression) {
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_side_effects_possible);
+						}
+					}
 					return null;
+				}
 			} else if (selectedExpression instanceof SimpleName) {
 				if ((((SimpleName) selectedExpression)).isDeclaration())
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations);

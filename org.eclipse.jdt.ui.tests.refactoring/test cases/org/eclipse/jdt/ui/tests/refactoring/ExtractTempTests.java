@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1411,6 +1411,12 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	public void testFail43() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1176
 		failHelper1(19, 9, 19, 88, true, false, "intValue", RefactoringStatus.FATAL);
+	}
+
+	@Test
+	public void testFail44() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1176
+		failHelper1(10, 39, 10, 48, true, false, "intValue", RefactoringStatus.FATAL);
 	}
 
 }
