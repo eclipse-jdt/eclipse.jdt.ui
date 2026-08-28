@@ -15,9 +15,18 @@ package org.eclipse.jdt.internal.ui;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -41,6 +50,56 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDecorator {
+
+	private static final int MAX_PENDING_ELEMENTS= 1024;
+
+	/** Type roots left undecorated because the type index was not ready. */
+	private final Set<ITypeRoot> fPendingElements= ConcurrentHashMap.newKeySet();
+
+	/** Set when there were too many pending elements to track them individually. */
+	private final AtomicBoolean fRefreshAll= new AtomicBoolean();
+
+	private final Job fIndexWaitJob= new IndexWaitJob();
+
+	/** Serializes disposal against the scheduling done by the decoration job. */
+	private final Object fDisposeLock= new Object();
+
+	private boolean fDisposed;
+
+	/**
+	 * Waits for the type index and then requests a label update for everything left undecorated.
+	 */
+	private final class IndexWaitJob extends Job {
+
+		IndexWaitJob() {
+			super("Java interface indicator decoration update"); //$NON-NLS-1$
+			setSystem(true);
+			setPriority(DECORATE);
+		}
+
+		@Override
+		public IStatus run(IProgressMonitor monitor) {
+			ITypeRoot[] elements= fPendingElements.toArray(new ITypeRoot[0]);
+			for (ITypeRoot element : elements) {
+				fPendingElements.remove(element);
+			}
+			boolean refreshAll= fRefreshAll.getAndSet(false);
+			if (!refreshAll && elements.length == 0) {
+				return Status.OK_STATUS;
+			}
+			try {
+				waitForIndex(elements.length > 0 ? elements[0] : null, monitor);
+			} catch (OperationCanceledException e) {
+				return Status.CANCEL_STATUS;
+			}
+			if (refreshAll) {
+				fireChange();
+			} else {
+				fireChange(elements);
+			}
+			return Status.OK_STATUS;
+		}
+	}
 
 	private static class TypeIndicatorOverlay extends CompositeImageDescriptor {
 		private static Point fgSize;
@@ -152,6 +211,41 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		}
 	}
 
+	/**
+	 * Blocks until the type index can answer queries, outside of the shared decoration job.
+	 */
+	private void waitForIndex(ITypeRoot element, IProgressMonitor monitor) {
+		if (element == null || !element.exists()) {
+			return;
+		}
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
+		String packName= element.getParent().getElementName();
+		int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+		TypeNameRequestor requestor= new TypeNameRequestor() {
+			// the result is irrelevant, the call returning is what says the index is ready
+		};
+		try {
+			new SearchEngine().searchAllTypeNames(packName.toCharArray(), matchRule, null, matchRule,
+					IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+	}
+
+	private void recordPendingElement(ITypeRoot element) {
+		synchronized (fDisposeLock) {
+			if (fDisposed) {
+				return;
+			}
+			if (fPendingElements.size() < MAX_PENDING_ELEMENTS) {
+				fPendingElements.add(element);
+			} else {
+				fRefreshAll.set(true);
+			}
+			fIndexWaitJob.schedule();
+		}
+	}
+
 	private void addOverlaysWithSearchEngine(ITypeRoot element, String typeName, IDecoration decoration) {
 		SearchEngine engine= new SearchEngine();
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
@@ -176,9 +270,12 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		try {
 			String packName = element.getParent().getElementName();
 			int matchRule = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
-			engine.searchAllTypeNames(packName.toCharArray(), matchRule, typeName.toCharArray(), matchRule, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH , null);
+			engine.searchAllTypeNames(packName.toCharArray(), matchRule, typeName.toCharArray(), matchRule, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.CANCEL_IF_NOT_READY_TO_SEARCH, null);
 		} catch (Result e) {
 			addOverlaysFromFlags(e.modifiers, decoration);
+		} catch (OperationCanceledException e) {
+			// the index is busy: decorate again once it is ready instead of stalling the decoration job
+			recordPendingElement(element);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
@@ -216,6 +313,19 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		} else if (type != null || deprecated || packageDefault) {
 			decoration.addOverlay(new TypeIndicatorOverlay(type, deprecated, packageDefault), IDecoration.TOP_RIGHT);
 		}
+	}
+
+	@Override
+	public void dispose() {
+		// decorate() may run concurrently on the decoration job: reject later scheduling first,
+		// so that cancel() cannot be outrun by recordPendingElement()
+		synchronized (fDisposeLock) {
+			fDisposed= true;
+		}
+		fIndexWaitJob.cancel();
+		fPendingElements.clear();
+		fRefreshAll.set(false);
+		super.dispose();
 	}
 
 	@Override
