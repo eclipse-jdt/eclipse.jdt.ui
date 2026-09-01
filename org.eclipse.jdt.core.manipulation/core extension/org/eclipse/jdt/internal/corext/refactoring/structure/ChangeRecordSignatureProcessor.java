@@ -15,8 +15,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -85,8 +83,6 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 
 	ClassInstanceCreation fClassInstanceCreation;
 
-	ITextSelection fSelection;
-
 	private StubTypeContext fContextCuStartEnd;
 
 	private List<ParameterInfo> fParameterInfos;
@@ -101,12 +97,11 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
 	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
 
-	public ChangeRecordSignatureProcessor(IType type, ASTNode node, ITextSelection selection) {
+	public ChangeRecordSignatureProcessor(IType type, ASTNode node) {
 		// fType is the record declaration.
 		// The node is the ASTNode where the refactor has started.
 		this.fType = type;
 		this.fClassInstanceCreation= resolveClassInstanceCreation(node);
-		this.fSelection = selection;
 		if (node != null) {
 			this.fParameterInfos = getTypeParameters();
 		}

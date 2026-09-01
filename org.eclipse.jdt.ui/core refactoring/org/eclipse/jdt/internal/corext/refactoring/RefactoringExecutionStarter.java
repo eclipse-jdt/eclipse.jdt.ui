@@ -194,14 +194,15 @@ public final class RefactoringExecutionStarter {
 		return null;
 	}
 
-	public static void startChangeRecordSignatureRefactoring(final ASTNode node, final IType type, ITextSelection selection, final SelectionDispatchAction action, final Shell shell) {
-		// Grab access to the ASTNode
-		// Instantiate the preocessor
+	public static void startChangeRecordSignatureRefactoring(final ASTNode node, final IType type, final Shell shell) {
+		// Grab access to the ASTNode andInstantiate the processor
 		try {
-			ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type, node, selection);
+			ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type, node);
 			RefactoringStatus status = processor.checkInitialConditions(new NullProgressMonitor());
 			if (status.hasFatalError()) {
-
+				RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
+			    MessageDialog.openInformation(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, entry.getMessage());
+			    return;
 			}
 			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
 			ChangeRecordSignatureWizard wizard= new ChangeRecordSignatureWizard(processor, refactoring);
