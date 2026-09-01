@@ -107,6 +107,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_method_deleted;
 
+	public static String ChangeSignatureRefactoring_record_deleted;
+
 	public static String ChangeSignatureRefactoring_method_name_will_shadow;
 
 	public static String ChangeSignatureRefactoring_method_name_will_shadow2;

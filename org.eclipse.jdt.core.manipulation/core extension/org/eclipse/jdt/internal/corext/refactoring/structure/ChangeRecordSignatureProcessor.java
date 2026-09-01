@@ -20,6 +20,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
@@ -36,7 +37,6 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.MethodReferenceMatch;
@@ -60,6 +61,7 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -69,21 +71,17 @@ import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.util.Progress;
 
-public class ChangeRecordSignatureProcessor extends RefactoringProcessor implements IDelegateUpdating{
+public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 
 	IType fType;
-
-	ASTNode fNode;
 
 	ClassInstanceCreation fClassInstanceCreation;
 
@@ -93,14 +91,11 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 
 	private List<ParameterInfo> fParameterInfos;
 
-	private int fVisibility;
 	private CompilationUnitRewrite fBaseCuRewrite;
 
 	private SearchResultGroup[] fOccurrences;
 
 	private TextChangeManager fChangeManager;
-
-	private IDefaultValueAdvisor fDefaultValueAdvisor;
 
 	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
@@ -110,29 +105,27 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		// fType is the record declaration.
 		// The node is the ASTNode where the refactor has started.
 		this.fType = type;
-		this.fNode = node;
 		this.fClassInstanceCreation= resolveClassInstanceCreation(node);
-		this.fVisibility= JdtFlags.getVisibilityCode(this.fClassInstanceCreation.getType().resolveBinding());
 		this.fSelection = selection;
 		if (node != null) {
-			this.fParameterInfos = getTypeParameters(this.fClassInstanceCreation);
+			this.fParameterInfos = getTypeParameters();
 		}
 	}
 
 	class NullOccurrenceUpdate extends OccurrenceUpdate<ASTNode> {
-		private ASTNode fNode;
+		private ASTNode fNullNode;
 		protected NullOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
 			super(cuRewrite, null, result);
-			fNode= node;
+			fNullNode= node;
 		}
 		@Override
 		public void updateNode() throws JavaModelException {
-			int start= fNode.getStartPosition();
-			int length= fNode.getLength();
-			String msg= "Cannot update found node: nodeType=" + fNode.getNodeType() + "; "  //$NON-NLS-1$//$NON-NLS-2$
-					+ fNode.toString() + "[" + start + ", " + length + "] in " + fCuRewrite.getCu();  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			int start= fNullNode.getStartPosition();
+			int length= fNullNode.getLength();
+			String msg= "Cannot update found node: nodeType=" + fNullNode.getNodeType() + "; "  //$NON-NLS-1$//$NON-NLS-2$
+					+ fNullNode.toString() + "[" + start + ", " + length + "] in " + fCuRewrite.getCu();  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 			JavaManipulationPlugin.log(new Exception(msg + ":\n" + fCuRewrite.getCu().getSource().substring(start, start + length))); //$NON-NLS-1$
-			fResult.addError(msg, JavaStatusContext.create(fCuRewrite.getCu(), fNode));
+			fResult.addError(msg, JavaStatusContext.create(fCuRewrite.getCu(), fNullNode));
 		}
 		@Override
 		protected ListRewrite getParamgumentsRewrite() {
@@ -142,6 +135,38 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		protected ASTNode createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<ASTNode> nodes) {
 			return null;
 		}
+	}
+
+	class ReferenceUpdate extends OccurrenceUpdate<Expression> {
+
+		ClassInstanceCreation fCic;
+
+		protected ReferenceUpdate(ClassInstanceCreation node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
+			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.ChangeSignatureRefactoring_update_reference), result);
+			fCic= node;
+		}
+
+		@Override
+		public void updateNode() throws CoreException {
+			// Before doing any update let's check if this update
+			int curArgumentCount = fCic.arguments().size();
+			int oldParamCount= (int) fParameterInfos.stream().filter(p -> !p.isAdded()).count();
+			if (oldParamCount != curArgumentCount) {
+				return;
+			}
+			reshuffleElements();
+		}
+
+		@Override
+		protected ListRewrite getParamgumentsRewrite() {
+			return getASTRewrite().getListRewrite(fCic, ClassInstanceCreation.ARGUMENTS_PROPERTY);
+		}
+
+		@Override
+		protected Expression createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<Expression> nodes) {
+			return (Expression) getASTRewrite().createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
+		}
+
 	}
 
 	class RecordDeclarationUpdate extends OccurrenceUpdate<SingleVariableDeclaration> {
@@ -163,10 +188,14 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		protected ListRewrite getParamgumentsRewrite() {
 			return getASTRewrite().getListRewrite(fRecDecl, RecordDeclaration.RECORD_COMPONENTS_PROPERTY);
 		}
+
 		@Override
 		protected SingleVariableDeclaration createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<SingleVariableDeclaration> nodes) {
-			// TODO Auto-generated method stub
-			return null;
+			SingleVariableDeclaration newP= getASTRewrite().getAST().newSingleVariableDeclaration();
+			newP.setName(getASTRewrite().getAST().newSimpleName(info.getNewName()));
+			newP.setType(createNewTypeNode(ParameterInfo.stripEllipsis(info.getNewTypeName())));
+			newP.setVarargs(info.isNewVarargs());
+			return newP;
 		}
 
 		protected SingleVariableDeclaration getParameter(int index) {
@@ -193,8 +222,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		protected void changeParamgumentType(ParameterInfo info) {
 			SingleVariableDeclaration oldParam= getParameter(info.getOldIndex());
 			SingleVariableDeclaration oldSVDParam= oldParam;
-			replaceTypeNode(oldSVDParam.getType(), ParameterInfo.stripEllipsis(info.getNewTypeName()), info.getNewTypeBinding());
-			//removeExtraDimensions(oldSVDParam); <-- Shouldn't be needed
+			replaceTypeNode(oldSVDParam.getType(), ParameterInfo.stripEllipsis(info.getNewTypeName()));
 		}
 
 	}
@@ -299,8 +327,8 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 				// no-op
 			}
 
-			protected final void replaceTypeNode(Type typeNode, String newTypeName, ITypeBinding newTypeBinding){
-				Type newTypeNode= createNewTypeNode(newTypeName, newTypeBinding);
+			protected final void replaceTypeNode(Type typeNode, String newTypeName){
+				Type newTypeNode= createNewTypeNode(newTypeName);
 				getASTRewrite().replace(typeNode, newTypeNode, fDescription);
 				//registerImportRemoveNode(typeNode);
 				getTightSourceRangeComputer().addTightSourceNode(typeNode);
@@ -310,8 +338,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 				return (TightSourceRangeComputer) fCuRewrite.getASTRewrite().getExtendedSourceRangeComputer();
 			}
 
-			protected final Type createNewTypeNode(String newTypeName, ITypeBinding newTypeBinding) {
-				Type newTypeNode;
+			protected final Type createNewTypeNode(String newTypeName) {
 				return (Type) getASTRewrite().createStringPlaceholder(newTypeName, ASTNode.SIMPLE_TYPE);
 			}
 	}
@@ -321,7 +348,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		return fParameterInfos;
 	}
 
-	private List<ParameterInfo> getTypeParameters(ClassInstanceCreation cic) {
+	private List<ParameterInfo> getTypeParameters() {
 		try {
 			IField[] recordTypes = fType.getRecordComponents();
 			List<ParameterInfo> result= new ArrayList<>(recordTypes.length);
@@ -363,51 +390,13 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 	}
 
 	@Override
-	public boolean canEnableDelegateUpdating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean getDelegateUpdating() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public String getDelegateUpdatingTitle(boolean plural) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean getDeprecateDelegates() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void setDelegateUpdating(boolean updating) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setDeprecateDelegates(boolean deprecate) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public Object[] getElements() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Object[] { fType };
 	}
 
 	@Override
 	public String getIdentifier() {
-		// TODO Auto-generated method stub
-		return null;
+		return IRefactoringProcessorIds.CHANGE_RECORD_SIGNATURE_PROCESSOR;
 	}
 
 	@Override
@@ -417,8 +406,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 
 	@Override
 	public boolean isApplicable() throws CoreException {
-		// TODO Auto-generated method stub
-		return false;
+		return RefactoringAvailabilityTesterCore.isChangeRecordSignatureAvailable(fType);
 	}
 
 	@Override
@@ -429,13 +417,11 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 			if (result.hasFatalError()) {
 				return result;
 			}
-			/*if (fType == null || !fType.exists()) {
-				//Should I place a check for it?
-			}*/
 			pm.worked(1);
 
 			if (fClassInstanceCreation == null) {
-				//return RefactoringStatus.createFatalErrorStatus("Could not find record instantiation at cursor position."); //$NON-NLS-1$
+				String message = Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_record_deleted, BasicElementLabels.getFileName(getCu()));
+				return RefactoringStatus.createFatalErrorStatus(message);
 			}
 
 			if (pm.isCanceled())
@@ -461,8 +447,8 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		pm.beginTask(RefactoringCoreMessages.ChangeSignatureRefactoring_checking_preconditions, 8);
 		RefactoringStatus result= new RefactoringStatus();
 		fBaseCuRewrite.clearASTAndImportRewrites();
-
 		fBaseCuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TightSourceRangeComputer());
+
 		if (isSignatureSameAsInitial())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_unchanged);
 		checkForDuplicateParameterNames(result);
@@ -504,17 +490,25 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 					deferredUpdates.add(update);
 				}
 			}
+
+			for (OccurrenceUpdate<? extends ASTNode> occurrenceUpdate : deferredUpdates) {
+				occurrenceUpdate.updateNode();
+			}
+
+			TextChange change= cuRewrite.createChange(true);
+			if (change != null)
+				fChangeManager.manage(cu, change);
+
 		}
 		pm.done();
 		return fChangeManager;
 	}
 
 	private OccurrenceUpdate<? extends ASTNode> createOccurrenceUpdate(ASTNode node, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
-		System.out.println(node.getParent() + " " + node.getClass()); //$NON-NLS-1$
 		if (node instanceof SimpleName && node.getParent() instanceof RecordDeclaration)
 			return new RecordDeclarationUpdate((RecordDeclaration) node.getParent(), cuRewrite, result);
 	    if (Invocations.isInvocationWithArguments(node))
-	    	return new NullOccurrenceUpdate(node, cuRewrite, result);
+	    	return new ReferenceUpdate((ClassInstanceCreation) node, cuRewrite, result);
 	    return new NullOccurrenceUpdate(node, cuRewrite, result);
 	}
 
@@ -534,7 +528,6 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		};
 
 		// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=226151 : don't find binary refs for constructors for now
-		//return ConstructorReferenceFinder.getConstructorOccurrences(fMethod, pm, status);
 		SearchPattern declPattern= SearchPattern.createPattern(fType, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		if (declPattern == null) {
 			return new SearchResultGroup[0];
@@ -602,14 +595,14 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 		}
 	}
 
-	private RefactoringStatus checkSignature() {
+	public RefactoringStatus checkSignature() {
 		RefactoringStatus result= new RefactoringStatus();
 		checkParameterNamesAndValues(result);
 		if (result.hasFatalError())
 			return result;
 
 		checkForDuplicateParameterNames(result);
-		// Maybe I can skip this check and return results anyway.
+		// Maybe we can skip this check and return results anyway. IVAN
 		if (result.hasFatalError())
 			return result;
 
@@ -677,13 +670,17 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		return new CompositeChange(fType.getElementName());
+		final TextChange[] changes= fChangeManager.getAllChanges();
+		if (changes.length == 0)
+			return null;
+		CompositeChange composite= new CompositeChange(fType.getElementName(), changes);
+		return composite;
 	}
 
 	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {
-		// TODO Auto-generated method stub
-		return null;
+		// For now not needed
+		return new RefactoringParticipant[0];
 	}
 
 	/**
@@ -707,5 +704,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor impleme
 			movedNode= ASTNodes.copySubtree(rewrite.getAST(), oldNode);
 		return movedNode;
 	}
+
+
 
 }
