@@ -13,10 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import java.text.Collator;
 import java.util.Comparator;
 import java.util.List;
-
-import java.text.Collator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,13 +38,11 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.util.CompilationUnitSorter;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * Orders members in a compilation unit. A working copy must be passed.
@@ -59,13 +56,13 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	public static class DefaultJavaElementComparator implements Comparator<BodyDeclaration> {
 
 		private final Collator fCollator;
-		private final MembersOrderPreferenceCache fMemberOrderCache;
+		private final MembersOrderPreferenceCacheCommon fMemberOrderCache;
 		private final boolean fDoNotSortFields;
 
 		public DefaultJavaElementComparator(boolean doNotSortFields) {
 			fDoNotSortFields= doNotSortFields;
 			fCollator= Collator.getInstance();
-			fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
+			fMemberOrderCache= JavaManipulationPlugin.getDefault().getMembersOrderPreferenceCacheCommon();
 		}
 
 		private int category(BodyDeclaration bodyDeclaration) {
