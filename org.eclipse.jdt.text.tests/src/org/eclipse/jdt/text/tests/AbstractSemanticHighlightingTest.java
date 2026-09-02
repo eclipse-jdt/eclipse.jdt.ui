@@ -122,6 +122,10 @@ public class AbstractSemanticHighlightingTest {
 		disableAllSemanticHighlightings();
 	}
 
+	protected static SourceViewer getSourceViewer() {
+		return fSourceViewer;
+	}
+
 	protected void assertEqualPositions(Position[] expected, Position[] actual) {
 		assertEquals(expected.length, actual.length,
 				"Expected: " + Arrays.toString(expected) + ", actual: " + Arrays.toString(actual));
