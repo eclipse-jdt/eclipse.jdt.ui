@@ -989,7 +989,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		} else
 		if (isSnippet)
 			fBuf.append("</code></pre>"); //$NON-NLS-1$
-		if (isLiteral || isCode)
+		if (isLiteral || isCode || isIndex)
 			fLiteralContent--;
 
 	}

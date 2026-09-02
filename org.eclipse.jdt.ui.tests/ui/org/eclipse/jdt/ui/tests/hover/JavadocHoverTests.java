@@ -699,5 +699,37 @@ public class JavadocHoverTests extends CoreTests {
 		}
 	}
 
+	@Test
+	public void testIndexInDescription() throws Exception {
+		String source=
+				"""
+				package p;
+				public class Javadoc {
+					/**
+					 * This is {@index foo}
+					 * <p>It is a simple function</p>
+					 */
+					String foo(){ return "abc";}
+				}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		assertNotNull("Javadoc.java", cu);
+
+		IType type= cu.getType("Javadoc");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			int snippetStartIndex = actualHtmlContent.indexOf("This");
+			assertNotEquals(-1, snippetStartIndex);
+		    String expectedContent = "This is  foo\n <p>It is a simple function</p>";
+		    String actualSnippetContent = actualHtmlContent.substring(snippetStartIndex, snippetStartIndex + expectedContent.length());
+		    assertEquals(expectedContent, actualSnippetContent);
+		}
+	}
+
 }
 
