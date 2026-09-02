@@ -31,7 +31,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -824,7 +823,26 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 10, 20); // class A2
 		FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 12, 17); // Runnable
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_FOLDING_INNERTYPES);
+	}
 
+	/**
+	 * "Collapse All" should not collapse top-level types, so that classes are not left completely
+	 * empty. See <a href="https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/3126">GitHub Issue
+	 * #3126</a>
+	 */
+	@Test
+	public void testCollapseAllSkipsTopLevelType() throws Exception {
+		String str= """
+				class MyClass {
+					void someMethod() {
+						// does some work
+					}
+				}
+				""";
+		FoldingTestUtils.collapseAll(packageFragment, str);
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		FoldingTestUtils.assertContainsExpandedRegionUsingStartAndEndLine(regions, str, 0, 4); // class MyClass
+		FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 1, 3); // someMethod
 	}
 }
 

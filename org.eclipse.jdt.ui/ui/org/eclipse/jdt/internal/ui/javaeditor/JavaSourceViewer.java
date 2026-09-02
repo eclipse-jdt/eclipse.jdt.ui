@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.text.Bidi;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -45,9 +46,12 @@ import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
@@ -60,6 +64,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.folding.DefaultJavaFoldingStructureProvider.JavaProjectionAnnotation;
 
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
@@ -178,8 +183,37 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 				if (fHierarchyPresenter != null)
 					fHierarchyPresenter.showInformation();
 				return true;
+			case COLLAPSE_ALL:
+				if (!canDoOperation(operation))
+					return false;
+				collapseAllExceptTopLevelTypes();
+				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Collapses all foldable regions except for top-level types, so that classes are not left
+	 * completely empty after a "Collapse All" operation.
+	 *
+	 * @see ProjectionViewer#COLLAPSE_ALL
+	 */
+	private void collapseAllExceptTopLevelTypes() {
+		ProjectionAnnotationModel model= getProjectionAnnotationModel();
+		if (model == null) {
+			return;
+		}
+
+		for (Iterator<Annotation> it= model.getAnnotationIterator(); it.hasNext();) {
+			Annotation annotation= it.next();
+			if (!(annotation instanceof ProjectionAnnotation projectionAnnotation) || projectionAnnotation.isCollapsed())
+				continue;
+
+			if (annotation instanceof JavaProjectionAnnotation javaAnnotation && javaAnnotation.isTopLevelType())
+				continue;
+
+			model.collapse(projectionAnnotation);
+		}
 	}
 
 	/*

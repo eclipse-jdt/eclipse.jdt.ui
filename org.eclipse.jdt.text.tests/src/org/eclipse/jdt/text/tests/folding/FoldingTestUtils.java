@@ -29,12 +29,14 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 public final class FoldingTestUtils {
 	private record StartEnd(int start, int end) {
@@ -53,6 +55,17 @@ public final class FoldingTestUtils {
 			ProjectionAnnotationModel model= editor.getAdapter(ProjectionAnnotationModel.class);
 
 			return extractRegions(model);
+		} finally {
+			editor.close(false);
+		}
+	}
+
+	public static void collapseAll(IPackageFragment packageFragment, String code) throws Exception {
+		ICompilationUnit cu= packageFragment.createCompilationUnit("A.java", code, true, null);
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+		try {
+			JavaSourceViewer viewer= (JavaSourceViewer) editor.getViewer();
+			viewer.doOperation(ProjectionViewer.COLLAPSE_ALL);
 		} finally {
 			editor.close(false);
 		}

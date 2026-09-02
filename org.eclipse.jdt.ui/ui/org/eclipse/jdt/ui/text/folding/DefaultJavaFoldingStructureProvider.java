@@ -326,8 +326,10 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 	/**
 	 * A {@link ProjectionAnnotation} for java code.
+	 *
+	 * @noextend This class is not intended to be subclassed by clients.
 	 */
-	protected static final class JavaProjectionAnnotation extends ProjectionAnnotation {
+	public static final class JavaProjectionAnnotation extends ProjectionAnnotation {
 
 		private IJavaElement fJavaElement;
 		private boolean fIsComment;
@@ -361,6 +363,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		void setIsComment(boolean isComment) {
 			fIsComment= isComment;
+		}
+
+		/**
+		 * Returns whether this annotation's java element is a top-level type, i.e. a type that
+		 * has no declaring type.
+		 *
+		 * @return <code>true</code> if this annotation refers to a top-level type,
+		 *         <code>false</code> otherwise
+		 * @since 3.39
+		 */
+		public boolean isTopLevelType() {
+			return fJavaElement instanceof IType type && type.getDeclaringType() == null;
 		}
 
 		/*
