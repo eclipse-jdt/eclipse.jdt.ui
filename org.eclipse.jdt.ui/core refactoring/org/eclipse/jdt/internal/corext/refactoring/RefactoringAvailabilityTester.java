@@ -124,6 +124,10 @@ public final class RefactoringAvailabilityTester {
 		return RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(method);
 	}
 
+	public static boolean isChangeRecordSignatureAvailable(final IType type) throws JavaModelException {
+		return RefactoringAvailabilityTesterCore.isChangeRecordSignatureAvailable(type);
+	}
+
 	public static boolean isChangeSignatureAvailable(final IStructuredSelection selection) throws JavaModelException {
 		final IMethod method= getSelectedMethod(selection);
 		return isChangeSignatureAvailable(method);

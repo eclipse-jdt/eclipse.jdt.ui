@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -88,7 +89,7 @@ public class ModifyRecordParametersAction extends SelectionDispatchAction {
 	}
 
 	private boolean isRecord(ASTNode node) {
-		return getRecordClassInstanceCreation(node) != null;
+		return getRecordClassInstanceCreation(node) != null || getRecordDeclarationType(node) != null;
 	}
 
 	/**
@@ -107,6 +108,21 @@ public class ModifyRecordParametersAction extends SelectionDispatchAction {
 			return null;
 		}
 		return getRecordClassInstanceCreation(node.getParent());
+	}
+
+	private IType getRecordDeclarationType(ASTNode node) {
+		ASTNode curNode = node;
+		while (curNode != null) {
+			if (curNode instanceof RecordDeclaration) {
+				RecordDeclaration rd = (RecordDeclaration)curNode;
+				ITypeBinding binding = rd.resolveBinding();
+				if (binding != null && binding.getJavaElement() instanceof IType)
+					return (IType)binding.getJavaElement();
+				return null;
+			}
+			curNode = curNode.getParent();
+		}
+		return null;
 	}
 
 	@Override
@@ -143,6 +159,11 @@ public class ModifyRecordParametersAction extends SelectionDispatchAction {
 				return;
 
 			IType recordType = (IType) typeBinding.getJavaElement();
+			RefactoringExecutionStarter.startChangeRecordSignatureRefactoring(node, recordType, getShell());
+		} else {
+			IType recordType = getRecordDeclarationType(node);
+			if(recordType == null)
+				return;
 			RefactoringExecutionStarter.startChangeRecordSignatureRefactoring(node, recordType, getShell());
 		}
 	}
