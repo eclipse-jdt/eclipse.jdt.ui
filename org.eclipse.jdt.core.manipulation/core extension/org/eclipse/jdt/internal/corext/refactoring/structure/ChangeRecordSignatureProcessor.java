@@ -31,14 +31,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -81,8 +79,6 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 
 	IType fType;
 
-	ClassInstanceCreation fClassInstanceCreation;
-
 	private StubTypeContext fContextCuStartEnd;
 
 	private List<ParameterInfo> fParameterInfos;
@@ -101,7 +97,6 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		// fType is the record declaration.
 		// The node is the ASTNode where the refactor has started.
 		this.fType = type;
-		this.fClassInstanceCreation= resolveClassInstanceCreation(node);
 		if (node != null) {
 			this.fParameterInfos = getTypeParameters();
 		}
@@ -359,15 +354,15 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		}
 	}
 
-	private ClassInstanceCreation resolveClassInstanceCreation(ASTNode node) {
-		if (node instanceof ClassInstanceCreation) return (ClassInstanceCreation)node;
-		else {
-			if(node == null || node instanceof Statement || node instanceof CompilationUnit || node instanceof BodyDeclaration ) {
-				return null;
-			}
-		}
-		return resolveClassInstanceCreation(node.getParent());
-	}
+//	private ClassInstanceCreation resolveClassInstanceCreation(ASTNode node) {
+//		if (node instanceof ClassInstanceCreation) return (ClassInstanceCreation)node;
+//		else {
+//			if(node == null || node instanceof Statement || node instanceof CompilationUnit || node instanceof BodyDeclaration ) {
+//				return null;
+//			}
+//		}
+//		return resolveClassInstanceCreation(node.getParent());
+//	}
 
 	public StubTypeContext getStubTypeContext() {
 		if (fContextCuStartEnd == null)
@@ -414,10 +409,10 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 			}
 			pm.worked(1);
 
-			if (fClassInstanceCreation == null) {
-				String message = Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_record_deleted, BasicElementLabels.getFileName(getCu()));
-				return RefactoringStatus.createFatalErrorStatus(message);
-			}
+//			if (fClassInstanceCreation == null) {
+//				String message = Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_record_deleted, BasicElementLabels.getFileName(getCu()));
+//				return RefactoringStatus.createFatalErrorStatus(message);
+//			}
 
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
