@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestExecutionResult.Status;
 import org.junit.platform.engine.reporting.ReportEntry;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
@@ -168,10 +169,27 @@ public class JUnit5TestListener implements TestExecutionListener {
 	@Override
 	public void executionSkipped(TestIdentifier testIdentifier, String reason) {
 		if (testIdentifier.isContainer() && fTestPlan != null) {
-			fTestPlan.getDescendants(testIdentifier).stream().filter(TestIdentifier::isTest).forEachOrdered(this::notifySkipped);
+			TestIdentifier[] skippedTests= fTestPlan.getDescendants(testIdentifier).stream()
+					.filter(this::isSkippedTest)
+					.toArray(TestIdentifier[]::new);
+			if (skippedTests.length == 0 && isSkippedTest(testIdentifier)) {
+				notifySkipped(testIdentifier);
+			} else {
+				for (TestIdentifier skippedTest : skippedTests) {
+					notifySkipped(skippedTest);
+				}
+			}
 		} else {
 			notifySkipped(testIdentifier);
 		}
+	}
+
+	private boolean isSkippedTest(TestIdentifier testIdentifier) {
+		if (testIdentifier.isTest()) {
+			return true;
+		}
+		return testIdentifier.getSource().filter(MethodSource.class::isInstance).isPresent()
+				&& fTestPlan.getDescendants(testIdentifier).stream().noneMatch(TestIdentifier::isTest);
 	}
 
 	private void notifySkipped(TestIdentifier testIdentifier) {
