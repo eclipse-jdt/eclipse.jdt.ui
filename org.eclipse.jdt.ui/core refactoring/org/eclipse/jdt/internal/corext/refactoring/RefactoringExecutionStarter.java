@@ -197,7 +197,7 @@ public final class RefactoringExecutionStarter {
 	public static void startChangeRecordSignatureRefactoring(final ASTNode node, final IType type, final Shell shell) {
 		// Grab access to the ASTNode andInstantiate the processor
 		try {
-			ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type, node);
+			ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type);
 			RefactoringStatus status = processor.checkInitialConditions(new NullProgressMonitor());
 			if (status.hasFatalError()) {
 				RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);

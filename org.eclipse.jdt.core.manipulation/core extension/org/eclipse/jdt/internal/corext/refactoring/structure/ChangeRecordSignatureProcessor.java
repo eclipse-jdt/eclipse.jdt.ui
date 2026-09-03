@@ -93,13 +93,11 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
 	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
 
-	public ChangeRecordSignatureProcessor(IType type, ASTNode node) {
+	public ChangeRecordSignatureProcessor(IType type) {
 		// fType is the record declaration.
 		// The node is the ASTNode where the refactor has started.
 		this.fType = type;
-		if (node != null) {
-			this.fParameterInfos = getTypeParameters();
-		}
+		this.fParameterInfos = getTypeParameters();
 	}
 
 	class NullOccurrenceUpdate extends OccurrenceUpdate<ASTNode> {
@@ -636,10 +634,22 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		if (fType.getRecordComponents().length == 0 && fParameterInfos.isEmpty()) {
 			return true;
 		}
-		if (areNamesSameAsInitial() && areParameterTypesSameAsInitial()) {
+		if (areNamesSameAsInitial() && areParameterTypesSameAsInitial() && isOrderSameAsInitial()) {
 			return true;
 		}
 		return false;
+	}
+
+	private boolean isOrderSameAsInitial(){
+		int i= 0;
+		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= iter.next();
+			if (info.getOldIndex() != i) // includes info.isAdded()
+				return false;
+			if (info.isDeleted())
+				return false;
+		}
+		return true;
 	}
 
 	private boolean areParameterTypesSameAsInitial() {

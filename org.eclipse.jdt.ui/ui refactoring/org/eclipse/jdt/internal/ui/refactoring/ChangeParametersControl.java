@@ -80,18 +80,22 @@ public class ChangeParametersControl extends Composite {
 		public static final Mode EXTRACT_METHOD= new Mode("EXTRACT_METHOD"); //$NON-NLS-1$
 		public static final Mode CHANGE_METHOD_SIGNATURE= new Mode("CHANGE_METHOD_SIGNATURE"); //$NON-NLS-1$
 		public static final Mode INTRODUCE_PARAMETER= new Mode("INTRODUCE_PARAMETER"); //$NON-NLS-1$
+		public static final Mode CHANGE_RECORD_SIGNATURE= new Mode("CHANGE_RECORD_SIGNATURE"); //$NON-NLS-1$
 		@Override
 		public String toString() {
 			return fName;
 		}
 		public boolean canChangeTypes() {
-			return this == CHANGE_METHOD_SIGNATURE;
+			return this == CHANGE_METHOD_SIGNATURE || this == CHANGE_RECORD_SIGNATURE;
 		}
 		public boolean canAddParameters() {
-			return this == Mode.CHANGE_METHOD_SIGNATURE;
+			return this == Mode.CHANGE_METHOD_SIGNATURE || this == CHANGE_RECORD_SIGNATURE;
 		}
 		public boolean canChangeDefault() {
-			return this == Mode.CHANGE_METHOD_SIGNATURE;
+			return this == Mode.CHANGE_METHOD_SIGNATURE || this == CHANGE_RECORD_SIGNATURE;
+		}
+		public boolean canReorder() {
+			return this != CHANGE_RECORD_SIGNATURE;
 		}
 	}
 
@@ -417,8 +421,10 @@ public class ChangeParametersControl extends Composite {
 		if (buttonComposite.getChildren().length != 0)
 			addSpacer(buttonComposite);
 
-		fUpButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_up, true);
-		fDownButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_down, false);
+		if (fMode.canReorder()) {
+			fUpButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_up, true);
+			fDownButton= createButton(buttonComposite, RefactoringMessages.ChangeParametersControl_buttons_move_down, false);
+		}
 
 		updateButtonsEnabledState();
 	}
@@ -431,8 +437,10 @@ public class ChangeParametersControl extends Composite {
 	}
 
 	private void updateButtonsEnabledState() {
-		fUpButton.setEnabled(canMove(true));
-		fDownButton.setEnabled(canMove(false));
+		if (fUpButton != null && fDownButton != null) {
+			fUpButton.setEnabled(canMove(true));
+			fDownButton.setEnabled(canMove(false));
+		}
 		if (fEditButton != null)
 			fEditButton.setEnabled(getTableSelectionCount() == 1);
 		if (fAddButton != null)

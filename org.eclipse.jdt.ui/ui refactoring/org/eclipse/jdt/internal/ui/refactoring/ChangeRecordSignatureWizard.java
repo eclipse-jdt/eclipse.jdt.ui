@@ -81,7 +81,7 @@ public class ChangeRecordSignatureWizard extends RefactoringWizard{
 				public void parameterAdded(ParameterInfo parameter) {
 					update(true);
 				}
-			}, ChangeParametersControl.Mode.CHANGE_METHOD_SIGNATURE, getChangeRecordSignatureProcessor().getStubTypeContext());
+			}, ChangeParametersControl.Mode.CHANGE_RECORD_SIGNATURE, getChangeRecordSignatureProcessor().getStubTypeContext());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeRecordSignatureProcessor().getParameterInfos());
 			return border;
