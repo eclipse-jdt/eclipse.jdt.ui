@@ -696,6 +696,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		Set<IMethod> result= new HashSet<>();
 		IType type= method.getDeclaringType();
 		List<IType> subtypes= Arrays.asList(hier.getAllSubtypes(type));
+		List<IType> supertypes= Arrays.asList(hier.getAllSupertypes(type));
 
 		int parameterCount= method.getParameterTypes().length;
 		boolean isMethodPrivate= JdtFlags.isPrivate(method);
@@ -706,6 +707,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			// may cause a model exception when the class is created in a lambda expression and the file is unopen
 			if (!clazz.isAnonymous()) {
 				boolean isSubclass= subtypes.contains(clazz);
+				boolean isSuperclass= supertypes.contains(clazz);
 				for (IMethod m : clazz.getMethods()) {
 					IMethod foundMethod= Checks.findMethod(newName, parameterCount, false, new IMethod[]{m});
 					if (foundMethod == null)
@@ -714,6 +716,15 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 							|| type.equals(clazz)
 							|| (!isMethodPrivate && !JdtFlags.isPrivate(m))) {
 						result.add(foundMethod);
+					}
+					if (isSuperclass) {
+						String retType= foundMethod.getReturnType();
+						String methodType= method.getReturnType();
+						if (!retType.equals(methodType)
+								|| (isMethodPrivate && !JdtFlags.isPrivate(m))
+								|| (!JdtFlags.isPublic(method) && JdtFlags.isPublic(m))) {
+							result.add(foundMethod);
+						}
 					}
 				}
 			}
