@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -26,6 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,6 +37,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import org.eclipse.jdt.junit.JUnitCore;
+import org.eclipse.jdt.junit.TestRunListener;
+import org.eclipse.jdt.junit.model.ITestCaseElement;
+import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
+import org.eclipse.jdt.junit.model.ITestElement.Result;
+import org.eclipse.jdt.junit.model.ITestRunSession;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
 import org.eclipse.swt.widgets.Composite;
@@ -48,7 +59,13 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
 
+import org.eclipse.debug.core.ILaunch;
+
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -56,7 +73,7 @@ import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
-public class ImportedTestRunReloadUITest {
+public class ImportedTestRunReloadUITest extends AbstractTestRunListenerTest {
 
 	private static final String RELOAD_COMMAND= "org.eclipse.jdt.junit.reloadImportedTestRun"; //$NON-NLS-1$
 
@@ -72,8 +89,12 @@ public class ImportedTestRunReloadUITest {
 	private boolean fViewWasOpen;
 	private Command fReloadCommand;
 
+	@Override
 	@Before
 	public void setUp() throws Exception {
+		fProject= JavaProjectHelper.createJavaProject("ImportedTestRunReloadUITest", "bin"); //$NON-NLS-1$ //$NON-NLS-2$
+		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
+		JavaProjectHelper.addRTJar15(fProject);
 		fPage= JUnitPlugin.getActivePage();
 		assertNotNull(fPage);
 		fPreviousPart= fPage.getActivePart();
@@ -94,7 +115,7 @@ public class ImportedTestRunReloadUITest {
 	}
 
 	@After
-	public void tearDown() {
+	public void tearDownView() {
 		JUnitModel model= JUnitCorePlugin.getModel();
 		try {
 			if (fHistory != null) {
@@ -159,6 +180,118 @@ public class ImportedTestRunReloadUITest {
 		DisplayHelper.driveEventQueue(Display.getCurrent());
 		assertFalse(model.getTestRunSessions().contains(reloaded));
 		assertReloadState(other, false);
+	}
+
+	@Test
+	public void testReloadEnablementAfterJUnitLaunch() throws Exception {
+		JUnitModel model= JUnitCorePlugin.getModel();
+		Path resultFile= fTemporaryFolder.newFile("launched-results.xml").toPath(); //$NON-NLS-1$
+		writeTestRun(resultFile, "imported before launch"); //$NON-NLS-1$
+		TestRunSession imported= JUnitModel.importTestRunSession(resultFile.toFile());
+		fSessionsToRemove.add(imported);
+		String source= """
+				package reload;
+				import org.junit.Test;
+				public class LaunchedTest {
+				    @Test public void testPass() { }
+				}
+				"""; //$NON-NLS-1$
+		IType testType= createType(source, "reload", "LaunchedTest.java"); //$NON-NLS-1$ //$NON-NLS-2$
+		AtomicReference<ILaunch> launched= new AtomicReference<>();
+		AtomicBoolean finished= new AtomicBoolean();
+		AtomicInteger finishedTests= new AtomicInteger();
+		AtomicReference<String> finishedTest= new AtomicReference<>();
+		AtomicReference<Result> testResult= new AtomicReference<>();
+		AtomicReference<Result> sessionResult= new AtomicReference<>();
+		TestRunListener listener= new TestRunListener() {
+			@Override
+			public void sessionLaunched(ITestRunSession session) {
+				if (fProject.equals(session.getLaunchedProject())) {
+					launched.compareAndSet(null, ((TestRunSession) session).getLaunch());
+				}
+			}
+
+			private boolean isLaunchedSession(ITestRunSession session) {
+				return launched.get() != null && ((TestRunSession) session).getLaunch() == launched.get();
+			}
+
+			@Override
+			public void testCaseFinished(ITestCaseElement testCase) {
+				if (isLaunchedSession(testCase.getTestRunSession())) {
+					finishedTest.set(testCase.getTestClassName() + "#" + testCase.getTestMethodName()); //$NON-NLS-1$
+					testResult.set(testCase.getTestResult(false));
+					finishedTests.incrementAndGet();
+				}
+			}
+
+			@Override
+			public void sessionFinished(ITestRunSession session) {
+				if (isLaunchedSession(session)) {
+					sessionResult.set(session.getTestResult(true));
+					finished.set(true);
+				}
+			}
+		};
+		JUnitCore.addTestRunListener(listener);
+		try {
+			launchJUnit(testType, TestKindRegistry.JUNIT4_TEST_KIND_ID);
+			assertTrue("The launched JUnit session must finish", waitForCondition(finished::get, 15000, 100)); //$NON-NLS-1$
+			assertEquals(1, finishedTests.get());
+			assertEquals("reload.LaunchedTest#testPass", finishedTest.get()); //$NON-NLS-1$
+			assertEquals(Result.OK, testResult.get());
+			assertEquals(Result.OK, sessionResult.get());
+
+			// Identify the session by the actual launch, not by its position in history.
+			List<TestRunSession> sessions= model.getTestRunSessions().stream()
+					.filter(session -> session.getLaunch() == launched.get()).toList();
+			assertEquals(1, sessions.size());
+			TestRunSession executed= sessions.get(0);
+			assertEquals(ProgressState.COMPLETED, executed.getProgressState());
+			assertNull(model.getImportedTestRunSource(executed));
+			// A launch may activate a different part. Set focus once, not between history selections.
+			fPage.activate(fView);
+			for (int i= 0; i < 2; i++) {
+				fHistory.setActiveEntry(imported);
+				assertReloadState(imported, true);
+				fHistory.setActiveEntry(executed);
+				assertReloadState(executed, false);
+			}
+			fHistory.setActiveEntry(imported);
+			assertReloadState(imported, true);
+
+			int historySize= model.getTestRunSessions().size();
+			writeTestRun(resultFile, "reloaded after launch"); //$NON-NLS-1$
+			fView.getSite().getService(IHandlerService.class).executeCommand(RELOAD_COMMAND, null);
+			DisplayHelper.driveEventQueue(Display.getCurrent());
+			TestRunSession reloaded= fView.getTestRunSession();
+			fSessionsToRemove.add(reloaded);
+			assertNotNull(reloaded);
+			assertNotSame(imported, reloaded);
+			assertNotSame(executed, reloaded);
+			assertEquals("reloaded after launch", reloaded.getTestRunName()); //$NON-NLS-1$
+			assertEquals(historySize, model.getTestRunSessions().size());
+			assertTrue(model.getTestRunSessions().contains(executed));
+			assertEquals(Result.OK, executed.getTestResult(true));
+			assertNull(model.getImportedTestRunSource(executed));
+			assertReloadState(reloaded, true);
+			fHistory.setActiveEntry(executed);
+			assertReloadState(executed, false);
+			fHistory.setActiveEntry(reloaded);
+			assertReloadState(reloaded, true);
+		} finally {
+			JUnitCore.removeTestRunListener(listener);
+			ILaunch launch= launched.get();
+			if (launch != null) {
+				try {
+					if (!launch.isTerminated()) {
+						launch.terminate();
+					}
+				} finally {
+					model.getTestRunSessions().stream().filter(session -> session.getLaunch() == launch)
+							.forEach(fSessionsToRemove::add);
+				}
+			}
+		}
 	}
 
 	private void assertReloadState(TestRunSession session, boolean enabled) throws Exception {
