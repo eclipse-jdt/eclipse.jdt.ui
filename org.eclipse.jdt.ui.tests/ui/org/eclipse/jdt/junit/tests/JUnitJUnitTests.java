@@ -40,6 +40,7 @@ TestRunSessionSerializationTests3.class,
 TestRunSessionSerializationTests4.class,
 TestRunSessionHistoryTests.class,
 ImportedTestRunReloadTest.class,
+ImportedTestRunReloadUITest.class,
 
 JUnit3TestFinderTest.class,
 JUnitTestFinderTest.class,

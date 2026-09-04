@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -107,6 +107,7 @@ import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.ISources;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -124,6 +125,7 @@ import org.eclipse.ui.part.PageSwitcher;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
+import org.eclipse.ui.services.IEvaluationService;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -1674,6 +1676,8 @@ action enablement
 				setSortingCriterion(fSortingCriterion);
 			}
 		}
+		// A history switch changes the view input without changing the active part.
+		getSite().getService(IEvaluationService.class).requestEvaluation(ISources.ACTIVE_PART_NAME);
 		return deactivatedSession;
 	}
 

@@ -413,7 +413,7 @@
             locationURI="toolbar:org.eclipse.jdt.junit.ResultView">
          <command
                commandId="org.eclipse.jdt.junit.reloadImportedTestRun"
-               icon="$nl$/icons/full/elcl16/relaunch.svg"
+               icon="$nl$/icons/full/elcl16/refresh.svg"
                id="org.eclipse.jdt.junit.reloadImportedTestRun.toolbar"
                label="%ReloadTestRunAction.label"
                style="push"
