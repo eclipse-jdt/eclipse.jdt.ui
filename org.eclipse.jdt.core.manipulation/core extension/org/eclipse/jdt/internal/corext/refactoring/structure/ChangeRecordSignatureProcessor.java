@@ -255,11 +255,12 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 	    			  N newParamgument= createNewParamgument(info, fParameterInfos, nodes);
 	    			  if (newParamgument != null)
 	    				  newNodes.add(newParamgument);
-	    		  } else {
-	    			  N oldNode= nodes.get(oldIndex);
-	    			  N movedNode= moveNode(oldNode, getASTRewrite());
-	    			  newNodes.add(movedNode);
+	    		  } else if (!info.isDeleted()) {
+	    		      N oldNode= nodes.get(oldIndex);
+	    		      N movedNode= moveNode(oldNode, getASTRewrite());
+	    		      newNodes.add(movedNode);
 	    		  }
+	    		  // deleted: skip — node is not added to newNodes, so it gets removed
 	    	  }
 	    	  Iterator<N> nodesIter= nodes.iterator();
 				Iterator<N> newIter= newNodes.iterator();

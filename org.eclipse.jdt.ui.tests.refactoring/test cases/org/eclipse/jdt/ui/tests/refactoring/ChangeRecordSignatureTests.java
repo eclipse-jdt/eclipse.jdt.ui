@@ -75,6 +75,30 @@ public class ChangeRecordSignatureTests extends GenericRefactoringTest {
 		}
 	}
 
+	private void helperDelete(int[] indicesToDelete) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
+		IType classA= getType(cu, "A");
+		assertTrue("refactoring not available", RefactoringAvailabilityTesterCore.isChangeRecordSignatureAvailable(classA));
+
+		ChangeRecordSignatureProcessor processor= new ChangeRecordSignatureProcessor(classA);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+
+		List<ParameterInfo> infos= processor.getParameterInfos();
+		for (int index : indicesToDelete) {
+			infos.get(index).markAsDeleted();
+		}
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus initialConditions= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+		assertTrue("precondition was supposed to pass: " + initialConditions.getEntryWithHighestSeverity(), initialConditions.isOK());
+
+		RefactoringStatus result= performRefactoring(ref);
+		assertNull("refactoring was supposed to succeed", result);
+
+		String expectedFileContents= getFileContents(getTestFileName(false));
+		assertEqualLines("unexpected result", expectedFileContents, cu.getSource());
+	}
+
 	private void helperAdd(ParameterInfo[] newParamInfos, int[] newIndices) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
 		IType classA= getType(cu, "A");
@@ -133,6 +157,22 @@ public class ChangeRecordSignatureTests extends GenericRefactoringTest {
 				new String[]{"a"},
 				new String[]{"0"});
 		helperAddFail(newParamInfos, new int[]{2}, RefactoringStatus.FATAL);
+	}
+
+	@Test
+	public void testFailInvalidType() throws Exception {
+		// adding a component with an invalid type name
+		ParameterInfo[] newParamInfos= createNewParamInfos(
+				new String[]{"not a type"},
+				new String[]{"c"},
+				new String[]{"0"});
+		helperAddFail(newParamInfos, new int[]{2}, RefactoringStatus.FATAL);
+	}
+
+	@Test
+	public void testDeleteComponent() throws Exception {
+		// delete the second component "b" from record A(int a, String b)
+		helperDelete(new int[]{1});
 	}
 
 }
