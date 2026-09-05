@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.Before;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
+import org.eclipse.jdt.junit.model.ITestRunSession;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
@@ -67,10 +69,8 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
-import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
@@ -341,18 +341,33 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		jm.addJobChangeListener(jobListener);
 
 		TestSessionListener sessionListener = new TestSessionListener();
-		TestRunSessionListener runSessionListener = new TestRunSessionListener();
-		JUnitCorePlugin.getModel().addTestRunSessionListener(runSessionListener);
+		AtomicReference<TestRunSession> startedSession= new AtomicReference<>();
+		TestRunListener runSessionListener= new TestRunListener() {
+			@Override
+			public void sessionStarted(ITestRunSession session) {
+				if (session instanceof TestRunSession testRunSession && testRunSession.getLaunch() != null
+						&& configuration.equals(testRunSession.getLaunch().getLaunchConfiguration())) {
+					startedSession.set(testRunSession);
+				}
+			}
+		};
+		JUnitCore.addTestRunListener(runSessionListener);
 		try {
-			configuration.launch(ILaunchManager.RUN_MODE, null);
-			waitForCondition(launchesListener.fLaunchChanged::get, 30 * 1000, 1000);
+			// This test needs a view, independently of preceding tests and show-on-error preferences.
+			assertNotNull(JUnitPlugin.showTestRunnerViewPartInActivePage());
+			ILaunch launch= configuration.launch(ILaunchManager.RUN_MODE, null);
+			// A launch change only announces the port; the remote VM may not have started JUnit yet.
+			// Keep the job-scheduling timeout separate from this session-start prerequisite.
+			assertTrue("Unexpected timeout on JUnit session start",
+					waitForCondition(() -> startedSession.get() != null, 30 * 1000, 100));
+			assertSame("Expected the session belonging to this launch", launch, startedSession.get().getLaunch());
 
 			long scheduledJobsCount = jobListener.scheduledCount.get();
 			boolean jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCount, 5 * 1000, 100);
 			assertTrue("Expected JUnit update jobs to be scheduled", jobCountIncrease);
 
 			// register the session listener here, so that its hopefully the last listener to be notified of stopping
-			runSessionListener.fTestRunSession.addTestSessionListener(sessionListener);
+			startedSession.get().addTestSessionListener(sessionListener);
 			terminateLaunches();
 			boolean terminatedLaunch= waitForCondition(launchesListener.fLaunchHasTerminated::get, 30 * 1000, 1000);
 			assertTrue("Unexpected timeout on JUnit launch terminate", terminatedLaunch);
@@ -364,7 +379,10 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			assertFalse("Expected no new JUnit update jobs to be scheduled", jobCountIncrease);
 		} finally {
 			jm.removeJobChangeListener(jobListener);
-			JUnitCorePlugin.getModel().removeTestRunSessionListener(runSessionListener);
+			JUnitCore.removeTestRunListener(runSessionListener);
+			TestRunSession session= startedSession.get();
+			if (session != null)
+				session.removeTestSessionListener(sessionListener);
 			terminateLaunches();
 			cleanUp(configuration, launchesListener);
 		}
@@ -396,23 +414,6 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			if (jobName.equals(name)) {
 				scheduledCount.incrementAndGet();
 			}
-		}
-	}
-
-	private static class TestRunSessionListener implements ITestRunSessionListener  {
-
-		private TestRunSession fTestRunSession;
-
-		public TestRunSessionListener() {
-		}
-
-		@Override
-		public void sessionAdded(TestRunSession testRunSession) {
-			fTestRunSession= testRunSession;
-		}
-
-		@Override
-		public void sessionRemoved(TestRunSession testRunSession) {
 		}
 	}
 
