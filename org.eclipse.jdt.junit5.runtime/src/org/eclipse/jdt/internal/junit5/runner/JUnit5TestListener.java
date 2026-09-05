@@ -172,7 +172,9 @@ public class JUnit5TestListener implements TestExecutionListener {
 			TestIdentifier[] skippedTests= fTestPlan.getDescendants(testIdentifier).stream()
 					.filter(this::isSkippedTest)
 					.toArray(TestIdentifier[]::new);
-			if (skippedTests.length == 0 && isSkippedTest(testIdentifier)) {
+			// All test descendants are included above, so an empty result rules them out.
+			if (skippedTests.length == 0 && (testIdentifier.isTest()
+					|| testIdentifier.getSource().filter(MethodSource.class::isInstance).isPresent())) {
 				notifySkipped(testIdentifier);
 			} else {
 				for (TestIdentifier skippedTest : skippedTests) {
