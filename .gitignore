@@ -6,6 +6,10 @@ javacore.*
 heapdump.*
 core.*
 Snap.*
+
+/.project
+/.settings/org.eclipse.core.resources.prefs
+
 # maven
 /*/target/
 .DS_Store
@@ -14,5 +18,3 @@ org.eclipse.jdt.ui.examples.projects/jdtexamples.jar
 
 # pomless
 .polyglot.*
-
-
