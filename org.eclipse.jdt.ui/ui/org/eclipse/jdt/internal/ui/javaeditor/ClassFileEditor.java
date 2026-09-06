@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,6 +97,7 @@ import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -603,6 +605,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	private StyledText fNoSourceTextWidget;
 	private StyleRange currentSelection;
 	private volatile boolean disposed;
+	private final AtomicReference<Job> fInstallSemanticHighlightingJob= new AtomicReference<>();
 	private Color instructionPointerColor = new Color(0, 255, 0);
 	private Map<MethodIdentifier, LineRegion> methodsToInstructionRegions;
 
@@ -803,33 +806,64 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 */
 	@Override
 	protected void installSemanticHighlighting() {
+		cancelInstallSemanticHighlightingJob();
 		super.installSemanticHighlighting();
+
+		ITypeRoot inputElement= getInputJavaElement();
+		if (inputElement == null || disposed) {
+			return;
+		}
+
 		Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
-			/*
-			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-			 * @since 3.0
-			 */
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				CompilationUnit ast= SharedASTProviderCore.getAST(getInputJavaElement(), SharedASTProviderCore.WAIT_YES, null);
-				if (fOverrideIndicatorManager != null) {
-					fOverrideIndicatorManager.reconciled(ast, true, monitor);
-				}
-				if (fSemanticManager != null) {
-					SemanticHighlightingReconciler reconciler= fSemanticManager.getReconciler();
-					if (reconciler != null) {
-						reconciler.reconciled(ast, false, monitor);
+				try {
+					if (!isCurrentInstallSemanticHighlightingJob(this, monitor)) {
+						return Status.CANCEL_STATUS;
 					}
+					CompilationUnit ast= SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_YES, monitor);
+					if (!isCurrentInstallSemanticHighlightingJob(this, monitor)) {
+						return Status.CANCEL_STATUS;
+					}
+					if (fOverrideIndicatorManager != null) {
+						fOverrideIndicatorManager.reconciled(ast, true, monitor);
+					}
+					if (!isCurrentInstallSemanticHighlightingJob(this, monitor)) {
+						return Status.CANCEL_STATUS;
+					}
+					if (fSemanticManager != null) {
+						SemanticHighlightingReconciler reconciler= fSemanticManager.getReconciler();
+						if (reconciler != null) {
+							reconciler.reconciled(ast, false, monitor);
+						}
+					}
+					if (!isCurrentInstallSemanticHighlightingJob(this, monitor)) {
+						return Status.CANCEL_STATUS;
+					}
+					if (isMarkingOccurrences()) {
+						installOccurrencesFinder(false);
+					}
+					return Status.OK_STATUS;
+				} finally {
+					fInstallSemanticHighlightingJob.compareAndSet(this, null);
 				}
-				if (isMarkingOccurrences()) {
-					installOccurrencesFinder(false);
-				}
-				return Status.OK_STATUS;
 			}
 		};
+		fInstallSemanticHighlightingJob.set(job);
 		job.setPriority(Job.DECORATE);
 		job.setSystem(true);
 		job.schedule();
+	}
+
+	private boolean isCurrentInstallSemanticHighlightingJob(Job job, IProgressMonitor monitor) {
+		return !disposed && !monitor.isCanceled() && fInstallSemanticHighlightingJob.get() == job;
+	}
+
+	private void cancelInstallSemanticHighlightingJob() {
+		Job job= fInstallSemanticHighlightingJob.getAndSet(null);
+		if (job != null) {
+			job.cancel();
+		}
 	}
 
 	@Override
@@ -1141,7 +1175,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 */
 	@Override
 	public void dispose() {
-		disposed = true;
+		disposed= true;
+		cancelInstallSemanticHighlightingJob();
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18510
 		IDocumentProvider documentProvider= getDocumentProvider();
 		if (documentProvider instanceof ClassFileDocumentProvider) {
