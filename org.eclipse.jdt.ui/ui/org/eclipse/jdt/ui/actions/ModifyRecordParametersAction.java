@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  *
- * @since 2.0
+ * @since 3.40
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
