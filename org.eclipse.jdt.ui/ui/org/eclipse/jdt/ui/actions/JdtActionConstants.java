@@ -347,6 +347,8 @@ public class JdtActionConstants {
 	/**
 	 * Refactor menu: name of standard Modify Record Parameters global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ModifyParameters"</code>).
+	 *
+	 * @since 3.40
 	 */
 	public static final String MODIFY_RECORD_PARAMETERS= "org.eclipse.jdt.ui.actions.ModifyRecordParameters"; //$NON-NLS-1$
 
