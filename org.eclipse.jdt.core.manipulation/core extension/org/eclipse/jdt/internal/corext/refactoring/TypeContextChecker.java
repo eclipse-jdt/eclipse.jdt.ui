@@ -399,7 +399,6 @@ public class TypeContextChecker {
 		private RefactoringStatus checkParameterTypeSyntax(ParameterInfo info) {
 			if (!info.isAdded() && !info.isTypeNameChanged() && !info.isDeleted())
 				return null;
-			IJavaProject jp;
 			if (fType != null)
 				//If fType is not null we know this is a recordType. so we have to pass fType.getJavaProject.
 				return TypeContextChecker.checkParameterTypeSyntax(info.getNewTypeName(), fType.getJavaProject());
