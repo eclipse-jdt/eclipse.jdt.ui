@@ -64,7 +64,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
@@ -194,7 +193,7 @@ public final class RefactoringExecutionStarter {
 		return null;
 	}
 
-	public static void startChangeRecordSignatureRefactoring(final ASTNode node, final IType type, final Shell shell) {
+	public static void startChangeRecordSignatureRefactoring(final IType type, final Shell shell) {
 		// Grab access to the ASTNode andInstantiate the processor
 		try {
 			ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type);
