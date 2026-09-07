@@ -159,12 +159,12 @@ public class ModifyRecordParametersAction extends SelectionDispatchAction {
 				return;
 
 			IType recordType = (IType) typeBinding.getJavaElement();
-			RefactoringExecutionStarter.startChangeRecordSignatureRefactoring(node, recordType, getShell());
+			RefactoringExecutionStarter.startChangeRecordSignatureRefactoring(recordType, getShell());
 		} else {
 			IType recordType = getRecordDeclarationType(node);
 			if(recordType == null)
 				return;
-			RefactoringExecutionStarter.startChangeRecordSignatureRefactoring(node, recordType, getShell());
+			RefactoringExecutionStarter.startChangeRecordSignatureRefactoring(recordType, getShell());
 		}
 	}
 
