@@ -1477,7 +1477,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 					parameterMismatchs.add((IMethodBinding) binding);
 				}
 			}
-			addParameterMissmatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
+			addParameterMismatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
 		}
 
 		if (sender == null) {
@@ -1744,7 +1744,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		return false;
 	}
 
-	private void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<T> proposals) throws CoreException {
+	private void addParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<T> proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
 		if (argTypes == null || nSimilarElements == 0)  {
@@ -2299,7 +2299,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			}
 		}
 
-		addParameterMissmatchProposals(context, problem, similarElements, selectedNode, arguments, proposals);
+		addParameterMismatchProposals(context, problem, similarElements, selectedNode, arguments, proposals);
 
 		if (targetBinding.isFromSource()) {
 			ITypeBinding targetDecl= targetBinding.getTypeDeclaration();
