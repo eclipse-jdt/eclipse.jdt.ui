@@ -591,9 +591,6 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 			return result;
 
 		checkForDuplicateParameterNames(result);
-		// Maybe we can skip this check and return results anyway. IVAN
-		if (result.hasFatalError())
-			return result;
 
 		return result;
 
