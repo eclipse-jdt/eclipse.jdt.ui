@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Achim Demelt <a.demelt@exxcellent.de> - [junit] Separate UI from non-UI code - https://bugs.eclipse.org/bugs/show_bug.cgi?id=278844
+ *     Carsten Hammer - reload imported test runs
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.model;
@@ -22,9 +23,11 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -252,6 +255,7 @@ public final class JUnitModel {
 	 * Active test run sessions, youngest first.
 	 */
 	private final LinkedList<TestRunSession> fTestRunSessions= new LinkedList<>();
+	private final Map<TestRunSession, File> fImportedTestRunSources= new IdentityHashMap<>();
 	private final ILaunchListener fLaunchListener= new JUnitLaunchListener();
 
 	/**
@@ -298,6 +302,16 @@ public final class JUnitModel {
 		return new ArrayList<>(fTestRunSessions);
 	}
 
+	/**
+	 * Returns the file from which the given session was imported.
+	 *
+	 * @param testRunSession the session
+	 * @return the normalized absolute source file, or <code>null</code>
+	 */
+	public synchronized File getImportedTestRunSource(TestRunSession testRunSession) {
+		return fImportedTestRunSources.get(testRunSession);
+	}
+
 	private static int getMaxTestRunCount() {
 		return Math.max(0, Platform.getPreferencesService().getInt(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.MAX_TEST_RUNS, 10, null));
 	}
@@ -309,12 +323,19 @@ public final class JUnitModel {
 	 * @param testRunSession the session to add
 	 */
 	public void addTestRunSession(TestRunSession testRunSession) {
+		addTestRunSession(testRunSession, null);
+	}
+
+	private void addTestRunSession(TestRunSession testRunSession, File importedTestRunSource) {
 		Assert.isNotNull(testRunSession);
 		ArrayList<TestRunSession> toRemove= new ArrayList<>();
 
 		synchronized (this) {
 			Assert.isLegal(! fTestRunSessions.contains(testRunSession));
 			fTestRunSessions.addFirst(testRunSession);
+			if (importedTestRunSource != null) {
+				fImportedTestRunSources.put(testRunSession, importedTestRunSource);
+			}
 
 			int maxCount= getMaxTestRunCount();
 			int size= fTestRunSessions.size();
@@ -325,6 +346,7 @@ public final class JUnitModel {
 					if (!oldSession.isStarting() && !oldSession.isRunning() && !oldSession.isKeptAlive()) {
 						toRemove.add(oldSession);
 						iter.remove();
+						fImportedTestRunSources.remove(oldSession);
 					}
 				}
 			}
@@ -345,15 +367,44 @@ public final class JUnitModel {
 	 * @throws CoreException if the import failed
 	 */
 	public static TestRunSession importTestRunSession(File file) throws CoreException {
+		File sourceFile= file.toPath().toAbsolutePath().normalize().toFile();
+		TestRunSession session= readTestRunSession(sourceFile);
+		JUnitCorePlugin.getModel().addTestRunSession(session, sourceFile);
+		return session;
+	}
+
+	/**
+	 * Reloads a file-imported test run. The existing session is replaced only after
+	 * the source file has been parsed successfully.
+	 *
+	 * @param testRunSession the imported session to replace
+	 * @return the replacement session, or <code>null</code> if the original session is no longer
+	 *         registered or was not imported from a file
+	 * @throws CoreException if the source file cannot be read or parsed
+	 */
+	public static TestRunSession reloadTestRunSession(TestRunSession testRunSession) throws CoreException {
+		Assert.isNotNull(testRunSession);
+		JUnitModel model= JUnitCorePlugin.getModel();
+		File sourceFile= model.getImportedTestRunSource(testRunSession);
+		if (sourceFile == null) {
+			return null;
+		}
+
+		TestRunSession replacementSession= readTestRunSession(sourceFile);
+		if (!model.replaceTestRunSession(testRunSession, replacementSession, sourceFile)) {
+			return null;
+		}
+		return replacementSession;
+	}
+
+	private static TestRunSession readTestRunSession(File file) throws CoreException {
 		try {
 			SAXParserFactory parserFactory= XmlProcessorFactoryJdtJunit.createSAXFactoryWithErrorOnDOCTYPE();
 //			parserFactory.setValidating(true); // TODO: add DTD and debug flag
 			SAXParser parser= parserFactory.newSAXParser();
 			TestRunHandler handler= new TestRunHandler();
 			parser.parse(file, handler);
-			TestRunSession session= handler.getTestRunSession();
-			JUnitCorePlugin.getModel().addTestRunSession(session);
-			return session;
+			return handler.getTestRunSession();
 		} catch (ParserConfigurationException | SAXException e) {
 			throwImportError(file, e);
 		} catch (IOException e) {
@@ -503,6 +554,27 @@ public final class JUnitModel {
 				e));
 	}
 
+	private boolean replaceTestRunSession(TestRunSession oldSession, TestRunSession newSession, File sourceFile) {
+		Assert.isNotNull(oldSession);
+		Assert.isNotNull(newSession);
+		boolean replaced;
+		synchronized (this) {
+			int index= fTestRunSessions.indexOf(oldSession);
+			replaced= index >= 0;
+			if (replaced) {
+				fTestRunSessions.set(index, newSession);
+				fImportedTestRunSources.remove(oldSession);
+				fImportedTestRunSources.put(newSession, sourceFile);
+			}
+		}
+		if (replaced) {
+			notifyTestRunSessionRemoved(oldSession);
+			oldSession.removeSwapFile();
+			notifyTestRunSessionAdded(newSession);
+		}
+		return replaced;
+	}
+
 	/**
 	 * Removes the given {@link TestRunSession} and notifies all registered
 	 * {@link ITestRunSessionListener}s.
@@ -513,6 +585,7 @@ public final class JUnitModel {
 		boolean existed;
 		synchronized (this) {
 			existed= fTestRunSessions.remove(testRunSession);
+			fImportedTestRunSources.remove(testRunSession);
 		}
 		if (existed) {
 			notifyTestRunSessionRemoved(testRunSession);
