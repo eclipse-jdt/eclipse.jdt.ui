@@ -29,7 +29,7 @@ public class ChangeRecordSignatureWizard extends RefactoringWizard{
 	public ChangeRecordSignatureWizard(ChangeRecordSignatureProcessor processor, Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		this.fProcessor = processor;
-		setDefaultPageTitle(RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters);
+		setDefaultPageTitle(RefactoringMessages.ChangeSignatureRefactoring_modify_Record_Parameters);
 	}
 
 	@Override
