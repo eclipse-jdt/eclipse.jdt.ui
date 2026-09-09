@@ -1528,12 +1528,16 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 
 			if (refTypeName != null) {
 				fBuf.append("<a href='"); //$NON-NLS-1$
-				try {
-					String scheme= CoreJavaElementLinks.JAVADOC_SCHEME;
-					String uri= createLinkURI(scheme, fElement, refTypeName, refMemberName, refMethodParamTypes);
-					fBuf.append(uri);
-				} catch (URISyntaxException e) {
-					JavaManipulationPlugin.log(e);
+				if (refTypeName.startsWith("http://") || refTypeName.startsWith("https://")) { //$NON-NLS-1$ //$NON-NLS-2$
+					fBuf.append(refTypeName);
+				} else {
+					try {
+						String scheme= CoreJavaElementLinks.JAVADOC_SCHEME;
+						String uri= createLinkURI(scheme, fElement, refTypeName, refMemberName, refMethodParamTypes);
+						fBuf.append(uri);
+					} catch (URISyntaxException e) {
+						JavaManipulationPlugin.log(e);
+					}
 				}
 				fBuf.append("'>"); //$NON-NLS-1$
 				if (fs > 1 && ((fs != 2) || !CoreJavadocContentAccessUtility.isWhitespaceTextElement(fragments.get(1)))) {

@@ -1168,4 +1168,20 @@ public class MarkdownCommentTests extends CoreTests {
 		assertTrue("Doesn't contain expected content", actualHtmlContent.contains(expectedContent));
 	}
 
+	@Test
+	public void testMarkdownInlineLinkToExternalSite_GH3160() throws CoreException {
+		String source= """
+				/// [Eclipse](https://www.eclipse.org)
+				public class Markdown {}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Markdown.java", source, null);
+		assertNotNull("Markdown.java", cu);
+		String expectedContent= "<a href='https://www.eclipse.org'>Eclipse</a>";
+		IType type= cu.getType("Markdown");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		int index= actualHtmlContent.lastIndexOf("<a href=");
+		assertNotEquals(-1, index);
+		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
+		assertEquals("external markdown link should navigate directly to the site", expectedContent, actualSnippet);
+	}
 }
