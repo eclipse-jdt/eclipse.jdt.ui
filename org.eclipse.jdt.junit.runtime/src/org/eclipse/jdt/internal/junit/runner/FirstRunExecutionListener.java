@@ -81,7 +81,7 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 	}
 
 	@Override
-	public synchronized void notifyTestEnded(ITestIdentifier test) {
+	public void notifyTestEnded(ITestIdentifier test) {
 		String testId= getTestId(test);
 		TestTiming timing= endTiming(testId);
 		if (timing != null)
@@ -98,7 +98,7 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 	}
 
 	@Override
-	public synchronized void notifyTestStarted(ITestIdentifier test) {
+	public void notifyTestStarted(ITestIdentifier test) {
 		String testId= getTestId(test);
 		startTiming(testId);
 		sendMessage(testId, test, MessageIds.TEST_START);
