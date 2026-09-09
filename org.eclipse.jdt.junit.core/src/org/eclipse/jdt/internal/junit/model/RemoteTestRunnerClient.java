@@ -451,10 +451,19 @@ public class RemoteTestRunnerClient {
 
 	private void scanTestTiming(String arg) {
 		String[] timing= arg.split(",", -1); //$NON-NLS-1$
-		if (timing.length != 5)
+		if (timing.length != 5 || timing[0].isEmpty())
 			return;
 		try {
-			notifyTestTiming(timing[0], Long.parseLong(timing[1]), Long.parseLong(timing[2]), Long.parseLong(timing[3]), Long.parseLong(timing[4]));
+			long startTimeNanos= Long.parseLong(timing[1]);
+			long elapsedTimeNanos= Long.parseLong(timing[2]);
+			long cpuTimeNanos= Long.parseLong(timing[3]);
+			long userTimeNanos= Long.parseLong(timing[4]);
+			if (startTimeNanos < 0 || elapsedTimeNanos < 0 || cpuTimeNanos < -1 || userTimeNanos < -1)
+				return;
+			// The model derives suite intervals from start + elapsed; the end must not overflow.
+			if (startTimeNanos > Long.MAX_VALUE - elapsedTimeNanos)
+				return;
+			notifyTestTiming(timing[0], startTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
 		} catch (NumberFormatException e) {
 			// Ignore malformed optional timing data. Test status/result messages remain authoritative.
 		}

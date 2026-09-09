@@ -120,22 +120,21 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			return decorated;
 		}
 
-		StringBuilder details= new StringBuilder(decorated);
-		details.append(" [CPU ").append(timeFormat.format(cpuTime)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$
-
+		String userAndSystemDetails= ""; //$NON-NLS-1$
 		double userTime= internalTestElement.getUserCpuTimeInSeconds();
 		double systemTime= internalTestElement.getSystemCpuTimeInSeconds();
 		if (!Double.isNaN(userTime) && !Double.isNaN(systemTime)) {
-			details.append("; user ").append(timeFormat.format(userTime)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$
-			details.append("; system ").append(timeFormat.format(systemTime)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$
+			userAndSystemDetails= Messages.format(JUnitMessages.TestSessionLabelProvider_userAndSystemTimeInSeconds,
+					new String[] { timeFormat.format(userTime), timeFormat.format(systemTime) });
 		}
 
+		String nonCpuDetails= ""; //$NON-NLS-1$
 		double nonCpuTime= internalTestElement.getNonCpuTimeInSeconds();
 		if (!Double.isNaN(nonCpuTime)) {
-			details.append("; non-CPU ").append(timeFormat.format(nonCpuTime)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$
+			nonCpuDetails= Messages.format(JUnitMessages.TestSessionLabelProvider_nonCpuTimeInSeconds, timeFormat.format(nonCpuTime));
 		}
-		details.append(']');
-		return details.toString();
+		return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_cpuTimeInSeconds,
+				new String[] { decorated, timeFormat.format(cpuTime), userAndSystemDetails, nonCpuDetails });
 	}
 
 	private String getSimpleLabel(Object element) {
