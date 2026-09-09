@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProce
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -179,7 +180,13 @@ public class JUnitRenameParticipantTest {
 				.newInstance(null, manager.generateLaunchConfigurationName("JUnit rename " + container.getElementName()));
 		configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProject.getElementName());
 		configuration.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, container.getHandleIdentifier());
-		configuration.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, "org.eclipse.jdt.junit.loader.junit" + junitVersion);
+		String testKindId= switch (junitVersion) {
+			case 4 -> TestKindRegistry.JUNIT4_TEST_KIND_ID;
+			case 5 -> TestKindRegistry.JUNIT5_TEST_KIND_ID;
+			case 6 -> TestKindRegistry.JUNIT6_TEST_KIND_ID;
+			default -> throw new IllegalArgumentException("Unsupported JUnit version: " + junitVersion);
+		};
+		configuration.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindId);
 		fLaunchConfigurations.add(configuration.doSave());
 	}
 
@@ -197,8 +204,16 @@ public class JUnitRenameParticipantTest {
 	}
 
 	private Change perform(PerformChangeOperation operation) throws CoreException {
-		ResourcesPlugin.getWorkspace().run(operation, new NullProgressMonitor());
-		fUndoChange= operation.getUndoChange();
+		try {
+			ResourcesPlugin.getWorkspace().run(operation, new NullProgressMonitor());
+		} finally {
+			// PerformChangeOperation disposes executed changes, including intermediate undo/redo
+			// changes. Keep the unperformed inverse for tearDown(), even if workspace.run fails.
+			fUndoChange= operation.getUndoChange();
+			if (!operation.changeExecuted() && operation.getChange() != null) {
+				operation.getChange().dispose();
+			}
+		}
 		assertTrue(operation.changeExecuted(), () -> String.valueOf(operation.getConditionCheckingStatus()));
 		assertFalse(operation.getValidationStatus().hasFatalError(), () -> operation.getValidationStatus().toString());
 		assertNotNull(fUndoChange);
