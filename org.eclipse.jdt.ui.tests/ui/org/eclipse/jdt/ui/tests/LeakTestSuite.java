@@ -22,11 +22,13 @@ import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.ui.tests.leaks.JavaLeakTest;
+import org.eclipse.jdt.ui.tests.leaks.LeakTestVmArgumentsTest;
 import org.eclipse.jdt.ui.tests.leaks.TextViewerUndoManagerLeakTest;
 import org.eclipse.jdt.ui.tests.search.SearchLeakTestWrapper;
 
 @Suite
 @SelectClasses({
+	LeakTestVmArgumentsTest.class,
 	JavaLeakTest.class,
 	SearchLeakTestWrapper.class,
 	TextViewerUndoManagerLeakTest.class,
