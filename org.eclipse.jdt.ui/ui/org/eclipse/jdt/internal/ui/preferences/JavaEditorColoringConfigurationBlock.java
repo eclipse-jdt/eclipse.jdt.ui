@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -787,6 +787,9 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, store);
+		// don't allow CSS to mess with background color so it matches the editor background
+		fPreviewViewer.getTextWidget().setData("org.eclipse.e4.ui.css.disabled", Boolean.TRUE); //$NON-NLS-1$
+
 
 		fPreviewViewer.setEditable(false);
 		Cursor arrowCursor= fPreviewViewer.getTextWidget().getDisplay().getSystemCursor(SWT.CURSOR_ARROW);
