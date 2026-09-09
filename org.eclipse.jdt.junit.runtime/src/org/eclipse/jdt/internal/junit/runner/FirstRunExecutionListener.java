@@ -100,9 +100,10 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 	@Override
 	public void notifyTestStarted(ITestIdentifier test) {
 		String testId= getTestId(test);
-		startTiming(testId);
 		sendMessage(testId, test, MessageIds.TEST_START);
 		fSender.flush();
+		// Start after publishing TEST_START so socket/protocol latency is not charged to the test.
+		startTiming(testId);
 	}
 
 	private void startTiming(String testId) {
