@@ -15,7 +15,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.text.templates.ContextTypeRegistry;
+
 import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.CompletionContext;
