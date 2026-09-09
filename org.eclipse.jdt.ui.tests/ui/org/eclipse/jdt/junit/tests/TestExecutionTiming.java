@@ -14,6 +14,7 @@
 package org.eclipse.jdt.junit.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -39,6 +40,8 @@ import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.runner.MessageSender;
 import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
+import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
+import org.eclipse.jdt.internal.junit.ui.TestSessionLabelProvider;
 
 public class TestExecutionTiming extends AbstractTestRunListenerTest {
 
@@ -129,20 +132,13 @@ public class TestExecutionTiming extends AbstractTestRunListenerTest {
 				}""";
 		IType timingTest= createType(source, "pack", "TimingTest.java"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		AtomicReference<double[]> capturedTiming= new AtomicReference<>();
+		AtomicReference<ITestCaseElement> capturedTest= new AtomicReference<>();
 		TestRunLog log= new TestRunLog();
 		TestRunListener sequenceListener= new TestRunListeners.SequenceTest(log);
 		TestRunListener timingListener= new TestRunListener() {
 			@Override
 			public void testCaseFinished(ITestCaseElement testCaseElement) {
-				TestElement element= (TestElement) testCaseElement;
-				capturedTiming.set(new double[] {
-						element.getElapsedTimeInSeconds(),
-						element.getCpuTimeInSeconds(),
-						element.getUserCpuTimeInSeconds(),
-						element.getSystemCpuTimeInSeconds(),
-						element.getNonCpuTimeInSeconds()
-				});
+				capturedTest.set(testCaseElement);
 			}
 		};
 		JUnitCore.addTestRunListener(sequenceListener);
@@ -154,8 +150,16 @@ public class TestExecutionTiming extends AbstractTestRunListenerTest {
 			JUnitCore.removeTestRunListener(sequenceListener);
 		}
 
-		double[] timing= capturedTiming.get();
-		assertNotNull(timing);
+		ITestCaseElement testCaseElement= capturedTest.get();
+		assertNotNull(testCaseElement);
+		TestElement element= (TestElement) testCaseElement;
+		double[] timing= new double[] {
+				element.getElapsedTimeInSeconds(),
+				element.getCpuTimeInSeconds(),
+				element.getUserCpuTimeInSeconds(),
+				element.getSystemCpuTimeInSeconds(),
+				element.getNonCpuTimeInSeconds()
+		};
 		assertTrue("wall time should include Thread.sleep", timing[0] >= 0.08d); //$NON-NLS-1$
 		if (!Double.isNaN(timing[1])) {
 			assertTrue(timing[1] >= 0.0d);
@@ -164,6 +168,39 @@ public class TestExecutionTiming extends AbstractTestRunListenerTest {
 				assertTrue(timing[2] <= timing[1]);
 				assertTrue(timing[3] >= 0.0d);
 			}
+		}
+		assertTimingLabels(element);
+	}
+
+	private static void assertTimingLabels(TestElement element) {
+		TestSessionLabelProvider labelProvider= new TestSessionLabelProvider(null, TestRunnerViewPart.LAYOUT_FLAT);
+
+		labelProvider.setShowTime(false);
+		labelProvider.setShowTimeDetails(false);
+		String baseLabel= labelProvider.getText(element);
+
+		labelProvider.setShowTime(true);
+		String elapsedLabel= labelProvider.getText(element);
+		assertTrue(elapsedLabel.startsWith(baseLabel));
+		assertFalse(elapsedLabel.equals(baseLabel));
+
+		labelProvider.setShowTime(false);
+		labelProvider.setShowTimeDetails(true);
+		String detailsLabel= labelProvider.getText(element);
+		if (Double.isNaN(element.getCpuTimeInSeconds())) {
+			assertEquals(baseLabel, detailsLabel);
+		} else {
+			assertTrue(detailsLabel.startsWith(baseLabel));
+			assertFalse(detailsLabel.equals(baseLabel));
+		}
+
+		labelProvider.setShowTime(true);
+		String combinedLabel= labelProvider.getText(element);
+		if (Double.isNaN(element.getCpuTimeInSeconds())) {
+			assertEquals(elapsedLabel, combinedLabel);
+		} else {
+			assertTrue(combinedLabel.startsWith(elapsedLabel));
+			assertFalse(combinedLabel.equals(elapsedLabel));
 		}
 	}
 }

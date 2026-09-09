@@ -348,6 +348,7 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_testName_startTime;
 	public static String TestRunnerViewPart_max_remembered;
 	public static String TestRunnerViewPart_show_execution_time;
+	public static String TestRunnerViewPart_show_execution_time_details;
 
 	public static String TestRunnerViewPart_show_failures_only;
 	public static String TestRunnerViewPart_show_ignored_only;

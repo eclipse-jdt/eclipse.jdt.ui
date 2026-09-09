@@ -500,6 +500,16 @@ public class TestViewer {
 		}
 	}
 
+	public synchronized void setShowTimeDetails(boolean showTimeDetails) {
+		try {
+			fViewerbook.setRedraw(false);
+			fTreeLabelProvider.setShowTimeDetails(showTimeDetails);
+			fTableLabelProvider.setShowTimeDetails(showTimeDetails);
+		} finally {
+			fViewerbook.setRedraw(true);
+		}
+	}
+
 	public synchronized void setSortingCriterion(SortingCriterion sortingCriterion) {
 		ViewerComparator viewerComparator;
 		switch (sortingCriterion) {

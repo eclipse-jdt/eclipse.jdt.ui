@@ -239,6 +239,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private ToggleOrientationAction[] fToggleOrientationActions;
 	private ShowTestHierarchyAction fShowTestHierarchyAction;
 	private ShowTimeAction fShowTimeAction;
+	private ShowTimeDetailsAction fShowTimeDetailsAction;
 	private ActivateOnErrorAction fActivateOnErrorAction;
 	private IMenuListener fViewMenuListener;
 
@@ -302,6 +303,7 @@ public class TestRunnerViewPart extends ViewPart {
 	 * @since 3.4
 	 */
 	static final String TAG_SHOW_TIME= "time"; //$NON-NLS-1$
+	static final String TAG_SHOW_TIME_DETAILS= "timeDetails"; //$NON-NLS-1$
 
 	static final String TAG_SORTING_CRITERION= "sortingCriterion"; //$NON-NLS-1$
 
@@ -1169,6 +1171,18 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 	}
 
+	private class ShowTimeDetailsAction extends Action {
+
+		public ShowTimeDetailsAction() {
+			super(JUnitMessages.TestRunnerViewPart_show_execution_time_details, IAction.AS_CHECK_BOX);
+		}
+
+		@Override
+		public void run() {
+			setShowExecutionTimeDetails(isChecked());
+		}
+	}
+
 	private class ShowTestHierarchyAction extends Action {
 
 		public ShowTestHierarchyAction() {
@@ -1276,6 +1290,7 @@ public class TestRunnerViewPart extends ViewPart {
 		memento.putString(TAG_IGNORED_ONLY, fIgnoredOnlyFilterAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		memento.putInteger(TAG_LAYOUT, fLayout);
 		memento.putString(TAG_SHOW_TIME, fShowTimeAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		memento.putString(TAG_SHOW_TIME_DETAILS, fShowTimeDetailsAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		memento.putInteger(TAG_SORTING_CRITERION, fSortingCriterion.ordinal());
 	}
 
@@ -1321,6 +1336,11 @@ public class TestRunnerViewPart extends ViewPart {
 		if (time != null)
 			showTime= "true".equals(time); //$NON-NLS-1$
 
+		String timeDetails= memento.getString(TAG_SHOW_TIME_DETAILS);
+		boolean showTimeDetails= false;
+		if (timeDetails != null)
+			showTimeDetails= "true".equals(timeDetails); //$NON-NLS-1$
+
 		SortingCriterion sortingCriterion= SortingCriterion.SORT_BY_EXECUTION_ORDER;
 		Integer tagSortingCriterion= memento.getInteger(TAG_SORTING_CRITERION);
 		if (tagSortingCriterion != null) {
@@ -1333,6 +1353,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		setFilterAndLayout(showFailuresOnly, showIgnoredOnly, layoutValue);
 		setShowExecutionTime(showTime);
+		setShowExecutionTimeDetails(showTimeDetails);
 	}
 
 	/**
@@ -1931,6 +1952,7 @@ action enablement
 
 		setFilterAndLayout(false, false, LAYOUT_HIERARCHICAL);
 		setShowExecutionTime(true);
+		setShowExecutionTimeDetails(false);
 		if (fMemento != null) {
 			restoreLayoutState(fMemento);
 		}
@@ -2093,6 +2115,7 @@ action enablement
 
 		fShowTestHierarchyAction= new ShowTestHierarchyAction();
 		fShowTimeAction= new ShowTimeAction();
+		fShowTimeDetailsAction= new ShowTimeDetailsAction();
 
 		toolBar.add(fNextAction);
 		toolBar.add(fPreviousAction);
@@ -2108,6 +2131,7 @@ action enablement
 
 		viewMenu.add(fShowTestHierarchyAction);
 		viewMenu.add(fShowTimeAction);
+		viewMenu.add(fShowTimeDetailsAction);
 		viewMenu.add(new Separator());
 
 		fToggleSortingActions=
@@ -2369,7 +2393,11 @@ action enablement
 	private void setShowExecutionTime(boolean showTime) {
 		fTestViewer.setShowTime(showTime);
 		fShowTimeAction.setChecked(showTime);
+	}
 
+	private void setShowExecutionTimeDetails(boolean showTimeDetails) {
+		fTestViewer.setShowTimeDetails(showTimeDetails);
+		fShowTimeDetailsAction.setChecked(showTimeDetails);
 	}
 
 	TestElement[] getAllFailures() {
