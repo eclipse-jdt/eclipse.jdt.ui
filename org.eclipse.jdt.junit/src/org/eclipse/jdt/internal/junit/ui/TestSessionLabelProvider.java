@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -80,7 +80,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				text= StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, text);
 			}
 		}
-		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
+		return addElapsedTime(text, testElement);
 	}
 
 	private String getTextForFlatLayout(TestCaseElement testCaseElement, String label) {
@@ -98,18 +98,44 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, BasicElementLabels.getJavaElementName(parentName) });
 	}
 
-	private StyledString addElapsedTime(StyledString styledString, double time) {
+	private StyledString addElapsedTime(StyledString styledString, ITestElement testElement) {
 		String string= styledString.getString();
-		String decorated= addElapsedTime(string, time);
+		String decorated= addElapsedTime(string, testElement);
 		return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, styledString);
 	}
 
-	private String addElapsedTime(String string, double time) {
+	private String addElapsedTime(String string, ITestElement testElement) {
+		double time= testElement.getElapsedTimeInSeconds();
 		if (!fShowTime || Double.isNaN(time)) {
 			return string;
 		}
 		String formattedTime= timeFormat.format(time);
-		return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, new String[] { string, formattedTime});
+		String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, new String[] { string, formattedTime});
+		if (!(testElement instanceof TestElement internalTestElement)) {
+			return decorated;
+		}
+
+		double cpuTime= internalTestElement.getCpuTimeInSeconds();
+		if (Double.isNaN(cpuTime)) {
+			return decorated;
+		}
+
+		StringBuilder details= new StringBuilder(decorated);
+		details.append(" [CPU ").append(timeFormat.format(cpuTime)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		double userTime= internalTestElement.getUserCpuTimeInSeconds();
+		double systemTime= internalTestElement.getSystemCpuTimeInSeconds();
+		if (!Double.isNaN(userTime) && !Double.isNaN(systemTime)) {
+			details.append("; user ").append(timeFormat.format(userTime)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$
+			details.append("; system ").append(timeFormat.format(systemTime)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		double nonCpuTime= internalTestElement.getNonCpuTimeInSeconds();
+		if (!Double.isNaN(nonCpuTime)) {
+			details.append("; non-CPU ").append(timeFormat.format(nonCpuTime)).append(" s"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		details.append(']');
+		return details.toString();
 	}
 
 	private String getSimpleLabel(Object element) {
@@ -144,7 +170,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				label= getTextForFlatLayout((TestCaseElement) testElement, label);
 			}
 		}
-		return addElapsedTime(label, testElement.getElapsedTimeInSeconds());
+		return addElapsedTime(label, testElement);
 	}
 
 	@Override

@@ -766,6 +766,14 @@ public class TestRunSession implements ITestRunSession {
 		}
 
 		@Override
+		public void testTiming(String testId, long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
+			TestElement testElement= getTestElement(testId);
+			if (testElement instanceof TestCaseElement) {
+				testElement.setExecutionTiming(startTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+			}
+		}
+
+		@Override
 		public void testEnded(String testId, String testName) {
 			boolean isIgnored= testName.startsWith(MessageIds.IGNORED_TEST_PREFIX);
 

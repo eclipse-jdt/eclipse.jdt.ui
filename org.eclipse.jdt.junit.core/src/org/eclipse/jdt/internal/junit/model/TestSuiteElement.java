@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,9 +22,11 @@ import org.eclipse.jdt.junit.model.ITestSuiteElement;
 
 
 public class TestSuiteElement extends TestElement implements ITestSuiteElement {
+	private static final long NO_TIME= Long.MIN_VALUE;
 
 	private List<TestElement> fChildren;
 	private Status fChildrenStatus;
+	private long fChildrenStartTimeNanos= NO_TIME;
 
 	public TestSuiteElement(TestSuiteElement parent, String id, String testName, int childrenCount, String displayName, String[] parameterTypes, String uniqueId) {
 		super(parent, id, testName, displayName, parameterTypes, uniqueId);
@@ -126,21 +128,33 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		}
 	}
 
+	void childChangedTiming(TestElement child) {
+		if (child.fExecutionStartTimeNanos == NO_TIME || child.fExecutionEndTimeNanos == NO_TIME)
+			return;
+
+		long startTimeNanos= fExecutionStartTimeNanos == NO_TIME ? child.fExecutionStartTimeNanos : Math.min(fExecutionStartTimeNanos, child.fExecutionStartTimeNanos);
+		long endTimeNanos= fExecutionEndTimeNanos == NO_TIME ? child.fExecutionEndTimeNanos : Math.max(fExecutionEndTimeNanos, child.fExecutionEndTimeNanos);
+		setExecutionWallTime(startTimeNanos, endTimeNanos);
+		fChildrenStartTimeNanos= NO_TIME;
+
+		TestSuiteElement parent= getParent();
+		if (parent != null)
+			parent.childChangedTiming(this);
+	}
+
 	private void internalSetChildrenStatus(Status status) {
 		if (fChildrenStatus == status)
 			return;
 
 		if (status == Status.RUNNING) {
-			if (fTime >= 0.0d) {
+			if (!Double.isNaN(fTime)) {
 				// re-running child: ignore change
 			} else {
-				fTime= - System.currentTimeMillis() / 1000d;
+				fChildrenStartTimeNanos= System.nanoTime();
 			}
-		} else if (status.convertToProgressState() == ProgressState.COMPLETED) {
-			if (fTime < 0) { // assert ! Double.isNaN(fTime)
-				double endTime= System.currentTimeMillis() / 1000d;
-				fTime= endTime + fTime;
-			}
+		} else if (status.convertToProgressState() == ProgressState.COMPLETED && fChildrenStartTimeNanos != NO_TIME) {
+			fTime= Math.max(0L, System.nanoTime() - fChildrenStartTimeNanos) / 1_000_000_000d;
+			fChildrenStartTimeNanos= NO_TIME;
 		}
 
 		fChildrenStatus= status;

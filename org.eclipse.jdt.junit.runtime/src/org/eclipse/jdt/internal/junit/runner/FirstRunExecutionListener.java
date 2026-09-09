@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,21 +16,77 @@
 
 package org.eclipse.jdt.internal.junit.runner;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class FirstRunExecutionListener implements IListensToTestExecutions {
+	private static final long UNAVAILABLE_TIME= -1L;
+
+	private static final class StartTiming {
+		final long wallTimeNanos;
+		final long cpuTimeNanos;
+		final long userTimeNanos;
+		final long threadId;
+
+		StartTiming(long wallTimeNanos, long cpuTimeNanos, long userTimeNanos, long threadId) {
+			this.wallTimeNanos= wallTimeNanos;
+			this.cpuTimeNanos= cpuTimeNanos;
+			this.userTimeNanos= userTimeNanos;
+			this.threadId= threadId;
+		}
+	}
+
+	private static final class TestTiming {
+		final long startTimeNanos;
+		final long elapsedTimeNanos;
+		final long cpuTimeNanos;
+		final long userTimeNanos;
+
+		TestTiming(long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
+			this.startTimeNanos= startTimeNanos;
+			this.elapsedTimeNanos= elapsedTimeNanos;
+			this.cpuTimeNanos= cpuTimeNanos;
+			this.userTimeNanos= userTimeNanos;
+		}
+	}
+
 	protected MessageSender fSender;
 
-	private TestIdMap fIds;
+	private final TestIdMap fIds;
+	private final Map<String, StartTiming> fStartTimings= new ConcurrentHashMap<>();
+	private final long fTimingOriginNanos= System.nanoTime();
+	private final ThreadMXBean fThreadMXBean= ManagementFactory.getThreadMXBean();
+	private final boolean fThreadCpuTimeEnabled;
 
 	FirstRunExecutionListener(MessageSender sender, TestIdMap ids) {
-		fSender = sender;
+		fSender= sender;
 		if (ids == null)
 			throw new NullPointerException();
-		fIds = ids;
+		fIds= ids;
+		fThreadCpuTimeEnabled= enableThreadCpuTime(fThreadMXBean);
+	}
+
+	private static boolean enableThreadCpuTime(ThreadMXBean threadMXBean) {
+		if (!threadMXBean.isCurrentThreadCpuTimeSupported())
+			return false;
+		try {
+			if (!threadMXBean.isThreadCpuTimeEnabled())
+				threadMXBean.setThreadCpuTimeEnabled(true);
+			return threadMXBean.isThreadCpuTimeEnabled();
+		} catch (SecurityException | UnsupportedOperationException e) {
+			return false;
+		}
 	}
 
 	@Override
-	public void notifyTestEnded(ITestIdentifier test) {
-		sendMessage(test, MessageIds.TEST_END);
+	public synchronized void notifyTestEnded(ITestIdentifier test) {
+		String testId= getTestId(test);
+		TestTiming timing= endTiming(testId);
+		if (timing != null)
+			sendTiming(testId, timing);
+		sendMessage(testId, test, MessageIds.TEST_END);
 		fSender.flush();
 	}
 
@@ -42,9 +98,50 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 	}
 
 	@Override
-	public void notifyTestStarted(ITestIdentifier test) {
-		sendMessage(test, MessageIds.TEST_START);
+	public synchronized void notifyTestStarted(ITestIdentifier test) {
+		String testId= getTestId(test);
+		startTiming(testId);
+		sendMessage(testId, test, MessageIds.TEST_START);
 		fSender.flush();
+	}
+
+	private void startTiming(String testId) {
+		long wallTimeNanos= System.nanoTime();
+		long cpuTimeNanos= currentThreadCpuTime();
+		long userTimeNanos= currentThreadUserTime();
+		fStartTimings.put(testId, new StartTiming(wallTimeNanos, cpuTimeNanos, userTimeNanos, Thread.currentThread().getId()));
+	}
+
+	private TestTiming endTiming(String testId) {
+		StartTiming start= fStartTimings.remove(testId);
+		if (start == null)
+			return null;
+
+		long endWallTimeNanos= System.nanoTime();
+		long elapsedTimeNanos= Math.max(0L, endWallTimeNanos - start.wallTimeNanos);
+		long cpuTimeNanos= UNAVAILABLE_TIME;
+		long userTimeNanos= UNAVAILABLE_TIME;
+		if (start.threadId == Thread.currentThread().getId()) {
+			cpuTimeNanos= elapsedTime(start.cpuTimeNanos, currentThreadCpuTime());
+			userTimeNanos= elapsedTime(start.userTimeNanos, currentThreadUserTime());
+			if (cpuTimeNanos >= 0 && userTimeNanos > cpuTimeNanos)
+				userTimeNanos= cpuTimeNanos;
+		}
+		return new TestTiming(start.wallTimeNanos - fTimingOriginNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+	}
+
+	private static long elapsedTime(long startTime, long endTime) {
+		if (startTime < 0 || endTime < 0)
+			return UNAVAILABLE_TIME;
+		return Math.max(0L, endTime - startTime);
+	}
+
+	private long currentThreadCpuTime() {
+		return fThreadCpuTimeEnabled ? fThreadMXBean.getCurrentThreadCpuTime() : UNAVAILABLE_TIME;
+	}
+
+	private long currentThreadUserTime() {
+		return fThreadCpuTimeEnabled ? fThreadMXBean.getCurrentThreadUserTime() : UNAVAILABLE_TIME;
 	}
 
 	private String getTestId(ITestIdentifier test) {
@@ -53,7 +150,7 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 
 	protected void sendFailure(TestReferenceFailure failure, String startTrace,
 			String endTrace) {
-		FailedComparison comparison = failure.getComparison();
+		FailedComparison comparison= failure.getComparison();
 		if (comparison != null)
 			comparison.sendMessages(fSender);
 
@@ -63,8 +160,16 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 		fSender.flush();
 	}
 
+	private void sendTiming(String testId, TestTiming timing) {
+		fSender.sendMessage(MessageIds.TEST_TIMING + testId + ',' + timing.startTimeNanos + ',' + timing.elapsedTimeNanos + ',' + timing.cpuTimeNanos + ',' + timing.userTimeNanos);
+	}
+
 	private void sendMessage(ITestIdentifier test, String status) {
-		fSender.sendMessage(status + getTestId(test) + ',' + RemoteTestRunner.escapeText(test.getName()));
+		sendMessage(getTestId(test), test, status);
+	}
+
+	private void sendMessage(String testId, ITestIdentifier test, String status) {
+		fSender.sendMessage(status + testId + ',' + RemoteTestRunner.escapeText(test.getName()));
 	}
 
 }
