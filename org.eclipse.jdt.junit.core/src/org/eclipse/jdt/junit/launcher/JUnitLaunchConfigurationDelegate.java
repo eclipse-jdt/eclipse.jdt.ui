@@ -135,7 +135,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	 * @param monitor the progress monitor
 	 * @return the VM runner configuration, or {@code null} if the operation was canceled
 	 * @throws CoreException if the launch configuration cannot be resolved
-	 * @since 3.15
+	 * @since 3.16
 	 */
 	protected final VMRunnerConfiguration getVMRunnerConfiguration(ILaunchConfiguration configuration, ILaunch launch, String mode, IProgressMonitor monitor) throws CoreException {
 		SubMonitor subMon= SubMonitor.convert(monitor, JUnitMessages.JUnitLaunchConfigurationDelegate_verifying_attriburtes_description, 4);
