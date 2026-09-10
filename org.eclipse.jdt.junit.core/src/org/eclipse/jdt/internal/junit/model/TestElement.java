@@ -376,6 +376,17 @@ public abstract class TestElement implements ITestElement {
 		clearExecutionTiming();
 	}
 
+	void setCpuTimesInSeconds(double cpuTime, double userCpuTime) {
+		fCpuTime= normalizeSeconds(cpuTime);
+		fUserCpuTime= normalizeSeconds(userCpuTime);
+		if (!Double.isNaN(fCpuTime) && !Double.isNaN(fUserCpuTime) && fUserCpuTime > fCpuTime)
+			fUserCpuTime= fCpuTime;
+	}
+
+	private static double normalizeSeconds(double time) {
+		return Double.isFinite(time) && time >= 0.0d ? time : Double.NaN;
+	}
+
 	void setExecutionTiming(long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
 		long elapsed= Math.max(0L, elapsedTimeNanos);
 		setExecutionWallTime(startTimeNanos, startTimeNanos + elapsed);

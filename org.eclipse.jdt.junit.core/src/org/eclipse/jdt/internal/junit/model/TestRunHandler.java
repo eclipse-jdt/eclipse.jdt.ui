@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -180,6 +180,7 @@ public class TestRunHandler extends DefaultHandler {
 				fNotRun.push(Boolean.parseBoolean(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 				fTestCase.setIgnored(Boolean.parseBoolean(attributes.getValue(IXMLTags.ATTR_IGNORED)));
 				readTime(fTestCase, attributes);
+				readCpuTimes(fTestCase, attributes);
 				break;
 			}
 		case IXMLTags.NODE_ERROR:
@@ -229,6 +230,24 @@ public class TestRunHandler extends DefaultHandler {
 				testElement.setElapsedTimeInSeconds(Double.parseDouble(timeString));
 			} catch (NumberFormatException e) {
 			}
+		}
+	}
+
+	private void readCpuTimes(TestElement testElement, Attributes attributes) {
+		double cpuTime= readOptionalNonNegativeTime(attributes, IXMLTags.ATTR_CPU_TIME);
+		double userTime= readOptionalNonNegativeTime(attributes, IXMLTags.ATTR_USER_TIME);
+		testElement.setCpuTimesInSeconds(cpuTime, userTime);
+	}
+
+	private static double readOptionalNonNegativeTime(Attributes attributes, String attributeName) {
+		String value= attributes.getValue(attributeName);
+		if (value == null)
+			return Double.NaN;
+		try {
+			double time= Double.parseDouble(value);
+			return Double.isFinite(time) && time >= 0.0d ? time : Double.NaN;
+		} catch (NumberFormatException e) {
+			return Double.NaN;
 		}
 	}
 

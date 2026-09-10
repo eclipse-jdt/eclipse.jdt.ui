@@ -41,6 +41,7 @@ import org.eclipse.jdt.junit.model.ITestElement.Result;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
+import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestRunSessionHistory;
 
@@ -89,6 +90,34 @@ public class TestRunSessionHistoryTests {
 
 		assertEquals(1, session.getChildren().length);
 		assertEquals(Result.OK, session.getTestResult(true));
+	}
+
+	@Test
+	public void preservesTimingDetailsAcrossLazyReload() throws Exception {
+		File historyDirectory= fTemporaryFolder.newFolder("history"); //$NON-NLS-1$
+		HistoryEntry entry= entry("timing", 1_788_336_001_250L, 1_788_336_001_250L, //$NON-NLS-1$
+				"completed", 1, 1, 0, 0, 0, //$NON-NLS-1$
+				"""
+				<testrun name="timing" tests="1" started="1" failures="0" errors="0" ignored="0">
+				  <testcase name="testOne" classname="example.ExampleTest" time="0.125" cpuTime="0.075" userTime="0.050"/>
+				</testrun>
+				"""); //$NON-NLS-1$
+		writeHistory(historyDirectory, entry);
+
+		TestRunSession session= TestRunSessionHistory.load(historyDirectory, 1).get(0);
+
+		assertTimingDetails(session);
+		session.swapOut();
+		assertTimingDetails(session);
+	}
+
+	private static void assertTimingDetails(TestRunSession session) {
+		TestElement testElement= (TestElement) session.getChildren()[0];
+		assertEquals(0.125d, testElement.getElapsedTimeInSeconds(), 0.0001d);
+		assertEquals(0.075d, testElement.getCpuTimeInSeconds(), 0.0001d);
+		assertEquals(0.050d, testElement.getUserCpuTimeInSeconds(), 0.0001d);
+		assertEquals(0.025d, testElement.getSystemCpuTimeInSeconds(), 0.0001d);
+		assertEquals(0.050d, testElement.getNonCpuTimeInSeconds(), 0.0001d);
 	}
 
 	@Test
