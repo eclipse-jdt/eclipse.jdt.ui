@@ -202,6 +202,10 @@ public class TestExecutionTiming extends AbstractTestRunListenerTest {
 		assertEquals(0.1d, test.getElapsedTimeInSeconds(), 0.000_001d);
 
 		listener.testReran(testId, "pack.TimingTest", testName, ITestRunListener2.STATUS_OK, "", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		assertTrue("rerun result must invalidate timing from the previous execution", Double.isNaN(test.getElapsedTimeInSeconds())); //$NON-NLS-1$
+		assertTrue(Double.isNaN(test.getCpuTimeInSeconds()));
+		assertTrue(Double.isNaN(test.getUserCpuTimeInSeconds()));
+
 		listener.testTiming(testId, 20_000_000_000L, 250_000_000L, 80_000_000L, 50_000_000L);
 
 		assertEquals(0.25d, test.getElapsedTimeInSeconds(), 0.000_001d);

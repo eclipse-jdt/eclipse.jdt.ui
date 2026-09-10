@@ -845,6 +845,10 @@ public class TestRunSession implements ITestRunSession {
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
 
+			// Invalidate timing from the previous execution before applying the rerun result.
+			// A fresh optional TEST_TIMING message will restore timing when available.
+			testElement.setElapsedTimeInSeconds(Double.NaN);
+
 			Status status= Status.convert(statusCode);
 			registerTestFailureStatus(testElement, status, trace, expectedResult, actualResult);
 
