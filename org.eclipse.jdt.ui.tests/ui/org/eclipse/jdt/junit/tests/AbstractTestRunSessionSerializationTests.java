@@ -97,7 +97,7 @@ public class AbstractTestRunSessionSerializationTests {
 		}
 
 		ByteArrayOutputStream out= new ByteArrayOutputStream();
-		JUnitModel.exportTestRunSession(result.fTestRunSession, out);
+		JUnitCore.exportTestElement(result.fTestRunSession, out);
 
 		result.fSerialized= out.toString("UTF-8");
 		return result;

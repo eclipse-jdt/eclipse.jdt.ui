@@ -19,8 +19,8 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -215,11 +215,11 @@ public class DisabledParameterizedTestViewTest extends AbstractTestRunListenerTe
 			labelProvider.dispose();
 		}
 
-		File file= File.createTempFile("ignored-suite-failure", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path file= Files.createTempFile("ignored-suite-failure", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		TestRunSession importedSession= null;
 		try {
-			JUnitModel.exportTestRunSession(session, file);
-			importedSession= JUnitModel.importTestRunSession(file);
+			JUnitCore.exportTestElement(session, file);
+			importedSession= JUnitModel.importTestRunSession(file.toFile());
 			TestSuiteElement importedFailure= (TestSuiteElement) importedSession.getChildren()[0];
 			assertTrue(importedFailure.isIgnored());
 			assertEquals(Result.FAILURE, importedFailure.getTestResult(false));
@@ -229,7 +229,7 @@ public class DisabledParameterizedTestViewTest extends AbstractTestRunListenerTe
 			if (importedSession != null) {
 				JUnitCorePlugin.getModel().removeTestRunSession(importedSession);
 			}
-			Files.deleteIfExists(file.toPath());
+			Files.deleteIfExists(file);
 		}
 	}
 

@@ -17,13 +17,16 @@ package org.eclipse.jdt.junit;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.xml.transform.TransformerException;
 
+import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.core.runtime.CoreException;
@@ -37,12 +40,13 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.ModelMessages;
-import org.eclipse.jdt.internal.junit.model.TestRunSession;
 
 /**
  * Class for accessing JUnit support; all functionality is provided by
@@ -182,7 +186,7 @@ public class JUnitCore {
 	 * @since 3.7
 	 */
 	public static void exportTestRunSession(ITestRunSession testRunSession, File file) throws CoreException {
-		JUnitModel.exportTestRunSession((TestRunSession)testRunSession, file);
+		exportTestElement(testRunSession, file.toPath());
 	}
 
 	/**
@@ -195,8 +199,40 @@ public class JUnitCore {
 	 * @since 3.7
 	 */
 	public static void exportTestRunSession(ITestRunSession testRunSession, OutputStream output) throws CoreException {
+		exportTestElement(testRunSession, output);
+	}
+
+	/**
+	 * Exports the given test run session into an XML report file.
+	 *
+	 * @param testElement the test run element
+	 * @param file the destination
+	 * @throws CoreException if an error occurred
+	 *
+	 * @since 3.16
+	 */
+	public static void exportTestElement(ITestElement testElement, java.nio.file.Path file) throws CoreException {
+		try (OutputStream out= Files.newOutputStream(file)) {
+			JUnitModel.exportTestElement(testElement, out);
+		} catch (IOException | TransformerException e) {
+			throw new CoreException(Status.error(
+					Messages.format(ModelMessages.JUnitModel_could_not_write, BasicElementLabels.getPathLabel(file)),
+					e));
+		}
+	}
+
+	/**
+	 * Exports the given test run session to an output stream.
+	 *
+	 * @param testElement the test run element
+	 * @param output the output stream
+	 * @throws CoreException if an error occurred
+	 *
+	 * @since 3.16
+	 */
+	public static void exportTestElement(ITestElement testElement, OutputStream output) throws CoreException {
 		try {
-			JUnitModel.exportTestRunSession((TestRunSession)testRunSession, output);
+			JUnitModel.exportTestElement(testElement, output);
 		} catch (TransformerException exception) {
 			throw new CoreException(Status.error(ModelMessages.JUnitModel_could_not_export, exception));
 		}

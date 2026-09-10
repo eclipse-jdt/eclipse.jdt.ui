@@ -17,7 +17,6 @@
 package org.eclipse.jdt.internal.junit.model;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -44,6 +43,7 @@ import org.xml.sax.SAXException;
 
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.junit.TestRunListener;
+import org.eclipse.jdt.junit.model.ITestElement;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -477,29 +477,12 @@ public final class JUnitModel {
 		}
 	}
 
-	/**
-	 * Exports the given test run session.
-	 *
-	 * @param testRunSession the test run session
-	 * @param file the destination
-	 * @throws CoreException if an error occurred
-	 */
-	public static void exportTestRunSession(TestRunSession testRunSession, File file) throws CoreException {
-		try (FileOutputStream out= new FileOutputStream(file)) {
-			exportTestRunSession(testRunSession, out);
-		} catch (IOException | TransformerException e) {
-			throw new CoreException(org.eclipse.core.runtime.Status.error(
-					Messages.format(ModelMessages.JUnitModel_could_not_write, BasicElementLabels.getPathLabel(file)),
-					e));
-		}
-	}
-
-	public static void exportTestRunSession(TestRunSession testRunSession, OutputStream out)
+	public static void exportTestElement(ITestElement testElement, OutputStream out)
 			throws TransformerFactoryConfigurationError, TransformerException {
 
 		Transformer transformer= XmlProcessorFactoryJdtJunit.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 		InputSource inputSource= new InputSource();
-		SAXSource source= new SAXSource(new TestRunSessionSerializer(testRunSession), inputSource);
+		SAXSource source= new SAXSource(new TestRunSessionSerializer(testElement), inputSource);
 		StreamResult result= new StreamResult(out);
 		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
