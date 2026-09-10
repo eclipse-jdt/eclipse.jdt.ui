@@ -38,7 +38,7 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 		}
 	}
 
-	private static final class TestTiming {
+	protected static final class TestTiming {
 		final long startTimeNanos;
 		final long elapsedTimeNanos;
 		final long cpuTimeNanos;
@@ -106,14 +106,14 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 		startTiming(testId);
 	}
 
-	private void startTiming(String testId) {
+	protected final void startTiming(String testId) {
 		long wallTimeNanos= System.nanoTime();
 		long cpuTimeNanos= currentThreadCpuTime();
 		long userTimeNanos= currentThreadUserTime();
 		fStartTimings.put(testId, new StartTiming(wallTimeNanos, cpuTimeNanos, userTimeNanos, Thread.currentThread().getId()));
 	}
 
-	private TestTiming endTiming(String testId) {
+	protected final TestTiming endTiming(String testId) {
 		StartTiming start= fStartTimings.remove(testId);
 		if (start == null)
 			return null;
@@ -161,7 +161,7 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 		fSender.flush();
 	}
 
-	private void sendTiming(String testId, TestTiming timing) {
+	protected final void sendTiming(String testId, TestTiming timing) {
 		fSender.sendMessage(MessageIds.TEST_TIMING + testId + ',' + timing.startTimeNanos + ',' + timing.elapsedTimeNanos + ',' + timing.cpuTimeNanos + ',' + timing.userTimeNanos);
 	}
 

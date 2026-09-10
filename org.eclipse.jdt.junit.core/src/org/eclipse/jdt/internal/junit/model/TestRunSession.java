@@ -769,7 +769,13 @@ public class TestRunSession implements ITestRunSession {
 		public void testTiming(String testId, long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
 			TestElement testElement= getTestElement(testId);
 			if (testElement instanceof TestCaseElement) {
-				testElement.setExecutionTiming(startTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+				if (testElement.getStatus().isRunning()) {
+					testElement.setExecutionTiming(startTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+				} else {
+					// Rerun timing arrives after TEST_RERAN. Its start offset belongs to a new
+					// measurement origin and must not extend the original suite interval.
+					testElement.setRerunExecutionTiming(elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+				}
 			}
 		}
 

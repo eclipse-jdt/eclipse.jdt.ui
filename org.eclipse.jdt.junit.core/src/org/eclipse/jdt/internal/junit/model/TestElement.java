@@ -390,13 +390,25 @@ public abstract class TestElement implements ITestElement {
 	void setExecutionTiming(long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
 		long elapsed= Math.max(0L, elapsedTimeNanos);
 		setExecutionWallTime(startTimeNanos, startTimeNanos + elapsed);
+		setCpuTimesInNanos(cpuTimeNanos, userTimeNanos);
+		fFallbackStartTimeNanos= NO_TIME;
+		if (fParent != null)
+			fParent.childChangedTiming(this);
+	}
+
+	void setRerunExecutionTiming(long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
+		fTime= Math.max(0L, elapsedTimeNanos) / 1_000_000_000d;
+		fExecutionStartTimeNanos= NO_TIME;
+		fExecutionEndTimeNanos= NO_TIME;
+		setCpuTimesInNanos(cpuTimeNanos, userTimeNanos);
+		fFallbackStartTimeNanos= NO_TIME;
+	}
+
+	private void setCpuTimesInNanos(long cpuTimeNanos, long userTimeNanos) {
 		fCpuTime= toSeconds(cpuTimeNanos);
 		fUserCpuTime= toSeconds(userTimeNanos);
 		if (!Double.isNaN(fCpuTime) && !Double.isNaN(fUserCpuTime) && fUserCpuTime > fCpuTime)
 			fUserCpuTime= fCpuTime;
-		fFallbackStartTimeNanos= NO_TIME;
-		if (fParent != null)
-			fParent.childChangedTiming(this);
 	}
 
 	void setExecutionWallTime(long startTimeNanos, long endTimeNanos) {

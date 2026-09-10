@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,14 +17,18 @@
 package org.eclipse.jdt.internal.junit.runner;
 
 public class RerunExecutionListener extends FirstRunExecutionListener {
-	// Don't send ids here, since they don't match the ids of the original run:
-	// RemoteTestRunner#rerunTest(..) reloads Test, so ITestReferences are not equals(..).
+	// IDs assigned while reloading a rerun do not match the IDs of the original run.
+	// Keep TEST_START/TEST_END suppressed, capture timing locally, and let
+	// RemoteTestRunner emit the timing with the original test ID after TEST_RERAN.
 
 	public RerunExecutionListener(MessageSender sender, TestIdMap ids) {
 		super(sender, ids);
 	}
 
+	private static final String RERUN_TIMING_ID= "rerun"; //$NON-NLS-1$
+
 	private String fStatus = RemoteTestRunner.RERAN_OK;
+	private TestTiming fTiming;
 
 	@Override
 	public synchronized void notifyTestFailed(TestReferenceFailure failure) {
@@ -41,12 +45,19 @@ public class RerunExecutionListener extends FirstRunExecutionListener {
 
 	@Override
 	public void notifyTestStarted(ITestIdentifier test) {
-		// do nothing
+		startTiming(RERUN_TIMING_ID);
 	}
 
 	@Override
 	public void notifyTestEnded(ITestIdentifier test) {
-		// do nothing
+		fTiming= endTiming(RERUN_TIMING_ID);
+	}
+
+	public void sendTiming(String testId) {
+		if (fTiming != null) {
+			sendTiming(testId, fTiming);
+			fSender.flush();
+		}
 	}
 
 	public String getStatus() {

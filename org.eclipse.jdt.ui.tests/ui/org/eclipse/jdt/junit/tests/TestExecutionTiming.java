@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,12 +35,17 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
+import org.eclipse.jdt.internal.junit.model.ITestRunListener2;
 import org.eclipse.jdt.internal.junit.model.TestElement;
+import org.eclipse.jdt.internal.junit.model.TestRunSession;
+import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.runner.FirstRunExecutionListener;
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.runner.MessageSender;
 import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
+import org.eclipse.jdt.internal.junit.runner.RerunExecutionListener;
+import org.eclipse.jdt.internal.junit.runner.TestIdMap;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 import org.eclipse.jdt.internal.junit.ui.TestSessionLabelProvider;
 
@@ -115,6 +121,107 @@ public class TestExecutionTiming extends AbstractTestRunListenerTest {
 		if (cpuTime >= 0 && userTime >= 0) {
 			assertTrue(userTime <= cpuTime);
 		}
+	}
+
+	@Test
+	public void testRerunListenerSendsFreshTimingWithOriginalTestId() {
+		List<String> messages= new ArrayList<>();
+		int[] flushCount= new int[1];
+		MessageSender sender= new MessageSender() {
+			@Override
+			public void sendMessage(String msg) {
+				messages.add(msg);
+			}
+
+			@Override
+			public void flush() {
+				flushCount[0]++;
+			}
+		};
+		RerunExecutionListener listener= new RerunExecutionListener(sender, new TestIdMap());
+		ITestIdentifier test= new ITestIdentifier() {
+			@Override
+			public String getName() {
+				return "testTiming(pack.TimingTest)"; //$NON-NLS-1$
+			}
+
+			@Override
+			public String getDisplayName() {
+				return getName();
+			}
+
+			@Override
+			public String getParameterTypes() {
+				return ""; //$NON-NLS-1$
+			}
+
+			@Override
+			public String getUniqueId() {
+				return ""; //$NON-NLS-1$
+			}
+		};
+
+		listener.notifyTestStarted(test);
+		listener.notifyTestEnded(test);
+		assertTrue("rerun callbacks must not publish transient test IDs", messages.isEmpty()); //$NON-NLS-1$
+
+		listener.sendTiming("42"); //$NON-NLS-1$
+
+		assertEquals(1, messages.size());
+		assertEquals(1, flushCount[0]);
+		String[] timing= messages.get(0).substring(MessageIds.MSG_HEADER_LENGTH).split(",", -1); //$NON-NLS-1$
+		assertEquals(5, timing.length);
+		assertEquals("42", timing[0]); //$NON-NLS-1$
+		assertTrue(Long.parseLong(timing[1]) >= 0);
+		assertTrue(Long.parseLong(timing[2]) >= 0);
+		long cpuTime= Long.parseLong(timing[3]);
+		long userTime= Long.parseLong(timing[4]);
+		assertTrue(cpuTime >= -1);
+		assertTrue(userTime >= -1);
+		if (cpuTime >= 0 && userTime >= 0) {
+			assertTrue(userTime <= cpuTime);
+		}
+	}
+
+
+	@Test
+	public void testRerunTimingDoesNotChangeOriginalSuiteInterval() throws Exception {
+		TestRunSession session= new TestRunSession("timing", null); //$NON-NLS-1$
+		ITestRunListener2 listener= newTestSessionNotifier(session);
+		String testId= "1"; //$NON-NLS-1$
+		String testName= "testTiming(pack.TimingTest)"; //$NON-NLS-1$
+
+		listener.testRunStarted(1);
+		listener.testStarted(testId, testName);
+		listener.testTiming(testId, 1_000_000_000L, 100_000_000L, 60_000_000L, 40_000_000L);
+		listener.testEnded(testId, testName);
+
+		TestSuiteElement suite= (TestSuiteElement) session.getTestRoot().getChildren()[0];
+		TestElement test= (TestElement) suite.getChildren()[0];
+		assertEquals(0.1d, suite.getElapsedTimeInSeconds(), 0.000_001d);
+		assertEquals(0.1d, test.getElapsedTimeInSeconds(), 0.000_001d);
+
+		listener.testReran(testId, "pack.TimingTest", testName, ITestRunListener2.STATUS_OK, "", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		listener.testTiming(testId, 20_000_000_000L, 250_000_000L, 80_000_000L, 50_000_000L);
+
+		assertEquals(0.25d, test.getElapsedTimeInSeconds(), 0.000_001d);
+		assertEquals(0.08d, test.getCpuTimeInSeconds(), 0.000_001d);
+		assertEquals(0.05d, test.getUserCpuTimeInSeconds(), 0.000_001d);
+		assertEquals("rerun must not extend the original suite interval", 0.1d, suite.getElapsedTimeInSeconds(), 0.000_001d); //$NON-NLS-1$
+	}
+
+	private static ITestRunListener2 newTestSessionNotifier(TestRunSession session) throws Exception {
+		Class<?> notifierClass= null;
+		for (Class<?> nestedClass : TestRunSession.class.getDeclaredClasses()) {
+			if (nestedClass.getSimpleName().equals("TestSessionNotifier")) { //$NON-NLS-1$
+				notifierClass= nestedClass;
+				break;
+			}
+		}
+		assertNotNull(notifierClass);
+		Constructor<?> constructor= notifierClass.getDeclaredConstructor(TestRunSession.class);
+		constructor.setAccessible(true);
+		return (ITestRunListener2) constructor.newInstance(session);
 	}
 
 	@Test
