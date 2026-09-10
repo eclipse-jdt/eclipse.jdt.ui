@@ -1401,6 +1401,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_remove_original_method;
 
+	public static String MoveInstanceMethodProcessor_reverse_call;
+
 	public static String MoveInstanceMethodProcessor_single_implementation;
 
 	public static String MoveInstanceMethodProcessor_target_element_pattern;
