@@ -2,7 +2,7 @@
 
 <!--
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -144,6 +144,11 @@
 	${cursor}
 }</template>
 
+
+<template name="mainvoid" description="%Templates.main" id="org.eclipse.jdt.ui.templates.mainvoid" context="java-members" enabled="true" autoinsert="false">void main() {
+	${cursor}
+}</template>
+
 <template name="public_method" description="%Templates.public_method" id="org.eclipse.jdt.ui.templates.public_method" context="java-members" enabled="true" autoinsert="false">public ${void} ${name}(${}) {
 	${cursor}
 }</template>
@@ -184,9 +189,13 @@ return ${name};</template>
 
 <template name="sysout" description="%Templates.sysout" id="org.eclipse.jdt.ui.templates.sysout" context="java-statements" enabled="true" autoinsert="true">System.out.println(${word_selection}${});${cursor}</template>
 
+<template name="ioprt" description="%Templates.sysout" id="org.eclipse.jdt.ui.templates.ioprt" context="java-statements" enabled="true" autoinsert="true">IO.println(${word_selection}${});${cursor}</template>
+
 <template name="syserr" description="%Templates.syserr" id="org.eclipse.jdt.ui.templates.syserr" context="java-statements" enabled="true" autoinsert="true">System.err.println(${word_selection}${});${cursor}</template>
 
 <template name="systrace" description="%Templates.systrace" id="org.eclipse.jdt.ui.templates.systrace" context="java-statements" enabled="true" autoinsert="true">System.out.println(&quot;${enclosing_type}.${enclosing_method}()&quot;);</template>
+
+<template name="iotrace" description="%Templates.systrace" id="org.eclipse.jdt.ui.templates.iotrace" context="java-statements" enabled="true" autoinsert="true">IO.println(&quot;${enclosing_type}.${enclosing_method}()&quot;);</template>
 
 <template name="&lt;code&gt;" description="%Templates.code_tag" id="org.eclipse.jdt.ui.templates.code_tag" context="javadoc" enabled="true" autoinsert="true">&lt;code&gt;${word_selection}${}&lt;/code&gt;${cursor}</template>
 
