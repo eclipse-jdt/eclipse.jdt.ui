@@ -632,9 +632,9 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		ITestReference[] suites= new ITestReference[] { rerunTest1 };
 		execution.run(suites);
 
-		notifyRerunComplete(r, service.getStatus());
-		// TEST_RERAN resets the model element before the fresh timing is installed.
+		// Publish timing first so TEST_RERAN's synchronous UI update sees fresh values.
 		service.sendTiming(Integer.toString(r.fRerunTestId));
+		notifyRerunComplete(r, service.getStatus());
 	}
 
 	public RerunExecutionListener rerunExecutionListener() {

@@ -209,6 +209,7 @@ public abstract class TestElement implements ITestElement {
 	/* default */ long fExecutionEndTimeNanos= NO_TIME;
 	private double fCpuTime= Double.NaN;
 	private double fUserCpuTime= Double.NaN;
+	private boolean fHasPendingRerunExecutionTiming;
 
 	/**
 	 * @param parent the parent, can be <code>null</code>
@@ -391,6 +392,7 @@ public abstract class TestElement implements ITestElement {
 		long elapsed= Math.max(0L, elapsedTimeNanos);
 		setExecutionWallTime(startTimeNanos, startTimeNanos + elapsed);
 		setCpuTimesInNanos(cpuTimeNanos, userTimeNanos);
+		fHasPendingRerunExecutionTiming= false;
 		fFallbackStartTimeNanos= NO_TIME;
 		if (fParent != null)
 			fParent.childChangedTiming(this);
@@ -401,7 +403,14 @@ public abstract class TestElement implements ITestElement {
 		fExecutionStartTimeNanos= NO_TIME;
 		fExecutionEndTimeNanos= NO_TIME;
 		setCpuTimesInNanos(cpuTimeNanos, userTimeNanos);
+		fHasPendingRerunExecutionTiming= true;
 		fFallbackStartTimeNanos= NO_TIME;
+	}
+
+	boolean consumeRerunExecutionTiming() {
+		boolean hadTiming= fHasPendingRerunExecutionTiming;
+		fHasPendingRerunExecutionTiming= false;
+		return hadTiming;
 	}
 
 	private void setCpuTimesInNanos(long cpuTimeNanos, long userTimeNanos) {
@@ -427,6 +436,7 @@ public abstract class TestElement implements ITestElement {
 		fExecutionEndTimeNanos= NO_TIME;
 		fCpuTime= Double.NaN;
 		fUserCpuTime= Double.NaN;
+		fHasPendingRerunExecutionTiming= false;
 	}
 
 	public double getCpuTimeInSeconds() {

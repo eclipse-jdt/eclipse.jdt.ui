@@ -201,17 +201,18 @@ public class TestExecutionTiming extends AbstractTestRunListenerTest {
 		assertEquals(0.1d, suite.getElapsedTimeInSeconds(), 0.000_001d);
 		assertEquals(0.1d, test.getElapsedTimeInSeconds(), 0.000_001d);
 
-		listener.testReran(testId, "pack.TimingTest", testName, ITestRunListener2.STATUS_OK, "", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		assertTrue("rerun result must invalidate timing from the previous execution", Double.isNaN(test.getElapsedTimeInSeconds())); //$NON-NLS-1$
-		assertTrue(Double.isNaN(test.getCpuTimeInSeconds()));
-		assertTrue(Double.isNaN(test.getUserCpuTimeInSeconds()));
-
 		listener.testTiming(testId, 20_000_000_000L, 250_000_000L, 80_000_000L, 50_000_000L);
+		listener.testReran(testId, "pack.TimingTest", testName, ITestRunListener2.STATUS_OK, "", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 		assertEquals(0.25d, test.getElapsedTimeInSeconds(), 0.000_001d);
 		assertEquals(0.08d, test.getCpuTimeInSeconds(), 0.000_001d);
 		assertEquals(0.05d, test.getUserCpuTimeInSeconds(), 0.000_001d);
 		assertEquals("rerun must not extend the original suite interval", 0.1d, suite.getElapsedTimeInSeconds(), 0.000_001d); //$NON-NLS-1$
+
+		listener.testReran(testId, "pack.TimingTest", testName, ITestRunListener2.STATUS_OK, "", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		assertTrue("a rerun without fresh timing must not retain values from the previous execution", Double.isNaN(test.getElapsedTimeInSeconds())); //$NON-NLS-1$
+		assertTrue(Double.isNaN(test.getCpuTimeInSeconds()));
+		assertTrue(Double.isNaN(test.getUserCpuTimeInSeconds()));
 	}
 
 	private static ITestRunListener2 newTestSessionNotifier(TestRunSession session) throws Exception {
