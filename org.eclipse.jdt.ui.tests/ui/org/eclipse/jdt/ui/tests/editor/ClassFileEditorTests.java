@@ -15,6 +15,12 @@ package org.eclipse.jdt.ui.tests.editor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +33,12 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.StyledTextContent;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 
@@ -143,6 +154,54 @@ public class ClassFileEditorTests {
 		classEditor.highlightInstruction("b", "()V", 3);
 		assertEquals("    3  ldc <String \"b\"> [21]", getSingleHighlightedRange(classEditor));
 
+	}
+
+	@Test
+	void testClosingEditorCancelsPendingOverrideIndicatorInstallationJob() throws Exception {
+		createHelloWorldClass();
+		CountDownLatch aboutToRun= new CountDownLatch(1);
+		CountDownLatch releaseJob= new CountDownLatch(1);
+		CountDownLatch jobDone= new CountDownLatch(1);
+		AtomicReference<Job> capturedJob= new AtomicReference<>();
+		IJobManager jobManager= Job.getJobManager();
+		JobChangeAdapter listener= new JobChangeAdapter() {
+			@Override
+			public void aboutToRun(IJobChangeEvent event) {
+				Job job= event.getJob();
+				if (job.getClass().isAnonymousClass() && job.getClass().getEnclosingClass() == ClassFileEditor.class && capturedJob.compareAndSet(null, job)) {
+					aboutToRun.countDown();
+					try {
+						releaseJob.await(30, TimeUnit.SECONDS);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+			}
+
+			@Override
+			public void done(IJobChangeEvent event) {
+				if (event.getJob() == capturedJob.get()) {
+					jobDone.countDown();
+				}
+			}
+		};
+		jobManager.addJobChangeListener(listener);
+		try {
+			ClassFileEditor editor= createClassFileEditor(TYPE_NAME);
+			assertTrue(aboutToRun.await(30, TimeUnit.SECONDS), "Expected override indicator installation job to be scheduled");
+			Job job= capturedJob.get();
+			assertNotNull(job);
+
+			assertTrue(JavaPlugin.getActivePage().closeEditor(editor, false));
+			releaseJob.countDown();
+
+			assertTrue(jobDone.await(30, TimeUnit.SECONDS), "Expected override indicator installation job to finish");
+			assertNotNull(job.getResult());
+			assertEquals(IStatus.CANCEL, job.getResult().getSeverity());
+		} finally {
+			releaseJob.countDown();
+			jobManager.removeJobChangeListener(listener);
+		}
 	}
 
 	private String getSingleHighlightedRange(ClassFileEditor classEditor) {
