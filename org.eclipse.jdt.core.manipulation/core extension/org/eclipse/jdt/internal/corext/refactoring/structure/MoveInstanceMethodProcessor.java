@@ -100,6 +100,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -2500,6 +2501,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						final Expression argument= (Expression) invocation.arguments().get(index);
 						if (argument instanceof NullLiteral) {
 							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_null_argument, BindingLabelProviderCore.getBindingLabel(declaration.resolveBinding(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)), JavaStatusContext.create(rewriter.getCu(), invocation)));
+							result= false;
+						} else if (argument instanceof LambdaExpression) {
+							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_lambdas, BindingLabelProviderCore.getBindingLabel(declaration.resolveBinding(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED))));
 							result= false;
 						} else {
 							if (argument instanceof ThisExpression)

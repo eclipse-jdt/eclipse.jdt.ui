@@ -1379,6 +1379,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_no_native_methods;
 
+	public static String MoveInstanceMethodProcessor_no_lambdas;
+
 	public static String MoveInstanceMethodProcessor_no_null_argument;
 
 	public static String MoveInstanceMethodProcessor_no_resolved_target;
@@ -2550,8 +2552,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ConvertToRecordRefactoring_has_initializer;
 
 	public static String ConvertToRecordRefactoring_member_types_not_supported;
-
-
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
