@@ -2,7 +2,7 @@
 
 <!--
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Nicolaj Hoess.
+ * Copyright (c) 2019, 2026 Nicolaj Hoess.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,6 +65,8 @@
 	<template autoinsert="true" id="org.eclipse.jdt.postfixcompletion.snull" context="postfix" deleted="false" description="%PostfixTemplates.snull" enabled="true" name="snull">(${i:inner_expression(java.lang.Object,array)} == null) ? ${} : ${inner_expression}${cursor}</template>
 
 	<template autoinsert="true" id="org.eclipse.jdt.postfixcompletion.sysout" context="postfix" deleted="false" description="%PostfixTemplates.sysout" enabled="true" name="sysout">System.out.println(${i:inner_expression(java.lang.String)}${});${cursor}</template>
+	
+	<template autoinsert="true" id="org.eclipse.jdt.postfixcompletion.ioprt" context="postfix" deleted="false" description="%PostfixTemplates.ioprt" enabled="true" name="ioprt">IO.println(${i:inner_expression(java.lang.String)}${});${cursor}</template>
 
 	<template autoinsert="true" id="org.eclipse.jdt.postfixcompletion.throw" context="postfix" deleted="false" description="%PostfixTemplates.throw" enabled="true" name="throw">throw ${true:inner_expression(java.lang.Throwable)};</template>
 
