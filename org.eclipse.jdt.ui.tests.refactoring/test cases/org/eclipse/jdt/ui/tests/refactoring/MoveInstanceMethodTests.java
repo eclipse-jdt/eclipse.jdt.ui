@@ -904,4 +904,10 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 	public void testFail21() throws Exception {
 		failHelper1(new String[] { "p1.A", "p1.B" }, "p1.A", 6, 9, 6, 10, FIELD, "b", true, true);
 	}
+
+	// Issue 3124
+	@Test
+	public void testFail22() throws Exception {
+		failHelper1(new String[] { "p1.A" }, "p1.A", 14, 9, 14, 10, FIELD, "b", true, true);
+	}
 }
