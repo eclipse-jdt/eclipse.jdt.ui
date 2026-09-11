@@ -734,79 +734,77 @@ public class TestRunnerViewPart extends ViewPart {
 	private class TestSessionListener implements ITestSessionListener {
 		@Override
 		public void sessionStarted(){
-			fTestViewer.registerViewersRefresh();
-			fShowOnErrorOnly= getShowOnErrorOnly();
+			runForActiveSession(() -> {
+				fTestViewer.registerViewersRefresh();
+				fShowOnErrorOnly= getShowOnErrorOnly();
 
-			startUpdateJobs();
+				startUpdateJobs();
 
-			fStopAction.setEnabled(true);
-			fRerunLastTestAction.setEnabled(fTestRunSession.canRerun());
+				fStopAction.setEnabled(true);
+				fRerunLastTestAction.setEnabled(fTestRunSession.canRerun());
 
-			// While tests are running, always use the execution order
-			getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					fTestViewer.setSortingCriterion(SortingCriterion.SORT_BY_EXECUTION_ORDER);
-				}
+				// While tests are running, always use the execution order
+				fTestViewer.setSortingCriterion(SortingCriterion.SORT_BY_EXECUTION_ORDER);
 			});
 		}
 
 		@Override
 		public void sessionEnded(long elapsedTime){
-			deregisterTestSessionListener(false);
+			runForActiveSession(() -> {
+				deregisterTestSessionListener(false);
 
-			fTestViewer.registerAutoScrollTarget(null);
+				fTestViewer.registerAutoScrollTarget(null);
 
-			String[] keys= {elapsedTimeAsString(elapsedTime)};
-			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_finish, keys);
-			registerInfoMessage(msg);
+				String[] keys= {elapsedTimeAsString(elapsedTime)};
+				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_finish, keys);
+				registerInfoMessage(msg);
 
-			postSyncRunnable(() -> {
-				if (isDisposed())
-					return;
-				fStopAction.setEnabled(lastLaunchIsKeptAlive());
-				updateRerunFailedFirstAction();
-				fRerunLastTestAction.setEnabled(fTestRunSession.canRerun());
-				processChangesInUI();
-				if (hasErrorsOrFailures()) {
-					selectFirstFailure();
-				}
-				if (fDirtyListener == null) {
-					fDirtyListener= new DirtyListener();
-					JavaCore.addElementChangedListener(fDirtyListener);
-				}
-				warnOfContentChange();
-			});
-			stopUpdateJobs();
-			logMessageIfNoTests();
+				postSyncRunnable(() -> {
+					if (isDisposed())
+						return;
+					fStopAction.setEnabled(lastLaunchIsKeptAlive());
+					updateRerunFailedFirstAction();
+					fRerunLastTestAction.setEnabled(fTestRunSession.canRerun());
+					processChangesInUI();
+					if (hasErrorsOrFailures()) {
+						selectFirstFailure();
+					}
+					if (fDirtyListener == null) {
+						fDirtyListener= new DirtyListener();
+						JavaCore.addElementChangedListener(fDirtyListener);
+					}
+					warnOfContentChange();
+				});
+				stopUpdateJobs();
+				logMessageIfNoTests();
 
-			// When test session ended, apply user sorting criterion
-			getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					setSortingCriterion(fSortingCriterion);
-				}
+				// When test session ended, apply user sorting criterion
+				setSortingCriterion(fSortingCriterion);
 			});
 		}
 
 		@Override
 		public void sessionStopped(final long elapsedTime) {
-			deregisterTestSessionListener(false);
+			runForActiveSession(() -> {
+				deregisterTestSessionListener(false);
 
-			fTestViewer.registerAutoScrollTarget(null);
+				fTestViewer.registerAutoScrollTarget(null);
 
-			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_stopped);
-			handleStopped();
+				registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_stopped);
+				handleStopped();
+			});
 		}
 
 		@Override
 		public void sessionTerminated() {
-			deregisterTestSessionListener(true);
+			runForActiveSession(() -> {
+				deregisterTestSessionListener(true);
 
-			fTestViewer.registerAutoScrollTarget(null);
+				fTestViewer.registerAutoScrollTarget(null);
 
-			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_terminated);
-			handleStopped();
+				registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_terminated);
+				handleStopped();
+			});
 		}
 
 		@Override
@@ -868,6 +866,15 @@ public class TestRunnerViewPart extends ViewPart {
 		public boolean acceptsSwapToDisk() {
 			return false;
 		}
+		private void runForActiveSession(Runnable runnable) {
+			// A notifier may retain this listener after the view switches sessions.
+			// Check its identity and update the jobs together on the UI thread.
+			postSyncRunnable(() -> {
+				if (!isDisposed() && fTestSessionListener == this)
+					runnable.run();
+			});
+		}
+
 	}
 
 	private class UpdateUIJob extends UIJob {
