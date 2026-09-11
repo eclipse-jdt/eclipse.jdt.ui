@@ -5,7 +5,9 @@ import p2.B;
 
 class C {
     C() {
-		getA().mA1(getB());
+    	A a = getA();
+    	B b = getB();
+		a.mA1(b);
 	}
 
 	A getA() {
