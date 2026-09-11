@@ -739,6 +739,8 @@ public class TestRunSession implements ITestRunSession {
 
 		@Override
 		public void testStarted(String testId, String testName) {
+			boolean isIgnored= testName.startsWith(MessageIds.IGNORED_TEST_PREFIX);
+
 			if (fStartedCount == 0) {
 				for (ITestSessionListener listener : fSessionListeners) {
 					listener.runningBegins();
@@ -748,7 +750,14 @@ public class TestRunSession implements ITestRunSession {
 			if (testElement == null) {
 				testElement= createUnrootedTestElement(testId, testName);
 			} else if (! (testElement instanceof TestCaseElement)) {
-				logUnexpectedTest(testId, testElement);
+				if (isIgnored && testElement instanceof TestSuiteElement) {
+					setStatus(testElement, Status.RUNNING);
+					fTotalCount++;
+					fStartedCount++;
+					notifyTestChanged(testElement);
+				} else {
+					logUnexpectedTest(testId, testElement);
+				}
 				return;
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
@@ -774,9 +783,13 @@ public class TestRunSession implements ITestRunSession {
 				testElement= createUnrootedTestElement(testId, testName);
 			} else if (! (testElement instanceof TestCaseElement)) {
 				if (isIgnored) {
-					testElement.setAssumptionFailed(true);
-					fAssumptionFailureCount++;
-					setStatus(testElement, Status.OK);
+					TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
+					testSuiteElement.setIgnored(true);
+					fIgnoredCount++;
+					if (! testElement.getStatus().isErrorOrFailure()) {
+						setStatus(testElement, Status.OK);
+					}
+					notifyTestChanged(testElement);
 				} else {
 					logUnexpectedTest(testId, testElement);
 				}
@@ -840,6 +853,12 @@ public class TestRunSession implements ITestRunSession {
 			}
 		}
 
+		private void notifyTestChanged(TestElement testElement) {
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.testChanged(testElement);
+			}
+		}
+
 		private void logUnexpectedTest(String testId, TestElement testElement) {
 			LOG.error("Unexpected TestElement type for testId '" + testId + "': " + testElement); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -867,17 +886,22 @@ public class TestRunSession implements ITestRunSession {
 	}
 
 	public void registerTestEnded(TestElement testElement, boolean completed) {
-		if (testElement instanceof TestCaseElement) {
+		boolean isIgnoredSuite= testElement instanceof TestSuiteElement
+				&& ((TestSuiteElement) testElement).isIgnored();
+		if (testElement instanceof TestCaseElement || isIgnoredSuite) {
 			fTotalCount++;
-			if (! completed) {
+			if (! completed && ! isIgnoredSuite) {
 				return;
 			}
 			fStartedCount++;
-			if (((TestCaseElement) testElement).isIgnored()) {
+			boolean isIgnored= isIgnoredSuite
+					|| ((TestCaseElement) testElement).isIgnored();
+			if (isIgnored) {
 				fIgnoredCount++;
 			}
-			if (! testElement.getStatus().isErrorOrFailure())
+			if (! testElement.getStatus().isErrorOrFailure()) {
 				setStatus(testElement, Status.OK);
+			}
 		}
 
 		if (testElement.isAssumptionFailure()) {

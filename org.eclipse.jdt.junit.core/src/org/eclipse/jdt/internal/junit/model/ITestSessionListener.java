@@ -66,6 +66,14 @@ public interface ITestSessionListener {
 	 */
 	void testEnded(TestCaseElement testCaseElement);
 	/**
+	 * A test element has changed without a corresponding test-case lifecycle event.
+	 *
+	 * @param testElement the changed test element
+	 */
+	default void testChanged(TestElement testElement) {
+	}
+
+	/**
 	 * An individual test has failed with a stack trace.
 	 *
 	 * @param testElement the test

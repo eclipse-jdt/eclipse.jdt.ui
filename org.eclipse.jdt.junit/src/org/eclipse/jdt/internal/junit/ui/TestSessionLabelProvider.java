@@ -172,7 +172,8 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				throw new IllegalStateException(element.toString());
 
 		} else if (element instanceof TestSuiteElement) {
-			Status status= ((TestSuiteElement) element).getStatus();
+			TestSuiteElement testSuiteElement= (TestSuiteElement) element;
+			Status status= testSuiteElement.getStatus();
 			if (status.isNotRun())
 				return fTestRunnerPart.fSuiteIcon;
 			else if (status.isRunning())
@@ -181,6 +182,8 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				return fTestRunnerPart.fSuiteErrorIcon;
 			else if (status.isFailure())
 				return fTestRunnerPart.fSuiteFailIcon;
+			else if (testSuiteElement.isIgnored())
+				return fTestRunnerPart.fTestIgnoredIcon;
 			else if (status.isOK())
 				return fTestRunnerPart.fSuiteOkIcon;
 			else

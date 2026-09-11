@@ -43,9 +43,10 @@ public class TestSessionTableContentProvider implements IStructuredContentProvid
 		ITestElement[] children= suite.getChildren();
 		for (ITestElement element : children) {
 			if (element instanceof TestSuiteElement) {
-				if (((TestSuiteElement) element).getSuiteStatus().isErrorOrFailure())
-					all.add(element); // add failed suite to flat list too
-				addAll(all, (TestSuiteElement) element);
+				TestSuiteElement testSuiteElement= (TestSuiteElement) element;
+				if (testSuiteElement.getSuiteStatus().isErrorOrFailure() || testSuiteElement.isIgnored())
+					all.add(element); // add failed or ignored suite to flat list too
+				addAll(all, testSuiteElement);
 			} else if (element instanceof TestCaseElement) {
 				all.add(element);
 			}
