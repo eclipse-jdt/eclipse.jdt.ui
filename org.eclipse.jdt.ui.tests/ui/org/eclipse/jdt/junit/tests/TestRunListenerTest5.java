@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -333,11 +333,12 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			configuration.launch(ILaunchManager.RUN_MODE, null);
 			waitForCondition(launchesListener.fLaunchChanged::get, 30 * 1000, 1000);
 
-			long scheduledJobsCount = jobListener.scheduledCount.get();
-			boolean jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCount, 5 * 1000, 100);
-			assertTrue("Expected JUnit update jobs to be scheduled", jobCountIncrease);
+			// The listener is installed before launching. The first event is the initial
+			// scheduling of the update job; the second proves that the running job rescheduled.
+			boolean updateJobRescheduled= waitForCondition(() -> jobListener.scheduledCount.get() >= 2, 5 * 1000, 100);
+			assertTrue("Expected JUnit update job to be rescheduled", updateJobRescheduled);
 
-			// register the session listener here, so that its hopefully the last listener to be notified of stopping
+			// register the session listener here, so that it's hopefully the last listener to be notified of stopping
 			runSessionListener.fTestRunSession.addTestSessionListener(sessionListener);
 			terminateLaunches();
 			boolean terminatedLaunch= waitForCondition(launchesListener.fLaunchHasTerminated::get, 30 * 1000, 1000);
@@ -346,8 +347,8 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			assertTrue("Unexpected timeout on JUnit session stop", stoppedSession);
 			long scheduledJobsCountAfterTermination = jobListener.scheduledCount.get();
 
-			jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCountAfterTermination, 1 * 1000, 100);
-			assertFalse("Expected no new JUnit update jobs to be scheduled", jobCountIncrease);
+			boolean jobCountIncreaseAfterTermination= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCountAfterTermination, 1 * 1000, 100);
+			assertFalse("Expected no new JUnit update jobs to be scheduled", jobCountIncreaseAfterTermination);
 		} finally {
 			jm.removeJobChangeListener(jobListener);
 			JUnitCorePlugin.getModel().removeTestRunSessionListener(runSessionListener);
