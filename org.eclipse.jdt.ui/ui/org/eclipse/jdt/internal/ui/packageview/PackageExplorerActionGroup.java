@@ -18,8 +18,11 @@ package org.eclipse.jdt.internal.ui.packageview;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.action.GroupMarker;
@@ -111,6 +114,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private ToggleLinkingAction fToggleLinkingAction;
 
+	private HighlightAction fHighlightAction;
+	private RemoveHighlightAction fRemoveHighlightAction;
+
 	private RefactorActionGroup fRefactorActionGroup;
 	private NavigateActionGroup fNavigateActionGroup;
 	private ViewActionGroup fViewActionGroup;
@@ -174,6 +180,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 		fGotoRequiredProjectAction= new GotoRequiredProjectAction(fPart);
 		fSelectAllAction= new SelectAllAction(fPart.getTreeViewer());
+
+		fHighlightAction= new HighlightAction(part.getLabelProvider());
+		fRemoveHighlightAction= new RemoveHighlightAction(part.getLabelProvider());
 	}
 
 	@Override
@@ -278,6 +287,13 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		addOpenNewWindowAction(menu, element);
 
 		super.fillContextMenu(menu);
+
+		fHighlightAction.selectionChanged(selection);
+		fRemoveHighlightAction.selectionChanged(selection);
+		if (fHighlightAction.isEnabled())
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fHighlightAction);
+		if (fRemoveHighlightAction.isEnabled())
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fRemoveHighlightAction);
 	}
 
 	 private void addGotoMenu(IMenuManager menu, Object element, int size) {
@@ -445,5 +461,86 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	public FrameList getFrameList() {
 		return fFrameList;
+	}
+
+	private static IPath resolveResourcePath(Object element) {
+		if (element instanceof IResource)
+			return ((IResource) element).getFullPath();
+		if (element instanceof IJavaElement) {
+			IResource r= ((IJavaElement) element).getResource();
+			if (r != null)
+				return r.getFullPath();
+		}
+		return null;
+	}
+
+	private static class HighlightAction extends org.eclipse.jface.action.Action {
+		private final PackageExplorerLabelProvider fLabelProvider;
+		private IPath fPath;
+
+		HighlightAction(PackageExplorerLabelProvider labelProvider) {
+			super(PackagesMessages.HighlightAction_label);
+			setToolTipText(PackagesMessages.HighlightAction_tooltip);
+			fLabelProvider= labelProvider;
+			setEnabled(false);
+		}
+
+		void selectionChanged(IStructuredSelection selection) {
+			fPath= null;
+			setEnabled(false);
+			if (selection.size() != 1)
+				return;
+			Object element= selection.getFirstElement();
+			if (!PackageExplorerLabelProvider.isOpenableFile(element))
+				return;
+			IPath path= resolveResourcePath(element);
+			if (path != null && !fLabelProvider.isHighlighted(path)) {
+				fPath= path;
+				setEnabled(true);
+			}
+		}
+
+		@Override
+		public void run() {
+			if (fPath != null) {
+				fLabelProvider.toggleHighlight(fPath);
+				fLabelProvider.notifyChanged();
+			}
+		}
+	}
+
+	private static class RemoveHighlightAction extends org.eclipse.jface.action.Action {
+		private final PackageExplorerLabelProvider fLabelProvider;
+		private IPath fPath;
+
+		RemoveHighlightAction(PackageExplorerLabelProvider labelProvider) {
+			super(PackagesMessages.RemoveHighlightAction_label);
+			setToolTipText(PackagesMessages.RemoveHighlightAction_tooltip);
+			fLabelProvider= labelProvider;
+			setEnabled(false);
+		}
+
+		void selectionChanged(IStructuredSelection selection) {
+			fPath= null;
+			setEnabled(false);
+			if (selection.size() != 1)
+				return;
+			Object element= selection.getFirstElement();
+			if (!PackageExplorerLabelProvider.isOpenableFile(element))
+				return;
+			IPath path= resolveResourcePath(element);
+			if (path != null && fLabelProvider.isHighlighted(path)) {
+				fPath= path;
+				setEnabled(true);
+			}
+		}
+
+		@Override
+		public void run() {
+			if (fPath != null) {
+				fLabelProvider.toggleHighlight(fPath);
+				fLabelProvider.notifyChanged();
+			}
+		}
 	}
 }
