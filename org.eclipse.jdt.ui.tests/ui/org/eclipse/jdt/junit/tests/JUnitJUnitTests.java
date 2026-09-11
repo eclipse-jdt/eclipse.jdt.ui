@@ -25,6 +25,7 @@ import org.junit.platform.suite.api.Suite;
 //WrappingUnitTest.class,
 
 TestEnableAssertions.class,
+JUnitLaunchConfigurationPrototypeTest.class,
 TestPriorization.class,
 TestTestSearchEngine.class,
 

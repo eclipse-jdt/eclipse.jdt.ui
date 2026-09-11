@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,6 +65,8 @@ import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 
 public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 
@@ -319,6 +321,9 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		IType aTestCase= createType(project, source, "pack", "ATestCaseTerminate.java");
 		buildTestCase(aTestCase);
 
+		// Update jobs belong to the view; do not depend on it being opened by an earlier test.
+		JUnitPlugin.getActivePage().showView(TestRunnerViewPart.NAME);
+
 		LaunchesListener launchesListener= new LaunchesListener();
 		ILaunchConfigurationWorkingCopy configuration= createLaunchConfiguration(aTestCase, testKindId, null, launchesListener);
 
@@ -331,7 +336,13 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		JUnitCorePlugin.getModel().addTestRunSessionListener(runSessionListener);
 		try {
 			configuration.launch(ILaunchManager.RUN_MODE, null);
-			waitForCondition(launchesListener.fLaunchChanged::get, 30 * 1000, 1000);
+			boolean changedLaunch= waitForCondition(launchesListener.fLaunchChanged::get, 30 * 1000, 1000);
+			assertTrue("Unexpected timeout on JUnit launch change", changedLaunch);
+
+			// A launch change does not mean the remote runner has started the test session yet.
+			boolean runningSession= waitForCondition(() -> runSessionListener.fTestRunSession != null
+					&& runSessionListener.fTestRunSession.isRunning(), 30 * 1000, 100);
+			assertTrue("Unexpected timeout on JUnit session start", runningSession);
 
 			long scheduledJobsCount = jobListener.scheduledCount.get();
 			boolean jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCount, 5 * 1000, 100);
@@ -351,6 +362,9 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		} finally {
 			jm.removeJobChangeListener(jobListener);
 			JUnitCorePlugin.getModel().removeTestRunSessionListener(runSessionListener);
+			if (runSessionListener.fTestRunSession != null) {
+				runSessionListener.fTestRunSession.removeTestSessionListener(sessionListener);
+			}
 			terminateLaunches();
 			cleanUp(configuration, launchesListener);
 		}
@@ -387,7 +401,7 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 
 	private static class TestRunSessionListener implements ITestRunSessionListener  {
 
-		private TestRunSession fTestRunSession;
+		private volatile TestRunSession fTestRunSession;
 
 		public TestRunSessionListener() {
 		}
