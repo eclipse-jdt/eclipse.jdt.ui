@@ -50,6 +50,8 @@ JUnit6TestFinderJupiterTest.class,
 JUnitStandaloneDetectionTest.class,
 
 JUnitQuickAssistTest.class,
+EnumSourceFilterTest.class,
+EnumSourceSafetyTest.class,
 
 TestSorting.class
 //LegacyTestRunListenerTest.class
