@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1472,7 +1472,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fInvalidSelection= new TextSelection(0, 0);
 
 			SelectionChangedEvent event= new SelectionChangedEvent(this, fInvalidSelection);
-
 			for (ISelectionChangedListener listener : fSelectionListeners) {
 				listener.selectionChanged(event);
 			}
@@ -3187,12 +3186,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		private final ISelectionValidator fPostSelectionValidator;
 		private boolean fCanceled= false;
 		private final OccurrenceLocation[] fLocations;
+		private final IRegion fTargetRegion;
+		private final long fModificationStamp;
 
-		public OccurrencesFinderJob(IDocument document, OccurrenceLocation[] locations, ISelection selection) {
+		public OccurrencesFinderJob(IDocument document, OccurrenceLocation[] locations, ISelection selection, IRegion targetRegion, long modificationStamp) {
 			super(JavaEditorMessages.JavaEditor_markOccurrences_job_name);
 			fDocument= document;
 			fSelection= selection;
 			fLocations= locations;
+			fTargetRegion= targetRegion;
+			fModificationStamp= modificationStamp;
 
 			if (getSelectionProvider() instanceof ISelectionValidator)
 				fPostSelectionValidator= (ISelectionValidator)getSelectionProvider();
@@ -3267,6 +3270,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					}
 				}
 				fOccurrenceAnnotations= annotationMap.keySet().toArray(new Annotation[annotationMap.size()]);
+				// Only cache successfully installed annotations. A canceled update must not
+				// prevent a later selection in the same word from updating the annotations.
+				fMarkOccurrenceTargetRegion= fTargetRegion;
+				fMarkOccurrenceModificationStamp= fModificationStamp;
 			}
 
 			return Status.OK_STATUS;
@@ -3297,17 +3304,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 
 		boolean hasChanged= false;
+		IRegion targetRegion= null;
+		long currentModificationStamp= IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
 		if (document instanceof IDocumentExtension4) {
 			int offset= selection.getOffset();
-			long currentModificationStamp= ((IDocumentExtension4)document).getModificationStamp();
+			currentModificationStamp= ((IDocumentExtension4)document).getModificationStamp();
 			IRegion markOccurrenceTargetRegion= fMarkOccurrenceTargetRegion;
 			hasChanged= currentModificationStamp != fMarkOccurrenceModificationStamp;
 			if (markOccurrenceTargetRegion != null && !hasChanged) {
 				if (markOccurrenceTargetRegion.getOffset() <= offset && offset <= markOccurrenceTargetRegion.getOffset() + markOccurrenceTargetRegion.getLength())
 					return;
 			}
-			fMarkOccurrenceTargetRegion= JavaWordFinder.findWord(document, offset);
-			fMarkOccurrenceModificationStamp= currentModificationStamp;
+			targetRegion= JavaWordFinder.findWord(document, offset);
 		}
 
 		OccurrenceLocation[] locations= null;
@@ -3359,7 +3367,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 		}
 
-		fOccurrencesFinderJob= new OccurrencesFinderJob(document, locations, selection);
+		fOccurrencesFinderJob= new OccurrencesFinderJob(document, locations, selection, targetRegion, currentModificationStamp);
 		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
 		//fOccurrencesFinderJob.setSystem(true);
 		//fOccurrencesFinderJob.schedule();
@@ -3460,18 +3468,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	void removeOccurrenceAnnotations() {
-		fMarkOccurrenceModificationStamp= IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
-		fMarkOccurrenceTargetRegion= null;
-
 		IDocumentProvider documentProvider= getDocumentProvider();
-		if (documentProvider == null)
+		IAnnotationModel annotationModel= documentProvider == null ? null : documentProvider.getAnnotationModel(getEditorInput());
+		if (annotationModel == null) {
+			fMarkOccurrenceModificationStamp= IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
+			fMarkOccurrenceTargetRegion= null;
 			return;
-
-		IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
-		if (annotationModel == null || fOccurrenceAnnotations == null)
-			return;
+		}
 
 		synchronized (getLockObject(annotationModel)) {
+			// Invalidate the cache under the same lock used to install annotations.
+			// Otherwise a concurrent update can republish the cache before removal.
+			fMarkOccurrenceModificationStamp= IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
+			fMarkOccurrenceTargetRegion= null;
+			if (fOccurrenceAnnotations == null)
+				return;
+
 			if (annotationModel instanceof IAnnotationModelExtension) {
 				((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, null);
 			} else {
@@ -4218,7 +4230,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		// use this as the preferred class for comparing objects.
 		return new NonLocalUndoUserApprover(undoContext, this, new Object [] { getInputJavaElement() }, IResource.class);
 	}
-
 	/**
 	 * Resets the foldings structure according to the folding
 	 * preferences.
