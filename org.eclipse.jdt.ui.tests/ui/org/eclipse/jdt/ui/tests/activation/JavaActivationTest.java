@@ -48,7 +48,7 @@ public class JavaActivationTest {
 			"org.eclipse.reftracker",
 			"org.eclipse.swt.sleak",
 			"org.eclipse.swt.spy",
-			"com.jcraft.jsch",
+			"com.github.mwiede.jsch",
 			"javax.servlet",
 			"javax.servlet.jsp-api",
 			"org.apache.ant",
