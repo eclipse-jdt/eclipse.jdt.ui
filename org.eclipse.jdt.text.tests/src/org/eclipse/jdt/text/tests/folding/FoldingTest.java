@@ -28,10 +28,13 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.folding.FoldingTestUtils.ProjectionRegion;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -41,6 +44,8 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.util.TestUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 @RunWith(Parameterized.class)
 public class FoldingTest {
@@ -169,6 +174,46 @@ public class FoldingTest {
 		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // Javadoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 7); // foo Methode
+	}
+
+	@Test
+	public void testCollapseAll() throws Exception {
+		String str= """
+				package org.example.test;
+
+				import java.util.List;                  //here should be an annotation
+				import java.util.Set;
+
+				class A {                               //here should be an annotation
+				    /**									//here should be an annotation
+				     * Javadoc
+				     */
+				    public void foo() {					//here should be an annotation
+				        System.out.println("Hello");
+				    }
+
+				    class InnerClass {					//here should be an annotation
+
+				    }
+				}
+				""";
+
+		ICompilationUnit cu= packageFragment.createCompilationUnit("A.java", str, true, null);
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+		try {
+
+			ProjectionAnnotationModel model= editor.getAdapter(ProjectionAnnotationModel.class);
+			model.collapseAll(0, str.length());
+
+			List<ProjectionRegion> regions= FoldingTestUtils.extractRegions(model);
+			FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 2, 3); // imports
+			FoldingTestUtils.assertContainsExpandedRegionUsingStartAndEndLine(regions, str, 5, 16); // class A
+			FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 6, 8); // javadoc
+			FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 9, 11);// foo method
+			FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 13, 15);// class InnerClass
+		} finally {
+			editor.close(false);
+		}
 	}
 
 	@Test
