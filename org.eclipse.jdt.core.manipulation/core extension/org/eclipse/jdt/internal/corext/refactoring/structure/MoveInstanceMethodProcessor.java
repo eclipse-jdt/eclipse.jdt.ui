@@ -2509,30 +2509,22 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							if (argument instanceof ThisExpression)
 								rewrite.remove(invocation.getExpression(), null);
 							else if (argument instanceof MethodInvocation ||
-									argument instanceof SuperMethodInvocation ||
-									argument instanceof ClassInstanceCreation) {
+									argument instanceof SuperMethodInvocation) {
 								Expression expression= invocation.getExpression();
 								if (needsTargetNode() &&
 										(expression instanceof MethodInvocation
-												|| expression instanceof SuperMethodInvocation
-												|| expression instanceof ClassInstanceCreation)) {
+												|| expression instanceof SuperMethodInvocation)) {
 									String name1= switch (expression) {
 										case MethodInvocation methodInvocation -> methodInvocation.getName().getFullyQualifiedName() + "()"; //$NON-NLS-1$
 										case SuperMethodInvocation superMethodInvocation -> superMethodInvocation.getName().getFullyQualifiedName() + "()"; //$NON-NLS-1$
-										case ClassInstanceCreation classCreation -> classCreation.getType().resolveBinding() == null
-												? "" //$NON-NLS-1$
-												: "new " + classCreation.getType().resolveBinding().getName() + "()"; //$NON-NLS-1$ //$NON-NLS-2$
 										default -> ""; //$NON-NLS-1$
 									};
 									String name2= switch (argument) {
 										case MethodInvocation methodInvocation -> methodInvocation.getName().getFullyQualifiedName() + "()"; //$NON-NLS-1$
 										case SuperMethodInvocation superMethodInvocation -> superMethodInvocation.getName().getFullyQualifiedName() + "()"; //$NON-NLS-1$
-										case ClassInstanceCreation classCreation -> classCreation.getType().resolveBinding() == null
-												? "" //$NON-NLS-1$
-												: "new " + classCreation.getType().resolveBinding().getName() + "()"; //$NON-NLS-1$ //$NON-NLS-2$
 										default -> ""; //$NON-NLS-1$
 									};
-									status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_reverse_call,  new Object[] {BindingLabelProviderCore.getBindingLabel(declaration.resolveBinding(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED),
+									status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_reverse_call,  new Object[] {BindingLabelProviderCore.getBindingLabel(declaration.resolveBinding(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED),
 											name1, name2}),
 											JavaStatusContext.create(rewriter.getCu(), invocation)));
 								}
