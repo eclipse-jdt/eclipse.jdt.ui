@@ -1374,6 +1374,19 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_type_annotations, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_TYPE_ANNOTATION))
 				.node(createKeepOnOneLineSection())
 				.build(null, (parent, label, key) -> {
+					if (DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER.equals(key)) {
+						String[] values= {
+								JavaCore.DO_NOT_INSERT,
+								JavaCore.INSERT,
+								DefaultCodeFormatterConstants.NEXT_LINE_ON_WRAP
+						};
+						String[] labels= {
+								FormatterMessages.FormatterModifyDialog_newLines_val_do_not_insert,
+								FormatterMessages.FormatterModifyDialog_newLines_val_insert,
+								FormatterMessages.FormatterModifyDialog_newLines_val_insert_on_wrap
+						};
+						return fTree.addComboPref(parent, label, key, values, labels);
+					}
 					String[] values= CheckboxPreference.DO_NOT_INSERT_INSERT;
 					if (parent.getKey().endsWith("-ifelse") || parent.getKey().endsWith("-simpleloops") //$NON-NLS-1$ //$NON-NLS-2$
 							|| DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE.equals(key) || DefaultCodeFormatterConstants.FORMATTER_PUT_TEXT_BLOCK_QUOTES_ON_NEW_LINE.equals(key) ) {
