@@ -494,11 +494,14 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 
 	/**
 	 * Returns the reconciler.
+	 * <p>
+	 * Can be used e.g. by tests to wait until the reconciler is idle, see
+	 * {@link org.eclipse.jface.text.reconciler.AbstractReconciler#isIdle()}.
+	 * </p>
 	 *
 	 * @return the reconciler or <code>null</code> if not set
-	 * @since 3.0
 	 */
-	IReconciler getReconciler() {
+	public IReconciler getReconciler() {
 		return fReconciler;
 	}
 
