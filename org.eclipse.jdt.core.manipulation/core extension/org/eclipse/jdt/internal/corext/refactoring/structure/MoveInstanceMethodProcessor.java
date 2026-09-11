@@ -2528,6 +2528,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 											name1, name2}),
 											JavaStatusContext.create(rewriter.getCu(), invocation)));
 								}
+								rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.createCopyTarget(argument), group);
 							} else {
 								rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.createCopyTarget(argument), group);
 							}

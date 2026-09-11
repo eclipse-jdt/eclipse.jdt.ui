@@ -6,8 +6,7 @@ import p2.B;
 class C {
     C() {
     	A a = getA();
-    	B b = getB();
-		b.mA1(a);
+		getB().mA1(a);
 	}
 
 	A getA() {
