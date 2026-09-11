@@ -124,6 +124,10 @@ public final class RefactoringAvailabilityTester {
 		return RefactoringAvailabilityTesterCore.isChangeSignatureAvailable(method);
 	}
 
+	public static boolean isChangeRecordSignatureAvailable(final IType type) throws JavaModelException {
+		return RefactoringAvailabilityTesterCore.isChangeRecordSignatureAvailable(type);
+	}
+
 	public static boolean isChangeSignatureAvailable(final IStructuredSelection selection) throws JavaModelException {
 		final IMethod method= getSelectedMethod(selection);
 		return isChangeSignatureAvailable(method);
@@ -159,8 +163,9 @@ public final class RefactoringAvailabilityTester {
 
 	public static IMethod getSelectedMethod(final JavaTextSelection selection) throws JavaModelException {
 		final IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length == 1 && (elements[0] instanceof IMethod))
+		if (elements.length == 1 && (elements[0] instanceof IMethod)) {
 			return ((IMethod) elements[0]);
+		}
 		final IJavaElement element= selection.resolveEnclosingElement();
 		return (element instanceof IMethod) ? (IMethod)element : null;
 	}
