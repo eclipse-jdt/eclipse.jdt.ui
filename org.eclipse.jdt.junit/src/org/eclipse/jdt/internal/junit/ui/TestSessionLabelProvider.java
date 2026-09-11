@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,11 +43,13 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 	private final NumberFormat timeFormat;
 
 	private boolean fShowTime;
+	private boolean fShowTimeDetails;
 
 	public TestSessionLabelProvider(TestRunnerViewPart testRunnerPart, int layoutMode) {
 		fTestRunnerPart= testRunnerPart;
 		fLayoutMode= layoutMode;
 		fShowTime= true;
+		fShowTimeDetails= false;
 
 		timeFormat= NumberFormat.getNumberInstance();
 		timeFormat.setGroupingUsed(true);
@@ -80,7 +82,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				text= StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, text);
 			}
 		}
-		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
+		return addTiming(text, testElement);
 	}
 
 	private String getTextForFlatLayout(TestCaseElement testCaseElement, String label) {
@@ -98,18 +100,43 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, BasicElementLabels.getJavaElementName(parentName) });
 	}
 
-	private StyledString addElapsedTime(StyledString styledString, double time) {
+	private StyledString addTiming(StyledString styledString, ITestElement testElement) {
 		String string= styledString.getString();
-		String decorated= addElapsedTime(string, time);
+		String decorated= addTiming(string, testElement);
 		return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, styledString);
 	}
 
-	private String addElapsedTime(String string, double time) {
-		if (!fShowTime || Double.isNaN(time)) {
-			return string;
+	private String addTiming(String string, ITestElement testElement) {
+		String decorated= string;
+		double time= testElement.getElapsedTimeInSeconds();
+		if (fShowTime && !Double.isNaN(time)) {
+			String formattedTime= timeFormat.format(time);
+			decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, new String[] { string, formattedTime});
 		}
-		String formattedTime= timeFormat.format(time);
-		return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, new String[] { string, formattedTime});
+		if (!fShowTimeDetails || !(testElement instanceof TestElement internalTestElement)) {
+			return decorated;
+		}
+
+		double cpuTime= internalTestElement.getCpuTimeInSeconds();
+		if (Double.isNaN(cpuTime)) {
+			return decorated;
+		}
+
+		String userAndSystemDetails= ""; //$NON-NLS-1$
+		double userTime= internalTestElement.getUserCpuTimeInSeconds();
+		double systemTime= internalTestElement.getSystemCpuTimeInSeconds();
+		if (!Double.isNaN(userTime) && !Double.isNaN(systemTime)) {
+			userAndSystemDetails= Messages.format(JUnitMessages.TestSessionLabelProvider_userAndSystemTimeInSeconds,
+					new String[] { timeFormat.format(userTime), timeFormat.format(systemTime) });
+		}
+
+		String nonCpuDetails= ""; //$NON-NLS-1$
+		double nonCpuTime= internalTestElement.getNonCpuTimeInSeconds();
+		if (!Double.isNaN(nonCpuTime)) {
+			nonCpuDetails= Messages.format(JUnitMessages.TestSessionLabelProvider_nonCpuTimeInSeconds, timeFormat.format(nonCpuTime));
+		}
+		return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_cpuTimeInSeconds,
+				new String[] { decorated, timeFormat.format(cpuTime), userAndSystemDetails, nonCpuDetails });
 	}
 
 	private String getSimpleLabel(Object element) {
@@ -144,7 +171,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				label= getTextForFlatLayout((TestCaseElement) testElement, label);
 			}
 		}
-		return addElapsedTime(label, testElement.getElapsedTimeInSeconds());
+		return addTiming(label, testElement);
 	}
 
 	@Override
@@ -192,6 +219,11 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 
 	public void setShowTime(boolean showTime) {
 		fShowTime= showTime;
+		fireLabelProviderChanged(new LabelProviderChangedEvent(this));
+	}
+
+	public void setShowTimeDetails(boolean showTimeDetails) {
+		fShowTimeDetails= showTimeDetails;
 		fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 	}
 

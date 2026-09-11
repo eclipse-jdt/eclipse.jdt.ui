@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.junit.runner.MessageIds;
 public interface ITestRunListener2 {
 
 	/**
-   	 * Status constant indicating that a test passed (constant value 0).
+  	 * Status constant indicating that a test passed (constant value 0).
  	 */
  	int STATUS_OK= 0;
  	/**
@@ -64,6 +64,22 @@ public interface ITestRunListener2 {
 	 * @param testName the name of the test that ended
 	 */
 	void testEnded(String testId, String testName);
+
+	/**
+	 * Reports execution timing measured in the test VM. This is optional protocol data; clients
+	 * talking to an older runner simply do not receive this callback.
+	 *
+	 * @param testId a unique Id identifying the test
+	 * @param startTimeNanos monotonic start offset in nanoseconds relative to a runner-local origin
+	 * @param elapsedTimeNanos monotonic elapsed wall-clock time in nanoseconds
+	 * @param cpuTimeNanos CPU time of the test execution thread in nanoseconds, or {@code -1} if not
+	 *            available
+	 * @param userTimeNanos user-mode CPU time of the test execution thread in nanoseconds, or
+	 *            {@code -1} if not available
+	 */
+	default void testTiming(String testId, long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
+		// optional protocol extension
+	}
 
 
 	/**

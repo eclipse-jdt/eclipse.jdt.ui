@@ -27,6 +27,8 @@ import org.junit.platform.suite.api.Suite;
 TestEnableAssertions.class,
 TestPriorization.class,
 TestTestSearchEngine.class,
+TestExecutionTiming.class,
+TestExecutionTimingProtocol.class,
 
 TestRunListenerTest3.class,
 TestRunListenerTest4.class,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -81,6 +81,13 @@ public class MessageIds {
 	 */
 	public static final String TEST_END=    "%TESTE  ";		 //$NON-NLS-1$
 	/**
+	 * Timing information for an individual test, measured in the test VM.
+	 * TEST_TIMING + testID + "," + startNanos + "," + elapsedNanos + "," + cpuNanos + "," + userNanos.
+	 * CPU values are {@code -1} when thread CPU time is unavailable or the start/end callbacks were
+	 * delivered on different threads.
+	 */
+	public static final String TEST_TIMING= "%TSTTIME"; //$NON-NLS-1$
+	/**
 	 * Notification that a test had an error.
 	 * TEST_ERROR + testID + "," + testName.
 	 * After the notification follows the stack trace.
@@ -152,5 +159,3 @@ public class MessageIds {
 	private MessageIds() {
 	}
 }
-
-

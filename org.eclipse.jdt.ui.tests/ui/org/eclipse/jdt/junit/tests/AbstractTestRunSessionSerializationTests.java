@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2020 IBM Corporation and others.
+ * Copyright (c) 2007, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -142,9 +142,15 @@ public class AbstractTestRunSessionSerializationTests {
 		 * Strips running times
 		 */
 		Pattern regex3= Pattern.compile("(?<=time=\\\")\\d+\\.\\d+(?=\\\")");
+		/*
+		 * CPU timings are optional and VM-dependent. Their persistence is covered by
+		 * TestRunSessionHistoryTests, while these legacy golden files verify the rest
+		 * of the exported XML independently of the availability and exact CPU values.
+		 */
+		Pattern regexCpuTimes= Pattern.compile("\\s+(?:cpuTime|userTime)=\\\"\\d+(?:\\.\\d+)?\\\"");
 		String replacement= "";
-		expected= regex3.matcher(regex2.matcher(regex.matcher(regex0.matcher(expected).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement);
-		actual= regex3.matcher(regex2.matcher(regex.matcher(regex0.matcher(actual).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement);
+		expected= regexCpuTimes.matcher(regex3.matcher(regex2.matcher(regex.matcher(regex0.matcher(expected).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement);
+		actual= regexCpuTimes.matcher(regex3.matcher(regex2.matcher(regex.matcher(regex0.matcher(actual).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement);
 		int ibmJava6BugOffset= actual.indexOf("><");
 		if (ibmJava6BugOffset > 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=197842
 			actual= new StringBuffer(actual).insert(ibmJava6BugOffset + 1, " ").toString();

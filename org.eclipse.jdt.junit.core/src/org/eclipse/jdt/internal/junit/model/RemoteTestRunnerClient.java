@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,6 +95,10 @@ public class RemoteTestRunnerClient {
 	        }
 	        if (message.startsWith(MessageIds.TEST_START)) {
 	            notifyTestStarted(arg);
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_TIMING)) {
+	            scanTestTiming(arg);
 	            return this;
 	        }
 	        if (message.startsWith(MessageIds.TEST_END)) {
@@ -445,6 +449,26 @@ public class RemoteTestRunnerClient {
 		notifyTestReran(testId, className, testName, status);
 	}
 
+	private void scanTestTiming(String arg) {
+		String[] timing= arg.split(",", -1); //$NON-NLS-1$
+		if (timing.length != 5 || timing[0].isEmpty())
+			return;
+		try {
+			long startTimeNanos= Long.parseLong(timing[1]);
+			long elapsedTimeNanos= Long.parseLong(timing[2]);
+			long cpuTimeNanos= Long.parseLong(timing[3]);
+			long userTimeNanos= Long.parseLong(timing[4]);
+			if (startTimeNanos < 0 || elapsedTimeNanos < 0 || cpuTimeNanos < -1 || userTimeNanos < -1)
+				return;
+			// The model derives suite intervals from start + elapsed; the end must not overflow.
+			if (startTimeNanos > Long.MAX_VALUE - elapsedTimeNanos)
+				return;
+			notifyTestTiming(timing[0], startTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+		} catch (NumberFormatException e) {
+			// Ignore malformed optional timing data. Test status/result messages remain authoritative.
+		}
+	}
+
 	private void notifyTestReran(String testId, String className, String testName, String status) {
 		int statusCode= ITestRunListener2.STATUS_OK;
 		if ("FAILURE".equals(status)) //$NON-NLS-1$
@@ -497,6 +521,19 @@ public class RemoteTestRunnerClient {
 					listener.testReran(testId,
 						className, testName, statusCode, trace,
 						nullifyEmpty(fExpectedResult), nullifyEmpty(fActualResult));
+				}
+			});
+		}
+	}
+
+	private void notifyTestTiming(final String testId, final long startTimeNanos, final long elapsedTimeNanos, final long cpuTimeNanos, final long userTimeNanos) {
+		if (JUnitCorePlugin.isStopped())
+			return;
+		for (ITestRunListener2 listener : fListeners) {
+			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
+				public void run() {
+					listener.testTiming(testId, startTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
 				}
 			});
 		}

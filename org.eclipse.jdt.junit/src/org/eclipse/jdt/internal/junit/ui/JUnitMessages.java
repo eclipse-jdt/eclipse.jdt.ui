@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -348,6 +348,7 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_testName_startTime;
 	public static String TestRunnerViewPart_max_remembered;
 	public static String TestRunnerViewPart_show_execution_time;
+	public static String TestRunnerViewPart_show_execution_time_details;
 
 	public static String TestRunnerViewPart_show_failures_only;
 	public static String TestRunnerViewPart_show_ignored_only;
@@ -359,6 +360,9 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_toggle_execution_time_label;
 
 	public static String TestSessionLabelProvider_testName_elapsedTimeInSeconds;
+	public static String TestSessionLabelProvider_testName_cpuTimeInSeconds;
+	public static String TestSessionLabelProvider_userAndSystemTimeInSeconds;
+	public static String TestSessionLabelProvider_nonCpuTimeInSeconds;
 
 	public static String TestSessionLabelProvider_testName_JUnitVersion;
 

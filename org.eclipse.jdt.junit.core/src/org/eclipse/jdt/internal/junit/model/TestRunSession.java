@@ -766,6 +766,20 @@ public class TestRunSession implements ITestRunSession {
 		}
 
 		@Override
+		public void testTiming(String testId, long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
+			TestElement testElement= getTestElement(testId);
+			if (testElement instanceof TestCaseElement) {
+				if (testElement.getStatus().isRunning()) {
+					testElement.setExecutionTiming(startTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+				} else {
+					// Rerun timing arrives after TEST_RERAN. Its start offset belongs to a new
+					// measurement origin and must not extend the original suite interval.
+					testElement.setRerunExecutionTiming(elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+				}
+			}
+		}
+
+		@Override
 		public void testEnded(String testId, String testName) {
 			boolean isIgnored= testName.startsWith(MessageIds.IGNORED_TEST_PREFIX);
 
@@ -830,6 +844,11 @@ public class TestRunSession implements ITestRunSession {
 				return;
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
+
+			// Rerun timing is sent before TEST_RERAN so the synchronous UI update sees it.
+			// If no valid timing arrived, invalidate values from the previous execution.
+			if (!testElement.consumeRerunExecutionTiming())
+				testElement.setElapsedTimeInSeconds(Double.NaN);
 
 			Status status= Status.convert(statusCode);
 			registerTestFailureStatus(testElement, status, trace, expectedResult, actualResult);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -111,8 +111,7 @@ public class TestRunSessionSerializer implements XMLReader {
 			AttributesImpl atts= new AttributesImpl();
 			// Need to store the full #getTestName instead of only the #getSuiteTypeName for test factory methods
 			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getTestName());
-			if (! Double.isNaN(testSuiteElement.getElapsedTimeInSeconds()))
-				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testSuiteElement.getElapsedTimeInSeconds()));
+			addTime(atts, IXMLTags.ATTR_TIME, testSuiteElement.getElapsedTimeInSeconds());
 			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			if (testSuiteElement.getDisplayName() != null) {
@@ -141,8 +140,9 @@ public class TestRunSessionSerializer implements XMLReader {
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestMethodName());
 			addCDATA(atts, IXMLTags.ATTR_CLASSNAME, testCaseElement.getClassName());
-			if (! Double.isNaN(testCaseElement.getElapsedTimeInSeconds()))
-				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testCaseElement.getElapsedTimeInSeconds()));
+			addTime(atts, IXMLTags.ATTR_TIME, testCaseElement.getElapsedTimeInSeconds());
+			addTime(atts, IXMLTags.ATTR_CPU_TIME, testCaseElement.getCpuTimeInSeconds());
+			addTime(atts, IXMLTags.ATTR_USER_TIME, testCaseElement.getUserCpuTimeInSeconds());
 			if (testElement.getProgressState() != ProgressState.COMPLETED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			if (testCaseElement.isIgnored())
@@ -212,6 +212,11 @@ public class TestRunSessionSerializer implements XMLReader {
 
 	private void endElement(String name) throws SAXException {
 		fHandler.endElement(EMPTY, name, name);
+	}
+
+	private void addTime(AttributesImpl atts, String name, double time) {
+		if (!Double.isNaN(time))
+			addCDATA(atts, name, timeFormat.format(time));
 	}
 
 	private static void addCDATA(AttributesImpl atts, String name, int value) {

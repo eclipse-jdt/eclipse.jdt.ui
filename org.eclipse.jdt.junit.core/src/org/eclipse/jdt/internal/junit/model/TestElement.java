@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,8 @@ import org.eclipse.jdt.junit.model.ITestRunSession;
 import org.eclipse.core.runtime.Assert;
 
 public abstract class TestElement implements ITestElement {
+	private static final long NO_TIME= Long.MIN_VALUE;
+
 	public final static class Status {
 		public static final Status RUNNING_ERROR= new Status("RUNNING_ERROR", 5); //$NON-NLS-1$
 		public static final Status RUNNING_FAILURE= new Status("RUNNING_FAILURE", 6); //$NON-NLS-1$
@@ -197,15 +199,17 @@ public abstract class TestElement implements ITestElement {
 	private boolean fAssumptionFailed;
 
 	/**
-	 * Running time in seconds. Contents depend on the current {@link #getProgressState()}:
-	 * <ul>
-	 * <li>{@link org.eclipse.jdt.junit.model.ITestElement.ProgressState#NOT_STARTED}: {@link Double#NaN}</li>
-	 * <li>{@link org.eclipse.jdt.junit.model.ITestElement.ProgressState#RUNNING}: negated start time</li>
-	 * <li>{@link org.eclipse.jdt.junit.model.ITestElement.ProgressState#STOPPED}: elapsed time</li>
-	 * <li>{@link org.eclipse.jdt.junit.model.ITestElement.ProgressState#COMPLETED}: elapsed time</li>
-	 * </ul>
+	 * Running time in seconds. While a test is running this remains {@link Double#NaN}; the
+	 * monotonic fallback start instant is kept separately in {@link #fFallbackStartTimeNanos}.
 	 */
 	/* default */ double fTime= Double.NaN;
+
+	private long fFallbackStartTimeNanos= NO_TIME;
+	/* default */ long fExecutionStartTimeNanos= NO_TIME;
+	/* default */ long fExecutionEndTimeNanos= NO_TIME;
+	private double fCpuTime= Double.NaN;
+	private double fUserCpuTime= Double.NaN;
+	private boolean fHasPendingRerunExecutionTiming;
 
 	/**
 	 * @param parent the parent, can be <code>null</code>
@@ -289,12 +293,12 @@ public abstract class TestElement implements ITestElement {
 
 	public void setStatus(Status status) {
 		if (status == Status.RUNNING) {
-			fTime= - System.currentTimeMillis() / 1000d ;
-		} else if (status.convertToProgressState() == ProgressState.COMPLETED) {
-			if (fTime < 0) { // assert ! Double.isNaN(fTime)
-				double endTime= System.currentTimeMillis() / 1000.0d;
-				fTime= endTime + fTime;
-			}
+			fFallbackStartTimeNanos= System.nanoTime();
+			fTime= Double.NaN;
+			clearExecutionTiming();
+		} else if (status.convertToProgressState() == ProgressState.COMPLETED && fFallbackStartTimeNanos != NO_TIME) {
+			fTime= Math.max(0L, System.nanoTime() - fFallbackStartTimeNanos) / 1_000_000_000d;
+			fFallbackStartTimeNanos= NO_TIME;
 		}
 
 		fStatus= status;
@@ -369,6 +373,90 @@ public abstract class TestElement implements ITestElement {
 
 	public void setElapsedTimeInSeconds(double time) {
 		fTime= time;
+		fFallbackStartTimeNanos= NO_TIME;
+		clearExecutionTiming();
+	}
+
+	void setCpuTimesInSeconds(double cpuTime, double userCpuTime) {
+		fCpuTime= normalizeSeconds(cpuTime);
+		fUserCpuTime= normalizeSeconds(userCpuTime);
+		if (!Double.isNaN(fCpuTime) && !Double.isNaN(fUserCpuTime) && fUserCpuTime > fCpuTime)
+			fUserCpuTime= fCpuTime;
+	}
+
+	private static double normalizeSeconds(double time) {
+		return Double.isFinite(time) && time >= 0.0d ? time : Double.NaN;
+	}
+
+	void setExecutionTiming(long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
+		long elapsed= Math.max(0L, elapsedTimeNanos);
+		setExecutionWallTime(startTimeNanos, startTimeNanos + elapsed);
+		setCpuTimesInNanos(cpuTimeNanos, userTimeNanos);
+		fHasPendingRerunExecutionTiming= false;
+		fFallbackStartTimeNanos= NO_TIME;
+		if (fParent != null)
+			fParent.childChangedTiming(this);
+	}
+
+	void setRerunExecutionTiming(long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
+		fTime= Math.max(0L, elapsedTimeNanos) / 1_000_000_000d;
+		fExecutionStartTimeNanos= NO_TIME;
+		fExecutionEndTimeNanos= NO_TIME;
+		setCpuTimesInNanos(cpuTimeNanos, userTimeNanos);
+		fHasPendingRerunExecutionTiming= true;
+		fFallbackStartTimeNanos= NO_TIME;
+	}
+
+	boolean consumeRerunExecutionTiming() {
+		boolean hadTiming= fHasPendingRerunExecutionTiming;
+		fHasPendingRerunExecutionTiming= false;
+		return hadTiming;
+	}
+
+	private void setCpuTimesInNanos(long cpuTimeNanos, long userTimeNanos) {
+		fCpuTime= toSeconds(cpuTimeNanos);
+		fUserCpuTime= toSeconds(userTimeNanos);
+		if (!Double.isNaN(fCpuTime) && !Double.isNaN(fUserCpuTime) && fUserCpuTime > fCpuTime)
+			fUserCpuTime= fCpuTime;
+	}
+
+	void setExecutionWallTime(long startTimeNanos, long endTimeNanos) {
+		fExecutionStartTimeNanos= startTimeNanos;
+		fExecutionEndTimeNanos= Math.max(startTimeNanos, endTimeNanos);
+		fTime= (fExecutionEndTimeNanos - fExecutionStartTimeNanos) / 1_000_000_000d;
+		fFallbackStartTimeNanos= NO_TIME;
+	}
+
+	private static double toSeconds(long timeNanos) {
+		return timeNanos < 0 ? Double.NaN : timeNanos / 1_000_000_000d;
+	}
+
+	private void clearExecutionTiming() {
+		fExecutionStartTimeNanos= NO_TIME;
+		fExecutionEndTimeNanos= NO_TIME;
+		fCpuTime= Double.NaN;
+		fUserCpuTime= Double.NaN;
+		fHasPendingRerunExecutionTiming= false;
+	}
+
+	public double getCpuTimeInSeconds() {
+		return fCpuTime;
+	}
+
+	public double getUserCpuTimeInSeconds() {
+		return fUserCpuTime;
+	}
+
+	public double getSystemCpuTimeInSeconds() {
+		if (Double.isNaN(fCpuTime) || Double.isNaN(fUserCpuTime))
+			return Double.NaN;
+		return Math.max(0.0d, fCpuTime - fUserCpuTime);
+	}
+
+	public double getNonCpuTimeInSeconds() {
+		if (Double.isNaN(fTime) || Double.isNaN(fCpuTime))
+			return Double.NaN;
+		return Math.max(0.0d, fTime - fCpuTime);
 	}
 
 	@Override
