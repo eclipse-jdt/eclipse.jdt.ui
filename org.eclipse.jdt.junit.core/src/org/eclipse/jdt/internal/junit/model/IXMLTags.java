@@ -65,6 +65,10 @@ public interface IXMLTags {
 	 */
 	String ATTR_IGNORED= "ignored"; //$NON-NLS-1$
 	/**
+	 * value: Boolean
+	 */
+	String ATTR_SKIPPED= "skipped"; //$NON-NLS-1$
+	/**
 	 * value: String
 	 */
 	String ATTR_PACKAGE= "package"; //$NON-NLS-1$

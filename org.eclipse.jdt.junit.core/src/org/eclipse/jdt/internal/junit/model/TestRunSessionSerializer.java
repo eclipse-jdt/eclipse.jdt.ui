@@ -21,8 +21,11 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -34,10 +37,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.AttributesImpl;
 
+import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
+import org.eclipse.jdt.junit.model.ITestElementContainer;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -50,18 +55,18 @@ public class TestRunSessionSerializer implements XMLReader {
 	private static final Attributes NO_ATTS= new AttributesImpl();
 
 
-	private final TestRunSession fTestRunSession;
+	private final ITestElement fTestElement;
 	private ContentHandler fHandler;
 	private ErrorHandler fErrorHandler;
 
 	private final NumberFormat timeFormat= new DecimalFormat("0.0##", new DecimalFormatSymbols(Locale.US)); //$NON-NLS-1$ // not localized, parseable by Double.parseDouble(..)
 
 	/**
-	 * @param testRunSession the test run session to serialize
+	 * @param testElement the test element to serialize
 	 */
-	public TestRunSessionSerializer(TestRunSession testRunSession) {
-		Assert.isNotNull(testRunSession);
-		fTestRunSession= testRunSession;
+	public TestRunSessionSerializer(ITestElement testElement) {
+		Assert.isNotNull(testElement);
+		fTestElement= testElement;
 	}
 
 	@Override
@@ -70,11 +75,15 @@ public class TestRunSessionSerializer implements XMLReader {
 			throw new SAXException("ContentHandler missing"); //$NON-NLS-1$
 
 		fHandler.startDocument();
-		handleTestRun();
+		if (fTestElement instanceof TestRunSession runSession) {
+			handleTestRun(runSession);
+		} else {
+			handleTestElement(fTestElement, true);
+		}
 		fHandler.endDocument();
 	}
 
-	private void handleTestRun() throws SAXException {
+	private void handleTestRun(TestRunSession fTestRunSession) throws SAXException {
 		AttributesImpl atts= new AttributesImpl();
 		addCDATA(atts, IXMLTags.ATTR_NAME, fTestRunSession.getTestRunName());
 		IJavaProject project= fTestRunSession.getLaunchedProject();
@@ -85,6 +94,7 @@ public class TestRunSessionSerializer implements XMLReader {
 		addCDATA(atts, IXMLTags.ATTR_FAILURES, fTestRunSession.getFailureCount());
 		addCDATA(atts, IXMLTags.ATTR_ERRORS, fTestRunSession.getErrorCount());
 		addCDATA(atts, IXMLTags.ATTR_IGNORED, fTestRunSession.getIgnoredCount());
+		addCDATA(atts, IXMLTags.ATTR_SKIPPED, fTestRunSession.getIgnoredCount());
 		String includeTags= fTestRunSession.getIncludeTags();
 		if (includeTags != null && !includeTags.trim().isEmpty()) {
 			addCDATA(atts, IXMLTags.ATTR_INCLUDE_TAGS, includeTags);
@@ -98,13 +108,13 @@ public class TestRunSessionSerializer implements XMLReader {
 		TestRoot testRoot= fTestRunSession.getTestRoot();
 		ITestElement[] topSuites= testRoot.getChildren();
 		for (ITestElement topSuite : topSuites) {
-			handleTestElement(topSuite);
+			handleTestElement(topSuite, false);
 		}
 
 		endElement(IXMLTags.NODE_TESTRUN);
 	}
 
-	private void handleTestElement(ITestElement testElement) throws SAXException {
+	private void handleTestElement(ITestElement testElement, boolean isRootOfDocument) throws SAXException {
 		if (testElement instanceof TestSuiteElement) {
 			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
 
@@ -118,6 +128,20 @@ public class TestRunSessionSerializer implements XMLReader {
 			if (testSuiteElement.getDisplayName() != null) {
 				addCDATA(atts, IXMLTags.ATTR_DISPLAY_NAME, testSuiteElement.getDisplayName());
 			}
+
+			if (isRootOfDocument) {
+				Map<Result, Long> accumluatedResults= allTestCaseChildren(testSuiteElement).map(c -> c.getTestResult(false)) //
+						.collect(Collectors.groupingBy(r -> r, HashMap::new, Collectors.counting()));
+
+				Long testCount= accumluatedResults.values().stream().reduce(0L, Long::sum);
+				addCDATA(atts, IXMLTags.ATTR_TESTS, testCount.toString());
+				addCDATA(atts, IXMLTags.ATTR_FAILURES, accumluatedResults.getOrDefault(Result.FAILURE, 0L).toString());
+				addCDATA(atts, IXMLTags.ATTR_ERRORS, accumluatedResults.getOrDefault(Result.ERROR, 0L).toString());
+				String ignored= accumluatedResults.getOrDefault(Result.IGNORED, 0L).toString();
+				addCDATA(atts, IXMLTags.ATTR_IGNORED, ignored);
+				addCDATA(atts, IXMLTags.ATTR_SKIPPED, ignored);
+			}
+
 			String[] paramTypes= testSuiteElement.getParameterTypes();
 			if (paramTypes != null) {
 				String paramTypesStr= Arrays.stream(paramTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
@@ -131,7 +155,7 @@ public class TestRunSessionSerializer implements XMLReader {
 
 			ITestElement[] children= testSuiteElement.getChildren();
 			for (ITestElement child : children) {
-				handleTestElement(child);
+				handleTestElement(child, false);
 			}
 			endElement(IXMLTags.NODE_TESTSUITE);
 
@@ -170,6 +194,17 @@ public class TestRunSessionSerializer implements XMLReader {
 			throw new IllegalStateException(String.valueOf(testElement));
 		}
 
+	}
+
+	private static Stream<ITestCaseElement> allTestCaseChildren(ITestElementContainer testContainer) {
+		return Arrays.stream(testContainer.getChildren()).flatMap(element -> {
+			if (element instanceof ITestCaseElement testCase) {
+				return Stream.of(testCase);
+			} else if (element instanceof ITestElementContainer container) {
+				return allTestCaseChildren(container);
+			}
+			return Stream.empty();
+		});
 	}
 
 	private void addFailure(TestElement testElement) throws SAXException {

@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
 
 import org.eclipse.swt.SWT;
@@ -670,9 +671,8 @@ public class TestRunnerViewPart extends ViewPart {
 
 			//TODO: MULTI: getFileNames()
 			File file= new File(path);
-
 			try {
-				JUnitModel.exportTestRunSession(fTestRunSession, file);
+				JUnitCore.exportTestRunSession(fTestRunSession, file);
 			} catch (CoreException e) {
 				JUnitPlugin.log(e);
 				ErrorDialog.openError(fShell, JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_error_title, e.getStatus().getMessage(), e.getStatus());

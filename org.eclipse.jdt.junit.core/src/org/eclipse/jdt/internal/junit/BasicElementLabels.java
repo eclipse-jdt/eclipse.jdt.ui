@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.junit;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.osgi.util.TextProcessor;
 
@@ -68,6 +69,16 @@ public class BasicElementLabels {
 	 */
 	public static String getPathLabel(File file) {
 		return markLTR(file.getAbsolutePath(), "/\\:.");  //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns the label of the path of a file.
+	 *
+	 * @param file the file
+	 * @return the label of the file path to be used in the UI.
+	 */
+	public static String getPathLabel(Path file) {
+		return markLTR(file.toAbsolutePath().toString(), "/\\:.");  //$NON-NLS-1$
 	}
 
 	/**
