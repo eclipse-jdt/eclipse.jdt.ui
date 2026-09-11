@@ -34,11 +34,14 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -50,6 +53,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -181,7 +185,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		protected SingleVariableDeclaration createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<SingleVariableDeclaration> nodes) {
 			SingleVariableDeclaration newP= getASTRewrite().getAST().newSingleVariableDeclaration();
 			newP.setName(getASTRewrite().getAST().newSimpleName(info.getNewName()));
-			newP.setType(createNewTypeNode(ParameterInfo.stripEllipsis(info.getNewTypeName())));
+			newP.setType(createNewTypeNode(ParameterInfo.stripEllipsis(info.getNewTypeName()), info.getNewTypeBinding()));
 			newP.setVarargs(info.isNewVarargs());
 			return newP;
 		}
@@ -210,7 +214,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		protected void changeParamgumentType(ParameterInfo info) {
 			SingleVariableDeclaration oldParam= getParameter(info.getOldIndex());
 			SingleVariableDeclaration oldSVDParam= oldParam;
-			replaceTypeNode(oldSVDParam.getType(), ParameterInfo.stripEllipsis(info.getNewTypeName()));
+			replaceTypeNode(oldSVDParam.getType(), ParameterInfo.stripEllipsis(info.getNewTypeName()), info.getNewTypeBinding());
 		}
 
 	}
@@ -316,8 +320,8 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 				// no-op
 			}
 
-			protected final void replaceTypeNode(Type typeNode, String newTypeName){
-				Type newTypeNode= createNewTypeNode(newTypeName);
+			protected final void replaceTypeNode(Type typeNode, String newTypeName, ITypeBinding newTypeBinding){
+				Type newTypeNode= createNewTypeNode(newTypeName, newTypeBinding);
 				getASTRewrite().replace(typeNode, newTypeNode, fDescription);
 				//registerImportRemoveNode(typeNode);
 				getTightSourceRangeComputer().addTightSourceNode(typeNode);
@@ -327,10 +331,19 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 				return (TightSourceRangeComputer) fCuRewrite.getASTRewrite().getExtendedSourceRangeComputer();
 			}
 
-			protected final Type createNewTypeNode(String newTypeName) {
-				return (Type) getASTRewrite().createStringPlaceholder(newTypeName, ASTNode.SIMPLE_TYPE);
+			protected final Type createNewTypeNode(String newTypeName, ITypeBinding newTypeBinding) {
+				Type newTypeNode;
+				if (newTypeBinding == null) {
+					return (Type) getASTRewrite().createStringPlaceholder(newTypeName, ASTNode.SIMPLE_TYPE);
+				} else {
+					ImportRewrite importRewrite= fCuRewrite.getImportRewrite();
+					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fCuRewrite.getRoot(), fCuRewrite.getRoot().getStartPosition(), importRewrite);
+					newTypeNode= importRewrite.addImport(newTypeBinding, fCuRewrite.getAST(), importRewriteContext);
+				}
+
+				return newTypeNode;
 			}
-	}
+		}
 
 
 	public List<ParameterInfo> getParameterInfos() {
@@ -448,7 +461,14 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 		fOccurrences= findOccurrences(Progress.subMonitor(pm, 1), binaryRefs, result);
 		binaryRefs.addErrorIfNecessary(result);
+		for (RefactoringStatus status : TypeContextChecker.checkAndResolveRecordTypes(fType, getStubTypeContext(), getParameterInfos())) {
+			if (status != null)
+				result.merge(status);
+		}
+		if (result.hasFatalError())
+			return result;
 		createChangeManager(Progress.subMonitor(pm, 1), result);
+
 		return result;
 	}
 
