@@ -98,8 +98,10 @@ public class TypeContextChecker {
 	private abstract static class AbstractTypesChecker {
 
 		static final String PLACEHOLDER_NAME= "__$$__"; //$NON-NLS-1$
-		static final String OPENING_QUOTE="(";//$NON-NLS-1$
-		static final String CLOSING_QUOTE=")";//$NON-NLS-1$
+
+		static final String OPENING_QUOTE= "(";//$NON-NLS-1$
+
+		static final String CLOSING_QUOTE= ")";//$NON-NLS-1$
 
 		abstract ITypeBinding[] resolveBindings(String[] types, RefactoringStatus[] results, boolean firstPass) throws CoreException;
 
@@ -107,13 +109,15 @@ public class TypeContextChecker {
 
 		boolean needSecondPass(String[] types, ITypeBinding[] typeBindings, RefactoringStatus[] semanticsResults) {
 			for (int i= 0; i < types.length; i++)
-				if (typeBindings[i] == null || ! semanticsResults[i].isOK())
+				if (typeBindings[i] == null || !semanticsResults[i].isOK())
 					return true;
 			return false;
 		}
 
-		String[] prepareTypes(int parameterCount, List<ParameterInfo> parameterInfos) {
-			String[] types= new String[parameterCount];
+		String[] prepareTypes(int arraySize, int parameterCount, List<ParameterInfo> parameterInfos) {
+			//For methodDeclarations arraySize = parameterCount+1 (it adds the return type),
+			//but for RecordDeclaration there is no return type, arraySize will be same as parameterCount
+			String[] types= new String[arraySize];
 			for (int i= 0; i < parameterCount; i++)
 				types[i]= ParameterInfo.stripEllipsis((parameterInfos.get(i)).getNewTypeName());
 			return types;
@@ -131,7 +135,7 @@ public class TypeContextChecker {
 			return offsetBeforeName;
 		}
 
-		ITypeBinding[] populateAndCheckTypeBindings(String[] types, Type[] typeNodes, RefactoringStatus[] results,  boolean firstPass) throws CoreException {
+		ITypeBinding[] populateAndCheckTypeBindings(String[] types, Type[] typeNodes, RefactoringStatus[] results, boolean firstPass) throws CoreException {
 			ITypeBinding[] typeBindings= new ITypeBinding[types.length];
 			for (int i= 0; i < types.length; i++) {
 				Type type= typeNodes[i];
@@ -158,11 +162,11 @@ public class TypeContextChecker {
 				ParameterInfo parameterInfo= parameterInfos.get(i);
 				if (!parameterInfo.isResolve())
 					continue;
-				if (parameterInfo.getOldTypeBinding() != null && ! parameterInfo.isTypeNameChanged()) {
+				if (parameterInfo.getOldTypeBinding() != null && !parameterInfo.isTypeNameChanged()) {
 					parameterInfo.setNewTypeBinding(parameterInfo.getOldTypeBinding());
 				} else {
 					parameterInfo.setNewTypeBinding(typeBindings[i]);
-					if (typeBindings[i] == null || (needsSecondPass && ! semanticsResults[i].isOK())) {
+					if (typeBindings[i] == null || (needsSecondPass && !semanticsResults[i].isOK())) {
 						if (results[i] == null)
 							results[i]= semanticsResults[i];
 						else
@@ -173,7 +177,7 @@ public class TypeContextChecker {
 		}
 
 		private static List<TypeNameMatch> findTypeInfos(String typeName, IType contextType, IProgressMonitor pm) throws JavaModelException {
-			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[]{contextType.getJavaProject()}, true);
+			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[] { contextType.getJavaProject() }, true);
 			IPackageFragment currPackage= contextType.getPackageFragment();
 			ArrayList<TypeNameMatch> collectedInfos= new ArrayList<>();
 			TypeNameMatchCollector requestor= new TypeNameMatchCollector(collectedInfos);
@@ -184,7 +188,7 @@ public class TypeContextChecker {
 			for (TypeNameMatch curr : collectedInfos) {
 				IType type= curr.getType();
 				if (type != null) {
-					boolean visible=true;
+					boolean visible= true;
 					try {
 						visible= JavaModelUtil.isVisible(type, currPackage);
 					} catch (JavaModelException e) {
@@ -201,6 +205,7 @@ public class TypeContextChecker {
 		String qualifyTypes(Type type, final RefactoringStatus result) throws CoreException {
 			class NestedException extends RuntimeException {
 				private static final long serialVersionUID= 1L;
+
 				NestedException(CoreException e) {
 					super(e);
 				}
@@ -211,21 +216,25 @@ public class TypeContextChecker {
 					appendResolved(node.getIdentifier());
 					return false;
 				}
+
 				@Override
 				public boolean visit(QualifiedName node) {
 					appendResolved(node.getFullyQualifiedName());
 					return false;
 				}
+
 				@Override
 				public boolean visit(QualifiedType node) {
 					appendResolved(ASTNodes.getQualifiedTypeName(node));
 					return false;
 				}
+
 				@Override
 				public boolean visit(NameQualifiedType node) {
 					appendResolved(ASTNodes.getQualifiedTypeName(node));
 					return false;
 				}
+
 				private void appendResolved(String typeName) {
 					String resolvedType;
 					try {
@@ -249,8 +258,8 @@ public class TypeContextChecker {
 			if (fqns != null) {
 				if (fqns.length == 1) {
 					return JavaModelUtil.concatenateName(fqns[0][0], fqns[0][1]);
-				} else if (fqns.length > 1){
-					String[] keys= { BasicElementLabels.getJavaElementName(elementTypeName), String.valueOf(fqns.length)};
+				} else if (fqns.length > 1) {
+					String[] keys= { BasicElementLabels.getJavaElementName(elementTypeName), String.valueOf(fqns.length) };
 					String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_ambiguous, keys);
 					status.addError(msg);
 					return elementTypeName;
@@ -258,16 +267,16 @@ public class TypeContextChecker {
 			}
 
 			List<TypeNameMatch> typeRefsFound= findTypeInfos(elementTypeName, declaringType, pm);
-			if (typeRefsFound.isEmpty()){
+			if (typeRefsFound.isEmpty()) {
 				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_not_unique, BasicElementLabels.getJavaElementName(elementTypeName));
 				status.addError(msg);
 				return elementTypeName;
-			} else if (typeRefsFound.size() == 1){
+			} else if (typeRefsFound.size() == 1) {
 				TypeNameMatch typeInfo= typeRefsFound.get(0);
 				return typeInfo.getFullyQualifiedName();
 			} else {
 				Assert.isTrue(typeRefsFound.size() > 1);
-				String[] keys= {BasicElementLabels.getJavaElementName(elementTypeName), String.valueOf(typeRefsFound.size())};
+				String[] keys= { BasicElementLabels.getJavaElementName(elementTypeName), String.valueOf(typeRefsFound.size()) };
 				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_ambiguous, keys);
 				status.addError(msg);
 				return elementTypeName;
@@ -280,8 +289,11 @@ public class TypeContextChecker {
 		private static final String METHOD_NAME= "__$$__"; //$NON-NLS-1$
 
 		private final IMethod fMethod;
+
 		private final StubTypeContext fStubTypeContext;
+
 		private final List<ParameterInfo> fParameterInfos;
+
 		private final ReturnTypeInfo fReturnTypeInfo;
 
 		public MethodTypesChecker(IMethod method, StubTypeContext stubTypeContext, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) {
@@ -293,8 +305,6 @@ public class TypeContextChecker {
 
 		public RefactoringStatus[] checkAndResolveMethodTypes() throws CoreException {
 			RefactoringStatus[] results= new MethodTypesSyntaxChecker(fMethod, fParameterInfos, fReturnTypeInfo).checkSyntax();
-			//results = parseResults(new MethodTypesSyntaxChecker(fMethod, fParameterInfos, fReturnTypeInfo).checkSyntax());
-			//if (results!=null) return results;
 			for (RefactoringStatus result : results) {
 				if (result != null && result.hasFatalError()) {
 					return results;
@@ -302,46 +312,23 @@ public class TypeContextChecker {
 			}
 
 			int parameterCount= fParameterInfos.size();
-			//prepareTypes(parameterCount+1, fParameterInfos);
-			String[] types= new String[parameterCount + 1];
-			for (int i= 0; i < parameterCount; i++)
-				types[i]= ParameterInfo.stripEllipsis((fParameterInfos.get(i)).getNewTypeName());
+			String[] types= prepareTypes(parameterCount + 1, parameterCount, fParameterInfos);
 			types[parameterCount]= fReturnTypeInfo.getNewTypeName();
 
-			//End of prpearetypes
 			RefactoringStatus[] semanticsResults= new RefactoringStatus[parameterCount + 1];
 			ITypeBinding[] typeBindings= resolveBindings(types, semanticsResults, true);
 
-			//needSecondPassMethod
-			boolean needsSecondPass= false;
-			for (int i= 0; i < types.length; i++)
-				if (typeBindings[i] == null || ! semanticsResults[i].isOK())
-					needsSecondPass= true;
+			boolean needsSecondPass= needSecondPass(types, typeBindings, semanticsResults);
 
 			RefactoringStatus[] semanticsResults2= new RefactoringStatus[parameterCount + 1];
 			if (needsSecondPass)
 				typeBindings= resolveBindings(types, semanticsResults2, false);
 
-			//prepareTypes
-			for (int i= 0; i < fParameterInfos.size(); i++) {
-				ParameterInfo parameterInfo= fParameterInfos.get(i);
-				if (!parameterInfo.isResolve())
-					continue;
-				if (parameterInfo.getOldTypeBinding() != null && ! parameterInfo.isTypeNameChanged()) {
-					parameterInfo.setNewTypeBinding(parameterInfo.getOldTypeBinding());
-				} else {
-					parameterInfo.setNewTypeBinding(typeBindings[i]);
-					if (typeBindings[i] == null || (needsSecondPass && ! semanticsResults2[i].isOK())) {
-						if (results[i] == null)
-							results[i]= semanticsResults2[i];
-						else
-							results[i].merge(semanticsResults2[i]);
-					}
-				}
-			}
+			updateParameterInfosBindings(fParameterInfos, typeBindings, semanticsResults2, results, needsSecondPass);
+
 			//only for methods part
 			fReturnTypeInfo.setNewTypeBinding(typeBindings[fParameterInfos.size()]);
-			if (typeBindings[parameterCount] == null || (needsSecondPass && ! semanticsResults2[parameterCount].isOK())) {
+			if (typeBindings[parameterCount] == null || (needsSecondPass && !semanticsResults2[parameterCount].isOK())) {
 				if (results[parameterCount] == null)
 					results[parameterCount]= semanticsResults2[parameterCount];
 				else
@@ -363,7 +350,8 @@ public class TypeContextChecker {
 			cuString.append(fStubTypeContext.getAfterString());
 
 			// need a working copy to tell the parser where to resolve (package visible) types
-			ICompilationUnit wc= fMethod.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
+			ICompilationUnit wc= fMethod.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {
+				/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(wc, true);
@@ -389,9 +377,7 @@ public class TypeContextChecker {
 					}
 					results[i]= new RefactoringStatus();
 					for (IProblem problem : ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS)) {
-						if (isError(problem, type)) {
-							results[i].addError(problem.getMessage());
-						}
+						results[i].addError(problem.getMessage());
 					}
 					ITypeBinding binding= handleBug84585(type.resolveBinding());
 					if (firstPass && (binding == null || binding.isRecovered())) {
@@ -403,16 +389,6 @@ public class TypeContextChecker {
 			} finally {
 				wc.discardWorkingCopy();
 			}
-		}
-
-		/**
-		 * Decides if a problem matters.
-		 * @param problem the problem
-		 * @param type the current type
-		 * @return return if a problem matters.
-		 */
-		private boolean isError(IProblem problem, Type type) {
-			return true;
 		}
 
 		private int appendMethodDeclaration(StringBuilder cuString, String[] types, int parameterCount) throws JavaModelException {
@@ -458,21 +434,24 @@ public class TypeContextChecker {
 	private static class MethodTypesSyntaxChecker {
 
 		private final IMethod fMethod;
+
 		private final IType fType;
+
 		private final List<ParameterInfo> fParameterInfos;
+
 		private final ReturnTypeInfo fReturnTypeInfo;
 
 		public MethodTypesSyntaxChecker(IMethod method, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) {
 			fMethod= method;
 			fParameterInfos= parameterInfos;
 			fReturnTypeInfo= returnTypeInfo;
-			fType = null;
+			fType= null;
 		}
 
 		public MethodTypesSyntaxChecker(IType recordType, List<ParameterInfo> parameterInfos) {
-			fType = recordType;
+			fType= recordType;
 			fParameterInfos= parameterInfos;
-			fReturnTypeInfo = null;
+			fReturnTypeInfo= null;
 			fMethod= null;
 		}
 
@@ -515,19 +494,19 @@ public class TypeContextChecker {
 
 			RefactoringStatus result= new RefactoringStatus();
 			for (String problem : problemsCollector) {
-				String[] keys= new String[]{ BasicElementLabels.getJavaElementName(newTypeName), BasicElementLabels.getJavaElementName(problem)};
+				String[] keys= new String[] { BasicElementLabels.getJavaElementName(newTypeName), BasicElementLabels.getJavaElementName(problem) };
 				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type_syntax, keys);
 				result.addError(msg);
 			}
 			return result;
 		}
 
-		private static boolean isVoidArrayType(Type type){
-			if (! type.isArrayType())
+		private static boolean isVoidArrayType(Type type) {
+			if (!type.isArrayType())
 				return false;
 
-			ArrayType arrayType= (ArrayType)type;
-			if (! arrayType.getElementType().isPrimitiveType())
+			ArrayType arrayType= (ArrayType) type;
+			if (!arrayType.getElementType().isPrimitiveType())
 				return false;
 			PrimitiveType primitiveType= (PrimitiveType) arrayType.getElementType();
 			return (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID);
@@ -538,13 +517,15 @@ public class TypeContextChecker {
 	private static class RecordTypesChecker extends AbstractTypesChecker {
 
 		private final IType fType;
+
 		private final List<ParameterInfo> fParameterInfos;
+
 		private final StubTypeContext fStubTypeContext;
 
 		public RecordTypesChecker(IType recordType, StubTypeContext stubTypeContext, List<ParameterInfo> parameterInfos) {
-			this.fType = recordType;
-			this.fParameterInfos = parameterInfos;
-			this.fStubTypeContext = stubTypeContext;
+			this.fType= recordType;
+			this.fParameterInfos= parameterInfos;
+			this.fStubTypeContext= stubTypeContext;
 
 		}
 
@@ -556,24 +537,21 @@ public class TypeContextChecker {
 		}
 
 		public RefactoringStatus[] checkAndResolveRecordTypes() throws CoreException {
-			// TODO Auto-generated method stub
-			//RefactoringStatus[] results= new MethodTypesSyntaxChecker(fType, fParameterInfos).checkSyntax();
-			RefactoringStatus[] results = new MethodTypesSyntaxChecker(fType, fParameterInfos).checkSyntax();
+			RefactoringStatus[] results= new MethodTypesSyntaxChecker(fType, fParameterInfos).checkSyntax();
 
 			for (RefactoringStatus result : results) {
 				if (result != null && result.hasFatalError()) {
 					return results;
 				}
 			}
-			String[] types= prepareTypes(fParameterInfos.size(), fParameterInfos);
 			int parameterCount= fParameterInfos.size();
+			String[] types= prepareTypes(parameterCount, parameterCount, fParameterInfos);
 			RefactoringStatus[] semanticsResults= new RefactoringStatus[parameterCount];
 			ITypeBinding[] typeBindings= resolveBindings(types, semanticsResults, true);
-			boolean needsSecondPass = needSecondPass(types, typeBindings, semanticsResults);
+			boolean needsSecondPass= needSecondPass(types, typeBindings, semanticsResults);
 			RefactoringStatus[] semanticsResults2= new RefactoringStatus[parameterCount];
 			if (needsSecondPass)
 				typeBindings= resolveBindings(types, semanticsResults2, false);
-			//int parameterCount= fParameterInfos.size();
 			updateParameterInfosBindings(fParameterInfos, typeBindings, semanticsResults2, results, needsSecondPass);
 			return results;
 		}
@@ -587,20 +565,21 @@ public class TypeContextChecker {
 			int offsetBeforeRecordName= appendRecordDeclaration(cuString, types, parameterCount);
 			cuString.append(fStubTypeContext.getAfterString());
 			// need a working copy to tell the parser where to resolve (package visible) types
-			ICompilationUnit wc= fType.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
+			ICompilationUnit wc= fType.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {
+				/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(wc, true);
 				ASTNode record= NodeFinder.perform(compilationUnit, offsetBeforeRecordName, PLACEHOLDER_NAME.length()).getParent();
 				Type[] typeNodes= new Type[types.length];
 				if (record instanceof RecordDeclaration) {
-					RecordDeclaration rDecl= (RecordDeclaration)record;
+					RecordDeclaration rDecl= (RecordDeclaration) record;
 					List<SingleVariableDeclaration> parameters= rDecl.recordComponents();
 					for (int i= 0; i < parameterCount; i++) {
-						typeNodes[i] = parameters.get(i).getType();
+						typeNodes[i]= parameters.get(i).getType();
 					}
 				}
-				ITypeBinding[] typeBindings = populateAndCheckTypeBindings(types, typeNodes, results, firstPass);
+				ITypeBinding[] typeBindings= populateAndCheckTypeBindings(types, typeNodes, results, firstPass);
 				return typeBindings;
 			} finally {
 				wc.discardWorkingCopy();
@@ -617,7 +596,7 @@ public class TypeContextChecker {
 	private static Type parseType(String typeString, IJavaProject javaProject, List<String> problemsCollector) {
 		if ("".equals(typeString.trim())) //speed up for a common case //$NON-NLS-1$
 			return null;
-		if (! typeString.trim().equals(typeString))
+		if (!typeString.trim().equals(typeString))
 			return null;
 
 		StringBuilder cuBuff= new StringBuilder();
@@ -635,7 +614,7 @@ public class TypeContextChecker {
 		ASTNode selected= analyzer.getFirstSelectedNode();
 		if (!(selected instanceof Type))
 			return null;
-		Type type= (Type)selected;
+		Type type= (Type) selected;
 		if (MethodTypesSyntaxChecker.isVoidArrayType(type))
 			return null;
 		for (IProblem problem : ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS)) {
@@ -664,7 +643,8 @@ public class TypeContextChecker {
 		return checker.checkAndResolveRecordTypes();
 	}
 
-	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) throws CoreException {
+	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo)
+			throws CoreException {
 		MethodTypesChecker checker= new MethodTypesChecker(method, stubTypeContext, parameterInfos, returnTypeInfo);
 		return checker.checkAndResolveMethodTypes();
 	}
@@ -683,7 +663,7 @@ public class TypeContextChecker {
 		String newTypeName= ParameterInfo.stripEllipsis(type.trim()).trim();
 		String typeLabel= BasicElementLabels.getJavaElementName(type);
 
-		if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
+		if ("".equals(newTypeName.trim())) { //$NON-NLS-1$
 			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_parameter_type, typeLabel);
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
@@ -692,8 +672,8 @@ public class TypeContextChecker {
 		Type parsedType= parseType(newTypeName, project, problemsCollector);
 		boolean valid= parsedType != null;
 		if (valid && parsedType instanceof PrimitiveType)
-			valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
-		if (! valid) {
+			valid= !PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
+		if (!valid) {
 			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_name, BasicElementLabels.getJavaElementName(newTypeName));
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
@@ -703,7 +683,7 @@ public class TypeContextChecker {
 		RefactoringStatus result= new RefactoringStatus();
 		for (String problem : problemsCollector) {
 			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_syntax,
-					new String[]{BasicElementLabels.getJavaElementName(newTypeName), BasicElementLabels.getJavaElementName(problem)});
+					new String[] { BasicElementLabels.getJavaElementName(newTypeName), BasicElementLabels.getJavaElementName(problem) });
 			result.addError(msg);
 		}
 		return result;
@@ -733,9 +713,9 @@ public class TypeContextChecker {
 	private static void fillWithTypeStubs(final StringBuilder bufBefore, final StringBuilder bufAfter, final int focalPosition, List<? extends BodyDeclaration> types) {
 		StringBuilder buf;
 		for (BodyDeclaration bodyDeclaration : types) {
-			if (! (bodyDeclaration instanceof AbstractTypeDeclaration)) {
+			if (!(bodyDeclaration instanceof AbstractTypeDeclaration)) {
 				//account for local classes:
-				if (! (bodyDeclaration instanceof MethodDeclaration))
+				if (!(bodyDeclaration instanceof MethodDeclaration))
 					continue;
 				int bodyStart= bodyDeclaration.getStartPosition();
 				int bodyEnd= bodyDeclaration.getStartPosition() + bodyDeclaration.getLength();
@@ -755,6 +735,7 @@ public class TypeContextChecker {
 						fillWithTypeStubs(bufBefore, bufAfter, focalPosition, Collections.singletonList(node));
 						return false;
 					}
+
 					@Override
 					public boolean visit(ClassInstanceCreation node) {
 						AnonymousClassDeclaration anonDecl= node.getAnonymousClassDeclaration();
@@ -907,7 +888,7 @@ public class TypeContextChecker {
 
 		} else if (packageFragment != null) {
 			ICompilationUnit cu= packageFragment.getCompilationUnit(JavaTypeCompletionProcessorCore.DUMMY_CU_NAME);
-			stubTypeContext= new StubTypeContext(cu, "package " + packageFragment.getElementName() + ";" + prolog, epilog);  //$NON-NLS-1$//$NON-NLS-2$
+			stubTypeContext= new StubTypeContext(cu, "package " + packageFragment.getElementName() + ";" + prolog, epilog); //$NON-NLS-1$//$NON-NLS-2$
 
 		} else {
 			stubTypeContext= new StubTypeContext(null, null, null);
@@ -941,7 +922,7 @@ public class TypeContextChecker {
 	}
 
 	private static Type parseSuperType(String superType, boolean isInterface) {
-		if (! superType.trim().equals(superType)) {
+		if (!superType.trim().equals(superType)) {
 			return null;
 		}
 
@@ -964,14 +945,14 @@ public class TypeContextChecker {
 			selected= selected.getParent();
 		if (selected.getStartPosition() != offset
 				|| selected.getLength() != superType.length()
-				|| ! (selected instanceof Type)
+				|| !(selected instanceof Type)
 				|| selected instanceof PrimitiveType) {
 			return null;
 		}
 		Type type= (Type) selected;
 
 		String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
-		if (! superType.equals(typeNodeRange)){
+		if (!superType.equals(typeNodeRange)) {
 			return null;
 		}
 		return type;
@@ -984,7 +965,8 @@ public class TypeContextChecker {
 		cuString.append(superClassContext.getAfterString());
 
 		try {
-			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
+			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {
+				/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(wc, true);
@@ -1021,7 +1003,8 @@ public class TypeContextChecker {
 		cuString.append(superInterfaceContext.getAfterString());
 
 		try {
-			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
+			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {
+				/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(wc, true);
