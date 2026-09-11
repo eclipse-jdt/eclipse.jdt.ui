@@ -28,6 +28,7 @@ TestEnableAssertions.class,
 TestPriorization.class,
 TestTestSearchEngine.class,
 
+RemoteTestRunnerClientTest.class,
 TestRunListenerTest3.class,
 TestRunListenerTest4.class,
 TestRunListenerTest5.class,
