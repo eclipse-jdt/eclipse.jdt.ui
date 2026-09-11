@@ -175,4 +175,14 @@ public class ChangeRecordSignatureTests extends GenericRefactoringTest {
 		helperDelete(new int[]{1});
 	}
 
+	@Test
+	public void testAddParamWithImport() throws Exception {
+		// adding a List<String> component should add java.util.List import to the record file
+		ParameterInfo[] newParamInfos= createNewParamInfos(
+				new String[]{"List<String>"},
+				new String[]{"c"},
+				new String[]{"null"});
+		helperAdd(newParamInfos, new int[]{2});
+	}
+
 }
