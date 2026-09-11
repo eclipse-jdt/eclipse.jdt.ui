@@ -34,6 +34,7 @@ public class SuperTypeHierarchyCache {
 
 		private ITypeHierarchy fTypeHierarchy;
 		private long fLastAccess;
+		private volatile boolean fStale;
 
 		public HierarchyCacheEntry(ITypeHierarchy hierarchy) {
 			fTypeHierarchy= hierarchy;
@@ -43,7 +44,12 @@ public class SuperTypeHierarchyCache {
 
 		@Override
 		public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
-			removeHierarchyEntryFromCache(this);
+			// runs on the thread changing the Java model, so only flag here and purge on the next access
+			fStale= true;
+		}
+
+		public boolean isStale() {
+			return fStale;
 		}
 
 		public ITypeHierarchy getTypeHierarchy() {
@@ -97,6 +103,7 @@ public class SuperTypeHierarchyCache {
 	}
 
 	public static MethodOverrideTester getMethodOverrideTester(IType type) throws JavaModelException {
+		purgeStaleEntries();
 		MethodOverrideTester test= null;
 		synchronized (fgMethodOverrideTesterCache) {
 			test= fgMethodOverrideTesterCache.get(type);
@@ -158,7 +165,7 @@ public class SuperTypeHierarchyCache {
 				ArrayList<HierarchyCacheEntry> obsoleteHierarchies= new ArrayList<>(CACHE_SIZE);
 				for (HierarchyCacheEntry entry : fgHierarchyCache) {
 					ITypeHierarchy curr= entry.getTypeHierarchy();
-					if (!curr.exists() || hierarchy.contains(curr.getType())) {
+					if (entry.isStale() || !curr.exists() || hierarchy.contains(curr.getType())) {
 						obsoleteHierarchies.add(entry);
 					} else {
 						if (oldest == null || entry.getLastAccess() < oldest.getLastAccess()) {
@@ -195,7 +202,7 @@ public class SuperTypeHierarchyCache {
 			for (int i= fgHierarchyCache.size() - 1; i>= 0; i--) {
 				HierarchyCacheEntry curr= fgHierarchyCache.get(i);
 				ITypeHierarchy hierarchy= curr.getTypeHierarchy();
-				if (!hierarchy.exists()) {
+				if (curr.isStale() || !hierarchy.exists()) {
 					removeHierarchyEntryFromCache(curr);
 				} else {
 					if (hierarchy.contains(type)) {
@@ -206,6 +213,20 @@ public class SuperTypeHierarchyCache {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Disposes all entries whose hierarchy has been invalidated in the meantime.
+	 */
+	private static void purgeStaleEntries() {
+		synchronized (fgHierarchyCache) {
+			for (int i= fgHierarchyCache.size() - 1; i >= 0; i--) {
+				HierarchyCacheEntry curr= fgHierarchyCache.get(i);
+				if (curr.isStale() || !curr.getTypeHierarchy().exists()) {
+					removeHierarchyEntryFromCache(curr);
+				}
+			}
+		}
 	}
 
 	private static void removeHierarchyEntryFromCache(HierarchyCacheEntry entry) {
