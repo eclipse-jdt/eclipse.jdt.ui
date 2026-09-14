@@ -4926,7 +4926,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
       <key
-            sequence="M2+M3+C"
+            sequence="M2+M3+E"
             commandId="org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
@@ -4937,7 +4937,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="COMMAND+ALT+C"
+            sequence="COMMAND+ALT+E"
             commandId="org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             

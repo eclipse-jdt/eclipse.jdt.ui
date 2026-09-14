@@ -304,7 +304,7 @@ public class TypeContextChecker {
 		}
 
 		public RefactoringStatus[] checkAndResolveMethodTypes() throws CoreException {
-			RefactoringStatus[] results= new MethodTypesSyntaxChecker(fMethod, fParameterInfos, fReturnTypeInfo).checkSyntax();
+			RefactoringStatus[] results= new ParameterTypesSyntaxChecker(fMethod, fParameterInfos, fReturnTypeInfo).checkSyntax();
 			for (RefactoringStatus result : results) {
 				if (result != null && result.hasFatalError()) {
 					return results;
@@ -431,7 +431,7 @@ public class TypeContextChecker {
 
 	}
 
-	private static class MethodTypesSyntaxChecker {
+	private static class ParameterTypesSyntaxChecker {
 
 		private final IMethod fMethod;
 
@@ -441,14 +441,14 @@ public class TypeContextChecker {
 
 		private final ReturnTypeInfo fReturnTypeInfo;
 
-		public MethodTypesSyntaxChecker(IMethod method, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) {
+		public ParameterTypesSyntaxChecker(IMethod method, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) {
 			fMethod= method;
 			fParameterInfos= parameterInfos;
 			fReturnTypeInfo= returnTypeInfo;
 			fType= null;
 		}
 
-		public MethodTypesSyntaxChecker(IType recordType, List<ParameterInfo> parameterInfos) {
+		public ParameterTypesSyntaxChecker(IType recordType, List<ParameterInfo> parameterInfos) {
 			fType= recordType;
 			fParameterInfos= parameterInfos;
 			fReturnTypeInfo= null;
@@ -537,7 +537,7 @@ public class TypeContextChecker {
 		}
 
 		public RefactoringStatus[] checkAndResolveRecordTypes() throws CoreException {
-			RefactoringStatus[] results= new MethodTypesSyntaxChecker(fType, fParameterInfos).checkSyntax();
+			RefactoringStatus[] results= new ParameterTypesSyntaxChecker(fType, fParameterInfos).checkSyntax();
 
 			for (RefactoringStatus result : results) {
 				if (result != null && result.hasFatalError()) {
@@ -615,7 +615,7 @@ public class TypeContextChecker {
 		if (!(selected instanceof Type))
 			return null;
 		Type type= (Type) selected;
-		if (MethodTypesSyntaxChecker.isVoidArrayType(type))
+		if (ParameterTypesSyntaxChecker.isVoidArrayType(type))
 			return null;
 		for (IProblem problem : ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS)) {
 			problemsCollector.add(problem.getMessage());
@@ -650,12 +650,12 @@ public class TypeContextChecker {
 	}
 
 	public static RefactoringStatus[] checkMethodTypesSyntax(IMethod method, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) {
-		MethodTypesSyntaxChecker checker= new MethodTypesSyntaxChecker(method, parameterInfos, returnTypeInfo);
+		ParameterTypesSyntaxChecker checker= new ParameterTypesSyntaxChecker(method, parameterInfos, returnTypeInfo);
 		return checker.checkSyntax();
 	}
 
 	public static RefactoringStatus[] checkRecordTypesSyntax(IType recordType, List<ParameterInfo> parameterInfos) {
-		MethodTypesSyntaxChecker checker= new MethodTypesSyntaxChecker(recordType, parameterInfos);
+		ParameterTypesSyntaxChecker checker= new ParameterTypesSyntaxChecker(recordType, parameterInfos);
 		return checker.checkSyntax();
 	}
 
