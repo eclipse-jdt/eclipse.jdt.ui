@@ -122,6 +122,17 @@ public class FoldingTest {
 	}
 
 	@Test
+	public void testFoldClassEndingAtEOF() throws Exception {
+		String str= """
+				package org.example.test;
+				class A {		//here should be an annotation
+					// content
+				}""";
+		List<FoldingTestUtils.ProjectionRegion> regions= FoldingTestUtils.getProjectionRangesOfPackage(packageFragment, str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 3); // class
+	}
+
+	@Test
 	public void testClassWithJavadocAsHeaderComment() throws Exception {
 		String str= """
 				package org.example.test;

@@ -1133,7 +1133,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			// Line numbers (0-based)
 			int start= document.getLineOfOffset(region.getOffset());
-			int end= document.getLineOfOffset(region.getOffset() + region.getLength());
+			int end= document.getLineOfOffset(Math.min(region.getOffset() + region.getLength(), ctx.getDocument().getLength()));
 
 			if (end >= document.getNumberOfLines()) {
 				end= document.getNumberOfLines() - 1;
@@ -1161,6 +1161,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			return new Region(offset, endOffset - offset);
 		} catch (BadLocationException x) {
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, "A folding region could not be processed and will therefore not be shown.\nThe region is located at offset " + region.getOffset() + " with length " + region.getLength(), x)); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 	}
@@ -1564,6 +1565,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			regions.toArray(result);
 			return result;
 		} catch (JavaModelException | InvalidInputException e) {
+			String name;
+			if (reference instanceof IJavaElement element) {
+				name = element.getElementName();
+			} else {
+				name = String.valueOf(reference);
+			}
+			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, "An error occured trying to compute the folding regions for " + name + ". These folding regions will be skipped.", e)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		return new IRegion[0];
