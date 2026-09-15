@@ -35,6 +35,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -83,6 +85,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -1256,8 +1259,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				collapse= ctx.collapseImportContainer();
 				break;
 			case IJavaElement.TYPE:
+				IType type= (IType) element;
 				// only inner types may be collapsed
-				collapse= ctx.collapseInnerTypes() && isInnerType((IType) element);
+				collapse= ctx.collapseInnerTypes() && isInnerType(type);
+				try {
+					if (type.isImplicitlyDeclared()) {
+						// Implicit declared classes from https://openjdk.org/jeps/512 are not present as source code and should therefore not be folded.
+						return;
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, "An error occurred while processing " + type.getFullyQualifiedName() + " for folding.", e)); //$NON-NLS-1$ //$NON-NLS-2$
+					return;
+				}
 				break;
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
