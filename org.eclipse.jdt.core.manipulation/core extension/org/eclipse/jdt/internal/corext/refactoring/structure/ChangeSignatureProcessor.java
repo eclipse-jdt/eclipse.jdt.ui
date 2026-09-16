@@ -3015,6 +3015,15 @@ public class ChangeSignatureProcessor extends AbstractSignatureProcessor impleme
 			}
 			return;
 		}
+		if (info.getDefaultValue().trim().isEmpty()){
+			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_default_value, BasicElementLabels.getJavaElementName(info.getNewName()));
+			result.addFatalError(msg);
+			return;
+		}
+		if (! isValidExpression(info.getDefaultValue())){
+			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_invalid_expression, new String[]{info.getDefaultValue()});
+			result.addFatalError(msg);
+		}
 	}
 
 	public IDefaultValueAdvisor getDefaultValueAdvisor() {
