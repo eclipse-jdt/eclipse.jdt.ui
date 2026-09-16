@@ -703,7 +703,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	protected boolean isBetaVersion(@SuppressWarnings("unused") String compliance) {
 		return false;
-//		return JavaCore.VERSION_26.equals(compliance);
+//		return JavaCore.VERSION_27.equals(compliance);
 	}
 
 	private String addsExportToSystemModule() {
