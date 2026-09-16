@@ -286,8 +286,6 @@ public class TypeContextChecker {
 
 	private static class MethodTypesChecker extends AbstractTypesChecker {
 
-		private static final String METHOD_NAME= "__$$__"; //$NON-NLS-1$
-
 		private final IMethod fMethod;
 
 		private final StubTypeContext fStubTypeContext;
@@ -355,7 +353,7 @@ public class TypeContextChecker {
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(wc, true);
-				ASTNode method= NodeFinder.perform(compilationUnit, offsetBeforeMethodName, METHOD_NAME.length()).getParent();
+				ASTNode method= NodeFinder.perform(compilationUnit, offsetBeforeMethodName, PLACEHOLDER_NAME.length()).getParent();
 				Type[] typeNodes= new Type[types.length];
 				if (method instanceof MethodDeclaration) {
 					MethodDeclaration methodDeclaration= (MethodDeclaration) method;
@@ -413,7 +411,7 @@ public class TypeContextChecker {
 
 			cuString.append(types[parameterCount]).append(' ');
 			int offsetBeforeMethodName= cuString.length();
-			cuString.append(METHOD_NAME).append('(');
+			cuString.append(PLACEHOLDER_NAME).append('(');
 			for (int i= 0; i < parameterCount; i++) {
 				if (i > 0)
 					cuString.append(',');

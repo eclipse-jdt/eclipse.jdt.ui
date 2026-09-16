@@ -34,11 +34,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -79,7 +78,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
@@ -92,23 +90,13 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.util.Progress;
 
-public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
+public class ChangeRecordSignatureProcessor extends AbstractSignatureProcessor {
 
 	IType fType;
-
-	private StubTypeContext fContextCuStartEnd;
-
-	private List<ParameterInfo> fParameterInfos;
-
-	private CompilationUnitRewrite fBaseCuRewrite;
 
 	private SearchResultGroup[] fOccurrences;
 
 	private TextChangeManager fChangeManager;
-
-	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
-	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
-	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
 
 	public ChangeRecordSignatureProcessor(IType type) {
 		// fType is the record declaration.
@@ -232,29 +220,11 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 
 	}
 
-	abstract class OccurrenceUpdate <N extends ASTNode>{
-	      protected final CompilationUnitRewrite fCuRewrite;
-	      protected final TextEditGroup fDescription;
-	      protected RefactoringStatus fResult;
+	abstract class OccurrenceUpdate <N extends ASTNode> extends AbstractOccurrenceUpdate<N>{
 
 	      protected OccurrenceUpdate(CompilationUnitRewrite cuRewrite, TextEditGroup description, RefactoringStatus result) {
-	          fCuRewrite = cuRewrite;
-	          fDescription = description;
-	          fResult = result;
+	    	  super(cuRewrite, description, result);
 	      }
-
-	      protected final ASTRewrite getASTRewrite() {
-	          return fCuRewrite.getASTRewrite();
-	      }
-
-	      public abstract void updateNode() throws CoreException;
-
-	      /**
-			 * @return ListRewrite of parameters or arguments
-			 * */
-	      protected abstract ListRewrite getParamgumentsRewrite();
-
-	      protected abstract N createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<N> nodes);
 
 	      protected final void reshuffleElements() {
 	    	  ListRewrite listRewrite= getParamgumentsRewrite();
@@ -319,29 +289,11 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 				}
 			}
 
-			/**
-			 * @param info the parameter info
-			 */
-			protected void changeParamgumentName(ParameterInfo info) {
-				// no-op
-			}
-
-			/**
-			 * @param info the parameter info
-			 */
-			protected void changeParamgumentType(ParameterInfo info) {
-				// no-op
-			}
-
 			protected final void replaceTypeNode(Type typeNode, String newTypeName, ITypeBinding newTypeBinding){
 				Type newTypeNode= createNewTypeNode(newTypeName, newTypeBinding);
 				getASTRewrite().replace(typeNode, newTypeNode, fDescription);
 				//registerImportRemoveNode(typeNode);
 				getTightSourceRangeComputer().addTightSourceNode(typeNode);
-			}
-
-			protected final TightSourceRangeComputer getTightSourceRangeComputer() {
-				return (TightSourceRangeComputer) fCuRewrite.getASTRewrite().getExtendedSourceRangeComputer();
 			}
 
 			protected final Type createNewTypeNode(String newTypeName, ITypeBinding newTypeBinding) {
@@ -358,11 +310,6 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 			}
 		}
 
-
-	public List<ParameterInfo> getParameterInfos() {
-		return fParameterInfos;
-	}
-
 	private List<ParameterInfo> getTypeParameters() {
 		try {
 			IField[] recordTypes = fType.getRecordComponents();
@@ -377,31 +324,6 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 			JavaManipulationPlugin.log(e);
 			return new ArrayList<>(0);
 		}
-	}
-
-//	private ClassInstanceCreation resolveClassInstanceCreation(ASTNode node) {
-//		if (node instanceof ClassInstanceCreation) return (ClassInstanceCreation)node;
-//		else {
-//			if(node == null || node instanceof Statement || node instanceof CompilationUnit || node instanceof BodyDeclaration ) {
-//				return null;
-//			}
-//		}
-//		return resolveClassInstanceCreation(node.getParent());
-//	}
-
-	public StubTypeContext getStubTypeContext() {
-		if (fContextCuStartEnd == null)
-			try {
-				fContextCuStartEnd= TypeContextChecker.createStubTypeContext(getCu(), fBaseCuRewrite.getRoot(), fType.getSourceRange().getOffset());
-			} catch (CoreException e) {
-				//cannot do anything here
-				throw new RuntimeException(e);
-			}
-		return fContextCuStartEnd;
-	}
-
-	private ICompilationUnit getCu() {
-		return fType.getCompilationUnit();
 	}
 
 	@Override
@@ -433,11 +355,6 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 				return result;
 			}
 			pm.worked(1);
-
-//			if (fClassInstanceCreation == null) {
-//				String message = Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_record_deleted, BasicElementLabels.getFileName(getCu()));
-//				return RefactoringStatus.createFatalErrorStatus(message);
-//			}
 
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
@@ -587,25 +504,8 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		}
 	}
 
-
-	private void checkParameterNamesAndValues(RefactoringStatus result) {
-		int i= 1;
-		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
-			ParameterInfo info= iter.next();
-			if (info.isDeleted())
-				continue;
-			checkParameterName(result, info, i);
-			if (result.hasFatalError())
-				return;
-			if (info.isAdded())	{
-				checkParameterDefaultValue(result, info);
-				if (result.hasFatalError())
-					return;
-			}
-		}
-	}
-
-	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
+	@Override
+	void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
 		if (info.getDefaultValue().trim().isEmpty()){
 			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_default_value, BasicElementLabels.getJavaElementName(info.getNewName()));
 			result.addFatalError(msg);
@@ -651,16 +551,7 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 				trimmed.equals(cuBuff.substring(cu.getExtendedStartPosition(selected), cu.getExtendedStartPosition(selected) + cu.getExtendedLength(selected)));
 	}
 
-	private void checkParameterName(RefactoringStatus result, ParameterInfo info, int position) {
-		if (info.getNewName().trim().length() == 0) {
-			result.addFatalError(Messages.format(
-					RefactoringCoreMessages.ChangeSignatureRefactoring_param_name_not_empty, Integer.toString(position)));
-		} else {
-			result.merge(Checks.checkTempName(info.getNewName(), fType));
-		}
-	}
-
-
+	@Override
 	public boolean isSignatureSameAsInitial() throws JavaModelException {
 		if (fType.getRecordComponents().length == 0 && fParameterInfos.isEmpty()) {
 			return true;
@@ -671,29 +562,14 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		return false;
 	}
 
-	private boolean isOrderSameAsInitial(){
+	@Override
+	boolean isOrderSameAsInitial(){
 		int i= 0;
 		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= iter.next();
 			if (info.getOldIndex() != i) // includes info.isAdded()
 				return false;
 			if (info.isDeleted())
-				return false;
-		}
-		return true;
-	}
-
-	private boolean areParameterTypesSameAsInitial() {
-		for (ParameterInfo info : fParameterInfos) {
-			if (! info.isAdded() && ! info.isDeleted() && info.isTypeNameChanged())
-				return false;
-		}
-		return true;
-	}
-
-	public boolean areNamesSameAsInitial() {
-		for (ParameterInfo info : fParameterInfos) {
-			if (info.isRenamed())
 				return false;
 		}
 		return true;
@@ -714,28 +590,18 @@ public class ChangeRecordSignatureProcessor extends RefactoringProcessor {
 		return new RefactoringParticipant[0];
 	}
 
-	/**
-	 * If this occurrence update is called from within a declaration update
-	 * (i.e., to update the call inside the newly created delegate), the old
-	 * node does not yet exist and therefore cannot be a move target.
-	 *
-	 * Normally, always use createMoveTarget as this has the advantage of
-	 * being able to add changes inside changed nodes (for example, a method
-	 * call within a method call, see test case #4) and preserving comments
-	 * inside calls.
-	 * @param oldNode original node
-	 * @param rewrite an AST rewrite
-	 * @return the node to insert at the target location
-	 */
-	protected <T extends ASTNode> T moveNode(T oldNode, ASTRewrite rewrite) {
-		T movedNode;
-		if (ASTNodes.isExistingNode(oldNode))
-			movedNode= ASTNodes.createMoveTarget(rewrite, oldNode); //node must be one of ast
-		else
-			movedNode= ASTNodes.copySubtree(rewrite.getAST(), oldNode);
-		return movedNode;
+	@Override
+	public int getSourceRangeOffset() throws JavaModelException {
+		return fType.getSourceRange().getOffset();
 	}
 
+	@Override
+	ICompilationUnit getCu() {
+		return fType.getCompilationUnit();
+	}
 
-
+	@Override
+	public IJavaElement getJavaElementContext() {
+		return fType;
+	}
 }
