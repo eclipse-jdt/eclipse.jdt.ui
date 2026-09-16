@@ -19,7 +19,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 
 /**
@@ -30,15 +32,24 @@ public class ContainedLibraryFilter extends ViewerFilter {
 
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (element instanceof IPackageFragmentRoot) {
-			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-			if (root.isArchive()) {
-				// don't filter out JARs contained in the project itself
+		if (element instanceof IPackageFragmentRoot root) {
+			// only filter out libraries contained in the project itself
+			if (!root.isExternal()) {
 				IResource resource= root.getResource();
 				if (resource != null) {
-					IProject jarProject= resource.getProject();
+					IProject project= resource.getProject();
 					IProject container= root.getJavaProject().getProject();
-					return !container.equals(jarProject);
+					if (container.equals(project)) {
+						try {
+							IClasspathEntry entry = root.getResolvedClasspathEntry();
+							if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+								return true;
+							}
+						} catch (JavaModelException e) {
+							return true;
+						}
+						return false;
+					}
 				}
 			}
 		}
