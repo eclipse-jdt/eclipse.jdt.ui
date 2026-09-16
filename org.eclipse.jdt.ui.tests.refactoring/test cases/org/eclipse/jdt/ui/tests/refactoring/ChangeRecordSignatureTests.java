@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -173,6 +174,40 @@ public class ChangeRecordSignatureTests extends GenericRefactoringTest {
 	public void testDeleteComponent() throws Exception {
 		// delete the second component "b" from record A(int a, String b)
 		helperDelete(new int[]{1});
+	}
+
+	private void helperReorder(int[] newOrder) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
+		IType classA= getType(cu, "A");
+		assertTrue("refactoring not available", RefactoringAvailabilityTesterCore.isChangeRecordSignatureAvailable(classA));
+
+		ChangeRecordSignatureProcessor processor= new ChangeRecordSignatureProcessor(classA);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+
+		List<ParameterInfo> infos= processor.getParameterInfos();
+		List<ParameterInfo> reordered= new ArrayList<>();
+		for (int index : newOrder) {
+			reordered.add(infos.get(index));
+		}
+		infos.clear();
+		infos.addAll(reordered);
+
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus initialConditions= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+		assertTrue("precondition was supposed to pass: " + initialConditions.getEntryWithHighestSeverity(), initialConditions.isOK());
+
+		RefactoringStatus result= performRefactoring(ref);
+		assertNull("refactoring was supposed to succeed", result);
+
+		String expectedFileContents= getFileContents(getTestFileName(false));
+		assertEqualLines("unexpected result", expectedFileContents, cu.getSource());
+	}
+
+	@Test
+	public void testReorderParameters() throws Exception {
+		// reorder A(int a, String b) -> A(String b, int a), instantiation args should also be reordered
+		helperReorder(new int[]{1, 0});
 	}
 
 	@Test

@@ -95,7 +95,7 @@ public class ChangeParametersControl extends Composite {
 			return this == Mode.CHANGE_METHOD_SIGNATURE || this == CHANGE_RECORD_SIGNATURE;
 		}
 		public boolean canReorder() {
-			return this != CHANGE_RECORD_SIGNATURE;
+			return this != CHANGE_RECORD_SIGNATURE || this == CHANGE_RECORD_SIGNATURE;
 		}
 	}
 
