@@ -857,6 +857,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 			ExpandableComposite excomposite= section.getControl();
 			getScrolledPageContent().adaptChild(excomposite);
+			excomposite.setBackground(excomposite.getParent().getBackground());
 
 			Menu expandAllMenu= new Menu(excomposite);
 			MenuItem expandAllItem= new MenuItem(expandAllMenu, SWT.NONE);
@@ -1520,6 +1521,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 		fPreview= new JavaPreview(fWorkingValues, previewPane);
 		fPreview.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		fPreview.getControl().setData("org.eclipse.e4.ui.css.disabled", Boolean.TRUE); //$NON-NLS-1$);
 
 		return previewPane;
 	}
