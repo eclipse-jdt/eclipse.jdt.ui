@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2017 IBM Corporation and others.
+ * Copyright (c) 2010, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,8 +33,6 @@ public class JUnitUIPreferencesConstants {
 
 	public static final boolean SHOW_IN_ALL_VIEWS_DEFAULT= false; // would need a PreferenceInitializer if this was changed to true!
 
-	private static final String CODEASSIST_FAVORITE_STATIC_MEMBERS_MIGRATED= JUnitPlugin.PLUGIN_ID + ".content_assist_favorite_static_members_migrated"; //$NON-NLS-1$
-
 	private JUnitUIPreferencesConstants() {
 		// no instance
 	}
@@ -46,20 +44,6 @@ public class JUnitUIPreferencesConstants {
 	public static void setShowInAllViews(boolean show) {
 		IEclipsePreferences preferences= InstanceScope.INSTANCE.getNode(JUnitPlugin.PLUGIN_ID);
 		preferences.putBoolean(SHOW_IN_ALL_VIEWS, show);
-		try {
-			preferences.flush();
-		} catch (BackingStoreException e) {
-			JUnitPlugin.log(e);
-		}
-	}
-
-	public static boolean isCodeassistFavoriteStaticMembersMigrated() {
-		return Platform.getPreferencesService().getBoolean(JUnitPlugin.PLUGIN_ID, CODEASSIST_FAVORITE_STATIC_MEMBERS_MIGRATED, false, null);
-	}
-
-	public static void setCodeassistFavoriteStaticMembersMigrated(boolean migrated) {
-		IEclipsePreferences preferences= InstanceScope.INSTANCE.getNode(JUnitPlugin.PLUGIN_ID);
-		preferences.putBoolean(CODEASSIST_FAVORITE_STATIC_MEMBERS_MIGRATED, migrated);
 		try {
 			preferences.flush();
 		} catch (BackingStoreException e) {

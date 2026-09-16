@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -198,9 +198,8 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Add the new default static import favorites in old workspaces that already have non-default
-	 * favorites. Only do this once, so that users have a way to opt-out if they don't want the new
-	 * favorites.
+	 * Adds the JUnit, Mockito and AssertJ entries to the default content assist favorites for static
+	 * imports.
 	 */
 	private void setCodeassistFavoriteStaticMembers() {
 		Set<String> favoritesToAdd= new LinkedHashSet<>();
@@ -223,24 +222,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		defaultFavorites.addAll(favoritesToAdd);
 		String newDefaultPreferenceValue= defaultFavorites.stream().collect(Collectors.joining(";")); //$NON-NLS-1$
 		PreferenceConstants.getPreferenceStore().setDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, newDefaultPreferenceValue);
-
-		// current value
-		if (JUnitUIPreferencesConstants.isCodeassistFavoriteStaticMembersMigrated()) {
-			return;
-		}
-		Set<String> currentFavorites= new LinkedHashSet<>();
-		String currentPreferenceValue= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
-		if (currentPreferenceValue != null && currentPreferenceValue.length() > 0) {
-			currentFavorites.addAll(Arrays.asList(currentPreferenceValue.split(";"))); //$NON-NLS-1$
-		}
-		favoritesToAdd.removeAll(currentFavorites);
-		if (!favoritesToAdd.isEmpty()) {
-			String newPreferenceValue= currentPreferenceValue + ";" + favoritesToAdd.stream().collect(Collectors.joining(";")); //$NON-NLS-1$ //$NON-NLS-2$
-			PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, newPreferenceValue);
-		}
-
-		// set as migrated
-		JUnitUIPreferencesConstants.setCodeassistFavoriteStaticMembersMigrated(true);
 	}
 
 	@Override
