@@ -124,6 +124,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 		JavaPreview result= new JavaPreview(profileManager.getSelected().getSettings(), composite);
 		result.setFormatterId(fCustomCodeFormatterBlock.getFormatterId());
 		result.setPreviewText(PREVIEW, CodeFormatter.K_COMPILATION_UNIT);
+		result.getControl().setData("org.eclipse.e4.ui.css.disabled", Boolean.TRUE); //$NON-NLS-1$
 		fJavaPreview= result;
 
 		final GridData gd = new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
