@@ -176,6 +176,12 @@ public class ChangeRecordSignatureTests extends GenericRefactoringTest {
 		helperDelete(new int[]{1});
 	}
 
+	@Test
+	public void testDeleteParamRemovesImport() throws Exception {
+		// deleting List<String> b should remove the java.util.List import
+		helperDelete(new int[]{1});
+	}
+
 	private void helperReorder(int[] newOrder) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
 		IType classA= getType(cu, "A");
