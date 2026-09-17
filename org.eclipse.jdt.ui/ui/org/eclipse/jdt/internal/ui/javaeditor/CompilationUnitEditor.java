@@ -140,7 +140,6 @@ import org.eclipse.jdt.internal.ui.preferences.SaveParticipantPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
-import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.Symbols;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandInstaller;
@@ -1648,12 +1647,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		for (IJavaReconcilingListener listener : fReconcilingListeners) {
 			listener.aboutToBeReconciled();
 		}
-	}
-
-	@Override
-	public void aboutToWork(JavaReconciler javaReconciler) {
-		// Notify AST provider
-		CoreASTProvider.getInstance().aboutToBeReconciled(getInputJavaElement(), javaReconciler::signalWaitForFinish);
 	}
 
 	/*
