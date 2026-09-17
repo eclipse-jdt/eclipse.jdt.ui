@@ -153,10 +153,11 @@ public class ProjectWithJavaResourcesImportConfigurator implements ProjectConfig
 	public Set<IFolder> getFoldersToIgnore(IProject project, IProgressMonitor monitor) {
 		Set<IFolder> res = new HashSet<>();
 		try {
-			IJavaProject javaProject = JavaCore.create(project);
-			if (javaProject == null) {
+			// the project may have Java resources but not (yet) the Java nature
+			if (!project.isAccessible() || !project.hasNature(JavaCore.NATURE_ID)) {
 				return res;
 			}
+			IJavaProject javaProject = JavaCore.create(project);
 			IResource resource = project.getWorkspace().getRoot().findMember(javaProject.getOutputLocation());
 			if (resource != null && resource.exists() && resource.getType() == IResource.FOLDER) {
 				res.add((IFolder)resource);
