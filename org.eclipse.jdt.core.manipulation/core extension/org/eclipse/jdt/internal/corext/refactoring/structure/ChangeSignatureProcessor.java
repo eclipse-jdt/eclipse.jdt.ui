@@ -1828,20 +1828,12 @@ public class ChangeSignatureProcessor extends AbstractSignatureProcessor impleme
 			return fCuRewrite.getImportRewrite();
 		}
 
-		protected final ImportRemover getImportRemover() {
-			return fCuRewrite.getImportRemover();
-		}
-
 		protected final CompilationUnitRewrite getCompilationUnitRewrite() {
 			return fCuRewrite;
 		}
 
 		protected int getStartPosition() {
 			return getMethodNameNode().getStartPosition();
-		}
-
-		protected void registerImportRemoveNode(ASTNode node) {
-			getImportRemover().registerRemovedNode(node);
 		}
 
 		protected final void reshuffleElements() {

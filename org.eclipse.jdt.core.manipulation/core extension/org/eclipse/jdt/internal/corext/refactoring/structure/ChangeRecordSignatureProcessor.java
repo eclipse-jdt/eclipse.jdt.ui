@@ -238,7 +238,9 @@ public class ChangeRecordSignatureProcessor extends AbstractSignatureProcessor {
 	    	  List<N> newNodes= new ArrayList<>();
 	    	  for (ParameterInfo info : fParameterInfos) {
 	    		  int oldIndex= info.getOldIndex();
-	    		  if (info.isAdded()) {
+	    		  if (info.isDeleted()) {
+	    			  registerImportRemoveNode(nodes.get(oldIndex));
+	    		  } else if (info.isAdded()) {
 	    			  N newParamgument= createNewParamgument(info, fParameterInfos, nodes);
 	    			  if (newParamgument != null)
 	    				  newNodes.add(newParamgument);
@@ -292,7 +294,7 @@ public class ChangeRecordSignatureProcessor extends AbstractSignatureProcessor {
 			protected final void replaceTypeNode(Type typeNode, String newTypeName, ITypeBinding newTypeBinding){
 				Type newTypeNode= createNewTypeNode(newTypeName, newTypeBinding);
 				getASTRewrite().replace(typeNode, newTypeNode, fDescription);
-				//registerImportRemoveNode(typeNode);
+				registerImportRemoveNode(typeNode);
 				getTightSourceRangeComputer().addTightSourceNode(typeNode);
 			}
 
@@ -304,6 +306,7 @@ public class ChangeRecordSignatureProcessor extends AbstractSignatureProcessor {
 					ImportRewrite importRewrite= fCuRewrite.getImportRewrite();
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fCuRewrite.getRoot(), fCuRewrite.getRoot().getStartPosition(), importRewrite);
 					newTypeNode= importRewrite.addImport(newTypeBinding, fCuRewrite.getAST(), importRewriteContext);
+					getImportRemover().registerAddedImports(newTypeNode);
 				}
 
 				return newTypeNode;

@@ -50,6 +50,14 @@ public abstract class AbstractOccurrenceUpdate <N extends ASTNode> {
 		return fCuRewrite.getASTRewrite();
 	}
 
+	protected final ImportRemover getImportRemover() {
+		return fCuRewrite.getImportRemover();
+	}
+
+	protected void registerImportRemoveNode(ASTNode node) {
+		getImportRemover().registerRemovedNode(node);
+	}
+
 	/**
 	 * @param info the parameter info
 	 */
