@@ -110,6 +110,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -1650,10 +1651,31 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		}
 	}
 
+	/**
+	 * Drops the shared AST as soon as this editor's document has changed.
+	 * <p>
+	 * {@link IJavaReconcilingListener#aboutToWork(JavaReconciler)} is called synchronously, on the
+	 * thread doing the change, from {@code AbstractReconciler}'s document listener - so this is the
+	 * earliest point at which the shared AST is known to be out of date. Announcing the reconcile
+	 * itself has to wait until one actually starts (that happens in
+	 * {@code JavaCompositeReconcilingStrategy}, paired with the matching {@code reconciled()}), but
+	 * invalidating the cache cannot wait for it: the reconciler only starts after its delay (500ms,
+	 * set in {@code JavaSourceViewerConfiguration#getReconciler}), and until the cache is dropped
+	 * {@code CoreASTProvider.getAST} hands out the pre-change AST to every caller, including
+	 * {@code WAIT_YES} and {@code WAIT_ACTIVE_ONLY} ones.
+	 * </p>
+	 * <p>
+	 * This deliberately avoids calling {@code aboutToBeReconciled} since this call site has no
+	 * guaranteed "reconcile finished" counterpart and therefore claiming a reconcile here is what
+	 * could leave {@code getAST} callers waiting forever (bugzilla 366048 comment 29).
+	 * </p>
+	 */
 	@Override
 	public void aboutToWork(JavaReconciler javaReconciler) {
-		// Notify AST provider
-		CoreASTProvider.getInstance().aboutToBeReconciled(getInputJavaElement(), javaReconciler::signalWaitForFinish);
+		ITypeRoot javaElement= getInputJavaElement();
+		if (javaElement == null)
+			return;
+		CoreASTProvider.getInstance().cache(null, javaElement);
 	}
 
 	/*
