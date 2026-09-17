@@ -731,5 +731,101 @@ public class JavadocHoverTests extends CoreTests {
 		}
 	}
 
+	@Test
+	public void testJavadocCodeTagRenderingIssue_01() throws Exception {
+		String source = """
+				package p;
+				public class Javadoc {
+					/**
+					 *  This is {@code code}.
+					 */
+					 void foo(){}
+				}
+				""";
+
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Javadoc.java", source, null);
+		assertNotNull("Javadoc.java", cu);
+
+		IType type= cu.getType("Javadoc");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			String expectedCodeSequence = "This is <code>code</code>.";
+
+			int index= actualHtmlContent.lastIndexOf("This is ");
+			assertNotEquals(-1, index);
+			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
+			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
+		}
+	}
+
+	@Test
+	public void testJavadocCodeTagRenderingIssue_02() throws Exception {
+		String source=
+				"""
+			package p;
+			public class TestClass {
+			/**
+			 * Performs:
+			 * <pre>abc</pre>
+			 * This is {@code code}.
+			 */
+			double l;
+			}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/TestClass.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("TestClass");
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			if (hoverInfo == null)
+				continue;
+			String actualHtmlContent= hoverInfo.getHtml();
+			// must contain "<code>code</code>." with no space before the dot
+			assertTrue("Expected <code>code</code>. without extra space, got: " + actualHtmlContent,
+					actualHtmlContent.contains("<code>code</code>."));
+		}
+	}
+
+	@Test
+	public void testJavadocCodeTagRenderingIssue_03() throws Exception {
+		String source = """
+				public class TestClass {
+                   /**
+                    * This is {@code code}.
+                    * <pre>
+                    * abc
+                    * </pre>
+                    */
+                   double l;
+				 }
+				""";
+
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/TestClass.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("TestClass");
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			if (hoverInfo == null)
+				continue;
+			String actualHtmlContent= hoverInfo.getHtml();
+			int index= actualHtmlContent.indexOf("This is ");
+			assertNotEquals(-1, index);
+			String expectedCodeSequence = "This is <code>code</code>.";
+			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
+			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
+		}
+	}
+
 }
 
