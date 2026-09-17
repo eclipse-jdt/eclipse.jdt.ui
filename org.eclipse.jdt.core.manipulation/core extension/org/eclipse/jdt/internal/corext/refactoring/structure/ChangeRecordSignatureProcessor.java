@@ -220,7 +220,7 @@ public class ChangeRecordSignatureProcessor extends AbstractSignatureProcessor {
 
 	}
 
-	abstract class OccurrenceUpdate <N extends ASTNode> extends AbstractOccurrenceUpdate<N>{
+	abstract class OccurrenceUpdate<N extends ASTNode> extends AbstractOccurrenceUpdate<N>{
 
 	      protected OccurrenceUpdate(CompilationUnitRewrite cuRewrite, TextEditGroup description, RefactoringStatus result) {
 	    	  super(cuRewrite, description, result);
