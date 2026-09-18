@@ -14,6 +14,7 @@
 package org.eclipse.jdt.core.manipulation;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,6 +52,34 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public final class CoreASTProvider {
+
+	/**
+	 * The default timeout for the reconcile operation. It can be overwritten via system property.
+	 *
+	 * @see #CORE_AST_PROVIDER_RECONCILE_TIMEOUT_MILLISECONDS_PROPERTY
+	 */
+	private static final int CORE_AST_PROVIDER_DEFAULT_RECONCILE_TIMEOUT_MILLISECONDS= 30_000;
+
+	/**
+	 * Use this system property to override the default timeout of the reconcile operation
+	 * (currently 30_000 ms), e.g. by setting it to:
+	 *
+	 * <pre>
+	 * 	-DCoreASTProvider.reconcileTimeoutMilliseconds=15_000
+	 * </pre>
+	 *
+	 * @since 1.26
+	 */
+	public static final String CORE_AST_PROVIDER_RECONCILE_TIMEOUT_MILLISECONDS_PROPERTY= "CoreASTProvider.reconcileTimeoutMilliseconds"; //$NON-NLS-1$
+
+	/**
+	 * Default overall timeout to let the reconcile operation wait for an AST. Overridable via the
+	 * "CoreASTProvider.reconcileTimeoutMilliseconds" system property (read fresh on every call, not
+	 * cached, so tests can lower it when needed).
+	 */
+	private static int getOverallReconcileTimeoutMilliseconds() {
+		return Integer.getInteger(CORE_AST_PROVIDER_RECONCILE_TIMEOUT_MILLISECONDS_PROPERTY, CORE_AST_PROVIDER_DEFAULT_RECONCILE_TIMEOUT_MILLISECONDS);
+	}
 
 	private static CoreASTProvider instance = new CoreASTProvider();
 
@@ -117,15 +146,31 @@ public final class CoreASTProvider {
 	 * <p>
 	 * Clients are not allowed to modify the AST and must synchronize all access to its nodes.
 	 * </p>
+	 * <p>
+	 * If {@link #WAIT_YES} is given and the element is being reconciled, this waits for that to
+	 * finish, but only up to a bounded overall timeout, so a reconcile that never finishes (or a
+	 * missed completion notification) cannot block this method forever.
+	 * </p>
 	 *
 	 * @param input the Java element, must not be <code>null</code>
 	 * @param waitFlag org.eclipse.jdt.ui.SharedASTProvider#WAIT_YES,
-	 * org.eclipse.jdt.ui.SharedASTProvider#WAIT_NO or
-	 * org.eclipse.jdt.ui.SharedASTProvider#WAIT_ACTIVE_ONLY
+	 *            org.eclipse.jdt.ui.SharedASTProvider#WAIT_NO or
+	 *            org.eclipse.jdt.ui.SharedASTProvider#WAIT_ACTIVE_ONLY
 	 * @param progressMonitor the progress monitor or <code>null</code>
 	 * @return the AST or <code>null</code> if the AST is not available
 	 */
 	public CompilationUnit getAST(final ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
+		return getAST(input, waitFlag, progressMonitor, System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(getOverallReconcileTimeoutMilliseconds()));
+	}
+
+	/**
+	 * Same as {@link #getAST(ITypeRoot, WAIT_FLAG, IProgressMonitor)}, but reusing the given
+	 * overall deadline across recursive retries instead of giving each retry's
+	 * {@code fWaitLock.wait(...)} a fresh timeout. Without this, a reconcile that never completes
+	 * (or a missed {@code notifyAll()}) makes the retries continue forever. See
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=366048
+	 */
+	private CompilationUnit getAST(final ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor, long waitDeadlineNanos) {
 		if (input == null || waitFlag == null)
 			throw new IllegalArgumentException("input or wait flag are null"); //$NON-NLS-1$
 
@@ -166,14 +211,29 @@ public final class CoreASTProvider {
 			activeElement= null;
 
 		if (isReconciling) {
+			long remainingMillis= TimeUnit.NANOSECONDS.toMillis(waitDeadlineNanos - System.nanoTime());
+			if (remainingMillis <= 0) {
+				// Overall wait budget exhausted: give up instead of retrying forever (e.g.
+				// because the reconcile that was supposed to notifyAll() never finished, or a
+				// notification was missed) and return whatever is available right now.
+				synchronized (this) {
+					final CompilationUnit ret= input.equals(fActiveJavaElement) ? fAST : null;
+
+					if (JavaManipulationPlugin.DEBUG_AST_PROVIDER) {
+						System.out.println(String.format("%s - %stimeout was exceeded, returning %s (%s) for: %s", //$NON-NLS-1$
+								getThreadName(), DEBUG_PREFIX, toString(ret), waitFlag, input.getElementName()));
+					}
+					return ret;
+				}
+			}
 			try {
 				notifyReconciler();
-				// Wait for AST
+				// Wait for AST, bounded by the overall deadline above, not reset on every retry
 				synchronized (fWaitLock) {
 					if (isReconciling(input)) {
 						if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
 							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
-						fWaitLock.wait(30000); // XXX: The 30 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
+						fWaitLock.wait(remainingMillis); // See https://bugs.eclipse.org/366048#c21
 					}
 				}
 
@@ -186,7 +246,7 @@ public final class CoreASTProvider {
 						return fAST;
 					}
 				}
-				return getAST(input, waitFlag, progressMonitor);
+				return getAST(input, waitFlag, progressMonitor, waitDeadlineNanos);
 			} catch (InterruptedException e) {
 				return null; // thread has been interrupted don't compute AST
 			}
