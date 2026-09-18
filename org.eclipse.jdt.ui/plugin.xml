@@ -4924,23 +4924,13 @@
             sequence="M2+M3+C"
             commandId="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
-      <key
-            sequence="M2+M3+E"
-            commandId="org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             platform="carbon"
             sequence="M2+M3+C"
             commandId=""
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="COMMAND+ALT+E"
-            commandId="org.eclipse.jdt.ui.edit.text.java.modify.record.parameters"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M2+M3+K"
             commandId="org.eclipse.jdt.ui.edit.text.java.make.static"

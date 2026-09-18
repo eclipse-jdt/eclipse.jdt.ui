@@ -182,6 +182,33 @@ public class ChangeRecordSignatureTests extends GenericRefactoringTest {
 		helperDelete(new int[]{1});
 	}
 
+	@Test
+	public void testNullOccurrenceUpdate() throws Exception {
+		// A::new is a CreationReference — not handled by createOccurrenceUpdate,
+		// so NullOccurrenceUpdate fires and the refactoring produces an error status
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
+		IType classA= getType(cu, "A");
+		assertTrue("refactoring not available", RefactoringAvailabilityTesterCore.isChangeRecordSignatureAvailable(classA));
+
+		ChangeRecordSignatureProcessor processor= new ChangeRecordSignatureProcessor(classA);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+
+		ParameterInfo[] newParamInfos= createNewParamInfos(
+				new String[]{"String"},
+				new String[]{"c"},
+				new String[]{"\"default\""});
+		addInfos(processor.getParameterInfos(), newParamInfos, new int[]{2});
+
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus initialConditions= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+		assertTrue("precondition was supposed to pass: " + initialConditions.getEntryWithHighestSeverity(), initialConditions.isOK());
+
+		RefactoringStatus result= performRefactoring(ref);
+		assertNotNull("refactoring was supposed to produce an error due to unhandled CreationReference", result);
+		assertEquals("Severity", RefactoringStatus.ERROR, result.getSeverity());
+	}
+
 	private void helperReorder(int[] newOrder) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
 		IType classA= getType(cu, "A");

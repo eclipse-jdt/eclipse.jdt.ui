@@ -139,6 +139,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_parameter_used;
 
+	public static String ChangeSignatureRefactoring_update_error_exception;
+
 	public static String ChangeSignatureRefactoring_preview;
 
 	public static String ChangeSignatureRefactoring_removed_exceptions;

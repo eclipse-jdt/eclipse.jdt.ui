@@ -115,8 +115,11 @@ public class ChangeRecordSignatureProcessor extends AbstractSignatureProcessor {
 		public void updateNode() throws JavaModelException {
 			int start= fNullNode.getStartPosition();
 			int length= fNullNode.getLength();
-			String msg= "Cannot update found node: nodeType=" + fNullNode.getNodeType() + "; "  //$NON-NLS-1$//$NON-NLS-2$
-					+ fNullNode.toString() + "[" + start + ", " + length + "] in " + fCuRewrite.getCu();  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			Object[] keys = {Integer.toString(fNullNode.getNodeType()), fNullNode.toString(), Integer.toString(start), Integer.toString(length),
+					fCuRewrite.getCu()};
+			//String msg= "Cannot update found node: nodeType=" + fNode.getNodeType() + "; "  //$NON-NLS-1$//$NON-NLS-2$
+			//					+ fNode.toString() + "[" + start + ", " + length + "] in " + fCuRewrite.getCu();  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_update_error_exception, keys);
 			JavaManipulationPlugin.log(new Exception(msg + ":\n" + fCuRewrite.getCu().getSource().substring(start, start + length))); //$NON-NLS-1$
 			fResult.addError(msg, JavaStatusContext.create(fCuRewrite.getCu(), fNullNode));
 		}
