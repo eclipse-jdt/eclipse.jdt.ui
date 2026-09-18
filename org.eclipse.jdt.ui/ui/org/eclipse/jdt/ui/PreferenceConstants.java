@@ -4056,6 +4056,16 @@ public class PreferenceConstants {
 	public static final String EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES = "java.codemining.filter.implied.parameterNames"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that holds the color used to highlight resources
+	 * in the Package Explorer.
+	 * <p>
+	 * Value is of type <code>String</code>.When this preference has a non-default value, the specified foreground color is applied in addition to the bold styling.
+	 * </p>
+	 * @since 3.39
+	 */
+	public static final String PACKAGE_EXPLORER_HIGHLIGHT_COLOR= "packageExplorerHighlightColor"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that stores the maximum number of chain completions
 	 * to be proposed at one time.
 	 * <p>
