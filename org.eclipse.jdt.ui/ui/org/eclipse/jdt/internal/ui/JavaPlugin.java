@@ -53,6 +53,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.text.templates.ContextTypeRegistry;
+
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
@@ -61,7 +63,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
@@ -173,12 +174,12 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * The template context type registry for the java editor.
 	 * @since 3.0
 	 */
-	private volatile ContextTypeRegistry fContextTypeRegistry;
+	private volatile ContributionContextTypeRegistry fContextTypeRegistry;
 	/**
 	 * The code template context type registry for the java editor.
 	 * @since 3.0
 	 */
-	private volatile ContextTypeRegistry fCodeTemplateContextTypeRegistry;
+	private volatile ContributionContextTypeRegistry fCodeTemplateContextTypeRegistry;
 
 	/**
 	 * The template store for the java editor.
@@ -806,7 +807,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		}
 		synchronized(this) {
 			if (fContextTypeRegistry == null) { // Second check (with locking)
-				ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry(JavaUI.ID_CU_EDITOR);
+				ContributionContextTypeRegistry contributionRegistry= new ContributionContextTypeRegistry(JavaUI.ID_CU_EDITOR);
+				ContextTypeRegistry registry= contributionRegistry;
 
 				TemplateContextType all_contextType= registry.getContextType(JavaContextType.ID_ALL);
 				((AbstractJavaContextType) all_contextType).initializeContextTypeResolvers();
@@ -824,10 +826,20 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 				registerJavaContext(registry, JavaPostfixContextType.ID_ALL, all_contextType);
 				all_contextType= registry.getContextType(JavaPostfixContextType.ID_ALL);
-				fContextTypeRegistry= registry;
+				fContextTypeRegistry= contributionRegistry;
 			}
 			return fContextTypeRegistry;
 		}
+	}
+
+	/**
+	 * Returns the contribution registry required by the legacy UI template preference page.
+	 *
+	 * @return the contribution template context registry
+	 */
+	public ContributionContextTypeRegistry getContributionTemplateContextRegistry() {
+		getTemplateContextRegistry();
+		return fContextTypeRegistry;
 	}
 
 	/**
@@ -838,7 +850,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @param parent the parent context type
 	 * @since 3.4
 	 */
-	private static void registerJavaContext(ContributionContextTypeRegistry registry, String id, TemplateContextType parent) {
+	private static void registerJavaContext(ContextTypeRegistry registry, String id, TemplateContextType parent) {
 		TemplateContextType contextType= registry.getContextType(id);
 		Iterator<TemplateVariableResolver> iter= parent.resolvers();
 		while (iter.hasNext())
@@ -859,7 +871,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 				}
 
 				final IPreferenceStore store= getPreferenceStore();
-				ContributionTemplateStore templateStore = new ContributionTemplateStore(getTemplateContextRegistry(), store, TEMPLATES_KEY);
+				getTemplateContextRegistry();
+				ContributionTemplateStore templateStore = new ContributionTemplateStore(fContextTypeRegistry, store, TEMPLATES_KEY);
 				try {
 					templateStore.load();
 				} catch (IOException e) {
@@ -914,7 +927,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 				}
 
 				IPreferenceStore store= getPreferenceStore();
-				ContributionTemplateStore templateStore = new ContributionTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY);
+				getCodeTemplateContextRegistry();
+				ContributionTemplateStore templateStore = new ContributionTemplateStore(fCodeTemplateContextTypeRegistry, store, CODE_TEMPLATES_KEY);
 				try {
 					templateStore.load();
 				} catch (IOException e) {
