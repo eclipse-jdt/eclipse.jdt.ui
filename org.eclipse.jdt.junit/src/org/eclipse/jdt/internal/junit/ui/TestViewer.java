@@ -139,6 +139,9 @@ public class TestViewer {
 		 *         {@link Result#IGNORED} test result
 		 */
 		private boolean hasIgnoredInTestResult(TestElement testElement) {
+			if (testElement.getTestResult(false) == Result.IGNORED)
+				return true;
+
 			if (testElement instanceof TestSuiteElement) {
 				ITestElement[] children= ((TestSuiteElement) testElement).getChildren();
 				for (ITestElement child : children) {
@@ -147,10 +150,9 @@ public class TestViewer {
 						return true;
 					}
 				}
-				return false;
 			}
 
-			return testElement.getTestResult(false) == Result.IGNORED;
+			return false;
 		}
 	}
 
