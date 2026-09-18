@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock2;
 import org.eclipse.jdt.ui.text.folding.IScopedJavaFoldingPreferenceBlock;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -51,11 +52,14 @@ import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey
  *
  * @since 3.0
  */
-public class DefaultJavaFoldingPreferenceBlock implements IScopedJavaFoldingPreferenceBlock {
+public class DefaultJavaFoldingPreferenceBlock implements IScopedJavaFoldingPreferenceBlock, IJavaFoldingPreferenceBlock2 {
 
 	private IPreferenceStore fStore;
 	private OverlayPreferenceStore fOverlayStore;
 	private OverlayKey[] fKeys;
+
+	private List<Group> fGroups= new ArrayList<>();
+	private List<Label> fLabels= new ArrayList<>();
 	private Map<Button, String> fCheckBoxes= new HashMap<>();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
 		@Override
@@ -125,7 +129,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IScopedJavaFoldingPref
 		outer.setLayout(layout);
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Group initialFoldingGroup= new Group(outer, SWT.NONE);
+		Group initialFoldingGroup= addGroup(outer, SWT.NONE);
 		initialFoldingGroup.setLayout(layout);
 		initialFoldingGroup.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_title);
 		initialFoldingGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -137,21 +141,21 @@ public class DefaultJavaFoldingPreferenceBlock implements IScopedJavaFoldingPref
 		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_imports, PreferenceConstants.EDITOR_FOLDING_IMPORTS, 0);
 		Button initiallyFoldCustomRegions= addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_customRegions, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, 0);
 
-		Group extendedFoldingGroup= new Group(outer, SWT.NONE);
+		Group extendedFoldingGroup= addGroup(outer, SWT.NONE);
 		GridLayout extendedFoldingLayout= new GridLayout(1, false);
 		extendedFoldingLayout.marginWidth= 10;
 		extendedFoldingLayout.marginHeight= 10;
 		extendedFoldingGroup.setLayout(extendedFoldingLayout);
 		extendedFoldingGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		extendedFoldingGroup.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_New_Setting_Title);
-		Label label= new Label(extendedFoldingGroup, SWT.WRAP);
+		Label label= addLabel(extendedFoldingGroup, SWT.WRAP);
 		GridData gd = new GridData(SWT.FILL, SWT.TOP, true, false);
 		gd.widthHint = 300;
 		label.setLayoutData(gd);
 		label.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_Warning_New_Feature);
 		addCheckBox(extendedFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_New, PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED, 0);
 
-		Group customRegionGroup= new Group(outer, SWT.NONE);
+		Group customRegionGroup= addGroup(outer, SWT.NONE);
 		customRegionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		GridLayout customRegionLayout= new GridLayout(2, false);
@@ -183,6 +187,18 @@ public class DefaultJavaFoldingPreferenceBlock implements IScopedJavaFoldingPref
 		fMasterSlaveListeners.add(listener);
 	}
 
+	private Group addGroup(Composite parent, int style) {
+		Group group= new Group(parent, style);
+		fGroups.add(group);
+		return group;
+	}
+
+	private Label addLabel(Composite parent, int style) {
+		Label label= new Label(parent, style);
+		fLabels.add(label);
+		return label;
+	}
+
 	private Button addCheckBox(Composite parent, String label, String key, int indentation) {
 		return addCheckBox(parent, label, key, indentation, 1);
 	}
@@ -203,7 +219,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IScopedJavaFoldingPref
 	}
 
 	private Text addStringInput(Composite parent, String label, String key) {
-		Label labelElement = new Label(parent, SWT.LEFT);
+		Label labelElement= addLabel(parent, SWT.LEFT);
 		labelElement.setText(label);
 		GridData labelGridData= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		labelGridData.horizontalSpan= 1;
@@ -227,6 +243,26 @@ public class DefaultJavaFoldingPreferenceBlock implements IScopedJavaFoldingPref
 		fCheckBoxes.forEach((b, key) -> b.setSelection(fOverlayStore.getBoolean(key)));
 		fStringInputs.forEach((text, key) -> text.setText(fOverlayStore.getString(key)));
 		fMasterSlaveListeners.forEach(listener -> listener.widgetSelected(null));
+	}
+
+	@Override
+	public void updateEnablements(boolean enabled) {
+		for (Group group : fGroups) {
+			group.setEnabled(enabled);
+		}
+		for (Label label : fLabels) {
+			label.setEnabled(enabled);
+		}
+		for (Button checkBox : fCheckBoxes.keySet()) {
+			checkBox.setEnabled(enabled);
+		}
+		for (Text stringInput : fStringInputs.keySet()) {
+			stringInput.setEnabled(enabled);
+		}
+		if (enabled) {
+			// re-apply master/slave dependencies that the blanket enable above overrode
+			fMasterSlaveListeners.forEach(listener -> listener.widgetSelected(null));
+		}
 	}
 
 	/*
