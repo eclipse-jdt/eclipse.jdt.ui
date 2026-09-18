@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettingsConstants;
+
 /**
  * Gives access to the import rewrite configured with the settings as specified in the user interface.
  * These settings are kept in JDT UI for compatibility reasons.
@@ -125,6 +127,14 @@ public class CodeStyleConfiguration {
 		} catch (NumberFormatException e) {
 			// ignore
 		}
+
+		String keepExisting= JavaManipulation.getPreference(CodeGenerationSettingsConstants.ORGIMPORTS_KEEP_EXISTING_ONDEMAND, project);
+		rewrite.setKeepExistingOnDemandImports(Boolean.parseBoolean(keepExisting));
+
+		String collapse= JavaManipulation.getPreference(CodeGenerationSettingsConstants.ORGIMPORTS_COLLAPSE_TO_ONDEMAND, project);
+		// Defaults to true, so a missing preference must be treated as enabled.
+		rewrite.setCollapseSingleImportsToOnDemand(collapse == null || Boolean.parseBoolean(collapse));
+
 		return rewrite;
 	}
 
