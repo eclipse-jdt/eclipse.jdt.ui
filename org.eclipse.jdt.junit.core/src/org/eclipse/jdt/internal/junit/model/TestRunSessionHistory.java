@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
 
 import org.eclipse.core.runtime.CoreException;
@@ -261,7 +262,7 @@ public final class TestRunSessionHistory {
 		Files.createDirectories(directory.toPath());
 		File temporaryFile= Files.createTempFile(directory.toPath(), targetFile.getName() + '.', TEMP_SUFFIX).toFile();
 		try {
-			JUnitModel.exportTestRunSession(session, temporaryFile);
+			JUnitCore.exportTestRunSession(session, temporaryFile);
 			if (session.hasSwapInFailed())
 				throw new IOException("Could not load the complete JUnit test tree"); //$NON-NLS-1$
 			moveReplacing(temporaryFile, targetFile);
