@@ -54,7 +54,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 	public JavaTemplatePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setTemplateStore(JavaPlugin.getDefault().getTemplateStore());
-		setContextTypeRegistry(JavaPlugin.getDefault().getTemplateContextRegistry());
+		setContextTypeRegistry(JavaPlugin.getDefault().getContributionTemplateContextRegistry());
 		fTemplateProcessor= new TemplateVariableProcessor();
 	}
 
