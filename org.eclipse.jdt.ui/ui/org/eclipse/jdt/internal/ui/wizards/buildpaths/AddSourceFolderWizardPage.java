@@ -682,7 +682,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			if (parentLocation != null) {
 				try {
 					IFileStore store= EFS.getStore(parentLocation).getChild(str);
-					if (store.fetchInfo().exists()) {
+					if (store.exists()) {
 						result.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase);
 						return result;
 					}

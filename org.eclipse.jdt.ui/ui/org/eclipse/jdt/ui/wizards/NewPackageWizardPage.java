@@ -380,7 +380,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 					URI location= pack.getResource().getLocationURI();
 					if (location != null) {
 						IFileStore store= EFS.getStore(location);
-						if (store.fetchInfo().exists()) {
+						if (store.exists()) {
 							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExistsDifferentCase);
 						}
 					}
