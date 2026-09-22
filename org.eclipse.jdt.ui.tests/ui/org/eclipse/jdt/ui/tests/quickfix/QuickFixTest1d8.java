@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2025 IBM Corporation and others.
+ * Copyright (c) 2013, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3548,4 +3548,111 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 	}
 
+	@Test
+	public void testIssue3214() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str1= """
+			package test1;
+
+			public class E {
+			    public static void main(String[] args) {
+			        someUsefulMethod(); // Place cursor in method call and use Ctrl+1 to show proposals
+			    }
+			    @Deprecated
+			    static void someUsefulMethod1() {}
+			    @Deprecated
+			    static void someUsefulMethod2() {}
+
+			    static void someUsefulMethod3_API_OK() {}
+
+			    static void someUsefulMethod4_API_OK() {}
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+		assertCorrectLabels(proposals);
+		String[] expected= new String[4];
+		expected[0]= """
+			package test1;
+
+			public class E {
+			    public static void main(String[] args) {
+			        someUsefulMethod3_API_OK(); // Place cursor in method call and use Ctrl+1 to show proposals
+			    }
+			    @Deprecated
+			    static void someUsefulMethod1() {}
+			    @Deprecated
+			    static void someUsefulMethod2() {}
+
+			    static void someUsefulMethod3_API_OK() {}
+
+			    static void someUsefulMethod4_API_OK() {}
+			}
+			""";
+
+		expected[1]= """
+				package test1;
+
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod4_API_OK(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
+
+				    static void someUsefulMethod3_API_OK() {}
+
+				    static void someUsefulMethod4_API_OK() {}
+				}
+				""";
+
+		expected[2]= """
+				package test1;
+
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod1(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
+
+				    static void someUsefulMethod3_API_OK() {}
+
+				    static void someUsefulMethod4_API_OK() {}
+				}
+				""";
+
+		expected[3]= """
+				package test1;
+
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod2(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
+
+				    static void someUsefulMethod3_API_OK() {}
+
+				    static void someUsefulMethod4_API_OK() {}
+				}
+				""";
+
+		for (int i= 0; i < 4; ++i) {
+			List<IJavaCompletionProposal> proposalList= new ArrayList<>();
+			proposalList.add(proposals.get(i));
+			assertExpectedExistInProposals(proposalList, new String[] {expected[i]});
+		}
+	}
 }

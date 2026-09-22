@@ -211,6 +211,7 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_add_static_import_description;
 	public static String UnresolvedElementsSubProcessor_addargumentcast_description;
 	public static String UnresolvedElementsSubProcessor_changemethod_description;
+	public static String UnresolvedElementsSubProcessor_changemethod_to_deprecated_description;
 	public static String UnresolvedElementsSubProcessor_changetoouter_description;
 	public static String UnresolvedElementsSubProcessor_changetomethod_description;
 	public static String UnresolvedElementsSubProcessor_create_loop_variable_description;

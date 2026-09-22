@@ -1457,16 +1457,28 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		IBinding[] bindings= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
 
 		HashSet<String> suggestedRenames= new HashSet<>();
+		Collection<T> deprecatedProposals= new ArrayList<>();
 		for (IBinding b : bindings) {
 			IMethodBinding binding= (IMethodBinding) b;
 			String curr= binding.getName();
 			if (!curr.equals(methodName) && binding.getParameterTypes().length == nArguments && NameMatcher.isSimilarName(methodName, curr) && suggestedRenames.add(curr)) {
-				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_description, BasicElementLabels.getJavaElementName(curr));
-				RenameNodeCorrectionProposalCore core= new RenameNodeCorrectionProposalCore(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, IProposalRelevance.CHANGE_METHOD);
-				T t= renameNodeProposalToT(core, MethodProposal1);
-				if (t != null)
-					proposals.add(t);
+				if (!binding.isDeprecated()) {
+					String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_description, BasicElementLabels.getJavaElementName(curr));
+					RenameNodeCorrectionProposalCore core= new RenameNodeCorrectionProposalCore(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, IProposalRelevance.CHANGE_METHOD);
+					T t= renameNodeProposalToT(core, MethodProposal1);
+					if (t != null)
+						proposals.add(t);
+				} else { // create suggestions to provide a deprecated method call, but add after normal calls
+					String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_to_deprecated_description, BasicElementLabels.getJavaElementName(curr));
+					RenameNodeCorrectionProposalCore core= new RenameNodeCorrectionProposalCore(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, IProposalRelevance.CHANGE_METHOD);
+					T t= renameNodeProposalToT(core, MethodProposal1);
+					if (t != null)
+						deprecatedProposals.add(t);
+				}
 			}
+		}
+		if (!deprecatedProposals.isEmpty()) {
+			proposals.addAll(deprecatedProposals);
 		}
 		suggestedRenames= null;
 
