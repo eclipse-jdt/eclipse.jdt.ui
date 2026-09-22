@@ -62,11 +62,13 @@ import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.ClasspathFixProcessorDescriptor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.ReorgCorrectionsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
@@ -1166,10 +1168,18 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Hello.java", str, false, null);
 
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertEquals(1, cu.getTypes().length);
+		assertTrue(cu.getTypes()[0].isImplicitlyDeclared());
 
-		for (IJavaCompletionProposal proposal : proposals) {
+		// A compact compilation unit no longer necessarily produces a package
+		// mismatch diagnostic. Exercise the correction provider explicitly so
+		// the regression still verifies that it never inserts a package declaration.
+		ProblemLocation problem= new ProblemLocation(0, 0, IProblem.PackageIsNotExpectedPackage,
+				new String[] { "", pack1.getElementName() }, true, IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
+		ArrayList<ICommandAccess> proposals= new ArrayList<>();
+		ReorgCorrectionsSubProcessor.getWrongPackageDeclNameProposals(getCorrectionContext(cu, 0, 0), problem, proposals);
+
+		for (ICommandAccess proposal : proposals) {
 			assertFalse(
 				"\"Correct package declaration\" must not be offered for implicit classes",
 				proposal instanceof FixCorrectionProposal);
