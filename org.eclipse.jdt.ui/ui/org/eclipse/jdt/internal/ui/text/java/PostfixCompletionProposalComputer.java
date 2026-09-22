@@ -72,7 +72,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 	private final PostfixTemplateEngine postfixCompletionTemplateEngine;
 
 	public PostfixCompletionProposalComputer() {
-		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
+		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistryCore();
 		postfixCompletionTemplateEngine= createTemplateEngine(templateContextRegistry, JavaPostfixContextType.ID_ALL);
 	}
 

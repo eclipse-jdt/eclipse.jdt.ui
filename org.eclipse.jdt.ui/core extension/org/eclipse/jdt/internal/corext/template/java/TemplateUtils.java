@@ -50,7 +50,7 @@ public class TemplateUtils {
 	 */
 	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException, TemplateException {
 
-		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistryCore().getContextType(template.getContextTypeId());
 		if (!(contextType instanceof CompilationUnitContextType))
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.JavaContext_error_message, null));
 

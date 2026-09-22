@@ -566,7 +566,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		if (selection.size() == 1 && selection.get(0) instanceof TemplatePersistenceData) {
 			TemplatePersistenceData data= (TemplatePersistenceData) selection.get(0);
 			Template template= data.getTemplate();
-			TemplateContextType type= JavaPlugin.getDefault().getCodeTemplateContextRegistry().getContextType(template.getContextTypeId());
+			TemplateContextType type= JavaPlugin.getDefault().getCodeTemplateContextRegistryCore().getContextType(template.getContextTypeId());
 			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {
@@ -595,7 +595,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 	private void edit(TemplatePersistenceData data) {
 		Template newTemplate= new Template(data.getTemplate());
-		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, false, JavaPlugin.getDefault().getCodeTemplateContextRegistry());
+		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, false, JavaPlugin.getDefault().getCodeTemplateContextRegistryCore());
 		if (dialog.open() == Window.OK) {
 			// changed
 			data.setTemplate(dialog.getTemplate());
