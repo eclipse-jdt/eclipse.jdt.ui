@@ -185,6 +185,17 @@ public class PreferenceConstants {
 	public static final String APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui.flatPackagesInPackageExplorer";//$NON-NLS-1$
 
 	/**
+	 * A named preference that controls if empty resource folders are folded in
+	 * the hierarchical mode of the package and project explorer.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: if <code>true</code> empty resource
+	 * folders with a single child folder are folded.
+	 * </p>
+	 * @since 3.40
+	 */
+	public static final String APPEARANCE_FOLD_RESOURCE_FOLDERS_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui.foldResourceFoldersInPackageExplorer"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if entries of library containers are sorted alphabetically.
 	 * <p>
 	 * Value is of type <code>Boolean</code>: if <code>true</code> entries are sorted alphabetically, otherwise
@@ -4144,6 +4155,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
+		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_RESOURCE_FOLDERS_IN_PACKAGE_EXPLORER, true);
 		store.setDefault(PreferenceConstants.APPEARANCE_SORT_LIBRARY_ENTRIES_BY_NAME, true);
 		store.setDefault(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
@@ -4648,4 +4660,3 @@ public class PreferenceConstants {
 	}
 
 }
-

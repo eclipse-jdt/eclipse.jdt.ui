@@ -422,6 +422,7 @@ public class ContentProviderTests1 {
 		if (myPart instanceof MockPluginView) {
 			fMyPart= (MockPluginView) myPart;
 			fMyPart.setFolding(false);
+			fMyPart.setResourceFolderFolding(false);
 			fMyPart.setFlatLayout(false);
 			// Above call might cause a property change event being sent
 			fMyPart.clear();

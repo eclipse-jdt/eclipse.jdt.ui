@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import org.junit.jupiter.api.AfterEach;
@@ -54,6 +55,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerLabelProvider;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 
@@ -149,6 +153,58 @@ public class ContentProviderTests3{
 		Object[] expectedChildren= new Object[]{fPack1,fPack2,fPack3, fRoot1.getPackageFragment("")};//$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fRoot1);
 		assertTrue(compareArrays(children, expectedChildren), "Wrong children found for PackageFragmentRoot with folding");	//$NON-NLS-1$
+	}
+
+	@Test
+	public void testFoldResourceFolders() throws Exception {
+		IPackageFragmentRoot root= createResourceRoot();
+		IFolder leaf= createFolderHierarchy((IFolder) root.getResource(), "com", "example", "application"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		Object[] children= fProvider.getChildren(root);
+
+		assertTrue(compareArrays(children, new Object[] { leaf }), "Wrong folded resource folder"); //$NON-NLS-1$
+		assertEquals(root, fProvider.getParent(leaf), "Wrong parent for folded resource folder"); //$NON-NLS-1$
+		assertEquals("com/example/application", getLabel(leaf), "Wrong folded resource folder label"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Test
+	public void testVisibleResourcePreventsFolderFolding() throws Exception {
+		IPackageFragmentRoot root= createResourceRoot();
+		IFolder middle= createFolderHierarchy((IFolder) root.getResource(), "com", "example"); //$NON-NLS-1$ //$NON-NLS-2$
+		createFolderHierarchy(middle, "application"); //$NON-NLS-1$
+		middle.getFile("config.properties").create(new ByteArrayInputStream(new byte[0]), true, null); //$NON-NLS-1$
+
+		Object[] children= fProvider.getChildren(root);
+
+		assertTrue(compareArrays(children, new Object[] { middle }), "Visible resource did not stop folder folding"); //$NON-NLS-1$
+		assertEquals("com/example", getLabel(middle), "Wrong partially folded resource folder label"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Test
+	public void testFilteredResourceDoesNotPreventFolderFolding() throws Exception {
+		IPackageFragmentRoot root= createResourceRoot();
+		IFolder middle= createFolderHierarchy((IFolder) root.getResource(), "com", "example"); //$NON-NLS-1$ //$NON-NLS-2$
+		IFolder leaf= createFolderHierarchy(middle, "application"); //$NON-NLS-1$
+		middle.getFile(".DS_Store").create(new ByteArrayInputStream(new byte[0]), true, null); //$NON-NLS-1$
+		NamePatternFilter filter= new NamePatternFilter();
+		filter.setPatterns(new String[] { ".*" }); //$NON-NLS-1$
+		fMyPart.getTreeViewer().addFilter(filter);
+
+		Object[] children= fProvider.getChildren(root);
+
+		assertTrue(compareArrays(children, new Object[] { leaf }), "Filtered resource prevented folder folding"); //$NON-NLS-1$
+	}
+
+	@Test
+	public void testResourceFoldersAreNotFoldedWhenResourceFolderFoldingIsDisabled() throws Exception {
+		IPackageFragmentRoot root= createResourceRoot();
+		IFolder top= createFolderHierarchy((IFolder) root.getResource(), "com"); //$NON-NLS-1$
+		createFolderHierarchy(top, "example", "application"); //$NON-NLS-1$ //$NON-NLS-2$
+		fMyPart.setResourceFolderFolding(false);
+
+		Object[] children= fProvider.getChildren(root);
+
+		assertTrue(compareArrays(children, new Object[] { top }), "Resource folder was folded while folding was disabled"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -393,6 +449,7 @@ public class ContentProviderTests3{
 			fMyPart= (MockPluginView) myPart;
 			//turn on folding
 			fMyPart.setFolding(true);
+			fMyPart.setResourceFolderFolding(true);
 			fMyPart.setFlatLayout(false);
 			// above call might cause a property change event being sent
 			fMyPart.clear();
@@ -401,6 +458,32 @@ public class ContentProviderTests3{
 		}else fail("Unable to get view");//$NON-NLS-1$
 
 		assertNotNull(fProvider);
+	}
+
+	private IPackageFragmentRoot createResourceRoot() throws Exception {
+		return JavaProjectHelper.addSourceContainer(
+				fJProject2,
+				"src/main/resources", //$NON-NLS-1$
+				new Path[0],
+				new Path[] { new Path("**") }); //$NON-NLS-1$
+	}
+
+	private IFolder createFolderHierarchy(IFolder parent, String... segments) throws Exception {
+		IFolder result= parent;
+		for (String segment : segments) {
+			result= result.getFolder(segment);
+			result.create(true, true, null);
+		}
+		return result;
+	}
+
+	private String getLabel(IFolder folder) {
+		PackageExplorerLabelProvider labelProvider= new PackageExplorerLabelProvider((PackageExplorerContentProvider) fProvider);
+		try {
+			return labelProvider.getText(folder);
+		} finally {
+			labelProvider.dispose();
+		}
 	}
 
 	@AfterEach
