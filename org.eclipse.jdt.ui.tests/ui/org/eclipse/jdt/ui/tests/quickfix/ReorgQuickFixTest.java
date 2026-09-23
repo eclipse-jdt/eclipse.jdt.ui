@@ -14,7 +14,6 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -1167,13 +1166,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Hello.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-
-		for (IJavaCompletionProposal proposal : proposals) {
-			assertFalse(
-				"\"Correct package declaration\" must not be offered for implicit classes",
-				proposal instanceof FixCorrectionProposal);
-		}
+		IProblem[] problems= astRoot.getProblems();
+		assertEquals("There shouldn't be any problems", 0, problems.length);
 	}
 
 
