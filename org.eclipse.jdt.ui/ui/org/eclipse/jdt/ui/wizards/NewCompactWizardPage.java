@@ -99,6 +99,7 @@ public class NewCompactWizardPage extends NewTypeWizardPage {
 			}
 		}
 
+		setPackageFragment(pack, true);
 		setTypeName(typeName, true);
 
 		setAddComments(StubUtility.doAddComments(project), true);
@@ -159,6 +160,7 @@ public class NewCompactWizardPage extends NewTypeWizardPage {
 		createSeparator(composite, nColumns);
 
 		createTypeNameControls(composite, nColumns);
+		createPackageControls(composite, nColumns);
 		createModifierControls(composite, nColumns);
 
 
