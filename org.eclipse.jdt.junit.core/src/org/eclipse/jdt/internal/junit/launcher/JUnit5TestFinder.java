@@ -13,13 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.ISourceRange;
@@ -30,6 +35,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
@@ -215,13 +221,26 @@ public class JUnit5TestFinder implements ITestFinder {
 		IRegion region= CoreTestSearchEngine.getRegion(element);
 		ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, subMonitor.split(1));
 		IType[] allClasses= hierarchy.getAllClasses();
+		Map<ICompilationUnit, List<IType>> typesByCompilationUnit= new HashMap<>();
 
 		// search for all types with references to RunWith and Test and all subclasses
 		for (IType type : allClasses) {
-			if (region.contains(type) && internalIsTest(type, pm)) {
-				addTypeAndSubtypes(type, result, hierarchy);
+			if (region.contains(type) && CoreTestSearchEngine.isAccessibleClass(type, TestKindRegistry.JUNIT5_TEST_KIND_ID)) {
+				if (CoreTestSearchEngine.hasSuiteMethod(type)) {
+					addTypeAndSubtypes(type, result, hierarchy);
+					continue;
+				}
+				ICompilationUnit compilationUnit= type.getCompilationUnit();
+				if (compilationUnit == null) {
+					if (internalIsTest(type, pm)) {
+						addTypeAndSubtypes(type, result, hierarchy);
+					}
+				} else {
+					typesByCompilationUnit.computeIfAbsent(compilationUnit, key -> new ArrayList<>()).add(type);
+				}
 			}
 		}
+		findTestsInCompilationUnits(typesByCompilationUnit, result, hierarchy, subMonitor.split(1));
 
 		// add all classes implementing JUnit 3.8's Test interface in the region
 		IType testInterface= element.getJavaProject().findType(JUnitCorePlugin.TEST_INTERFACE_NAME);
@@ -231,6 +250,30 @@ public class JUnit5TestFinder implements ITestFinder {
 
 		//JUnit 4.3 can also run JUnit-3.8-style public static Test suite() methods:
 		CoreTestSearchEngine.findSuiteMethods(element, result, subMonitor.split(1));
+	}
+
+	private void findTestsInCompilationUnits(Map<ICompilationUnit, List<IType>> typesByCompilationUnit, Set<IType> result,
+			ITypeHierarchy hierarchy, IProgressMonitor monitor) {
+		if (!typesByCompilationUnit.isEmpty()) {
+			ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
+			parser.setProject(typesByCompilationUnit.keySet().iterator().next().getJavaProject());
+			parser.setResolveBindings(true);
+			ICompilationUnit[] compilationUnits= typesByCompilationUnit.keySet().toArray(ICompilationUnit[]::new);
+			parser.createASTs(compilationUnits, new String[0], new ASTRequestor() {
+				@Override
+				public void acceptAST(ICompilationUnit source, CompilationUnit root) {
+					for (IType type : typesByCompilationUnit.get(source)) {
+						ASTNode node= root.findDeclaringNode(type.getKey());
+						if (node instanceof TypeDeclaration || node instanceof RecordDeclaration) {
+							ITypeBinding binding= ((AbstractTypeDeclaration) node).resolveBinding();
+							if (binding != null && isTest(binding)) {
+								addTypeAndSubtypes(type, result, hierarchy);
+							}
+						}
+					}
+				}
+			}, monitor);
+		}
 	}
 
 	private void addTypeAndSubtypes(IType type, Set<IType> result, ITypeHierarchy hierarchy) {
