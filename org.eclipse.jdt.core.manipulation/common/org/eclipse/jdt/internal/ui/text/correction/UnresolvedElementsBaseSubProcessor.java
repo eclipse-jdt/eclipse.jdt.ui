@@ -143,7 +143,6 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
-import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddArgumentCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddImportCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCorrectionProposalCore;
@@ -1459,8 +1458,9 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 		HashSet<String> suggestedRenames= new HashSet<>();
 		Collection<T> deprecatedProposals= new ArrayList<>();
-		String quickFixPref= JavaManipulation.getPreference(PreferenceConstantsCore.QUICKFIX_HIDE_DEPRECATED_METHODS, null);
-		boolean hideDeprecatedProposals= quickFixPref == null ? false : Boolean.parseBoolean(quickFixPref);
+		String depCheckPref= JavaCore.getOption(JavaCore.CODEASSIST_DEPRECATION_CHECK);
+		boolean hideDeprecatedProposals= depCheckPref == null ? false : depCheckPref.equals(JavaCore.ENABLED);
+		boolean hasNonDeprecatedProposals= false;
 		for (IBinding b : bindings) {
 			IMethodBinding binding= (IMethodBinding) b;
 			String curr= binding.getName();
@@ -1469,9 +1469,11 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 					String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_description, BasicElementLabels.getJavaElementName(curr));
 					RenameNodeCorrectionProposalCore core= new RenameNodeCorrectionProposalCore(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, IProposalRelevance.CHANGE_METHOD);
 					T t= renameNodeProposalToT(core, MethodProposal1);
-					if (t != null)
+					if (t != null) {
 						proposals.add(t);
-				} else if (!hideDeprecatedProposals) {
+						hasNonDeprecatedProposals= true;
+					}
+				} else {
 					// create suggestions to provide a deprecated method call, but add after normal calls
 					String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_to_deprecated_description, BasicElementLabels.getJavaElementName(curr));
 					RenameNodeCorrectionProposalCore core= new RenameNodeCorrectionProposalCore(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, IProposalRelevance.CHANGE_METHOD);
@@ -1482,7 +1484,9 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			}
 		}
 		if (!deprecatedProposals.isEmpty()) {
-			proposals.addAll(deprecatedProposals);
+			if (!hideDeprecatedProposals || !hasNonDeprecatedProposals) {
+				proposals.addAll(deprecatedProposals);
+			}
 		}
 		suggestedRenames= null;
 

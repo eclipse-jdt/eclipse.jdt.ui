@@ -3554,48 +3554,50 @@ public class QuickFixTest1d8 extends QuickFixTest {
 	public void testIssue3214_1() throws Exception {
 		Hashtable<String, String> options = JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		options.put(JavaCore.CODEASSIST_DEPRECATION_CHECK, JavaCore.DISABLED);
 		JavaCore.setOptions(options);
+
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 
 		String str1= """
-			package test1;
+				package test1;
 
-			public class E {
-			    public static void main(String[] args) {
-			        someUsefulMethod(); // Place cursor in method call and use Ctrl+1 to show proposals
-			    }
-			    @Deprecated
-			    static void someUsefulMethod1() {}
-			    @Deprecated
-			    static void someUsefulMethod2() {}
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
 
-			    static void someUsefulMethod3_API_OK() {}
+				    static void someUsefulMethod3_API_OK() {}
 
-			    static void someUsefulMethod4_API_OK() {}
-			}
-			""";
+				    static void someUsefulMethod4_API_OK() {}
+				}
+				""";
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
 		assertCorrectLabels(proposals);
 		String[] expected= new String[4];
 		expected[0]= """
-			package test1;
+				package test1;
 
-			public class E {
-			    public static void main(String[] args) {
-			        someUsefulMethod3_API_OK(); // Place cursor in method call and use Ctrl+1 to show proposals
-			    }
-			    @Deprecated
-			    static void someUsefulMethod1() {}
-			    @Deprecated
-			    static void someUsefulMethod2() {}
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod3_API_OK(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
 
-			    static void someUsefulMethod3_API_OK() {}
+				    static void someUsefulMethod3_API_OK() {}
 
-			    static void someUsefulMethod4_API_OK() {}
-			}
-			""";
+				    static void someUsefulMethod4_API_OK() {}
+				}
+				""";
 
 		expected[1]= """
 				package test1;
@@ -3662,52 +3664,53 @@ public class QuickFixTest1d8 extends QuickFixTest {
 	public void testIssue3214_2() throws Exception {
 		Hashtable<String, String> options = JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		options.put(JavaCore.CODEASSIST_DEPRECATION_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.QUICKFIX_HIDE_DEPRECATED_METHODS, true);
+		String oldvalue= store.getString(JavaCore.CODEASSIST_DEPRECATION_CHECK);
+		store.setValue(JavaCore.CODEASSIST_DEPRECATION_CHECK, "enabled");
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 
 		String str1= """
-			package test1;
+				package test1;
 
-			public class E {
-			    public static void main(String[] args) {
-			        someUsefulMethod(); // Place cursor in method call and use Ctrl+1 to show proposals
-			    }
-			    @Deprecated
-			    static void someUsefulMethod1() {}
-			    @Deprecated
-			    static void someUsefulMethod2() {}
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
 
-			    static void someUsefulMethod3_API_OK() {}
+				    static void someUsefulMethod3_API_OK() {}
 
-			    static void someUsefulMethod4_API_OK() {}
-			}
-			""";
+				    static void someUsefulMethod4_API_OK() {}
+				}
+				""";
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
-		store.setValue(PreferenceConstants.QUICKFIX_HIDE_DEPRECATED_METHODS, false);
 		assertCorrectLabels(proposals);
 		String[] expected= new String[4];
 		expected[0]= """
-			package test1;
+				package test1;
 
-			public class E {
-			    public static void main(String[] args) {
-			        someUsefulMethod3_API_OK(); // Place cursor in method call and use Ctrl+1 to show proposals
-			    }
-			    @Deprecated
-			    static void someUsefulMethod1() {}
-			    @Deprecated
-			    static void someUsefulMethod2() {}
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod3_API_OK(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
 
-			    static void someUsefulMethod3_API_OK() {}
+				    static void someUsefulMethod3_API_OK() {}
 
-			    static void someUsefulMethod4_API_OK() {}
-			}
-			""";
+				    static void someUsefulMethod4_API_OK() {}
+				}
+				""";
 
 		expected[1]= """
 				package test1;
@@ -3735,6 +3738,71 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		IJavaCompletionProposal nextProposal= proposals.get(2);
 		assertFalse(nextProposal.getDisplayString().contains("deprecated"));
+	}
+
+	@Test
+	public void testIssue3214_3() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		options.put(JavaCore.CODEASSIST_DEPRECATION_CHECK, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		String oldvalue= store.getString(JavaCore.CODEASSIST_DEPRECATION_CHECK);
+		store.setValue(JavaCore.CODEASSIST_DEPRECATION_CHECK, "enabled");
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str1= """
+				package test1;
+
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
+				}
+				""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+		assertCorrectLabels(proposals);
+		String[] expected= new String[4];
+		expected[0]= """
+				package test1;
+
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod1(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
+				}
+				""";
+
+		expected[1]= """
+				package test1;
+
+				public class E {
+				    public static void main(String[] args) {
+				        someUsefulMethod2(); // Place cursor in method call and use Ctrl+1 to show proposals
+				    }
+				    @Deprecated
+				    static void someUsefulMethod1() {}
+				    @Deprecated
+				    static void someUsefulMethod2() {}
+				}
+				""";
+
+		for (int i= 0; i < 2; ++i) {
+			List<IJavaCompletionProposal> proposalList= new ArrayList<>();
+			proposalList.add(proposals.get(i));
+			assertExpectedExistInProposals(proposalList, new String[] {expected[i]});
+		}
 	}
 
 }
