@@ -3667,7 +3667,6 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		options.put(JavaCore.CODEASSIST_DEPRECATION_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		String oldvalue= store.getString(JavaCore.CODEASSIST_DEPRECATION_CHECK);
 		store.setValue(JavaCore.CODEASSIST_DEPRECATION_CHECK, "enabled");
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
@@ -3747,7 +3746,6 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		options.put(JavaCore.CODEASSIST_DEPRECATION_CHECK, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		String oldvalue= store.getString(JavaCore.CODEASSIST_DEPRECATION_CHECK);
 		store.setValue(JavaCore.CODEASSIST_DEPRECATION_CHECK, "enabled");
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
