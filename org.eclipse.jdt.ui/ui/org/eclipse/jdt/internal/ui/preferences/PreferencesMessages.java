@@ -806,6 +806,8 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistConfigurationBlock_typeFilters_link;
 	public static String CodeAssistConfigurationBlock_sortingSection_title;
 	public static String CodeAssistConfigurationBlock_autoactivationSection_title;
+	public static String CodeAssistConfigurationBlock_quickfix_title;
+	public static String CodeAssistConfigurationBlock_hide_deprecated_methods;
 	public static String CodeAssistConfigurationBlock_insertionSection_title;
 	public static String JavaEditorPreferencePage_coloring_category_java;
 	public static String JavaEditorPreferencePage_coloring_category_javadoc;

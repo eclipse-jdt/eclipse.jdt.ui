@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -82,6 +82,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEASSIST_DEPRECATION_CHECK= getJDTCoreKey(JavaCore.CODEASSIST_DEPRECATION_CHECK);
 	private static final Key PREF_CODEASSIST_CAMEL_CASE_MATCH= getJDTCoreKey(JavaCore.CODEASSIST_CAMEL_CASE_MATCH);
 	private static final Key PREF_CODEASSIST_SUBWORD_MATCH= getJDTCoreKey(JavaCore.CODEASSIST_SUBWORD_MATCH);
+	private static final Key PREF_QUICKFIX_HIDE_DEPRECATED_METHODS= getJDTUIKey(PreferenceConstants.QUICKFIX_HIDE_DEPRECATED_METHODS);
 
 	private static Key[] getAllKeys() {
 		return new Key[] {
@@ -102,7 +103,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_DEPRECATION_CHECK,
 				PREF_CODEASSIST_CAMEL_CASE_MATCH,
 				PREF_CODEASSIST_SUBWORD_MATCH,
-				PREF_CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS
+				PREF_CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS,
+				PREF_QUICKFIX_HIDE_DEPRECATED_METHODS,
 		};
 	}
 
@@ -140,6 +142,9 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_autoactivationSection_title);
 		addAutoActivationSection(composite);
+
+		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_quickfix_title);
+		addQuickfixSection(composite);
 
 		initialize();
 
@@ -324,6 +329,12 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 100, 0, 20);
 	}
 
+
+	private void addQuickfixSection(Composite composite) {
+		String label;
+		label= PreferencesMessages.CodeAssistConfigurationBlock_hide_deprecated_methods;
+		addCheckBox(composite, label, PREF_QUICKFIX_HIDE_DEPRECATED_METHODS, trueFalse, 0);
+	}
 
 	protected Text addLabelledTextField(Composite parent, String label, Key key, int textlimit, int indent) {
 		return addLabelledTextField(parent, label, key, textlimit, textlimit, indent);
