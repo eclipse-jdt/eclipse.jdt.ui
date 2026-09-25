@@ -16,10 +16,13 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
@@ -279,6 +282,11 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	/** The hard-coded ranges */
 	private HighlightedRange[][] fHardcodedRanges;
 
+	/** Highlightings whose style changed in the current UI turn */
+	private final Set<Highlighting> fChangedHighlightings= new HashSet<>();
+	/** Whether a re-style is already scheduled */
+	private boolean fRestylePending;
+
 	/**
 	 * Install the semantic highlighting on the given editor infrastructure
 	 *
@@ -424,6 +432,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			fPresenter= null;
 		}
 
+		fChangedHighlightings.clear();
+
 		if (fSemanticHighlightings != null)
 			disposeHighlightings();
 	}
@@ -525,56 +535,48 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		if (!isEnabled())
 			return;
 
-		boolean refreshNeeded= false;
-
 		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++) {
 			SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
 
 			String colorKey= SemanticHighlightings.getColorPreferenceKey(semanticHighlighting);
 			if (colorKey.equals(event.getProperty())) {
 				adaptToTextForegroundChange(fHighlightings[i], event);
-				fPresenter.highlightingStyleChanged(fHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fHighlightings[i]);
 				continue;
 			}
 
 			String boldKey= SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting);
 			if (boldKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, SWT.BOLD);
-				fPresenter.highlightingStyleChanged(fHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fHighlightings[i]);
 				continue;
 			}
 
 			String italicKey= SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting);
 			if (italicKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, SWT.ITALIC);
-				fPresenter.highlightingStyleChanged(fHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fHighlightings[i]);
 				continue;
 			}
 
 			String strikethroughKey= SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting);
 			if (strikethroughKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, TextAttribute.STRIKETHROUGH);
-				fPresenter.highlightingStyleChanged(fHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fHighlightings[i]);
 				continue;
 			}
 
 			String underlineKey= SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting);
 			if (underlineKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, TextAttribute.UNDERLINE);
-				fPresenter.highlightingStyleChanged(fHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fHighlightings[i]);
 				continue;
 			}
 
 			String enabledKey= SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting);
 			if (enabledKey.equals(event.getProperty())) {
 				adaptToEnablementChange(fHighlightings[i], event);
-				fPresenter.highlightingStyleChanged(fHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fHighlightings[i]);
 				continue;
 			}
 		}
@@ -586,46 +588,67 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			String colorKey= h.preferenceKey();
 			if (colorKey.equals(event.getProperty())) {
 				adaptToTextForegroundChange(fSyntaxHighlightings[i], event);
-				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fSyntaxHighlightings[i]);
 				continue;
 			}
 
 			String boldKey= h.getBoldPreferenceKey();
 			if (boldKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fSyntaxHighlightings[i], event, SWT.BOLD);
-				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fSyntaxHighlightings[i]);
 				continue;
 			}
 
 			String italicKey= h.getItalicPreferenceKey();
 			if (italicKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fSyntaxHighlightings[i], event, SWT.ITALIC);
-				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fSyntaxHighlightings[i]);
 				continue;
 			}
 
 			String strikethroughKey= h.getStrikethroughPreferenceKey();
 			if (strikethroughKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fSyntaxHighlightings[i], event, TextAttribute.STRIKETHROUGH);
-				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fSyntaxHighlightings[i]);
 				continue;
 			}
 
 			String underlineKey= h.getUnderlinePreferenceKey();
 			if (underlineKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fSyntaxHighlightings[i], event, TextAttribute.UNDERLINE);
-				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
-				refreshNeeded= true;
+				scheduleRestyle(fSyntaxHighlightings[i]);
 				continue;
 			}
 
 		}
+	}
 
-		if (refreshNeeded && fReconciler != null)
+	/**
+	 * Re-styles the changed highlightings once per UI event loop turn, since a theme
+	 * switch changes dozens of keys in one turn.
+	 */
+	private void scheduleRestyle(Highlighting highlighting) {
+		fChangedHighlightings.add(highlighting);
+		if (fRestylePending)
+			return;
+		StyledText widget= fSourceViewer.getTextWidget();
+		if (widget == null || widget.isDisposed())
+			return;
+		fRestylePending= true;
+		widget.getDisplay().asyncExec(this::restyleChangedHighlightings);
+	}
+
+	private void restyleChangedHighlightings() {
+		fRestylePending= false;
+		Set<Highlighting> changed= new HashSet<>(fChangedHighlightings);
+		fChangedHighlightings.clear();
+		if (changed.isEmpty() || fPresenter == null || fSourceViewer == null)
+			return;
+		StyledText widget= fSourceViewer.getTextWidget();
+		if (widget == null || widget.isDisposed())
+			return;
+		fPresenter.highlightingStylesChanged(changed);
+		if (fReconciler != null)
 			fReconciler.refresh();
 	}
 
