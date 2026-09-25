@@ -45,7 +45,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 
 	}
 
-	private ListenerList<ILabelProviderListener> fListeners;
+	private volatile ListenerList<ILabelProviderListener> fListeners;
 	private IElementChangedListener fChangeListener;
 
 	@Override
@@ -94,10 +94,22 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 		}
 	}
 
-	private void fireChange(IJavaElement[] elements) {
-		if (fListeners != null && !fListeners.isEmpty()) {
-			LabelProviderChangedEvent event= new LabelProviderChangedEvent(this, elements);
-			for (ILabelProviderListener listener : fListeners) {
+	protected void fireChange(IJavaElement[] elements) {
+		fireChange(new LabelProviderChangedEvent(this, elements));
+	}
+
+	/**
+	 * Requests an update of all labels.
+	 */
+	protected void fireChange() {
+		fireChange(new LabelProviderChangedEvent(this));
+	}
+
+	private void fireChange(LabelProviderChangedEvent event) {
+		// snapshot: a background job may fire while dispose() clears the field
+		ListenerList<ILabelProviderListener> listeners= fListeners;
+		if (listeners != null) {
+			for (ILabelProviderListener listener : listeners) {
 				listener.labelProviderChanged(event);
 			}
 		}
