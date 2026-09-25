@@ -19,7 +19,10 @@ import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-
+/**
+ * A text selection in a compilation unit. Used to determine which AST nodes
+ * are affected by a user's selection during refactoring and code manipulation operations.
+ */
 public class Selection {
 
 	/** Flag indicating that the AST node somehow intersects with the selection. */
