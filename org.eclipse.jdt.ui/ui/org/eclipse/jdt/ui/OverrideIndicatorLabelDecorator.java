@@ -13,15 +13,31 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+
+import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
@@ -62,8 +78,49 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  */
 public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
 
+	/** Refreshes the labels in the UI thread once a build is done. */
+	private final class UpdateJob extends WorkbenchJob {
+
+		UpdateJob() {
+			super("Java override indicator decoration update"); //$NON-NLS-1$
+			setSystem(true);
+			setPriority(DECORATE);
+		}
+
+		@Override
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			if (monitor.isCanceled()) {
+				return Status.CANCEL_STATUS;
+			}
+			// the next build already started: keep the pending elements, its POST_BUILD reschedules
+			if (!fBuildRunning.get()) {
+				fireLabelProviderChanged();
+			}
+			return Status.OK_STATUS;
+		}
+	}
+
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;
+
+	private static final int MAX_PENDING_ELEMENTS= 512;
+
+	private ListenerList<ILabelProviderListener> fListeners;
+	private IResourceChangeListener fBuildListener;
+	private final UpdateJob fUpdateJob= new UpdateJob();
+
+	/**
+	 * Whether a build is currently running. A flag rather than a nesting count: a PRE_BUILD whose
+	 * POST_BUILD never arrives would leave a count permanently above zero and suppress every
+	 * indicator from then on, while a flag is cleared again by the next build.
+	 */
+	private final AtomicBoolean fBuildRunning= new AtomicBoolean();
+
+	/** Elements whose indicator was not computed because a build was running. */
+	private final Set<Object> fPendingElements= ConcurrentHashMap.newKeySet();
+
+	/** Set when there were too many pending elements to track them individually. */
+	private final AtomicBoolean fRefreshAll= new AtomicBoolean();
 
 	/**
 	 * Creates a decorator. The decorator creates an own image registry to cache
@@ -171,6 +228,12 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 		IType type= method.getDeclaringType();
 
+		if (fBuildRunning.get() && !SuperTypeHierarchyCache.hasInCache(type)) {
+			// a running build invalidates the cache continuously, so a hierarchy built here is wasted
+			recordSkippedElement(method);
+			return 0;
+		}
+
 		MethodOverrideTester methodOverrideTester= SuperTypeHierarchyCache.getMethodOverrideTester(type);
 		IMethod defining= methodOverrideTester.findOverriddenMethod(method, true);
 		if (defining != null) {
@@ -243,12 +306,79 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 	@Override
 	public void addListener(ILabelProviderListener listener) {
+		if (fListeners == null) {
+			fListeners= new ListenerList<>();
+		}
+		fListeners.add(listener);
+		if (fBuildListener == null) {
+			fBuildListener= this::handleBuildEvent;
+			ResourcesPlugin.getWorkspace().addResourceChangeListener(fBuildListener, IResourceChangeEvent.PRE_BUILD | IResourceChangeEvent.POST_BUILD);
+		}
 	}
 
 	@Override
 	public void dispose() {
+		removeBuildListener();
+		fUpdateJob.cancel();
+		fPendingElements.clear();
 		if (fRegistry != null && fUseNewRegistry) {
 			fRegistry.dispose();
+		}
+		if (fListeners != null) {
+			fListeners.clear();
+		}
+	}
+
+	private void recordSkippedElement(IMethod method) {
+		if (fPendingElements.size() < MAX_PENDING_ELEMENTS) {
+			fPendingElements.add(method);
+		} else {
+			fRefreshAll.set(true);
+		}
+		// the build may have finished while recording, its POST_BUILD then saw nothing pending
+		if (!fBuildRunning.get()) {
+			fUpdateJob.schedule(100);
+		}
+	}
+
+	private void handleBuildEvent(IResourceChangeEvent event) {
+		if (event.getType() == IResourceChangeEvent.PRE_BUILD) {
+			fBuildRunning.set(true);
+		} else if (event.getType() == IResourceChangeEvent.POST_BUILD) {
+			fBuildRunning.set(false);
+			if (fRefreshAll.get() || !fPendingElements.isEmpty()) {
+				fUpdateJob.schedule(100);
+			}
+		}
+	}
+
+	private void removeBuildListener() {
+		if (fBuildListener != null) {
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fBuildListener);
+			fBuildListener= null;
+			fBuildRunning.set(false);
+			fRefreshAll.set(false);
+			fPendingElements.clear();
+		}
+	}
+
+	private void fireLabelProviderChanged() {
+		boolean refreshAll= fRefreshAll.getAndSet(false);
+		// drain instead of clear: a build starting again in the meantime must not lose an element
+		Object[] elements= fPendingElements.toArray();
+		for (Object element : elements) {
+			fPendingElements.remove(element);
+		}
+
+		if (fListeners == null || fListeners.isEmpty()) {
+			return;
+		}
+		if (!refreshAll && elements.length == 0) {
+			return;
+		}
+		LabelProviderChangedEvent event= refreshAll ? new LabelProviderChangedEvent(this) : new LabelProviderChangedEvent(this, elements);
+		for (ILabelProviderListener listener : fListeners) {
+			listener.labelProviderChanged(event);
 		}
 	}
 
@@ -259,6 +389,13 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 	@Override
 	public void removeListener(ILabelProviderListener listener) {
+		if (fListeners == null) {
+			return;
+		}
+		fListeners.remove(listener);
+		if (fListeners.isEmpty()) {
+			removeBuildListener();
+		}
 	}
 
 	@Override
