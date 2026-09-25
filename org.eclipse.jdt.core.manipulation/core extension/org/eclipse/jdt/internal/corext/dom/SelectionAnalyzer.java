@@ -23,6 +23,7 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 
 
 /**
@@ -74,6 +75,12 @@ public class SelectionAnalyzer extends GenericVisitor {
 		if (!hasSelectedNodes())
 			return false;
 		return fSelectedNodes.get(0) instanceof Expression;
+	}
+
+	public boolean isExpressionStatementSelected() {
+		if (!hasSelectedNodes())
+			return false;
+		return fSelectedNodes.get(0) instanceof ExpressionStatement;
 	}
 
 	public IRegion getSelectedNodeRange() {
