@@ -2561,6 +2561,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ConvertToRecordRefactoring_member_types_not_supported;
 
+	public static String ExtractMethodAnalyzer_cannot_extract_local_type_reference;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}

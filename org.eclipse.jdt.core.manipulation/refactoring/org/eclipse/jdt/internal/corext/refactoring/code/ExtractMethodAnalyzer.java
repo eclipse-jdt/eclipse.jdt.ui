@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -1017,9 +1018,24 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 						break superCall;
 					}
 				}
+				if (expression instanceof MethodInvocation methd) {
+					if (checkForLocalOrAnonymousTypeReference(methd)) {
+						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_local_type_reference);
+						break superCall;
+					}
+				}
 				fForceStatic=
 					ASTNodes.getParent(expression, ASTNode.SUPER_CONSTRUCTOR_INVOCATION) != null ||
 					ASTNodes.getParent(expression, ASTNode.CONSTRUCTOR_INVOCATION) != null;
+			}
+			if(isExpressionStatementSelected()) {
+				ExpressionStatement expression= (ExpressionStatement) getFirstSelectedNode();
+				if (expression.getExpression() instanceof MethodInvocation methd) {
+					if (checkForLocalOrAnonymousTypeReference(methd)) {
+						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_local_type_reference);
+						break superCall;
+					}
+				}
 			}
 			status.merge(LocalTypeAnalyzer.perform(fEnclosingBodyDeclaration, getSelection()));
 			computeLastStatementSelected();
@@ -1259,6 +1275,29 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 	}
 
 
+	private boolean checkForLocalOrAnonymousTypeReference(MethodInvocation methodInvocation) {
+		for (Object arg : methodInvocation.arguments()) {
+			if (arg instanceof MethodInvocation mI) {
+				if (checkLocalOrAnonymousType(mI.getExpression() != null ? mI.getExpression().resolveTypeBinding() : null)) {
+					return true;
+				}
+			} else if (arg instanceof SimpleName name) {
+				if (checkLocalOrAnonymousType(name.resolveTypeBinding())) {
+					return true;
+				}
+			}
+		}
+		Expression receiver= methodInvocation.getExpression();
+		if (receiver instanceof SimpleName name) {
+			if (checkLocalOrAnonymousType(name.resolveTypeBinding())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
+	private boolean checkLocalOrAnonymousType(ITypeBinding type) {
+		return type != null && (type.isLocal() || type.isAnonymous());
+	}
 }
 
