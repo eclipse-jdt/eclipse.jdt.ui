@@ -25,6 +25,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -268,6 +269,7 @@ public class RemoteTestRunnerClient {
 
 	private volatile boolean stopped;
 	private volatile boolean ended;
+	private final AtomicBoolean terminationNotified= new AtomicBoolean();
 	private final ITestKind testRunnerKind;
 
 	public RemoteTestRunnerClient(ITestKind testRunnerKind) {
@@ -298,7 +300,7 @@ public class RemoteTestRunnerClient {
 				while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
 					receiveMessage(message);
 			} catch (SocketException e) {
-				notifyTestRunTerminated();
+				// fall through
 			} catch (IOException e) {
 				LOG.error(e.getMessage(), e);
 				// fall through
@@ -367,13 +369,17 @@ public class RemoteTestRunnerClient {
 			}
 		} catch(IOException e) {
 		}
-		if (stopped || !ended) {
-			// JUnit 3 and 4 RemoteTestRunnerClient properly handle notifying stopped/terminated
-			String testKind= testRunnerKind.getId();
-			if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind)
-					|| TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind)) {
-				return;
-			}
+		if (terminationNotified.get() || ended) {
+			return;
+		}
+
+		String testKind= testRunnerKind.getId();
+		boolean isJUnit3Or4= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind)
+				|| TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind);
+		if (isJUnit3Or4 && !stopped) {
+			// An externally terminated VM can close the socket without sending a final protocol message.
+			notifyTestRunTerminated();
+		} else {
 			notifyTestRunStopped(0);
 		}
 	}
@@ -556,7 +562,7 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void notifyTestRunStopped(final long elapsedTime) {
-		if (JUnitCorePlugin.isStopped())
+		if (JUnitCorePlugin.isStopped() || !terminationNotified.compareAndSet(false, true))
 			return;
 		for (ITestRunListener2 listener : fListeners) {
 			SafeRunner.run(new ListenerSafeRunnable() {
@@ -571,7 +577,7 @@ public class RemoteTestRunnerClient {
 
 	private void testRunEnded(final long elapsedTime) {
 		ended = true;
-		if (JUnitCorePlugin.isStopped())
+		if (JUnitCorePlugin.isStopped() || !terminationNotified.compareAndSet(false, true))
 			return;
 		for (ITestRunListener2 listener : fListeners) {
 			SafeRunner.run(new ListenerSafeRunnable() {
@@ -612,6 +618,9 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void notifyTestRunStarted(final int count) {
+		stopped= false;
+		ended= false;
+		terminationNotified.set(false);
 		if (JUnitCorePlugin.isStopped())
 			return;
 		for (ITestRunListener2 listener : fListeners) {
@@ -665,7 +674,7 @@ public class RemoteTestRunnerClient {
 
 	private void notifyTestRunTerminated() {
 		// fix for 77771 RemoteTestRunnerClient doing work after junit shutdown [JUnit]
-		if (JUnitCorePlugin.isStopped())
+		if (JUnitCorePlugin.isStopped() || !terminationNotified.compareAndSet(false, true))
 			return;
 		for (ITestRunListener2 listener : fListeners) {
 			SafeRunner.run(new ListenerSafeRunnable() {
