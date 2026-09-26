@@ -10,6 +10,9 @@ package org.eclipse.jdt.ui.tests.packageview;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.swt.widgets.Display;
@@ -28,7 +31,10 @@ public class StartupClasspathContainerInitializer extends ClasspathContainerInit
 	static final IPath PATH= new Path("org.eclipse.jdt.ui.tests.startupContainer");
 	static final List<String> UI_CALLS= new CopyOnWriteArrayList<>();
 	static final AtomicInteger CALLS= new AtomicInteger();
+	static final AtomicBoolean TIMED_OUT= new AtomicBoolean();
 	static volatile String watchedProject;
+	static volatile CountDownLatch entered;
+	static volatile CountDownLatch release;
 
 	@Override
 	public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
@@ -40,16 +46,37 @@ public class StartupClasspathContainerInitializer extends ClasspathContainerInit
 					trace.append(frame).append('\n');
 				UI_CALLS.add(trace.toString());
 			}
+			CountDownLatch started= entered;
+			CountDownLatch gate= release;
+			if (started != null)
+				started.countDown();
+			if (gate != null) {
+				try {
+					if (!gate.await(10, TimeUnit.SECONDS))
+						TIMED_OUT.set(true);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					TIMED_OUT.set(true);
+				}
+			}
 		}
 		IClasspathContainer container= new IClasspathContainer() {
 			@Override
-			public IClasspathEntry[] getClasspathEntries() { return new IClasspathEntry[0]; }
+			public IClasspathEntry[] getClasspathEntries() {
+				return new IClasspathEntry[0];
+			}
 			@Override
-			public String getDescription() { return "Startup test container"; }
+			public String getDescription() {
+				return "Startup test container";
+			}
 			@Override
-			public int getKind() { return K_APPLICATION; }
+			public int getKind() {
+				return K_APPLICATION;
+			}
 			@Override
-			public IPath getPath() { return containerPath; }
+			public IPath getPath() {
+				return containerPath;
+			}
 		};
 		JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { project }, new IClasspathContainer[] { container }, null);
 	}

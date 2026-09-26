@@ -817,7 +817,9 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		if (element instanceof IJavaElement javaElement) {
 			IJavaProject project= javaElement.getJavaProject();
 			if (project != null && (!project.equals(fInitializedProject) || !project.isOpen())) {
-				if (!project.equals(fInitializingProject)) {
+				IStatus result= fInitializationJob == null ? null : fInitializationJob.getResult();
+				// A new request must not be discarded by a cancelled job's pending UI callback.
+				if (!project.equals(fInitializingProject) || result != null && !result.isOK()) {
 					cancelInitialization();
 					initializeProject(project);
 				}
@@ -860,7 +862,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			@Override
 			public boolean belongsTo(Object family) {
-				return JavaUI.ID_PLUGIN.equals(family);
+				return family == JavaEditorBreadcrumb.this || JavaUI.ID_PLUGIN.equals(family);
 			}
 		};
 		job.addJobChangeListener(new JobChangeAdapter() {
