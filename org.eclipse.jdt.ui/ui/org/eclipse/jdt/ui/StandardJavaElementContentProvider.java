@@ -243,7 +243,10 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 
 	@Override
 	public Object getParent(Object element) {
-		if (!exists(element))
+		// Java element handles already describe their parent, even when the element
+		// does not exist. Checking existence here can open the project model and
+		// initialize classpath containers on the UI thread during editor restore.
+		if (!(element instanceof IJavaElement) && !exists(element))
 			return null;
 		return internalGetParent(element);
 	}
