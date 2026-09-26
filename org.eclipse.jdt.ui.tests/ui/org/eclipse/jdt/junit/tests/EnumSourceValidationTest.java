@@ -80,6 +80,41 @@ public class EnumSourceValidationTest {
 	}
 
 	@Test
+	public void testAppendExclusionExpandsSingleName() throws Exception {
+		// Array-valued annotation members can omit braces for one element. These
+		// expressions exercise the non-ArrayInitializer branch when adding a value.
+		for (String nameExpression : List.of("\"RED\"", "\"R\" + \"ED\"")) { //$NON-NLS-1$ //$NON-NLS-2$
+			IMethod method= createTest("""
+					@EnumSource(value = Color.class, from = "RED", to = "GREEN",
+					    mode = EnumSource.Mode.EXCLUDE, names = %s)
+					""".formatted(nameExpression));
+			ICompilationUnit cu= method.getCompilationUnit();
+			assertEquals(List.of("RED"), EnumSourceValidator.getExcludedNames(method)); //$NON-NLS-1$
+			assertEquals("GREEN", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+
+			assertTrue(EnumSourceValidator.excludeEnumValue(method, "GREEN")); //$NON-NLS-1$
+
+			assertEquals(List.of("RED", "GREEN"), EnumSourceValidator.getExcludedNames(method)); //$NON-NLS-1$ //$NON-NLS-2$
+			assertExcludeMode(method);
+			assertNull(enumConstantForInvocation(method, 1));
+			String source= cu.getSource();
+			String expectedNames= "names={" + nameExpression + ",\"GREEN\"}"; //$NON-NLS-1$ //$NON-NLS-2$
+			assertTrue(source.replaceAll("\\s+", "").contains(expectedNames.replaceAll("\\s+", ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			assertTrue(source.contains("from = \"RED\"")); //$NON-NLS-1$
+			assertTrue(source.contains("to = \"GREEN\"")); //$NON-NLS-1$
+			assertCompiles(cu);
+
+			assertFalse(EnumSourceValidator.excludeEnumValue(method, "GREEN")); //$NON-NLS-1$
+			assertEquals(source, cu.getSource());
+			assertTrue(EnumSourceValidator.removeValueFromExclusion(method, "RED")); //$NON-NLS-1$
+			assertEquals(List.of("GREEN"), EnumSourceValidator.getExcludedNames(method)); //$NON-NLS-1$
+			assertEquals("RED", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+			assertNull(enumConstantForInvocation(method, 2));
+			assertCompiles(cu);
+		}
+	}
+
+	@Test
 	public void testReincludeOneWhenAllValuesExcluded() throws Exception {
 		IMethod method= createTest("""
 				@EnumSource(value = Color.class, mode = EnumSource.Mode.EXCLUDE,
