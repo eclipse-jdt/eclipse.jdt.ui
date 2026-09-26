@@ -35,7 +35,7 @@ public final class TestMethodFinder {
 	 * Finds the method represented by a parameterized-test suite.
 	 *
 	 * <p>When JUnit supplied parameter types, they are used to resolve overloads.
-	 * Without parameter metadata, a method is returned only if its name is unique.
+	 * Without parameter metadata, a method is returned only if its name is unique.</p>
 	 *
 	 * @param testSuiteElement the test suite element
 	 * @return the method, or <code>null</code> if it cannot be resolved unambiguously

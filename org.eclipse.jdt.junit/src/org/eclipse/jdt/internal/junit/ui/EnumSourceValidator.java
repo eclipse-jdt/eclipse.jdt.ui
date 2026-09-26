@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Carsten Hammer and others.
+ * Copyright (c) 2025, 2026 Carsten Hammer and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -64,9 +67,14 @@ import org.eclipse.jdt.ui.CodeStyleConfiguration;
  *
  * <p>The exclusion action is deliberately conservative. It is available only when the
  * selected invocation can be mapped unambiguously to one enum constant and when changing
- * the annotation preserves its existing semantics. Methods with multiple argument sources,
- * repeatable {@code @EnumSource} annotations, or regex-based name filters are rejected.
+ * the annotation preserves its existing semantics. Methods with multiple argument sources
+ * or regex-based name filters are rejected.</p>
  *
+ * <p>Multiple sources include two {@code @EnumSource} annotations on the same method,
+ * for example {@code @EnumSource(value = Color.class, names = "RED")} together with
+ * {@code @EnumSource(value = Color.class, names = "GREEN")}. This refers to repeated
+ * annotations, not {@code @RepeatedTest}. An explicit {@code @EnumSources} container is
+ * also unsupported; this action requires exactly one directly editable source.</p>
  */
 public final class EnumSourceValidator {
 
@@ -84,6 +92,9 @@ public final class EnumSourceValidator {
 	private static final String MEMBER_FROM= "from"; //$NON-NLS-1$
 	private static final String MEMBER_TO= "to"; //$NON-NLS-1$
 
+	// Read the invocation index from a JUnit unique ID, not from a display name, for example:
+	// [engine:junit-jupiter]/[class:p.T]/[test-template:testColor(p.Color)]/[test-template-invocation:#2]
+	// The one-based #2 maps to index 1 in the source's effective enum values.
 	private static final Pattern INVOCATION_INDEX_PATTERN=
 			Pattern.compile("\\[test-template-invocation:#(\\d+)\\]"); //$NON-NLS-1$
 
@@ -93,43 +104,12 @@ public final class EnumSourceValidator {
 		UNKNOWN
 	}
 
-	static final class ExclusionTarget {
-		private final IMethod fMethod;
-		private final String fEnumConstantName;
-
-		ExclusionTarget(IMethod method, String enumConstantName) {
-			fMethod= method;
-			fEnumConstantName= enumConstantName;
-		}
-
-		IMethod getMethod() {
-			return fMethod;
-		}
-
-		String getEnumConstantName() {
-			return fEnumConstantName;
-		}
+	record ExclusionTarget(IMethod method, String enumConstantName) {
 	}
 
-	private static final class ParsedEnumSource {
-		private final ICompilationUnit fCompilationUnit;
-		private final CompilationUnit fAstRoot;
-		private final Annotation fAnnotation;
-		private final String fMode;
-		private final List<String> fNames;
-		private final List<String> fEffectiveValues;
-		private final boolean fSupportsExclusion;
-
-		ParsedEnumSource(ICompilationUnit compilationUnit, CompilationUnit astRoot, Annotation annotation,
-				String mode, List<String> names, List<String> effectiveValues, boolean supportsExclusion) {
-			fCompilationUnit= compilationUnit;
-			fAstRoot= astRoot;
-			fAnnotation= annotation;
-			fMode= mode;
-			fNames= names;
-			fEffectiveValues= effectiveValues;
-			fSupportsExclusion= supportsExclusion;
-		}
+	/** A supported source, including one whose effective values are empty. */
+	private record ParsedEnumSource(ICompilationUnit compilationUnit, CompilationUnit astRoot,
+			Annotation annotation, String mode, List<String> names, List<String> effectiveValues) {
 	}
 
 	static ExclusionTarget findExclusionTarget(TestCaseElement testCaseElement) {
@@ -149,22 +129,23 @@ public final class EnumSourceValidator {
 
 		try {
 			ParsedEnumSource parsed= parse(method);
-			if (parsed == null || !parsed.fSupportsExclusion) {
+			if (parsed == null) {
 				return null;
 			}
 
-			int invocationIndex= getInvocationIndex(testCaseElement, parsed.fEffectiveValues.size());
+			int invocationIndex= getInvocationIndex(testCaseElement, parsed.effectiveValues().size());
 			if (invocationIndex < 0) {
 				return null;
 			}
 
-			String enumConstantName= parsed.fEffectiveValues.get(invocationIndex);
+			String enumConstantName= parsed.effectiveValues().get(invocationIndex);
 			if (!canExclude(parsed, enumConstantName)) {
 				return null;
 			}
 			return new ExclusionTarget(method, enumConstantName);
 		} catch (JavaModelException e) {
-			JUnitPlugin.log(e);
+			JUnitPlugin.log(new Status(IStatus.ERROR, JUnitPlugin.getPluginId(),
+					"Failed to resolve @EnumSource exclusion target for " + method.getElementName(), e)); //$NON-NLS-1$
 			return null;
 		}
 	}
@@ -179,25 +160,21 @@ public final class EnumSourceValidator {
 	 */
 	public static String getEnumConstantForInvocation(IMethod method, int invocationIndex) throws JavaModelException {
 		ParsedEnumSource parsed= parse(method);
-		if (parsed == null || !parsed.fSupportsExclusion
-				|| invocationIndex < 1 || invocationIndex > parsed.fEffectiveValues.size()) {
+		if (parsed == null || invocationIndex < 1 || invocationIndex > parsed.effectiveValues().size()) {
 			return null;
 		}
-		return parsed.fEffectiveValues.get(invocationIndex - 1);
+		return parsed.effectiveValues().get(invocationIndex - 1);
 	}
 
 	private static boolean canExclude(ParsedEnumSource parsed, String enumConstantName) {
-		if (!parsed.fSupportsExclusion || !parsed.fEffectiveValues.contains(enumConstantName)) {
+		if (!parsed.effectiveValues().contains(enumConstantName)) {
 			return false;
 		}
-		if (MODE_EXCLUDE.equals(parsed.fMode)) {
-			return !parsed.fNames.contains(enumConstantName);
+		if (MODE_EXCLUDE.equals(parsed.mode())) {
+			return !parsed.names().contains(enumConstantName);
 		}
-		if (!MODE_INCLUDE.equals(parsed.fMode)) {
-			return false;
-		}
-		return parsed.fNames.isEmpty()
-				|| parsed.fEffectiveValues.size() > 1 && parsed.fNames.contains(enumConstantName);
+		return parsed.names().isEmpty()
+				|| parsed.effectiveValues().size() > 1 && parsed.names().contains(enumConstantName);
 	}
 
 	/**
@@ -222,7 +199,7 @@ public final class EnumSourceValidator {
 	 */
 	public static boolean isExcludeMode(IMethod method) throws JavaModelException {
 		ParsedEnumSource parsed= parse(method);
-		return parsed != null && parsed.fSupportsExclusion && MODE_EXCLUDE.equals(parsed.fMode);
+		return parsed != null && MODE_EXCLUDE.equals(parsed.mode());
 	}
 
 	/**
@@ -234,10 +211,10 @@ public final class EnumSourceValidator {
 	 */
 	public static List<String> getExcludedNames(IMethod method) throws JavaModelException {
 		ParsedEnumSource parsed= parse(method);
-		if (parsed == null || !parsed.fSupportsExclusion || !MODE_EXCLUDE.equals(parsed.fMode)) {
+		if (parsed == null || !MODE_EXCLUDE.equals(parsed.mode())) {
 			return new ArrayList<>();
 		}
-		return new ArrayList<>(parsed.fNames);
+		return new ArrayList<>(parsed.names());
 	}
 
 	/**
@@ -255,21 +232,21 @@ public final class EnumSourceValidator {
 		if (parsed == null || !canExclude(parsed, enumConstantName)) {
 			return false;
 		}
-		if (MODE_INCLUDE.equals(parsed.fMode) && !parsed.fNames.isEmpty()) {
+		if (MODE_INCLUDE.equals(parsed.mode()) && !parsed.names().isEmpty()) {
 			return removeValueFromInclusion(parsed, enumConstantName);
 		}
 
-		AST ast= parsed.fAstRoot.getAST();
+		AST ast= parsed.astRoot().getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(parsed.fAstRoot, true);
+		ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(parsed.astRoot(), true);
 		List<ASTNode> removedNodes= new ArrayList<>();
 
-		if (parsed.fAnnotation instanceof NormalAnnotation) {
-			NormalAnnotation annotation= (NormalAnnotation) parsed.fAnnotation;
+		if (parsed.annotation() instanceof NormalAnnotation) {
+			NormalAnnotation annotation= (NormalAnnotation) parsed.annotation();
 			ListRewrite valuesRewrite= rewrite.getListRewrite(annotation, NormalAnnotation.VALUES_PROPERTY);
 
 			MemberValuePair modePair= findMemberValuePair(annotation, MEMBER_MODE);
-			if (!MODE_EXCLUDE.equals(parsed.fMode)) {
+			if (!MODE_EXCLUDE.equals(parsed.mode())) {
 				Expression excludeMode= createExcludeModeExpression(ast, importRewrite);
 				if (modePair == null) {
 					modePair= ast.newMemberValuePair();
@@ -302,13 +279,13 @@ public final class EnumSourceValidator {
 			}
 		} else {
 			NormalAnnotation replacement= ast.newNormalAnnotation();
-			replacement.setTypeName((Name) ASTNode.copySubtree(ast, parsed.fAnnotation.getTypeName()));
+			replacement.setTypeName((Name) ASTNode.copySubtree(ast, parsed.annotation().getTypeName()));
 
-			if (parsed.fAnnotation instanceof SingleMemberAnnotation) {
+			if (parsed.annotation() instanceof SingleMemberAnnotation) {
 				MemberValuePair valuePair= ast.newMemberValuePair();
 				valuePair.setName(ast.newSimpleName(MEMBER_VALUE));
 				valuePair.setValue((Expression) ASTNode.copySubtree(ast,
-						((SingleMemberAnnotation) parsed.fAnnotation).getValue()));
+						((SingleMemberAnnotation) parsed.annotation()).getValue()));
 				replacement.values().add(valuePair);
 			}
 
@@ -324,25 +301,25 @@ public final class EnumSourceValidator {
 			namesPair.setValue(names);
 			replacement.values().add(namesPair);
 
-			rewrite.replace(parsed.fAnnotation, replacement, null);
+			rewrite.replace(parsed.annotation(), replacement, null);
 		}
 
 		return applyChanges(parsed, rewrite, importRewrite, removedNodes);
 	}
 
 	private static boolean removeValueFromInclusion(ParsedEnumSource parsed, String enumConstantName) {
-		if (!(parsed.fAnnotation instanceof NormalAnnotation)) {
+		if (!(parsed.annotation() instanceof NormalAnnotation)) {
 			return false;
 		}
 
-		NormalAnnotation annotation= (NormalAnnotation) parsed.fAnnotation;
+		NormalAnnotation annotation= (NormalAnnotation) parsed.annotation();
 		MemberValuePair namesPair= findMemberValuePair(annotation, MEMBER_NAMES);
 		if (namesPair == null || !(namesPair.getValue() instanceof ArrayInitializer)) {
 			return false;
 		}
 
 		ArrayInitializer names= (ArrayInitializer) namesPair.getValue();
-		ASTRewrite rewrite= ASTRewrite.create(parsed.fAstRoot.getAST());
+		ASTRewrite rewrite= ASTRewrite.create(parsed.astRoot().getAST());
 		ListRewrite namesRewrite= rewrite.getListRewrite(names, ArrayInitializer.EXPRESSIONS_PROPERTY);
 		List<ASTNode> removedNodes= new ArrayList<>();
 		for (Object value : names.expressions()) {
@@ -357,7 +334,7 @@ public final class EnumSourceValidator {
 		}
 
 		return applyChanges(parsed, rewrite,
-				CodeStyleConfiguration.createImportRewrite(parsed.fAstRoot, true), removedNodes);
+				CodeStyleConfiguration.createImportRewrite(parsed.astRoot(), true), removedNodes);
 	}
 
 	/**
@@ -370,24 +347,24 @@ public final class EnumSourceValidator {
 	 */
 	public static boolean removeValueFromExclusion(IMethod method, String enumConstantName) throws JavaModelException {
 		ParsedEnumSource parsed= parse(method);
-		if (parsed == null || !parsed.fSupportsExclusion || !MODE_EXCLUDE.equals(parsed.fMode)
-				|| !parsed.fNames.contains(enumConstantName)) {
+		if (parsed == null || !MODE_EXCLUDE.equals(parsed.mode())
+				|| !parsed.names().contains(enumConstantName)) {
 			return false;
 		}
-		if (parsed.fNames.size() == 1) {
+		if (parsed.names().size() == 1) {
 			return removeExcludeMode(method);
 		}
-		if (!(parsed.fAnnotation instanceof NormalAnnotation)) {
+		if (!(parsed.annotation() instanceof NormalAnnotation)) {
 			return false;
 		}
 
-		NormalAnnotation annotation= (NormalAnnotation) parsed.fAnnotation;
+		NormalAnnotation annotation= (NormalAnnotation) parsed.annotation();
 		MemberValuePair namesPair= findMemberValuePair(annotation, MEMBER_NAMES);
 		if (namesPair == null) {
 			return false;
 		}
 
-		ASTRewrite rewrite= ASTRewrite.create(parsed.fAstRoot.getAST());
+		ASTRewrite rewrite= ASTRewrite.create(parsed.astRoot().getAST());
 		ASTNode removedNode= null;
 		if (namesPair.getValue() instanceof ArrayInitializer) {
 			ArrayInitializer names= (ArrayInitializer) namesPair.getValue();
@@ -410,25 +387,25 @@ public final class EnumSourceValidator {
 		List<ASTNode> removedNodes= new ArrayList<>();
 		removedNodes.add(removedNode);
 		return applyChanges(parsed, rewrite,
-				CodeStyleConfiguration.createImportRewrite(parsed.fAstRoot, true), removedNodes);
+				CodeStyleConfiguration.createImportRewrite(parsed.astRoot(), true), removedNodes);
 	}
 
 	/**
 	 * Removes {@code mode} and {@code names}, preserving every other annotation member.
 	 *
-	 * @param method the parameterized test method
+	 * @param method the method to inspect
 	 * @return <code>true</code> if the source was changed
 	 * @throws JavaModelException if the Java model cannot be read
 	 */
 	public static boolean removeExcludeMode(IMethod method) throws JavaModelException {
 		ParsedEnumSource parsed= parse(method);
-		if (parsed == null || !parsed.fSupportsExclusion || !MODE_EXCLUDE.equals(parsed.fMode)
-				|| !(parsed.fAnnotation instanceof NormalAnnotation)) {
+		if (parsed == null || !MODE_EXCLUDE.equals(parsed.mode())
+				|| !(parsed.annotation() instanceof NormalAnnotation)) {
 			return false;
 		}
 
-		NormalAnnotation annotation= (NormalAnnotation) parsed.fAnnotation;
-		ASTRewrite rewrite= ASTRewrite.create(parsed.fAstRoot.getAST());
+		NormalAnnotation annotation= (NormalAnnotation) parsed.annotation();
+		ASTRewrite rewrite= ASTRewrite.create(parsed.astRoot().getAST());
 		ListRewrite valuesRewrite= rewrite.getListRewrite(annotation, NormalAnnotation.VALUES_PROPERTY);
 
 		List<ASTNode> removedNodes= new ArrayList<>();
@@ -447,7 +424,7 @@ public final class EnumSourceValidator {
 		}
 
 		return applyChanges(parsed, rewrite,
-				CodeStyleConfiguration.createImportRewrite(parsed.fAstRoot, true), removedNodes);
+				CodeStyleConfiguration.createImportRewrite(parsed.astRoot(), true), removedNodes);
 	}
 
 	private static ParsedEnumSource parse(IMethod method) throws JavaModelException {
@@ -480,11 +457,9 @@ public final class EnumSourceValidator {
 
 		String mode= getMode(enumSourceBinding);
 		List<String> names= getNames(enumSourceBinding);
-		if (mode == null || names == null) {
+		if (names == null || !(MODE_EXCLUDE.equals(mode) || MODE_INCLUDE.equals(mode))) {
 			return null;
 		}
-
-		boolean supportsExclusion= MODE_EXCLUDE.equals(mode) || MODE_INCLUDE.equals(mode);
 
 		ITypeBinding enumType= getEnumType(enumSourceBinding, methodBinding);
 		List<String> enumConstants= getEnumConstants(enumType);
@@ -496,12 +471,11 @@ public final class EnumSourceValidator {
 		String to= getStringMember(enumSourceBinding, MEMBER_TO);
 		List<String> effectiveValues= computeEffectiveValues(enumConstants, from, to, mode, names);
 		if (effectiveValues == null) {
-			supportsExclusion= false;
-			effectiveValues= new ArrayList<>();
+			return null;
 		}
 
-		return new ParsedEnumSource(compilationUnit, astRoot, enumSource, mode, names,
-				effectiveValues, supportsExclusion);
+		// An empty result is supported: excluded values must still be available for re-inclusion.
+		return new ParsedEnumSource(compilationUnit, astRoot, enumSource, mode, names, effectiveValues);
 	}
 
 	private static MethodDeclaration findMethodDeclaration(CompilationUnit astRoot, IMethod method) {
@@ -718,6 +692,7 @@ public final class EnumSourceValidator {
 		} catch (NumberFormatException e) {
 			return -1;
 		}
+		// Validate the last matching segment, not an earlier match in the unique ID.
 		return oneBasedIndex >= 1 && oneBasedIndex <= valueCount ? oneBasedIndex - 1 : -1;
 	}
 
@@ -748,7 +723,7 @@ public final class EnumSourceValidator {
 		try {
 			if (!removedNodes.isEmpty()) {
 				ImportRemover importRemover=
-						new ImportRemover(parsed.fCompilationUnit.getJavaProject(), parsed.fAstRoot);
+						new ImportRemover(parsed.compilationUnit().getJavaProject(), parsed.astRoot());
 				for (ASTNode removedNode : removedNodes) {
 					importRemover.registerRemovedNode(removedNode);
 				}
@@ -768,11 +743,12 @@ public final class EnumSourceValidator {
 				return false;
 			}
 
-			parsed.fCompilationUnit.applyTextEdit(combinedEdit, null);
-			parsed.fCompilationUnit.save(null, true);
+			parsed.compilationUnit().applyTextEdit(combinedEdit, null);
+			parsed.compilationUnit().save(null, true);
 			return true;
 		} catch (Exception e) {
-			JUnitPlugin.log(e);
+			JUnitPlugin.log(new Status(IStatus.ERROR, JUnitPlugin.getPluginId(),
+					"Failed to apply @EnumSource changes to " + parsed.compilationUnit().getElementName(), e)); //$NON-NLS-1$
 			return false;
 		}
 	}

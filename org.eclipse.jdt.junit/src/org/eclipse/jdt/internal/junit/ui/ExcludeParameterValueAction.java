@@ -53,8 +53,8 @@ public final class ExcludeParameterValueAction extends Action {
 		}
 
 		try {
-			if (EnumSourceValidator.excludeEnumValue(target.getMethod(), target.getEnumConstantName())) {
-				JavaUI.openInEditor(target.getMethod());
+			if (EnumSourceValidator.excludeEnumValue(target.method(), target.enumConstantName())) {
+				JavaUI.openInEditor(target.method());
 			}
 		} catch (JavaModelException ex) {
 			JUnitPlugin.log(ex);

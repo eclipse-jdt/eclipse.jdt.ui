@@ -57,6 +57,7 @@ JUnitStandaloneDetectionTest.class,
 JUnitQuickAssistTest.class,
 EnumSourceFilterTest.class,
 EnumSourceSafetyTest.class,
+EnumSourceValidationTest.class,
 
 TestSorting.class
 //LegacyTestRunListenerTest.class
