@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import static org.eclipse.jdt.junit.tests.EnumSourceTestSupport.enumConstantForInvocation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -48,7 +49,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
-import org.eclipse.jdt.internal.junit.ui.EnumSourceValidator;
 import org.eclipse.jdt.internal.junit.ui.ExcludeParameterValueAction;
 import org.eclipse.jdt.internal.junit.ui.TestMethodFinder;
 
@@ -108,9 +108,9 @@ public class EnumSourceSafetyTest {
 				""");
 		IMethod method= getMethod(cu, "testWithEnum", "QColor;"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		assertEquals("ZETA", EnumSourceValidator.getEnumConstantForInvocation(method, 1)); //$NON-NLS-1$
-		assertEquals("ALPHA", EnumSourceValidator.getEnumConstantForInvocation(method, 2)); //$NON-NLS-1$
-		assertEquals("MIDDLE", EnumSourceValidator.getEnumConstantForInvocation(method, 3)); //$NON-NLS-1$
+		assertEquals("ZETA", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+		assertEquals("ALPHA", enumConstantForInvocation(method, 2)); //$NON-NLS-1$
+		assertEquals("MIDDLE", enumConstantForInvocation(method, 3)); //$NON-NLS-1$
 		assertCompiles(cu);
 	}
 
@@ -132,9 +132,9 @@ public class EnumSourceSafetyTest {
 				""");
 		IMethod method= getMethod(cu, "testWithEnum", "QMode;"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		assertEquals("INCLUDE", EnumSourceValidator.getEnumConstantForInvocation(method, 1)); //$NON-NLS-1$
-		assertEquals("MATCH_NONE", EnumSourceValidator.getEnumConstantForInvocation(method, 5)); //$NON-NLS-1$
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 6));
+		assertEquals("INCLUDE", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+		assertEquals("MATCH_NONE", enumConstantForInvocation(method, 5)); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 6));
 		assertCompiles(cu);
 	}
 
@@ -268,8 +268,7 @@ public class EnumSourceSafetyTest {
 				""");
 		IMethod method= getMethod(cu, "mixed", "QObject;"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		assertFalse(EnumSourceValidator.canExcludeEnumValue(method, "RED")); //$NON-NLS-1$
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 1));
+		assertNull(enumConstantForInvocation(method, 1));
 		assertCompiles(cu);
 	}
 
@@ -291,7 +290,7 @@ public class EnumSourceSafetyTest {
 				}
 				""");
 		IMethod method= getMethod(cu, "testWithEnum", "QColor;"); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("BLUE", EnumSourceValidator.getEnumConstantForInvocation(method, 2)); //$NON-NLS-1$
+		assertEquals("BLUE", enumConstantForInvocation(method, 2)); //$NON-NLS-1$
 
 		TestRunSession session= new TestRunSession("EnumSource include run", fJProject); //$NON-NLS-1$
 		TestSuiteElement suite= createParameterizedSuite(session, "include-suite", 2); //$NON-NLS-1$

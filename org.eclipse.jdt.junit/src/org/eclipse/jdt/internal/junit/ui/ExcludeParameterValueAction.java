@@ -28,7 +28,8 @@ import org.eclipse.jdt.internal.junit.ui.EnumSourceValidator.ExclusionTarget;
  */
 public final class ExcludeParameterValueAction extends Action {
 
-	private TestCaseElement fTestCaseElement;
+	// Retain the selected value, not its index or AST. Execution revalidates the current source.
+	private ExclusionTarget fExclusionTarget;
 
 	public ExcludeParameterValueAction() {
 		super(JUnitMessages.ExcludeParameterValueAction_label);
@@ -40,13 +41,13 @@ public final class ExcludeParameterValueAction extends Action {
 	 * @param testCaseElement the selected test invocation
 	 */
 	public void update(TestCaseElement testCaseElement) {
-		fTestCaseElement= testCaseElement;
-		setEnabled(EnumSourceValidator.findExclusionTarget(testCaseElement) != null);
+		fExclusionTarget= EnumSourceValidator.findExclusionTarget(testCaseElement);
+		setEnabled(fExclusionTarget != null);
 	}
 
 	@Override
 	public void run() {
-		ExclusionTarget target= EnumSourceValidator.findExclusionTarget(fTestCaseElement);
+		ExclusionTarget target= fExclusionTarget;
 		if (target == null) {
 			setEnabled(false);
 			return;
@@ -55,6 +56,8 @@ public final class ExcludeParameterValueAction extends Action {
 		try {
 			if (EnumSourceValidator.excludeEnumValue(target.method(), target.enumConstantName())) {
 				JavaUI.openInEditor(target.method());
+			} else {
+				setEnabled(false);
 			}
 		} catch (JavaModelException ex) {
 			JUnitPlugin.log(ex);

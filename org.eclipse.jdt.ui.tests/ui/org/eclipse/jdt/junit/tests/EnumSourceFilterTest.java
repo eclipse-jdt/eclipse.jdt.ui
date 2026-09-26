@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import static org.eclipse.jdt.junit.tests.EnumSourceTestSupport.assertExcludeMode;
+import static org.eclipse.jdt.junit.tests.EnumSourceTestSupport.assertFilterRemoved;
+import static org.eclipse.jdt.junit.tests.EnumSourceTestSupport.enumConstantForInvocation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -96,9 +99,9 @@ public class EnumSourceFilterTest {
 				""");
 		IMethod method= getMethod(cu, "testWithEnum", "QColor;"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		assertEquals("GREEN", EnumSourceValidator.getEnumConstantForInvocation(method, 1)); //$NON-NLS-1$
-		assertEquals("BLUE", EnumSourceValidator.getEnumConstantForInvocation(method, 2)); //$NON-NLS-1$
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 3));
+		assertEquals("GREEN", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+		assertEquals("BLUE", enumConstantForInvocation(method, 2)); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 3));
 
 		assertTrue(EnumSourceValidator.excludeEnumValue(method, "GREEN")); //$NON-NLS-1$
 
@@ -155,16 +158,15 @@ public class EnumSourceFilterTest {
 				""");
 		IMethod method= getMethod(cu, "testWithEnum", "QColor;"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		assertEquals("RED", EnumSourceValidator.getEnumConstantForInvocation(method, 1)); //$NON-NLS-1$
-		assertEquals("BLUE", EnumSourceValidator.getEnumConstantForInvocation(method, 2)); //$NON-NLS-1$
-		assertTrue(EnumSourceValidator.canExcludeEnumValue(method, "BLUE")); //$NON-NLS-1$
+		assertEquals("RED", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+		assertEquals("BLUE", enumConstantForInvocation(method, 2)); //$NON-NLS-1$
 		assertTrue(EnumSourceValidator.excludeEnumValue(method, "BLUE")); //$NON-NLS-1$
 
 		String source= cu.getSource();
 		assertEquals(0, countOccurrences(source, "\"BLUE\"")); //$NON-NLS-1$
 		assertEquals(1, countOccurrences(source, "\"RED\"")); //$NON-NLS-1$
 		assertFalse(source.contains("Mode.EXCLUDE")); //$NON-NLS-1$
-		assertFalse(EnumSourceValidator.canExcludeEnumValue(method, "RED")); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 1));
 		assertCompiles(cu);
 	}
 
@@ -188,7 +190,7 @@ public class EnumSourceFilterTest {
 		IMethod matched= getMethod(cu, "matched", "QColor;"); //$NON-NLS-1$ //$NON-NLS-2$
 		String original= cu.getSource();
 
-		assertFalse(EnumSourceValidator.canExcludeEnumValue(matched, "RED")); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(matched, 1));
 		assertFalse(EnumSourceValidator.excludeEnumValue(matched, "RED")); //$NON-NLS-1$
 		assertEquals(original, cu.getSource());
 		assertCompiles(cu);
@@ -252,8 +254,8 @@ public class EnumSourceFilterTest {
 		assertTrue(source.contains("from = \"RED\"")); //$NON-NLS-1$
 		assertTrue(source.contains("to = \"BLUE\"")); //$NON-NLS-1$
 		assertTrue(source.contains("import org.junit.jupiter.params.provider.EnumSource.Mode;")); //$NON-NLS-1$
-		assertFalse(EnumSourceValidator.isExcludeMode(first));
-		assertTrue(EnumSourceValidator.isExcludeMode(second));
+		assertFilterRemoved(first);
+		assertExcludeMode(second);
 		assertCompiles(cu);
 	}
 
@@ -284,7 +286,7 @@ public class EnumSourceFilterTest {
 		assertFalse(source.contains("import org.junit.jupiter.params.provider.EnumSource.Mode;")); //$NON-NLS-1$
 		assertTrue(source.contains("from = \"GREEN\"")); //$NON-NLS-1$
 		assertTrue(source.contains("to = \"BLUE\"")); //$NON-NLS-1$
-		assertFalse(EnumSourceValidator.isExcludeMode(method));
+		assertFilterRemoved(method);
 		assertCompiles(cu);
 	}
 
@@ -312,7 +314,7 @@ public class EnumSourceFilterTest {
 		assertTrue(EnumSourceValidator.removeValueFromExclusion(method, "RED")); //$NON-NLS-1$
 
 		assertEquals(List.of("GREEN"), EnumSourceValidator.getExcludedNames(method)); //$NON-NLS-1$
-		assertTrue(EnumSourceValidator.isExcludeMode(method));
+		assertExcludeMode(method);
 		assertCompiles(cu);
 	}
 
@@ -377,8 +379,8 @@ public class EnumSourceFilterTest {
 		IMethod mixed= getMethod(cu, "mixed", "QObject;"); //$NON-NLS-1$ //$NON-NLS-2$
 		IMethod repeated= getMethod(cu, "repeated", "QColor;"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		assertFalse(EnumSourceValidator.canExcludeEnumValue(mixed, "RED")); //$NON-NLS-1$
-		assertFalse(EnumSourceValidator.canExcludeEnumValue(repeated, "RED")); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(mixed, 1));
+		assertNull(enumConstantForInvocation(repeated, 1));
 		assertCompiles(cu);
 	}
 
@@ -402,9 +404,9 @@ public class EnumSourceFilterTest {
 				""");
 		IMethod method= getMethod(cu, "testWithEnum", "QColor;"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		assertEquals("GREEN", EnumSourceValidator.getEnumConstantForInvocation(method, 1)); //$NON-NLS-1$
-		assertEquals("YELLOW", EnumSourceValidator.getEnumConstantForInvocation(method, 2)); //$NON-NLS-1$
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 3));
+		assertEquals("GREEN", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+		assertEquals("YELLOW", enumConstantForInvocation(method, 2)); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 3));
 	}
 
 	@Test

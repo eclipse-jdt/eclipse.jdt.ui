@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import static org.eclipse.jdt.junit.tests.EnumSourceTestSupport.assertExcludeMode;
+import static org.eclipse.jdt.junit.tests.EnumSourceTestSupport.assertFilterRemoved;
+import static org.eclipse.jdt.junit.tests.EnumSourceTestSupport.enumConstantForInvocation;
+import static org.eclipse.jdt.junit.tests.EnumSourceTestSupport.invocation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -82,15 +86,14 @@ public class EnumSourceValidationTest {
 				    names = { "RED", "GREEN", "BLUE" })
 				""");
 
-		assertTrue(EnumSourceValidator.isExcludeMode(method));
+		assertExcludeMode(method);
 		assertEquals(List.of("RED", "GREEN", "BLUE"), EnumSourceValidator.getExcludedNames(method)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 1));
-		assertFalse(EnumSourceValidator.canExcludeEnumValue(method, "GREEN")); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 1));
 
 		assertTrue(EnumSourceValidator.removeValueFromExclusion(method, "GREEN")); //$NON-NLS-1$
 		assertEquals(List.of("RED", "BLUE"), EnumSourceValidator.getExcludedNames(method)); //$NON-NLS-1$ //$NON-NLS-2$
-		assertEquals("GREEN", EnumSourceValidator.getEnumConstantForInvocation(method, 1)); //$NON-NLS-1$
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 2));
+		assertEquals("GREEN", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 2));
 		assertCompiles(method.getCompilationUnit());
 	}
 
@@ -101,12 +104,12 @@ public class EnumSourceValidationTest {
 				    mode = EnumSource.Mode.EXCLUDE, names = "GREEN")
 				""");
 
-		assertTrue(EnumSourceValidator.isExcludeMode(method));
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 1));
+		assertExcludeMode(method);
+		assertNull(enumConstantForInvocation(method, 1));
 		assertTrue(EnumSourceValidator.removeValueFromExclusion(method, "GREEN")); //$NON-NLS-1$
-		assertFalse(EnumSourceValidator.isExcludeMode(method));
-		assertEquals("GREEN", EnumSourceValidator.getEnumConstantForInvocation(method, 1)); //$NON-NLS-1$
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 2));
+		assertFilterRemoved(method);
+		assertEquals("GREEN", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 2));
 		assertCompiles(method.getCompilationUnit());
 	}
 
@@ -117,14 +120,14 @@ public class EnumSourceValidationTest {
 				    mode = EnumSource.Mode.EXCLUDE, names = { "GREEN", "BLUE" })
 				""");
 
-		assertTrue(EnumSourceValidator.isExcludeMode(method));
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 1));
+		assertExcludeMode(method);
+		assertNull(enumConstantForInvocation(method, 1));
 		assertTrue(EnumSourceValidator.removeExcludeMode(method));
-		assertFalse(EnumSourceValidator.isExcludeMode(method));
+		assertFilterRemoved(method);
 		assertTrue(EnumSourceValidator.getExcludedNames(method).isEmpty());
-		assertEquals("GREEN", EnumSourceValidator.getEnumConstantForInvocation(method, 1)); //$NON-NLS-1$
-		assertEquals("BLUE", EnumSourceValidator.getEnumConstantForInvocation(method, 2)); //$NON-NLS-1$
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 3));
+		assertEquals("GREEN", enumConstantForInvocation(method, 1)); //$NON-NLS-1$
+		assertEquals("BLUE", enumConstantForInvocation(method, 2)); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 3));
 		assertCompiles(method.getCompilationUnit());
 	}
 
@@ -181,6 +184,56 @@ public class EnumSourceValidationTest {
 		assertFalse(isActionEnabled("[test-template-invocation:#2]/[test-template-invocation:#0]")); //$NON-NLS-1$
 	}
 
+	@Test
+	public void testActionDoesNotRemapAnAlreadyExcludedValue() throws Exception {
+		IMethod method= createTest("@EnumSource(Color.class)"); //$NON-NLS-1$
+		ExcludeParameterValueAction action= new ExcludeParameterValueAction();
+		action.update(invocation(method, 2));
+		assertTrue(action.isEnabled());
+
+		assertTrue(EnumSourceValidator.excludeEnumValue(method, "GREEN")); //$NON-NLS-1$
+		String source= method.getCompilationUnit().getSource();
+		action.run();
+
+		assertEquals(source, method.getCompilationUnit().getSource());
+		assertEquals(List.of("GREEN"), EnumSourceValidator.getExcludedNames(method)); //$NON-NLS-1$
+		assertFalse(action.isEnabled());
+		assertCompiles(method.getCompilationUnit());
+	}
+
+	@Test
+	public void testActionRevalidatesSourceAfterMenuWasOpened() throws Exception {
+		IMethod method= createTest("@EnumSource(Color.class)"); //$NON-NLS-1$
+		ExcludeParameterValueAction action= new ExcludeParameterValueAction();
+		action.update(invocation(method, 2));
+		assertTrue(action.isEnabled());
+
+		IMethod updatedMethod= createTest("""
+				@EnumSource(value = Color.class, mode = EnumSource.Mode.MATCH_ANY, names = "R.*")
+				""");
+		String source= updatedMethod.getCompilationUnit().getSource();
+		action.run();
+
+		assertEquals(source, updatedMethod.getCompilationUnit().getSource());
+		assertFalse(action.isEnabled());
+		assertCompiles(updatedMethod.getCompilationUnit());
+	}
+
+	@Test
+	public void testClearingSelectionDropsExclusionTarget() throws Exception {
+		IMethod method= createTest("@EnumSource(Color.class)"); //$NON-NLS-1$
+		ExcludeParameterValueAction action= new ExcludeParameterValueAction();
+		action.update(invocation(method, 2));
+		assertTrue(action.isEnabled());
+
+		action.update(null);
+		String source= method.getCompilationUnit().getSource();
+		action.run();
+
+		assertEquals(source, method.getCompilationUnit().getSource());
+		assertFalse(action.isEnabled());
+	}
+
 	private IMethod createTest(String enumSource) throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null); //$NON-NLS-1$
 		ICompilationUnit cu= pack.createCompilationUnit("MyTest.java", """
@@ -204,10 +257,8 @@ public class EnumSourceValidationTest {
 
 	private static void assertNotEditable(IMethod method) throws Exception {
 		String original= method.getCompilationUnit().getSource();
-		assertFalse(EnumSourceValidator.isExcludeMode(method));
 		assertTrue(EnumSourceValidator.getExcludedNames(method).isEmpty());
-		assertNull(EnumSourceValidator.getEnumConstantForInvocation(method, 1));
-		assertFalse(EnumSourceValidator.canExcludeEnumValue(method, "RED")); //$NON-NLS-1$
+		assertNull(enumConstantForInvocation(method, 1));
 		assertFalse(EnumSourceValidator.excludeEnumValue(method, "RED")); //$NON-NLS-1$
 		assertFalse(EnumSourceValidator.removeValueFromExclusion(method, "GREEN")); //$NON-NLS-1$
 		assertFalse(EnumSourceValidator.removeExcludeMode(method));

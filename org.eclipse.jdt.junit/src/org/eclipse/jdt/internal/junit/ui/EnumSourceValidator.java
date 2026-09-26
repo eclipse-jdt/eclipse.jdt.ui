@@ -104,7 +104,13 @@ public final class EnumSourceValidator {
 		UNKNOWN
 	}
 
-	record ExclusionTarget(IMethod method, String enumConstantName) {
+	/**
+	 * The selected source identity, without retaining an AST between menu display and execution.
+	 *
+	 * @param method the parameterized test method
+	 * @param enumConstantName the selected enum constant
+	 */
+	public record ExclusionTarget(IMethod method, String enumConstantName) {
 	}
 
 	/** A supported source, including one whose effective values are empty. */
@@ -112,7 +118,13 @@ public final class EnumSourceValidator {
 			Annotation annotation, String mode, List<String> names, List<String> effectiveValues) {
 	}
 
-	static ExclusionTarget findExclusionTarget(TestCaseElement testCaseElement) {
+	/**
+	 * Resolves the selected invocation to a safely editable enum constant.
+	 *
+	 * @param testCaseElement the selected invocation
+	 * @return its source identity, or <code>null</code> if exclusion is unsupported
+	 */
+	public static ExclusionTarget findExclusionTarget(TestCaseElement testCaseElement) {
 		if (testCaseElement == null || !testCaseElement.isDynamicTest()) {
 			return null;
 		}
@@ -150,22 +162,6 @@ public final class EnumSourceValidator {
 		}
 	}
 
-	/**
-	 * Returns the enum constant for a one-based JUnit invocation index.
-	 *
-	 * @param method the parameterized test method
-	 * @param invocationIndex one-based invocation index
-	 * @return the enum constant name, or <code>null</code> if the source is unsupported
-	 * @throws JavaModelException if the Java model cannot be read
-	 */
-	public static String getEnumConstantForInvocation(IMethod method, int invocationIndex) throws JavaModelException {
-		ParsedEnumSource parsed= parse(method);
-		if (parsed == null || invocationIndex < 1 || invocationIndex > parsed.effectiveValues().size()) {
-			return null;
-		}
-		return parsed.effectiveValues().get(invocationIndex - 1);
-	}
-
 	private static boolean canExclude(ParsedEnumSource parsed, String enumConstantName) {
 		if (!parsed.effectiveValues().contains(enumConstantName)) {
 			return false;
@@ -178,31 +174,6 @@ public final class EnumSourceValidator {
 		// at least one value: clearing it would select the entire range again.
 		return parsed.names().isEmpty()
 				|| parsed.effectiveValues().size() > 1 && parsed.names().contains(enumConstantName);
-	}
-
-	/**
-	 * Returns whether the given enum constant can safely be excluded.
-	 *
-	 * @param method the parameterized test method
-	 * @param enumConstantName the enum constant name
-	 * @return <code>true</code> if the transformation is supported
-	 * @throws JavaModelException if the Java model cannot be read
-	 */
-	public static boolean canExcludeEnumValue(IMethod method, String enumConstantName) throws JavaModelException {
-		ParsedEnumSource parsed= parse(method);
-		return parsed != null && canExclude(parsed, enumConstantName);
-	}
-
-	/**
-	 * Returns whether the method has one supported {@code @EnumSource} in EXCLUDE mode.
-	 *
-	 * @param method the method to inspect
-	 * @return <code>true</code> if EXCLUDE mode is active
-	 * @throws JavaModelException if the Java model cannot be read
-	 */
-	public static boolean isExcludeMode(IMethod method) throws JavaModelException {
-		ParsedEnumSource parsed= parse(method);
-		return parsed != null && MODE_EXCLUDE.equals(parsed.mode());
 	}
 
 	/**
@@ -231,7 +202,10 @@ public final class EnumSourceValidator {
 	 * @throws JavaModelException if the Java model cannot be read
 	 */
 	public static boolean excludeEnumValue(IMethod method, String enumConstantName) throws JavaModelException {
-		ParsedEnumSource parsed= parse(method);
+		return excludeEnumValue(parse(method), enumConstantName);
+	}
+
+	private static boolean excludeEnumValue(ParsedEnumSource parsed, String enumConstantName) {
 		if (parsed == null || !canExclude(parsed, enumConstantName)) {
 			return false;
 		}
@@ -248,8 +222,8 @@ public final class EnumSourceValidator {
 			NormalAnnotation annotation= (NormalAnnotation) parsed.annotation();
 			ListRewrite valuesRewrite= rewrite.getListRewrite(annotation, NormalAnnotation.VALUES_PROPERTY);
 
-			MemberValuePair modePair= findMemberValuePair(annotation, MEMBER_MODE);
 			if (!MODE_EXCLUDE.equals(parsed.mode())) {
+				MemberValuePair modePair= findMemberValuePair(annotation, MEMBER_MODE);
 				Expression excludeMode= createExcludeModeExpression(ast, importRewrite);
 				if (modePair == null) {
 					modePair= ast.newMemberValuePair();
@@ -349,13 +323,16 @@ public final class EnumSourceValidator {
 	 * @throws JavaModelException if the Java model cannot be read
 	 */
 	public static boolean removeValueFromExclusion(IMethod method, String enumConstantName) throws JavaModelException {
-		ParsedEnumSource parsed= parse(method);
+		return removeValueFromExclusion(parse(method), enumConstantName);
+	}
+
+	private static boolean removeValueFromExclusion(ParsedEnumSource parsed, String enumConstantName) {
 		if (parsed == null || !MODE_EXCLUDE.equals(parsed.mode())
 				|| !parsed.names().contains(enumConstantName)) {
 			return false;
 		}
 		if (parsed.names().size() == 1) {
-			return removeExcludeMode(method);
+			return removeExcludeMode(parsed);
 		}
 		if (!(parsed.annotation() instanceof NormalAnnotation)) {
 			return false;
@@ -401,7 +378,10 @@ public final class EnumSourceValidator {
 	 * @throws JavaModelException if the Java model cannot be read
 	 */
 	public static boolean removeExcludeMode(IMethod method) throws JavaModelException {
-		ParsedEnumSource parsed= parse(method);
+		return removeExcludeMode(parse(method));
+	}
+
+	private static boolean removeExcludeMode(ParsedEnumSource parsed) {
 		if (parsed == null || !MODE_EXCLUDE.equals(parsed.mode())
 				|| !(parsed.annotation() instanceof NormalAnnotation)) {
 			return false;
