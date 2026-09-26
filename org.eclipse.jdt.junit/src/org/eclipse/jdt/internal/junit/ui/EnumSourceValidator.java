@@ -310,8 +310,7 @@ public final class EnumSourceValidator {
 			return false;
 		}
 
-		return applyChanges(parsed, rewrite,
-				CodeStyleConfiguration.createImportRewrite(parsed.astRoot(), true), removedNodes);
+		return applyChanges(parsed, rewrite, removedNodes);
 	}
 
 	/**
@@ -366,8 +365,7 @@ public final class EnumSourceValidator {
 		}
 		List<ASTNode> removedNodes= new ArrayList<>();
 		removedNodes.add(removedNode);
-		return applyChanges(parsed, rewrite,
-				CodeStyleConfiguration.createImportRewrite(parsed.astRoot(), true), removedNodes);
+		return applyChanges(parsed, rewrite, removedNodes);
 	}
 
 	/**
@@ -406,8 +404,7 @@ public final class EnumSourceValidator {
 			return false;
 		}
 
-		return applyChanges(parsed, rewrite,
-				CodeStyleConfiguration.createImportRewrite(parsed.astRoot(), true), removedNodes);
+		return applyChanges(parsed, rewrite, removedNodes);
 	}
 
 	private static ParsedEnumSource parse(IMethod method) throws JavaModelException {
@@ -699,6 +696,12 @@ public final class EnumSourceValidator {
 		StringLiteral literal= ast.newStringLiteral();
 		literal.setLiteralValue(value);
 		return literal;
+	}
+
+	private static boolean applyChanges(ParsedEnumSource parsed, ASTRewrite rewrite,
+			List<ASTNode> removedNodes) {
+		return applyChanges(parsed, rewrite,
+				CodeStyleConfiguration.createImportRewrite(parsed.astRoot(), true), removedNodes);
 	}
 
 	private static boolean applyChanges(ParsedEnumSource parsed, ASTRewrite rewrite,
