@@ -173,6 +173,9 @@ public final class EnumSourceValidator {
 		if (MODE_EXCLUDE.equals(parsed.mode())) {
 			return !parsed.names().contains(enumConstantName);
 		}
+		// In INCLUDE mode, empty names select every enum constant in the range, so
+		// exclusion creates an EXCLUDE filter. An explicit INCLUDE list must retain
+		// at least one value: clearing it would select the entire range again.
 		return parsed.names().isEmpty()
 				|| parsed.effectiveValues().size() > 1 && parsed.names().contains(enumConstantName);
 	}
