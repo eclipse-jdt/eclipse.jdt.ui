@@ -27,6 +27,7 @@ import org.junit.platform.suite.api.Suite;
 	ContentProviderTests6.class,
 	ContentProviderTests7.class,
 	StartupContentProviderTests.class,
+	BreadcrumbStartupTests.class,
 	PackageExplorerShowInTests.class,
 	WorkingSetDropAdapterTest.class,
 	HierarchicalContentProviderTests.class,

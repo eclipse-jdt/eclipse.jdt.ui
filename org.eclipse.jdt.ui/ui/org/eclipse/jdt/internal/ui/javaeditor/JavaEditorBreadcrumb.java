@@ -19,11 +19,18 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -48,6 +55,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.contexts.IContextService;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.views.WorkbenchViewerSetup;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -78,11 +86,13 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.filters.EmptyLibraryContainerFilter;
@@ -475,11 +485,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				if (fViewer == null)
 					return;
 
-				Object newInput= getCurrentInput();
-				if (newInput instanceof IJavaElement)
-					newInput= getInput((IJavaElement) newInput);
-
-				fViewer.setInput(newInput);
+				updateInput(getCurrentInput(), true);
 				fRunnable= null;
 			};
 			fViewer.getControl().getDisplay().asyncExec(fRunnable);
@@ -555,6 +561,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	private BreadcrumbViewer fViewer;
 	private ISelection fEditorSelection;
 	private ElementChangeListener fElementChangeListener;
+
+	// Accessed only on the UI thread. Keep the latest input while initialization runs.
+	private IJavaProject fInitializedProject;
+	private IJavaProject fInitializingProject;
+	private Job fInitializationJob;
+	private Object fPendingInput;
+	private boolean fPendingRefresh;
 
 
 	public JavaEditorBreadcrumb(JavaEditor javaEditor) {
@@ -764,6 +777,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 */
 	@Override
 	public void dispose() {
+		cancelInitialization();
+		fInitializedProject= null;
 		super.dispose();
 
 		if (fViewer != null) {
@@ -786,6 +801,12 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 */
 	@Override
 	public void setInput(Object element) {
+		updateInput(element, false);
+	}
+
+	private void updateInput(Object element, boolean refresh) {
+		if (fViewer == null || fViewer.getControl().isDisposed())
+			return;
 		if (element == null) {
 			element= getCurrentInput();
 			if (element instanceof IType) {
@@ -793,11 +814,94 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			}
 		}
 
-		if (element instanceof IJavaElement) {
-			super.setInput(getInput((IJavaElement) element));
-		} else {
-			super.setInput(element);
+		if (element instanceof IJavaElement javaElement) {
+			IJavaProject project= javaElement.getJavaProject();
+			if (project != null && (!project.equals(fInitializedProject) || !project.isOpen())) {
+				if (!project.equals(fInitializingProject)) {
+					cancelInitialization();
+					initializeProject(project);
+				}
+				fPendingInput= element;
+				fPendingRefresh|= refresh;
+				return;
+			}
 		}
+
+		cancelInitialization();
+		Object input= element instanceof IJavaElement javaElement ? getInput(javaElement) : element;
+		if (refresh)
+			fViewer.setInput(input);
+		else
+			super.setInput(input);
+	}
+
+	private void initializeProject(IJavaProject project) {
+		Display display= fViewer.getControl().getDisplay();
+		Job job= new Job(JavaUIMessages.JavaPlugin_initializing_ui) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					if (monitor.isCanceled())
+						return Status.CANCEL_STATUS;
+					// Labels, icons and build-path checks also access the classpath. Prepare
+					// the model before ANY of them run while restoring the editor's UI.
+					project.getResolvedClasspath(true);
+					if (monitor.isCanceled())
+						return Status.CANCEL_STATUS;
+					project.open(monitor);
+					return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+				} catch (JavaModelException e) {
+					if (monitor.isCanceled())
+						return Status.CANCEL_STATUS;
+					JavaPlugin.log(e);
+					return e.getStatus();
+				}
+			}
+
+			@Override
+			public boolean belongsTo(Object family) {
+				return JavaUI.ID_PLUGIN.equals(family);
+			}
+		};
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				UIJob update= new UIJob(display, JavaUIMessages.JavaPlugin_initializing_ui) {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						if (fViewer == null || fViewer.getControl().isDisposed() || fInitializationJob != job)
+							return Status.CANCEL_STATUS;
+						fInitializationJob= null;
+						fInitializingProject= null;
+						Object input= fPendingInput;
+						boolean refresh= fPendingRefresh;
+						fPendingInput= null;
+						fPendingRefresh= false;
+						if (event.getResult().isOK()) {
+							fInitializedProject= project;
+							updateInput(input, refresh);
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				update.setSystem(true);
+				update.schedule();
+			}
+		});
+		fInitializingProject= project;
+		fInitializationJob= job;
+		job.setPriority(Job.DECORATE);
+		job.schedule();
+	}
+
+	private void cancelInitialization() {
+		Job job= fInitializationJob;
+		fInitializationJob= null;
+		fInitializingProject= null;
+		fPendingInput= null;
+		fPendingRefresh= false;
+		if (job != null)
+			job.cancel();
 	}
 
 	/*
