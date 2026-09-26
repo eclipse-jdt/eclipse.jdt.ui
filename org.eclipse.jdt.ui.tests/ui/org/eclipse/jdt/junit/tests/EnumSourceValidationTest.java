@@ -155,6 +155,12 @@ public class EnumSourceValidationTest {
 	}
 
 	@Test
+	public void testNonDynamicInvocationIsNotEditable() throws Exception {
+		createTest("@EnumSource(Color.class)"); //$NON-NLS-1$
+		assertFalse(isActionEnabled("[test-template-invocation:#1]", false)); //$NON-NLS-1$
+	}
+
+	@Test
 	public void testInvocationMappingRejectsInvalidIndices() throws Exception {
 		createTest("@EnumSource(Color.class)"); //$NON-NLS-1$
 		assertFalse(isActionEnabled(null));
@@ -209,12 +215,16 @@ public class EnumSourceValidationTest {
 	}
 
 	private boolean isActionEnabled(String uniqueId) {
+		return isActionEnabled(uniqueId, true);
+	}
+
+	private boolean isActionEnabled(String uniqueId, boolean dynamic) {
 		TestRunSession session= new TestRunSession("EnumSource validation run", fJProject); //$NON-NLS-1$
 		TestSuiteElement suite= new TestSuiteElement(session.getTestRoot(), "suite", //$NON-NLS-1$
 				"testWithEnum(test1.MyTest$Color)(test1.MyTest)", 3, null, //$NON-NLS-1$
 				new String[] { "test1.MyTest$Color" }, null); //$NON-NLS-1$
 		TestCaseElement testCase= new TestCaseElement(suite, "case", //$NON-NLS-1$
-				"custom(test1.MyTest)", "custom", false, null, uniqueId); //$NON-NLS-1$ //$NON-NLS-2$
+				"custom(test1.MyTest)", "custom", dynamic, null, uniqueId); //$NON-NLS-1$ //$NON-NLS-2$
 		ExcludeParameterValueAction action= new ExcludeParameterValueAction();
 		action.update(testCase);
 		return action.isEnabled();

@@ -296,7 +296,7 @@ public class EnumSourceSafetyTest {
 		TestRunSession session= new TestRunSession("EnumSource include run", fJProject); //$NON-NLS-1$
 		TestSuiteElement suite= createParameterizedSuite(session, "include-suite", 2); //$NON-NLS-1$
 		TestCaseElement blueCase= new TestCaseElement(suite, "include-blue", //$NON-NLS-1$
-				"custom 2: BLUE(test1.MyTest)", "BLUE", false, null, //$NON-NLS-1$ //$NON-NLS-2$
+				"custom 2: BLUE(test1.MyTest)", "BLUE", true, null, //$NON-NLS-1$ //$NON-NLS-2$
 				"[engine:junit-jupiter]/[class:test1.MyTest]/" //$NON-NLS-1$
 						+ "[test-template:testWithEnum(test1.MyTest$Color)]/" //$NON-NLS-1$
 						+ "[test-template-invocation:#2]"); //$NON-NLS-1$
@@ -328,7 +328,7 @@ public class EnumSourceSafetyTest {
 		TestRunSession session= new TestRunSession("EnumSource run", fJProject); //$NON-NLS-1$
 		TestSuiteElement validSuite= createParameterizedSuite(session, "valid-suite", 1); //$NON-NLS-1$
 		TestCaseElement validCase= new TestCaseElement(validSuite, "valid-case", //$NON-NLS-1$
-				"arbitrary display(test1.MyTest)", "not an enum value", false, null, //$NON-NLS-1$ //$NON-NLS-2$
+				"arbitrary display(test1.MyTest)", "not an enum value", true, null, //$NON-NLS-1$ //$NON-NLS-2$
 				"[engine:junit-jupiter]/[class:test1.MyTest]/" //$NON-NLS-1$
 						+ "[test-template:testWithEnum(test1.MyTest$Color)]/" //$NON-NLS-1$
 						+ "[test-template-invocation:#2]"); //$NON-NLS-1$
@@ -339,18 +339,18 @@ public class EnumSourceSafetyTest {
 
 		TestSuiteElement fallbackSuite= createParameterizedSuite(session, "fallback-suite", 3); //$NON-NLS-1$
 		TestCaseElement withoutUniqueId= new TestCaseElement(fallbackSuite, "fallback-case-1", //$NON-NLS-1$
-				"first(test1.MyTest)", "first", false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+				"first(test1.MyTest)", "first", true, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 		new TestCaseElement(fallbackSuite, "fallback-case-2", //$NON-NLS-1$
-				"second(test1.MyTest)", "second", false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+				"second(test1.MyTest)", "second", true, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 		new TestCaseElement(fallbackSuite, "fallback-case-3", //$NON-NLS-1$
-				"third(test1.MyTest)", "third", false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+				"third(test1.MyTest)", "third", true, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 
 		action.update(withoutUniqueId);
 		assertFalse(action.isEnabled());
 
 		TestSuiteElement invalidSuite= createParameterizedSuite(session, "invalid-suite", 1); //$NON-NLS-1$
 		TestCaseElement invalidCase= new TestCaseElement(invalidSuite, "invalid-case", //$NON-NLS-1$
-				"invalid(test1.MyTest)", "invalid", false, null, //$NON-NLS-1$ //$NON-NLS-2$
+				"invalid(test1.MyTest)", "invalid", true, null, //$NON-NLS-1$ //$NON-NLS-2$
 				"[test-template-invocation:#99]"); //$NON-NLS-1$
 		action.update(invalidCase);
 		assertFalse(action.isEnabled());

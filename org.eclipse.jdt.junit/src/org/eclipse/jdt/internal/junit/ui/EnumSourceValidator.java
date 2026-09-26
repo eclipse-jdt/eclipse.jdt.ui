@@ -113,7 +113,7 @@ public final class EnumSourceValidator {
 	}
 
 	static ExclusionTarget findExclusionTarget(TestCaseElement testCaseElement) {
-		if (testCaseElement == null) {
+		if (testCaseElement == null || !testCaseElement.isDynamicTest()) {
 			return null;
 		}
 
