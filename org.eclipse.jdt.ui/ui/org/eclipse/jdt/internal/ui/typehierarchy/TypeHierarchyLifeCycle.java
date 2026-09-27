@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -286,7 +286,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 
-	private ITypeHierarchy createTypeHierarchy(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
+	ITypeHierarchy createTypeHierarchy(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		if (elements.length == 1 && elements[0].getElementType() == IJavaElement.TYPE) {
 			IType type= (IType)elements[0];
 			if (fIsSuperTypesOnly) {
@@ -312,6 +312,16 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 
+
+	/** Installs a detached restoration result only after the view accepts its job. */
+	void installHierarchy(IJavaElement[] elements, ITypeHierarchy hierarchy) {
+		freeHierarchy();
+		fHierarchy= hierarchy;
+		fInputElements= elements;
+		fHierarchy.addTypeHierarchyChangedListener(this);
+		JavaCore.addElementChangedListener(this);
+		fHierarchyRefreshNeeded= false;
+	}
 
 	public void doHierarchyRefresh(IJavaElement[] elements, IProgressMonitor pm) throws JavaModelException {
 		boolean hierachyCreationNeeded= (fHierarchy == null || !Arrays.equals(elements, fInputElements));

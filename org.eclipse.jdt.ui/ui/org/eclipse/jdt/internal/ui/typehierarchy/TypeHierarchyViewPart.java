@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.help.IContextProvider;
 
@@ -51,7 +52,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -101,6 +104,7 @@ import org.eclipse.ui.part.PluginTransfer;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.views.WorkbenchViewerSetup;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -244,13 +248,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private OpenAndLinkWithEditorHelper fTypeOpenAndLinkWithEditorHelper;
 
 	private OpenAction fOpenAction;
-
-	/**
-	 * Indicates whether the restore job was canceled explicitly.
-	 *
-	 * @since 3.6
-	 */
-	private boolean fRestoreJobCanceledExplicitly= true;
 
 	/**
 	 * Indicates whether empty viewers should keep showing. If false, replace them with
@@ -534,6 +531,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @since 3.7
 	 */
 	public void setInputElements(IJavaElement[] javaElements) {
+		cancelRestoreState();
 		IJavaElement[] newElements= null;
 		IMember memberToSelect= null;
 		if (javaElements != null) {
@@ -576,20 +574,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private void updateInput(IJavaElement[] inputElements) {
 		IJavaElement[] prevInput= fInputElements;
-
-		synchronized (this) {
-			if (fRestoreStateJob != null) {
-				fRestoreStateJob.cancel();
-				fRestoreJobCanceledExplicitly= false;
-				try {
-					fRestoreStateJob.join();
-				} catch (InterruptedException e) {
-					// ignore
-				} finally {
-					fRestoreStateJob= null;
-				}
-			}
-		}
 
 		// Make sure the UI got repainted before we execute a long running
 		// operation. This can be removed if we refresh the hierarchy in a
@@ -683,6 +667,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	@Override
 	public void dispose() {
+		cancelRestoreState();
 		if (fHierarchyLifeCycle != null) {
 			fHierarchyLifeCycle.freeHierarchy();
 			fHierarchyLifeCycle.removeChangedListener(fTypeHierarchyLifeCycleListener);
@@ -1596,8 +1581,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	@Override
 	public void saveState(IMemento memento) {
-		if (fPagebook == null) {
-			// part has not been created
+		if (fPagebook == null || fRestoreStateJob != null) {
+			// Preserve the saved input while asynchronous restoration is pending.
 			if (fMemento != null) { //Keep the old state;
 				memento.putMemento(fMemento);
 			}
@@ -1637,66 +1622,97 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Restores the type hierarchy settings from a memento.
 	 */
 	private void restoreState(final IMemento memento) {
-		IJavaElement input= null;
-		List<IJavaElement> inputList= new ArrayList<>();
+		cancelRestoreState();
+		fMemento= memento;
+		List<IJavaElement> inputs= new ArrayList<>();
 		String elementId= memento.getString(TAG_INPUT);
-		int i= 0;
-		while (elementId != null) {
-			input= JavaCore.create(elementId);
-			if (input == null || !input.exists()) {
-				inputList= null;
+		for (int i= 0; elementId != null; elementId= memento.getString(TAG_INPUT + ++i)) {
+			IJavaElement input= JavaCore.create(elementId);
+			if (input == null) {
+				inputs.clear();
 				break;
 			}
-			inputList.add(input);
-			elementId= memento.getString(TAG_INPUT + ++i);
+			inputs.add(input);
 		}
-		if (inputList == null || inputList.isEmpty()) {
-			doRestoreState(memento, input);
-		} else {
-			final IJavaElement[] hierarchyInput= inputList.toArray(new IJavaElement[inputList.size()]);
+		if (inputs.isEmpty()) {
+			doRestoreState(memento, (IJavaElement[]) null);
+			return;
+		}
 
-			synchronized (this) {
-				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, HistoryAction.getElementLabel(hierarchyInput));
-				fNoHierarchyShownLabel.setText(label);
-
-				fRestoreStateJob= new Job(label) {
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						try {
-							doRestoreInBackground(memento, hierarchyInput, monitor);
-						} catch (JavaModelException e) {
-							return e.getStatus();
-						} catch (OperationCanceledException e) {
-							if (fRestoreJobCanceledExplicitly) {
-								showEmptyViewer();
-							}
+		IJavaElement[] hierarchyInput= inputs.toArray(IJavaElement[]::new);
+		// Even the usual label provider may open the model. Only use handle data
+		// here; existence checks and hierarchy creation belong to the worker.
+		String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, hierarchyInput[0].getElementName());
+		fNoHierarchyShownLabel.setText(label);
+		var display= fPagebook.getDisplay();
+		TypeHierarchyLifeCycle lifeCycle= fHierarchyLifeCycle;
+		AtomicReference<ITypeHierarchy> computedHierarchy= new AtomicReference<>();
+		Job job= new Job(label) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					for (IJavaElement input : hierarchyInput) {
+						if (monitor.isCanceled())
 							return Status.CANCEL_STATUS;
+						if (!input.exists())
+							return Status.OK_STATUS;
+					}
+					// Compute a detached hierarchy. A cancelled worker must not mutate
+					// the current view's life cycle or install listeners after disposal.
+					computedHierarchy.set(lifeCycle.createTypeHierarchy(hierarchyInput, monitor));
+					return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+				} catch (JavaModelException e) {
+					return e.getStatus();
+				} catch (OperationCanceledException e) {
+					return Status.CANCEL_STATUS;
+				}
+			}
+
+			@Override
+			public boolean belongsTo(Object family) {
+				return family == TypeHierarchyViewPart.this || JavaUI.ID_PLUGIN.equals(family);
+			}
+		};
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				UIJob update= new UIJob(display, label) {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						if (fRestoreStateJob != job || isDisposed() || fPagebook.isDisposed())
+							return Status.CANCEL_STATUS;
+						fRestoreStateJob= null;
+						if (!event.getResult().isOK()) {
+							clearInput();
+							return event.getResult();
 						}
+						ITypeHierarchy hierarchy= computedHierarchy.get();
+						JavaCore.runReadOnly(() -> {
+							if (hierarchy != null)
+								fHierarchyLifeCycle.installHierarchy(hierarchyInput, hierarchy);
+							doRestoreState(memento, hierarchy == null ? null : hierarchyInput);
+						});
 						return Status.OK_STATUS;
 					}
+
+					@Override
+					public boolean belongsTo(Object family) {
+						return family == TypeHierarchyViewPart.this || JavaUI.ID_PLUGIN.equals(family);
+					}
 				};
-				fRestoreStateJob.schedule();
+				update.setSystem(true);
+				update.schedule();
 			}
-		}
+		});
+		fRestoreStateJob= job;
+		job.schedule();
 	}
 
-
-	private void doRestoreInBackground(final IMemento memento, final IJavaElement[] hierarchyInput, IProgressMonitor monitor) throws JavaModelException {
-		fHierarchyLifeCycle.doHierarchyRefresh(hierarchyInput, monitor);
-		final boolean doRestore= !monitor.isCanceled();
-		if (doRestore) {
-			Display.getDefault().asyncExec(() -> {
-				// running async: check first if view still exists
-				if (fPagebook != null && !fPagebook.isDisposed()) {
-					JavaCore.runReadOnly(() -> doRestoreState(memento, hierarchyInput));
-				}
-			});
-		}
-	}
-
-
-	final void doRestoreState(IMemento memento, IJavaElement input) {
-		doRestoreState(memento, input == null ? null : new IJavaElement[] { input });
+	private void cancelRestoreState() {
+		Job job= fRestoreStateJob;
+		fRestoreStateJob= null;
+		if (job != null)
+			job.cancel();
 	}
 
 	/**
@@ -1707,13 +1723,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @since 3.7
 	 */
 	final void doRestoreState(IMemento memento, IJavaElement[] input) {
-		synchronized (this) {
-			if (fRestoreStateJob == null) {
-				return;
-			}
-			fRestoreStateJob= null;
-		}
-
 		fWorkingSetActionGroup.restoreState(memento);
 		setKeepShowingEmptyViewers(false);
 		setInputElements(input);
