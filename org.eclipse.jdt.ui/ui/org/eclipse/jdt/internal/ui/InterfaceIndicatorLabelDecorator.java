@@ -87,8 +87,13 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 			if (!refreshAll && elements.length == 0) {
 				return Status.OK_STATUS;
 			}
+			ITypeRoot probe= firstExisting(elements);
+			if (probe == null && !refreshAll) {
+				// all pending elements were deleted, nothing left to update
+				return Status.OK_STATUS;
+			}
 			try {
-				waitForIndex(elements.length > 0 ? elements[0] : null, monitor);
+				waitForIndex(probe, monitor);
 			} catch (OperationCanceledException e) {
 				return Status.CANCEL_STATUS;
 			}
@@ -211,11 +216,20 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		}
 	}
 
+	private static ITypeRoot firstExisting(ITypeRoot[] elements) {
+		for (ITypeRoot element : elements) {
+			if (element.exists()) {
+				return element;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Blocks until the type index can answer queries, outside of the shared decoration job.
 	 */
 	private void waitForIndex(ITypeRoot element, IProgressMonitor monitor) {
-		if (element == null || !element.exists()) {
+		if (element == null) {
 			return;
 		}
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
@@ -237,7 +251,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 			if (fDisposed) {
 				return;
 			}
-			if (fPendingElements.size() < MAX_PENDING_ELEMENTS) {
+			if (fPendingElements.size() < MAX_PENDING_ELEMENTS || fPendingElements.contains(element)) {
 				fPendingElements.add(element);
 			} else {
 				fRefreshAll.set(true);
