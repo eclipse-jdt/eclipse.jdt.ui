@@ -267,6 +267,37 @@ public class InterfaceIndicatorLabelDecoratorTest extends CoreTests {
 	}
 
 	/**
+	 * A pending element that no longer exists needs no update. Firing one anyway, without
+	 * waiting, would re-decorate against a busy index and reschedule the job in a loop.
+	 */
+	@Test
+	public void testNoLabelUpdateForDeletedElement() throws Exception {
+		ICompilationUnit cu= createInterface();
+		JavaProjectHelper.mustPerformDummySearch();
+		close(cu);
+		cu.delete(true, null);
+
+		RecordingDecorator decorator= new RecordingDecorator();
+		try {
+			IndexManager indexManager= getIndexManager();
+			indexManager.disable();
+			try {
+				indexManager.indexAll(fJProject1.getProject());
+				decorator.decorate(cu, new RecordingDecoration());
+			} finally {
+				indexManager.enable();
+			}
+
+			JavaProjectHelper.mustPerformDummySearch();
+			DisplayHelper.sleep(Display.getDefault(), 1000);
+
+			assertEquals("a deleted element must not trigger a label update", 0, decorator.fireCount.get());
+		} finally {
+			decorator.dispose();
+		}
+	}
+
+	/**
 	 * The workbench may dispose the decorator while the decoration job is still inside
 	 * {@code decorate()}. Nothing may be scheduled after disposal.
 	 */
