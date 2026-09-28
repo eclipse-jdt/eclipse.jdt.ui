@@ -15,12 +15,15 @@ package org.eclipse.jdt.ui.tests.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
 import org.junit.Before;
@@ -267,6 +270,37 @@ public class InterfaceIndicatorLabelDecoratorTest extends CoreTests {
 	}
 
 	/**
+	 * A pending element that no longer exists needs no update. Firing one anyway, without
+	 * waiting, would re-decorate against a busy index and reschedule the job in a loop.
+	 */
+	@Test
+	public void testNoLabelUpdateForDeletedElement() throws Exception {
+		ICompilationUnit cu= createInterface();
+		JavaProjectHelper.mustPerformDummySearch();
+		close(cu);
+		cu.delete(true, null);
+
+		RecordingDecorator decorator= new RecordingDecorator();
+		try {
+			IndexManager indexManager= getIndexManager();
+			indexManager.disable();
+			try {
+				indexManager.indexAll(fJProject1.getProject());
+				decorator.decorate(cu, new RecordingDecoration());
+			} finally {
+				indexManager.enable();
+			}
+
+			JavaProjectHelper.mustPerformDummySearch();
+			DisplayHelper.sleep(Display.getDefault(), 1000);
+
+			assertEquals("a deleted element must not trigger a label update", 0, decorator.fireCount.get());
+		} finally {
+			decorator.dispose();
+		}
+	}
+
+	/**
 	 * The workbench may dispose the decorator while the decoration job is still inside
 	 * {@code decorate()}. Nothing may be scheduled after disposal.
 	 */
@@ -293,5 +327,37 @@ public class InterfaceIndicatorLabelDecoratorTest extends CoreTests {
 		DisplayHelper.sleep(Display.getDefault(), 1000);
 
 		assertEquals("a disposed decorator must not request label updates", 0, decorator.fireCount.get());
+	}
+
+	/**
+	 * The decorator manager hands a refresh of all labels straight to the viewers, so it must arrive
+	 * on the UI thread even when the index wait job requests it.
+	 */
+	@Test
+	public void testRefreshAllFromBackgroundThreadNotifiesOnUIThread() throws Exception {
+		RecordingDecorator decorator= new RecordingDecorator();
+		try {
+			AtomicReference<Thread> notifiedThread= new AtomicReference<>();
+			AtomicReference<LabelProviderChangedEvent> notifiedEvent= new AtomicReference<>();
+			decorator.addListener(event -> {
+				notifiedEvent.set(event);
+				notifiedThread.set(Thread.currentThread());
+			});
+
+			Thread background= new Thread(decorator::fireChange);
+			background.start();
+			background.join();
+
+			assertTrue("the listener must be notified", new DisplayHelper() {
+				@Override
+				protected boolean condition() {
+					return notifiedThread.get() != null;
+				}
+			}.waitForCondition(Display.getDefault(), 5000));
+			assertSame(Display.getDefault().getThread(), notifiedThread.get());
+			assertNull(notifiedEvent.get().getElements());
+		} finally {
+			decorator.dispose();
+		}
 	}
 }

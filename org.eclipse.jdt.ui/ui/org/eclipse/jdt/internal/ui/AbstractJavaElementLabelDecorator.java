@@ -23,6 +23,9 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.UIJob;
+
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
@@ -99,10 +102,23 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 	}
 
 	/**
-	 * Requests an update of all labels.
+	 * Requests an update of all labels, notifying the listeners on the UI thread.
 	 */
 	protected void fireChange() {
-		fireChange(new LabelProviderChangedEvent(this));
+		if (!PlatformUI.isWorkbenchRunning()) {
+			return;
+		}
+		LabelProviderChangedEvent event= new LabelProviderChangedEvent(this);
+		// DecoratorManager hands element-less events straight to the viewers on the calling thread
+		if (PlatformUI.getWorkbench().getDisplay().getThread() == Thread.currentThread()) {
+			fireChange(event);
+			return;
+		}
+		UIJob job= UIJob.create("Java label decoration update", monitor -> { //$NON-NLS-1$
+			fireChange(event);
+		});
+		job.setSystem(true);
+		job.schedule();
 	}
 
 	private void fireChange(LabelProviderChangedEvent event) {
