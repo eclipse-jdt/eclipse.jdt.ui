@@ -26,6 +26,7 @@ import org.junit.platform.suite.api.Suite;
 	ContentProviderTests5.class,
 	ContentProviderTests6.class,
 	ContentProviderTests7.class,
+	JavaNavigatorSorterTest.class,
 	PackageExplorerShowInTests.class,
 	WorkingSetDropAdapterTest.class,
 	HierarchicalContentProviderTests.class,
