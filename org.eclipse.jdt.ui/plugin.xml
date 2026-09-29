@@ -6317,7 +6317,7 @@
 					policy="InvokeAlwaysRegardlessOfSuppressedExt"
 					suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>
 			<commonSorter
-					class="org.eclipse.jdt.ui.JavaElementSorter"
+					class="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorSorter"
 					id="org.eclipse.jdt.ui.javaElementSorter"/>
 
 		   <commonWizard
