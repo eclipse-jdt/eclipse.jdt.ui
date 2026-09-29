@@ -312,4 +312,10 @@
       </derivedSourceSearchParticipant>
    </extension>
 
+   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            id="org.eclipse.jdt.ui.tests.startupContainer"
+            class="org.eclipse.jdt.ui.tests.packageview.StartupClasspathContainerInitializer">
+      </classpathContainerInitializer>
+   </extension>
 </plugin>

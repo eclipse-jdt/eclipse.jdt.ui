@@ -562,6 +562,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		IJavaElement element= delta.getElement();
 		int elementType= element.getElementType();
 
+		// These changes are ignored at the compilation-unit level below. Avoid
+		// resolving the root's classpath container before reaching that leaf.
+		if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT && isWorkingCopyOnlyDelta(delta))
+			return false;
 
 		if (elementType != IJavaElement.JAVA_MODEL && elementType != IJavaElement.JAVA_PROJECT) {
 			IJavaProject proj= element.getJavaProject();
@@ -757,6 +761,33 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 		handleAffectedChildren(delta, element, runnables);
 		return false;
+	}
+
+	private static boolean isWorkingCopyOnlyDelta(IJavaElementDelta delta) {
+		if (delta.getKind() != IJavaElementDelta.CHANGED)
+			return false;
+		IResourceDelta[] resources= delta.getResourceDeltas();
+		if (resources != null && resources.length != 0)
+			return false;
+
+		int flags= delta.getFlags();
+		IJavaElementDelta[] children= delta.getAffectedChildren();
+		int type= delta.getElement().getElementType();
+		if (type == IJavaElement.COMPILATION_UNIT) {
+			return children.length == 0
+					&& (flags & IJavaElementDelta.F_PRIMARY_WORKING_COPY) != 0
+					&& (flags & ~(IJavaElementDelta.F_PRIMARY_WORKING_COPY | IJavaElementDelta.F_FINE_GRAINED)) == 0;
+		}
+		if ((type != IJavaElement.PACKAGE_FRAGMENT_ROOT && type != IJavaElement.PACKAGE_FRAGMENT)
+				|| (flags & ~IJavaElementDelta.F_FINE_GRAINED) != IJavaElementDelta.F_CHILDREN
+				|| children.length == 0)
+			return false;
+
+		for (IJavaElementDelta child : children) {
+			if (!isWorkingCopyOnlyDelta(child))
+				return false;
+		}
+		return true;
 	}
 
 	private static boolean isStructuralCUChange(int flags) {

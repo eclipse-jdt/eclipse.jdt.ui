@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.help.IContextProvider;
 
@@ -33,10 +34,16 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -90,6 +97,7 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.views.WorkbenchViewerSetup;
 import org.eclipse.ui.views.framelist.Frame;
 import org.eclipse.ui.views.framelist.FrameAction;
@@ -123,6 +131,7 @@ import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
 import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
@@ -177,6 +186,10 @@ public class PackageExplorerPart extends ViewPart
 	private boolean fShowLibrariesNode;
 	private boolean fLinkingEnabled;
 
+	// Owned by the UI thread. Never wait for this job during activation or disposal.
+	private Job fEditorLinkJob;
+	private IEditorPart fLinkedEditor;
+
 	private int fRootMode;
 	private WorkingSetModel fWorkingSetModel;
 
@@ -210,7 +223,10 @@ public class PackageExplorerPart extends ViewPart
 		@Override
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
 		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {}
+		public void partClosed(IWorkbenchPartReference partRef) {
+			if (partRef.getPart(false) == fLinkedEditor)
+				cancelEditorLink();
+		}
 		@Override
 		public void partDeactivated(IWorkbenchPartReference partRef) {}
 		@Override
@@ -451,6 +467,7 @@ public class PackageExplorerPart extends ViewPart
 
 	 @Override
 	public void dispose() {
+		cancelEditorLink();
 		XMLMemento memento= XMLMemento.createWriteRoot("packageExplorer"); //$NON-NLS-1$
 		saveState(memento);
 		StringWriter writer= new StringWriter();
@@ -1000,16 +1017,92 @@ public class PackageExplorerPart extends ViewPart
 	 * @param editor the activated editor
 	 */
 	void editorActivated(IEditorPart editor) {
+		cancelEditorLink();
+		if (!fLinkingEnabled || editor == null || fViewer.getControl().isDisposed())
+			return;
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput == null)
 			return;
-		Object input= getInputFromEditor(editorInput);
-		if (input == null)
-			return;
-		if (!inputIsSelected(editorInput))
-			showInput(input);
-		else
-			getTreeViewer().getTree().showSelection();
+
+		// Revealing a selection also asks the content provider for parents and
+		// children. Prepare its model before allowing those UI queries to run.
+		AtomicReference<Object> resolvedInput= new AtomicReference<>();
+		var display= fViewer.getControl().getDisplay();
+		Job job= new Job(JavaUIMessages.JavaPlugin_initializing_ui) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					if (monitor.isCanceled())
+						return Status.CANCEL_STATUS;
+					Object input= getInputFromEditor(editorInput);
+					IJavaProject project= input instanceof IJavaElement element ? element.getJavaProject()
+							: input instanceof IResource resource ? JavaCore.create(resource.getProject()) : null;
+					if (project != null && project.exists()) {
+						project.getResolvedClasspath(true);
+						if (monitor.isCanceled())
+							return Status.CANCEL_STATUS;
+						project.open(monitor);
+					}
+					resolvedInput.set(input);
+					return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+				} catch (JavaModelException e) {
+					return e.getStatus();
+				} catch (OperationCanceledException e) {
+					return Status.CANCEL_STATUS;
+				}
+			}
+
+			@Override
+			public boolean belongsTo(Object family) {
+				return family == PackageExplorerPart.this || JavaUI.ID_PLUGIN.equals(family);
+			}
+		};
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				UIJob update= new UIJob(display, job.getName()) {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						if (fEditorLinkJob != job || fViewer.getControl().isDisposed())
+							return Status.CANCEL_STATUS;
+						fEditorLinkJob= null;
+						fLinkedEditor= null;
+						if (!event.getResult().isOK() || !fLinkingEnabled
+								|| getSite().getPage().getActiveEditor() != editor
+								|| !editorInput.equals(editor.getEditorInput()))
+							return Status.CANCEL_STATUS;
+						Object input= resolvedInput.get();
+						if (input != null) {
+							if (!inputIsSelected(editorInput))
+								showInput(input);
+							else
+								fViewer.getTree().showSelection();
+						}
+						return Status.OK_STATUS;
+					}
+
+					@Override
+					public boolean belongsTo(Object family) {
+						return family == PackageExplorerPart.this || JavaUI.ID_PLUGIN.equals(family);
+					}
+				};
+				update.setSystem(true);
+				update.schedule();
+			}
+		});
+		fLinkedEditor= editor;
+		fEditorLinkJob= job;
+		job.setSystem(true);
+		job.setPriority(Job.DECORATE);
+		job.schedule();
+	}
+
+	private void cancelEditorLink() {
+		Job job= fEditorLinkJob;
+		fEditorLinkJob= null;
+		fLinkedEditor= null;
+		if (job != null)
+			job.cancel();
 	}
 
 	private Object getInputFromEditor(IEditorInput editorInput) {
@@ -1278,6 +1371,7 @@ public class PackageExplorerPart extends ViewPart
 			if (editor != null)
 				editorActivated(editor);
 		} else {
+			cancelEditorLink();
 			page.removePartListener(fLinkWithEditorListener);
 		}
 		fOpenAndLinkWithEditorHelper.setLinkWithEditor(enabled);

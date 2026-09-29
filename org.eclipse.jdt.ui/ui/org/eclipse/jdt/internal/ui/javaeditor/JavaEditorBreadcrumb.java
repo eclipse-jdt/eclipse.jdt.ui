@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,14 +16,22 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -48,6 +56,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.contexts.IContextService;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.ui.views.WorkbenchViewerSetup;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -78,11 +87,13 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.filters.EmptyLibraryContainerFilter;
@@ -449,40 +460,71 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 	private class ElementChangeListener implements IElementChangedListener {
 
-		private Runnable fRunnable;
+		private final UIJob fUpdateJob;
 
-		/*
-		 * @seeorg.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.
-		 * ElementChangedEvent)
-		 */
+		ElementChangeListener(Display display) {
+			fUpdateJob= new UIJob(display, JavaUIMessages.JavaPlugin_initializing_ui) {
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					if (fViewer == null || fViewer.getControl().isDisposed())
+						return Status.CANCEL_STATUS;
+					// Resolve the current selection only after checking model readiness.
+					updateInput(null, true);
+					return Status.OK_STATUS;
+				}
+
+				@Override
+				public boolean belongsTo(Object family) {
+					return family == JavaEditorBreadcrumb.this || JavaUI.ID_PLUGIN.equals(family);
+				}
+			};
+			fUpdateJob.setSystem(true);
+		}
+
 		@Override
 		public void elementChanged(ElementChangedEvent event) {
-			if (fViewer == null)
+			// Model notifications may arrive on a worker thread, including before
+			// the first viewer input has been published. Only read the shared handle.
+			IJavaElement input= fTrackedInput;
+			if (input == null)
 				return;
 
-			Object input= fViewer.getInput();
-			if (!(input instanceof IJavaElement))
-				return;
+			IJavaElementDelta delta= event.getDelta();
+			boolean classpathChanged= hasClasspathChange(delta, input.getJavaProject());
+			if (classpathChanged)
+				fClasspathGeneration.incrementAndGet();
+			if (classpathChanged || getChangedParentElement(input, delta) != null)
+				fUpdateJob.schedule();
+		}
 
-			if (fRunnable != null)
-				return;
+		void dispose() {
+			fUpdateJob.cancel();
+		}
 
-			final IJavaElement changedElement= getChangedParentElement((IJavaElement) input, event.getDelta());
-			if (changedElement == null)
-				return;
-
-			fRunnable= () -> {
-				if (fViewer == null)
-					return;
-
-				Object newInput= getCurrentInput();
-				if (newInput instanceof IJavaElement)
-					newInput= getInput((IJavaElement) newInput);
-
-				fViewer.setInput(newInput);
-				fRunnable= null;
-			};
-			fViewer.getControl().getDisplay().asyncExec(fRunnable);
+		private boolean hasClasspathChange(IJavaElementDelta delta, IJavaProject project) {
+			if (project == null)
+				return false;
+			IJavaElement element= delta.getElement();
+			int flags= delta.getFlags();
+			if (element instanceof IJavaProject) {
+				if (!project.equals(element))
+					return false;
+				if (delta.getKind() != IJavaElementDelta.CHANGED
+						|| (flags & (IJavaElementDelta.F_CLASSPATH_CHANGED | IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED
+								| IJavaElementDelta.F_OPENED | IJavaElementDelta.F_CLOSED)) != 0)
+					return true;
+			} else if (element instanceof IPackageFragmentRoot) {
+				return project.equals(element.getJavaProject()) && (delta.getKind() != IJavaElementDelta.CHANGED
+						|| (flags & (IJavaElementDelta.F_ADDED_TO_CLASSPATH | IJavaElementDelta.F_REMOVED_FROM_CLASSPATH
+								| IJavaElementDelta.F_REORDER | IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED)) != 0);
+			} else if (!(element instanceof IJavaModel)) {
+				return false;
+			}
+			for (IJavaElementDelta child : delta.getAffectedChildren()) {
+				if (hasClasspathChange(child, project))
+					return true;
+			}
+			return false;
 		}
 
 		/**
@@ -556,6 +598,18 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	private ISelection fEditorSelection;
 	private ElementChangeListener fElementChangeListener;
 
+	// The model listener also runs on worker threads. Do not access viewers there.
+	private volatile IJavaElement fTrackedInput;
+	private final AtomicLong fClasspathGeneration= new AtomicLong();
+
+	// Accessed only on the UI thread. Keep the latest input while initialization runs.
+	private IJavaProject fInitializedProject;
+	private long fInitializedClasspathGeneration;
+	private IJavaProject fInitializingProject;
+	private Job fInitializationJob;
+	private Object fPendingInput;
+	private boolean fPendingRefresh;
+
 
 	public JavaEditorBreadcrumb(JavaEditor javaEditor) {
 		super(javaEditor);
@@ -603,7 +657,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		fBreadcrumbActionGroup= new JavaEditorBreadcrumbActionGroup(getJavaEditor(), fViewer);
 
-		fElementChangeListener= new ElementChangeListener();
+		fElementChangeListener= new ElementChangeListener(composite.getDisplay());
 		JavaCore.addElementChangedListener(fElementChangeListener);
 
 		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
@@ -764,6 +818,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 */
 	@Override
 	public void dispose() {
+		fTrackedInput= null;
+		if (fElementChangeListener != null)
+			fElementChangeListener.dispose();
+		cancelInitialization();
+		fInitializedProject= null;
 		super.dispose();
 
 		if (fViewer != null) {
@@ -786,18 +845,124 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 */
 	@Override
 	public void setInput(Object element) {
-		if (element == null) {
-			element= getCurrentInput();
-			if (element instanceof IType) {
-				element= ((IType) element).getDeclaringType();
+		updateInput(element, false);
+	}
+
+	private void updateInput(Object element, boolean refresh) {
+		if (fViewer == null || fViewer.getControl().isDisposed())
+			return;
+		// getCurrentInput() may reconcile the working copy. Obtain just the editor
+		// input handle until the project is ready, also for null-input refreshes.
+		IJavaElement requestedInput= element instanceof IJavaElement javaElement ? javaElement
+				: element == null ? SelectionConverter.getInput(getJavaEditor()) : null;
+		fTrackedInput= requestedInput;
+		if (requestedInput != null) {
+			IJavaProject project= requestedInput.getJavaProject();
+			if (project != null && (!project.equals(fInitializedProject) || !project.isOpen()
+					|| fInitializedClasspathGeneration != fClasspathGeneration.get())) {
+				IStatus result= fInitializationJob == null ? null : fInitializationJob.getResult();
+				// A new request must not be discarded by a cancelled job's pending UI callback.
+				if (!project.equals(fInitializingProject) || result != null && !result.isOK()) {
+					cancelInitialization();
+					initializeProject(project);
+				}
+				fPendingInput= element;
+				fPendingRefresh|= refresh;
+				return;
 			}
 		}
 
-		if (element instanceof IJavaElement) {
-			super.setInput(getInput((IJavaElement) element));
-		} else {
-			super.setInput(element);
+		cancelInitialization();
+		if (element == null) {
+			element= getCurrentInput();
+			if (!refresh && element instanceof IType type)
+				element= type.getDeclaringType();
 		}
+		Object input= element instanceof IJavaElement javaElement ? getInput(javaElement) : element;
+		if (input instanceof IJavaElement javaElement)
+			fTrackedInput= javaElement;
+		if (refresh)
+			fViewer.setInput(input);
+		else
+			super.setInput(input);
+	}
+
+	private void initializeProject(IJavaProject project) {
+		long generation= fClasspathGeneration.get();
+		Display display= fViewer.getControl().getDisplay();
+		Job job= new Job(JavaUIMessages.JavaPlugin_initializing_ui) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					if (monitor.isCanceled())
+						return Status.CANCEL_STATUS;
+					// Labels, icons and build-path checks also access the classpath. Prepare
+					// the model before ANY of them run while restoring the editor's UI.
+					project.getResolvedClasspath(true);
+					if (monitor.isCanceled())
+						return Status.CANCEL_STATUS;
+					project.open(monitor);
+					return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+				} catch (JavaModelException e) {
+					if (monitor.isCanceled())
+						return Status.CANCEL_STATUS;
+					JavaPlugin.log(e);
+					return e.getStatus();
+				}
+			}
+
+			@Override
+			public boolean belongsTo(Object family) {
+				return family == JavaEditorBreadcrumb.this || JavaUI.ID_PLUGIN.equals(family);
+			}
+		};
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				UIJob update= new UIJob(display, JavaUIMessages.JavaPlugin_initializing_ui) {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						if (fViewer == null || fViewer.getControl().isDisposed() || fInitializationJob != job)
+							return Status.CANCEL_STATUS;
+						fInitializationJob= null;
+						fInitializingProject= null;
+						Object input= fPendingInput;
+						boolean refresh= fPendingRefresh;
+						fPendingInput= null;
+						fPendingRefresh= false;
+						if (event.getResult().isOK()) {
+							fInitializedProject= project;
+							// A classpath delta arriving during the job or before this UI
+							// callback requires another background pass, not stale labels.
+							fInitializedClasspathGeneration= generation;
+							updateInput(input, refresh);
+						}
+						return Status.OK_STATUS;
+					}
+
+					@Override
+					public boolean belongsTo(Object family) {
+						return family == JavaEditorBreadcrumb.this || JavaUI.ID_PLUGIN.equals(family);
+					}
+				};
+				update.setSystem(true);
+				update.schedule();
+			}
+		});
+		fInitializingProject= project;
+		fInitializationJob= job;
+		job.setPriority(Job.DECORATE);
+		job.schedule();
+	}
+
+	private void cancelInitialization() {
+		Job job= fInitializationJob;
+		fInitializationJob= null;
+		fInitializingProject= null;
+		fPendingInput= null;
+		fPendingRefresh= false;
+		if (job != null)
+			job.cancel();
 	}
 
 	/*
