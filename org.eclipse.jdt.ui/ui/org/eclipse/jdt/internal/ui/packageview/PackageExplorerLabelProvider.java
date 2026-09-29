@@ -19,15 +19,18 @@ import java.util.Map;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.ui.IWorkingSet;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -79,6 +82,16 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 			} else if (parent instanceof IFolder) { // bug 152735
 				return getNameDelta((IFolder) parent, fragment);
 			}
+		} else if (!fIsFlatLayout && element instanceof IFolder) {
+			IFolder folder= (IFolder) element;
+			try {
+				Object parent= fContentProvider.getHierarchicalFolderParent(folder);
+				if (!folder.getParent().equals(parent)) {
+					return getNameDelta(parent, folder);
+				}
+			} catch (CoreException e) {
+				// fall through
+			}
 		} else if (element instanceof IWorkingSet) {
 			return ((IWorkingSet) element).getLabel();
 		}
@@ -116,6 +129,22 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 			return buf.toString();
 		}
 		return fragment.getElementName();
+	}
+
+	private String getNameDelta(Object parent, IFolder folder) {
+		IPath prefix;
+		if (parent instanceof IResource) {
+			prefix= ((IResource) parent).getFullPath();
+		} else if (parent instanceof IJavaElement) {
+			prefix= ((IJavaElement) parent).getPath();
+		} else {
+			return folder.getName();
+		}
+		IPath fullPath= folder.getFullPath();
+		if (prefix.isPrefixOf(fullPath)) {
+			return fullPath.makeRelativeTo(prefix).toString();
+		}
+		return folder.getName();
 	}
 
 	@Override

@@ -6178,6 +6178,7 @@
 		<viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
 			<includes>
 				<contentExtension pattern="org.eclipse.jdt.java.ui.javaContent" />
+				<contentExtension pattern="org.eclipse.jdt.java.ui.javaResourceLabels" />
 				<contentExtension pattern="org.eclipse.jdt.java.ui.filters.*" />
 				<contentExtension pattern="org.eclipse.jdt.java.ui.javaLinkHelper" />
 			</includes>
@@ -6186,6 +6187,28 @@
 
 	<extension
 			point="org.eclipse.ui.navigator.navigatorContent">
+		<navigatorContent
+				activeByDefault="true"
+				id="org.eclipse.jdt.java.ui.javaResourceLabels"
+				labelProvider="org.eclipse.jdt.internal.ui.navigator.JavaResourceNavigatorLabelProvider"
+				name="%javaResourceLabelsContentName"
+				priority="highest">
+			<triggerPoints>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFolder" />
+					<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
+				</and>
+			</triggerPoints>
+			<possibleChildren>
+				<and>
+					<instanceof value="org.eclipse.core.resources.IFolder" />
+					<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
+				</and>
+			</possibleChildren>
+			<override
+					policy="InvokeAlwaysRegardlessOfSuppressedExt"
+					suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>
+		</navigatorContent>
 		<navigatorContent
 				activeByDefault="true"
 				contentProvider="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorContentProvider"

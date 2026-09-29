@@ -60,6 +60,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private static final String PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= PreferenceConstants.APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW;
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
+	private static final String PREF_FOLD_RESOURCE_FOLDERS_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_RESOURCE_FOLDERS_IN_PACKAGE_EXPLORER;
 	private static final String PREF_SORT_LIBRARY_ENTRIES_BY_NAME= PreferenceConstants.APPEARANCE_SORT_LIBRARY_ENTRIES_BY_NAME;
 	private static final String PREF_CATEGORY= PreferenceConstants.APPEARANCE_CATEGORY;
 	private static final String DECORATE_TEST_CODE_CONTAINER_ICONS= PreferenceConstants.DECORATE_TEST_CODE_CONTAINER_ICONS;
@@ -74,6 +75,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private StringDialogField fPackageNamePattern;
 	private StringDialogField fAbbreviatePackageNamePattern;
 	private SelectionButtonDialogField fFoldPackagesInPackageExplorer;
+	private SelectionButtonDialogField fFoldResourceFoldersInPackageExplorer;
 	private SelectionButtonDialogField fShowMethodTypeParameters;
 	private SelectionButtonDialogField fSortLibraryEntriesByName;
 
@@ -110,6 +112,10 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fFoldPackagesInPackageExplorer= new SelectionButtonDialogField(SWT.CHECK);
 		fFoldPackagesInPackageExplorer.setDialogFieldListener(listener);
 		fFoldPackagesInPackageExplorer.setLabelText(PreferencesMessages.AppearancePreferencePage_foldEmptyPackages);
+
+		fFoldResourceFoldersInPackageExplorer= new SelectionButtonDialogField(SWT.CHECK);
+		fFoldResourceFoldersInPackageExplorer.setDialogFieldListener(listener);
+		fFoldResourceFoldersInPackageExplorer.setLabelText(PreferencesMessages.AppearancePreferencePage_foldEmptyResourceFolders);
 
 		fSortLibraryEntriesByName= new SelectionButtonDialogField(SWT.CHECK);
 		fSortLibraryEntriesByName.setDialogFieldListener(listener);
@@ -148,6 +154,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		doDialogFieldChanged(fAbbreviatePackageNames);
 		fAbbreviatePackageNamePattern.setEnabled(fAbbreviatePackageNames.isSelected());
 		fFoldPackagesInPackageExplorer.setSelection(prefs.getBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
+		fFoldResourceFoldersInPackageExplorer.setSelection(prefs.getBoolean(PREF_FOLD_RESOURCE_FOLDERS_IN_PACKAGE_EXPLORER));
 		fSortLibraryEntriesByName.setSelection(prefs.getBoolean(PREF_SORT_LIBRARY_ENTRIES_BY_NAME));
 	}
 
@@ -182,6 +189,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowCategory.doFillIntoGrid(result, nColumns);
 		fShowMembersInPackageView.doFillIntoGrid(result, nColumns);
 		fFoldPackagesInPackageExplorer.doFillIntoGrid(result, nColumns);
+		fFoldResourceFoldersInPackageExplorer.doFillIntoGrid(result, nColumns);
 		fDecorateTestCodeContainerIcons.doFillIntoGrid(result, nColumns);
 		fSortLibraryEntriesByName.doFillIntoGrid(result, nColumns);
 
@@ -274,6 +282,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setValue(PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW, fAbbreviatePackageNamePattern.getText());
 		prefs.setValue(PREF_ABBREVIATE_PACKAGE_NAMES, fAbbreviatePackageNames.isSelected());
 		prefs.setValue(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fFoldPackagesInPackageExplorer.isSelected());
+		prefs.setValue(PREF_FOLD_RESOURCE_FOLDERS_IN_PACKAGE_EXPLORER, fFoldResourceFoldersInPackageExplorer.isSelected());
 		prefs.setValue(PREF_SORT_LIBRARY_ENTRIES_BY_NAME, fSortLibraryEntriesByName.isSelected());
 		JavaPlugin.flushInstanceScope();
 		return super.performOk();
@@ -296,8 +305,8 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fAbbreviatePackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW));
 		fAbbreviatePackageNames.setSelection(prefs.getDefaultBoolean(PREF_ABBREVIATE_PACKAGE_NAMES));
 		fFoldPackagesInPackageExplorer.setSelection(prefs.getDefaultBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
+		fFoldResourceFoldersInPackageExplorer.setSelection(prefs.getDefaultBoolean(PREF_FOLD_RESOURCE_FOLDERS_IN_PACKAGE_EXPLORER));
 		fSortLibraryEntriesByName.setSelection(prefs.getDefaultBoolean(PREF_SORT_LIBRARY_ENTRIES_BY_NAME));
 		super.performDefaults();
 	}
 }
-

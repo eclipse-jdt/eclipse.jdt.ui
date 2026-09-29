@@ -30,6 +30,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
 import org.eclipse.ui.navigator.ICommonLabelProvider;
 import org.eclipse.ui.navigator.IExtensionStateModel;
+import org.eclipse.ui.navigator.INavigatorContentExtension;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -74,8 +75,9 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 	}
 	@Override
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
-		fStateModel = commonContentExtensionSite.getExtensionStateModel();
-		fContentProvider = (PackageExplorerContentProvider) commonContentExtensionSite.getExtension().getContentProvider();
+		INavigatorContentExtension extension= getContentExtension(commonContentExtensionSite);
+		fStateModel= extension.getStateModel();
+		fContentProvider= (PackageExplorerContentProvider) extension.getContentProvider();
 		delegeteLabelProvider = createLabelProvider();
 
 		delegeteLabelProvider.setIsFlatLayout(fStateModel
@@ -90,6 +92,10 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 
 		};
 		fStateModel.addPropertyChangeListener(fLayoutPropertyListener);
+	}
+
+	INavigatorContentExtension getContentExtension(ICommonContentExtensionSite commonContentExtensionSite) {
+		return commonContentExtensionSite.getExtension();
 	}
 
 	@Override

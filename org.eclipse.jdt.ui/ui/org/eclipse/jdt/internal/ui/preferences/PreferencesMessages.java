@@ -327,6 +327,7 @@ public final class PreferencesMessages extends NLS {
 	public static String AppearancePreferencePage_packageNameCompressionPattern_error_isEmpty;
 	public static String AppearancePreferencePage_packageNameAbbreviationPattern_error_isInvalid;
 	public static String AppearancePreferencePage_foldEmptyPackages;
+	public static String AppearancePreferencePage_foldEmptyResourceFolders;
 	public static String AppearancePreferencePage_sortLibraryEntries;
 	public static String CodeFormatterPreferencePage_title;
 	public static String SourceAttachmentPropertyPage_not_supported;
