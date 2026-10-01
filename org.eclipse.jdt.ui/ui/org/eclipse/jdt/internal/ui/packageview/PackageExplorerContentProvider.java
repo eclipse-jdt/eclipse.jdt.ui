@@ -64,6 +64,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 /**
@@ -539,8 +540,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return pack;
 	}
 
-	private static boolean isEmpty(IPackageFragment fragment) throws JavaModelException {
-		return !fragment.containsJavaResources() && fragment.getNonJavaResources().length == 0;
+	private boolean isEmpty(IPackageFragment fragment) throws JavaModelException {
+		return !fragment.containsJavaResources() && !EmptyPackageFilter.hasUnfilteredResources(fViewer, fragment);
 	}
 
 	// ------ delta processing ------

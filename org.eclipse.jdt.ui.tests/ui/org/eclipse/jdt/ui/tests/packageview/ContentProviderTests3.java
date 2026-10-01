@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 
 import org.junit.jupiter.api.AfterEach;
@@ -54,6 +55,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter;
+import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 
@@ -149,6 +152,22 @@ public class ContentProviderTests3{
 		Object[] expectedChildren= new Object[]{fPack1,fPack2,fPack3, fRoot1.getPackageFragment("")};//$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fRoot1);
 		assertTrue(compareArrays(children, expectedChildren), "Wrong children found for PackageFragmentRoot with folding");	//$NON-NLS-1$
+	}
+
+	@Test
+	public void testFilteredResourceDoesNotPreventPackageFolding() throws Exception {
+		IPackageFragment parent= fRoot1.getPackageFragment("pack3.pack5"); //$NON-NLS-1$
+		IFile hiddenFile= ((IFolder) parent.getResource()).getFile(".DS_Store"); //$NON-NLS-1$
+		hiddenFile.create(new ByteArrayInputStream(new byte[0]), true, null);
+		NamePatternFilter filter= new NamePatternFilter();
+		filter.setPatterns(new String[] { ".*" }); //$NON-NLS-1$
+		fMyPart.getTreeViewer().addFilter(filter);
+
+		assertFalse(filter.select(fMyPart.getTreeViewer(), parent, hiddenFile), "Resource was not filtered"); //$NON-NLS-1$
+		assertFalse(EmptyPackageFilter.hasUnfilteredResources(fMyPart.getTreeViewer(), parent), "Package has an unfiltered resource"); //$NON-NLS-1$
+		Object[] children= fProvider.getChildren(fPack3);
+
+		assertTrue(compareArrays(children, new Object[] { fPack4, fPack6 }), "Filtered resource prevented package folding"); //$NON-NLS-1$
 	}
 
 	@Test
