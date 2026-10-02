@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,12 +15,21 @@
 package org.eclipse.jdt.junit.tests;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +39,11 @@ import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
+import org.eclipse.jdt.junit.model.ITestRunSession;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
+
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -50,21 +63,22 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
-import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 
 public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 
@@ -327,18 +341,33 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		jm.addJobChangeListener(jobListener);
 
 		TestSessionListener sessionListener = new TestSessionListener();
-		TestRunSessionListener runSessionListener = new TestRunSessionListener();
-		JUnitCorePlugin.getModel().addTestRunSessionListener(runSessionListener);
+		AtomicReference<TestRunSession> startedSession= new AtomicReference<>();
+		TestRunListener runSessionListener= new TestRunListener() {
+			@Override
+			public void sessionStarted(ITestRunSession session) {
+				if (session instanceof TestRunSession testRunSession && testRunSession.getLaunch() != null
+						&& configuration.equals(testRunSession.getLaunch().getLaunchConfiguration())) {
+					startedSession.set(testRunSession);
+				}
+			}
+		};
+		JUnitCore.addTestRunListener(runSessionListener);
 		try {
-			configuration.launch(ILaunchManager.RUN_MODE, null);
-			waitForCondition(launchesListener.fLaunchChanged::get, 30 * 1000, 1000);
+			// This test needs a view, independently of preceding tests and show-on-error preferences.
+			assertNotNull(JUnitPlugin.showTestRunnerViewPartInActivePage());
+			ILaunch launch= configuration.launch(ILaunchManager.RUN_MODE, null);
+			// A launch change only announces the port; the remote VM may not have started JUnit yet.
+			// Keep the job-scheduling timeout separate from this session-start prerequisite.
+			assertTrue("Unexpected timeout on JUnit session start",
+					waitForCondition(() -> startedSession.get() != null, 30 * 1000, 100));
+			assertSame("Expected the session belonging to this launch", launch, startedSession.get().getLaunch());
 
 			long scheduledJobsCount = jobListener.scheduledCount.get();
 			boolean jobCountIncrease= waitForCondition(() -> jobListener.scheduledCount.get() > scheduledJobsCount, 5 * 1000, 100);
 			assertTrue("Expected JUnit update jobs to be scheduled", jobCountIncrease);
 
 			// register the session listener here, so that its hopefully the last listener to be notified of stopping
-			runSessionListener.fTestRunSession.addTestSessionListener(sessionListener);
+			startedSession.get().addTestSessionListener(sessionListener);
 			terminateLaunches();
 			boolean terminatedLaunch= waitForCondition(launchesListener.fLaunchHasTerminated::get, 30 * 1000, 1000);
 			assertTrue("Unexpected timeout on JUnit launch terminate", terminatedLaunch);
@@ -350,7 +379,10 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			assertFalse("Expected no new JUnit update jobs to be scheduled", jobCountIncrease);
 		} finally {
 			jm.removeJobChangeListener(jobListener);
-			JUnitCorePlugin.getModel().removeTestRunSessionListener(runSessionListener);
+			JUnitCore.removeTestRunListener(runSessionListener);
+			TestRunSession session= startedSession.get();
+			if (session != null)
+				session.removeTestSessionListener(sessionListener);
 			terminateLaunches();
 			cleanUp(configuration, launchesListener);
 		}
@@ -382,23 +414,6 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			if (jobName.equals(name)) {
 				scheduledCount.incrementAndGet();
 			}
-		}
-	}
-
-	private static class TestRunSessionListener implements ITestRunSessionListener  {
-
-		private TestRunSession fTestRunSession;
-
-		public TestRunSessionListener() {
-		}
-
-		@Override
-		public void sessionAdded(TestRunSession testRunSession) {
-			fTestRunSession= testRunSession;
-		}
-
-		@Override
-		public void sessionRemoved(TestRunSession testRunSession) {
 		}
 	}
 
@@ -451,5 +466,117 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		public boolean acceptsSwapToDisk() {
 			return false;
 		}
+	}
+
+	@Test
+	public void testRetiredSessionTerminationDoesNotStopActiveSession() throws Exception {
+		assertSessionNotification(ITestSessionListener::sessionTerminated, true);
+	}
+
+	@Test
+	public void testRetiredSessionStopDoesNotStopActiveSession() throws Exception {
+		assertSessionNotification(listener -> listener.sessionStopped(0), true);
+	}
+
+	@Test
+	public void testRetiredSessionEndDoesNotStopActiveSession() throws Exception {
+		assertSessionNotification(listener -> listener.sessionEnded(0), true);
+	}
+
+	@Test
+	public void testActiveSessionTerminationStopsUpdateJobs() throws Exception {
+		assertSessionNotification(ITestSessionListener::sessionTerminated, false);
+	}
+
+	@Test
+	public void testActiveSessionStopStopsUpdateJobs() throws Exception {
+		assertSessionNotification(listener -> listener.sessionStopped(0), false);
+	}
+
+	@Test
+	public void testActiveSessionEndStopsUpdateJobs() throws Exception {
+		assertSessionNotification(listener -> listener.sessionEnded(0), false);
+	}
+
+	private void assertSessionNotification(Consumer<ITestSessionListener> notification, boolean retired) throws Exception {
+		TestRunnerViewPart view= JUnitPlugin.showTestRunnerViewPartInActivePage();
+		assertNotNull(view);
+		DisplayHelper.driveEventQueue(Display.getCurrent());
+		Field activeSessionField= accessibleField(TestRunnerViewPart.class, "fTestRunSession");
+		Field listenerField= accessibleField(TestRunnerViewPart.class, "fTestSessionListener");
+		Field jobField= accessibleField(TestRunnerViewPart.class, "fUpdateJob");
+		Field runningField= accessibleField(TestRunSession.class, "fIsRunning");
+		Field dirtyListenerField= accessibleField(TestRunnerViewPart.class, "fDirtyListener");
+		Object previousDirtyListener= dirtyListenerField.get(view);
+		Method activate= TestRunnerViewPart.class.getDeclaredMethod("setActiveTestRunSession", TestRunSession.class);
+		activate.setAccessible(true);
+		Object previous= activeSessionField.get(view);
+		TestRunSession oldSession= new TestRunSession("retired-session", fProject);
+		TestRunSession currentSession= new TestRunSession("active-session", fProject);
+		runningField.setBoolean(oldSession, true);
+		runningField.setBoolean(currentSession, true);
+		try {
+			activate.invoke(view, oldSession);
+			ITestSessionListener oldListener= (ITestSessionListener) listenerField.get(view);
+			assertNotNull(oldListener);
+			activate.invoke(view, currentSession);
+			ITestSessionListener currentListener= (ITestSessionListener) listenerField.get(view);
+			Object currentJob= jobField.get(view);
+			assertNotNull(currentListener);
+			assertNotNull(currentJob);
+			assertNotSame(oldListener, currentListener);
+
+			// A notifier may retain an old ListenerList snapshot while the UI
+			// switches sessions. Deliver that event on a notification thread.
+			ITestSessionListener recipient= retired ? oldListener : currentListener;
+			deliverSessionNotification(notification, recipient);
+			assertSame(currentSession, activeSessionField.get(view));
+			if (retired) {
+				assertSame("A retired session must not detach the active session listener", currentListener, listenerField.get(view));
+				assertSame("A retired session must not stop the active session's update job", currentJob, jobField.get(view));
+				assertTrue("The active update job must remain schedulable", ((Job) currentJob).shouldSchedule());
+			} else {
+				assertNull("The active session must still detach its own listener", listenerField.get(view));
+				assertNull("The active session must still stop its own update job", jobField.get(view));
+				assertFalse("The stopped update job must not reschedule", ((Job) currentJob).shouldSchedule());
+			}
+		} finally {
+			Object dirtyListener= dirtyListenerField.get(view);
+			if (dirtyListener != previousDirtyListener) {
+				if (dirtyListener != null)
+					JavaCore.removeElementChangedListener((IElementChangedListener) dirtyListener);
+				dirtyListenerField.set(view, previousDirtyListener);
+				if (previousDirtyListener != null)
+					JavaCore.addElementChangedListener((IElementChangedListener) previousDirtyListener);
+			}
+			runningField.setBoolean(oldSession, false);
+			runningField.setBoolean(currentSession, false);
+			activate.invoke(view, previous);
+		}
+	}
+
+	private static void deliverSessionNotification(Consumer<ITestSessionListener> notification, ITestSessionListener recipient) throws Exception {
+		FutureTask<Void> delivered= new FutureTask<>(() -> {
+			notification.accept(recipient);
+			return null;
+		});
+		Thread notifier= new Thread(delivered, "JUnit view session notification");
+		notifier.setDaemon(true);
+		try {
+			notifier.start();
+			assertTrue("The session notification must complete", waitForCondition(delivered::isDone, 10000, 10));
+			delivered.get();
+		} finally {
+			// Keep dispatching pending syncExec work even after an assertion fails.
+			// The worker must finish before the previous view session is restored.
+			assertTrue("The notification thread must finish before restoring the view",
+					waitForCondition(() -> !notifier.isAlive(), 10000, 10));
+		}
+	}
+
+	private static Field accessibleField(Class<?> declaringClass, String name) throws ReflectiveOperationException {
+		Field field= declaringClass.getDeclaredField(name);
+		field.setAccessible(true);
+		return field;
 	}
 }
