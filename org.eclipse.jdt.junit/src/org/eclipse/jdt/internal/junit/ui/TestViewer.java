@@ -516,11 +516,11 @@ public class TestViewer {
 
 	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
 		String testName= testSuite.getTestName();
-		if (testSuite.getDisplayName() != null && testName.indexOf('(') < 0) {
+		if (testName.indexOf('(') < 0) {
 			IJavaProject project= fTestRunnerPart.getLaunchedProject();
 			try {
-				// A distinct display name can describe a suite whose source is not
-				// its first child. Prefer that source before the group fallback.
+				// A suite's source need not be its first child, even when its display
+				// name equals its class name. Prefer it before the group fallback.
 				String className= testSuite.getSuiteTypeName();
 				if (project != null && project.findType(className) != null) {
 					return new OpenTestAction(fTestRunnerPart, className);
