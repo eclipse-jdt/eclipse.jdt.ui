@@ -1318,6 +1318,15 @@
             %coloredLabels.writeaccess_highlight.description
          </description>
       </colorDefinition>
+      <colorDefinition
+            label="%packageExplorerHighlightColor.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="COLOR_LIST_FOREGROUND"
+            id="org.eclipse.jdt.ui.packageExplorerHighlightColor">
+         <description>
+            %packageExplorerHighlightColor.description
+         </description>
+      </colorDefinition>
    </extension>
 
 

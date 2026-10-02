@@ -142,4 +142,9 @@ public interface IJavaThemeConstants {
 	 */
 	String PROPERTIES_FILE_COLORING_COMMENT= ID_PREFIX + PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT;
 
+	/**
+	 * Theme constant for the color used to highlight resources in the Package Explorer.
+	 */
+	String PACKAGE_EXPLORER_HIGHLIGHT_COLOR= ID_PREFIX + PreferenceConstants.PACKAGE_EXPLORER_HIGHLIGHT_COLOR;
+
 }
