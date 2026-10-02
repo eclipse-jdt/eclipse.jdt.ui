@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit4.runner;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -24,10 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.runner.Description;
 import org.junit.runner.Request;
+import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
+import org.junit.runners.AllTests;
+import org.junit.runners.model.RunnerBuilder;
 
 import org.eclipse.jdt.internal.junit.runner.ITestLoader;
 import org.eclipse.jdt.internal.junit.runner.ITestReference;
@@ -188,10 +193,66 @@ public class JUnit4TestLoader implements ITestLoader {
 	}
 
 	private ITestReference createUnfilteredTest(Class<?> clazz, String[] failureNames) {
-		Request request= sortByFailures(Request.aClass(clazz), failureNames);
+		Runner suiteRunner= new RunnerBuilder() {
+			@Override
+			public Runner runnerForClass(Class<?> testClass) throws Throwable {
+				Method suiteMethod= getLegacySuiteMethod(testClass);
+				if (suiteMethod == null) {
+					return null;
+				}
+				if (!Modifier.isStatic(suiteMethod.getModifiers())) {
+					throw new Exception(testClass.getName() + ".suite() must be static"); //$NON-NLS-1$
+				}
+				try {
+					return new LegacySuiteRunner((Test) suiteMethod.invoke(null));
+				} catch (InvocationTargetException e) {
+					throw e.getCause();
+				}
+			}
+		}.safeRunnerForClass(clazz);
+		Request request= suiteRunner == null ? Request.aClass(clazz) : Request.runner(suiteRunner);
+		request= sortByFailures(request, failureNames);
 		Runner runner= request.getRunner();
 		Description description= runner.getDescription();
-		return new JUnit4TestReference(runner, description);
+		Test legacyTest= runner instanceof LegacySuiteRunner ? ((LegacySuiteRunner) runner).fTest : null;
+		return new JUnit4TestReference(runner, description, clazz, legacyTest);
+	}
+
+	private static Method getLegacySuiteMethod(Class<?> testClass) {
+		if (testClass.getAnnotation(Ignore.class) != null) {
+			return null;
+		}
+		// Match JUnit's runner precedence, including enclosing non-static classes.
+		// Custom runners remain responsible for constructing their own tests.
+		for (Class<?> current= testClass; current != null;) {
+			RunWith annotation= current.getAnnotation(RunWith.class);
+			if (annotation != null) {
+				if (annotation.value() != AllTests.class) {
+					return null;
+				}
+				break;
+			}
+			current= current.isMemberClass() && !Modifier.isStatic(current.getModifiers()) ? current.getEnclosingClass() : null;
+		}
+		try {
+			return testClass.getMethod("suite"); //$NON-NLS-1$
+		} catch (NoSuchMethodException | SecurityException e) {
+			return null;
+		}
+	}
+
+	// JUnit's public Runner API does not expose the adapted JUnit 3 Test. Retain
+	// it when constructing the same adapter used by SuiteMethod, without invoking
+	// suite() twice or reflectively accessing private JUnit fields.
+	// Keep the required internal JUnit dependency confined to this adapter.
+	@SuppressWarnings("restriction")
+	private static class LegacySuiteRunner extends org.junit.internal.runners.JUnit38ClassRunner {
+		final Test fTest;
+
+		LegacySuiteRunner(Test test) {
+			super(test);
+			fTest= test;
+		}
 	}
 
 	private Request sortByFailures(Request request, String[] failureNames) {
