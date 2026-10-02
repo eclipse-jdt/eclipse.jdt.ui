@@ -16,9 +16,13 @@ package org.eclipse.jdt.junit.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,14 +50,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.model.ITestRunListener2;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
+import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
+import org.eclipse.jdt.internal.junit.runner.ITestReference;
+import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 import org.eclipse.jdt.internal.junit.ui.TestSessionLabelProvider;
 import org.eclipse.jdt.internal.junit.ui.TestViewer;
+import org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader;
 
 public class JUnitSuiteLabelTest extends AbstractTestRunListenerTest {
 
@@ -65,6 +74,7 @@ public class JUnitSuiteLabelTest extends AbstractTestRunListenerTest {
 	private TestRunnerViewPart fView;
 	private TestRunSession fPreviousSession;
 	private TestRunSession fSession;
+	private ITestRunListener2 fProtocol;
 	private IType fSuiteType;
 	private IType fTestType;
 	private boolean fViewWasOpen;
@@ -92,6 +102,9 @@ public class JUnitSuiteLabelTest extends AbstractTestRunListenerTest {
 	@After
 	public void restoreView() throws Exception {
 		if (fView != null) {
+			if (fProtocol != null) {
+				fProtocol.testRunEnded(0);
+			}
 			DisplayHelper.driveEventQueue(Display.getCurrent());
 			activate(fPreviousSession);
 			fView.setLayoutMode(fPreviousLayout);
@@ -148,6 +161,59 @@ public class JUnitSuiteLabelTest extends AbstractTestRunListenerTest {
 		TestSuiteElement suite= suite("pack.NamedSuite", "Readable suite (with punctuation)"); //$NON-NLS-1$ //$NON-NLS-2$
 		new TestCaseElement(suite, "child", "testExample(pack.SampleTest)", null, false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 		assertOpens(suite, fSuiteType);
+	}
+
+	@Test
+	public void testOpeningClassNamedSuiteUsesItsOwnClassBeforeItsFirstChild() throws Exception {
+		startRuntimeSession(1);
+		TestSuiteElement suite= (TestSuiteElement) addTreeEntry("suite,pack.NamedSuite,true,1,false,-1,pack.NamedSuite,,"); //$NON-NLS-1$
+		assertNull(suite.getDisplayName());
+		addTreeEntry("child,testExample(pack.SampleTest),false,1,false,-1,testExample(pack.SampleTest),,"); //$NON-NLS-1$
+		assertOpens(suite, fSuiteType);
+	}
+
+	@Test
+	public void testEmptySuiteRuntimeTreeOpensItsClass() throws Exception {
+		assertEmptyRuntimeSuiteOpens(JUnit4SuiteSourceTest.EmptySuite.class);
+	}
+
+	@Test
+	public void testMethodLikeEmptySuiteRuntimeTreeOpensItsClass() throws Exception {
+		assertEmptyRuntimeSuiteOpens(JUnit4SuiteSourceTest.MethodLikeEmptySuite.class);
+	}
+
+	private void assertEmptyRuntimeSuiteOpens(Class<?> suiteClass) throws Exception {
+		IType outer= createType("package org.eclipse.jdt.junit.tests; public class JUnit4SuiteSourceTest { public static class " //$NON-NLS-1$
+				+ suiteClass.getSimpleName() + " {} }", "org.eclipse.jdt.junit.tests", "JUnit4SuiteSourceTest.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		ITestReference test= new JUnit4TestLoader().loadTests(new Class<?>[] { suiteClass }, null, null, null, null, null, null)[0];
+		List<String> entries= new ArrayList<>();
+		test.sendTree(new RemoteTestRunner() {
+			@Override
+			protected void notifyTestTreeEntry(String treeEntry) {
+				entries.add(treeEntry);
+			}
+		});
+		assertEquals(1, entries.size());
+		startRuntimeSession(test.countTestCases());
+		TestElement element= addTreeEntry(entries.get(0));
+		assertTrue("The runtime tree must create a suite in the session model", element instanceof TestSuiteElement); //$NON-NLS-1$
+		TestSuiteElement suite= (TestSuiteElement) element;
+		assertEquals(0, suite.getChildren().length);
+		assertEquals(0, test.countTestCases());
+		assertOpens(suite, outer.getType(suiteClass.getSimpleName()));
+	}
+
+	private void startRuntimeSession(int count) throws Exception {
+		Class<?> notifier= Class.forName(TestRunSession.class.getName() + "$TestSessionNotifier"); //$NON-NLS-1$
+		Constructor<?> constructor= notifier.getDeclaredConstructor(TestRunSession.class);
+		constructor.setAccessible(true);
+		fProtocol= (ITestRunListener2) constructor.newInstance(fSession);
+		fProtocol.testRunStarted(count);
+	}
+
+	private TestElement addTreeEntry(String entry) {
+		fProtocol.testTreeEntry(entry);
+		return fSession.getTestElement(entry.substring(0, entry.indexOf(',')));
 	}
 
 	@Test

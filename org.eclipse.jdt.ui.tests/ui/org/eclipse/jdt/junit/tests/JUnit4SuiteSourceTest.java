@@ -14,17 +14,21 @@
 package org.eclipse.jdt.junit.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.Request;
 import org.junit.runner.RunWith;
 import org.junit.runners.AllTests;
+import org.junit.runners.BlockJUnit4ClassRunner;
 
 import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
@@ -34,6 +38,7 @@ import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
 import org.eclipse.jdt.internal.junit4.runner.JUnit4Identifier;
 import org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader;
 
+import junit.extensions.TestSetup;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -57,9 +62,37 @@ public class JUnit4SuiteSourceTest {
 
 	@Test
 	public void testEmptySuiteIdentifiesItsClass() {
-		ITestIdentifier root= tree(load(EmptySuite.class, null)).get(0);
+		ITestReference test= load(EmptySuite.class, null);
+		ITestIdentifier root= tree(test).get(0);
 		assertEquals("Empty suite", root.getDisplayName()); //$NON-NLS-1$
 		assertEquals(EmptySuite.class.getName(), root.getName());
+		assertEmptySuite(test);
+	}
+
+	@Test
+	public void testMethodLikeEmptySuiteNameDoesNotBecomeAMethod() {
+		ITestReference test= load(MethodLikeEmptySuite.class, null);
+		assertEquals(MethodLikeEmptySuite.class.getName(), test.getIdentifier().getName());
+		assertEquals("runBare(junit.framework.TestCase)", test.getIdentifier().getDisplayName()); //$NON-NLS-1$
+		assertEmptySuite(test);
+	}
+
+	@Test
+	public void testDecoratedEmptySuiteKeepsItsSuiteKind() {
+		assertEmptySuite(load(DecoratedEmptySuite.class, null));
+	}
+
+	@Test
+	public void testNestedEmptySuiteKeepsItsSuiteKind() {
+		ITestReference test= load(NestedEmptySuite.class, null);
+		List<TreeEntry> entries= treeEntries(test);
+		assertEquals(0, test.countTestCases());
+		assertEquals(2, entries.size());
+		assertTrue(entries.get(0).suite());
+		assertEquals(1, entries.get(0).count());
+		assertTrue(entries.get(1).suite());
+		assertEquals(0, entries.get(1).count());
+		assertEquals("Empty suite", entries.get(1).identifier().getName()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -78,15 +111,21 @@ public class JUnit4SuiteSourceTest {
 
 	@Test
 	public void testExplicitAllTestsRunnerKeepsTheEmptySuitesSource() {
-		ITestIdentifier root= tree(load(AnnotatedEmptySuite.class, null)).get(0);
+		ITestReference test= load(AnnotatedEmptySuite.class, null);
+		ITestIdentifier root= tree(test).get(0);
 		assertEquals("Empty suite (java.lang.String)", root.getDisplayName()); //$NON-NLS-1$
 		assertEquals(AnnotatedEmptySuite.class.getName(), root.getName());
+		assertEmptySuite(test);
 	}
 
 	@Test
 	public void testSuiteMethodReturningSingleTestKeepsItsMethodIdentity() {
-		ITestIdentifier root= tree(load(SingleTestSuite.class, null)).get(0);
+		ITestReference test= load(SingleTestSuite.class, null);
+		ITestIdentifier root= tree(test).get(0);
 		assertEquals("testFirst(" + SampleTest.class.getName() + ")", root.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertFalse(treeEntries(test).get(0).suite());
+		assertEquals(1, treeEntries(test).get(0).count());
+		assertEquals(1, test.countTestCases());
 	}
 
 	@Test
@@ -144,14 +183,86 @@ public class JUnit4SuiteSourceTest {
 		assertEquals("testSecond(" + SampleTest.class.getName() + ")", entries.get(0).getName()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
+	public void testSuiteMethodIsOnlyInvokedOnce() {
+		CountingSuite.calls= 0;
+		ITestReference test= load(CountingSuite.class, null);
+		tree(test);
+		assertEquals(1, test.countTestCases());
+		assertEquals(1, CountingSuite.calls);
+	}
+
+	@Test
+	public void testIgnoredSuiteMethodIsNotInvoked() {
+		CountingSuite.calls= 0;
+		load(IgnoredSuite.class, null);
+		assertEquals(0, CountingSuite.calls);
+	}
+
+	@Test
+	public void testExplicitRunnerTakesPrecedenceOverSuiteMethod() {
+		CountingSuite.calls= 0;
+		ITestReference test= load(ExplicitRunnerSuite.class, null);
+		assertEquals(1, test.countTestCases());
+		assertEquals(0, CountingSuite.calls);
+		assertEquals("actualTest(" + ExplicitRunnerSuite.class.getName() + ")", tree(test).get(1).getName()); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Test
+	public void testSuiteInitializationFailureIsReported() {
+		ITestReference test= load(FailingSuite.class, null);
+		assertEquals(1, test.countTestCases());
+		assertEquals("initializationError(" + FailingSuite.class.getName() + ")", tree(test).get(1).getName()); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Test
+	public void testMissingRunnerClassIsReportedAsInitializationFailure() throws Exception {
+		String testClassName= ExplicitRunnerSuite.class.getName();
+		byte[] classBytes;
+		try (InputStream input= ExplicitRunnerSuite.class.getResourceAsStream("JUnit4SuiteSourceTest$ExplicitRunnerSuite.class")) { //$NON-NLS-1$
+			classBytes= input.readAllBytes();
+		}
+		Class<?> testClass= new ClassLoader(getClass().getClassLoader()) {
+			Class<?> defineTestClass() {
+				return defineClass(testClassName, classBytes, 0, classBytes.length);
+			}
+
+			@Override
+			protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+				if (name.equals(BlockJUnit4ClassRunner.class.getName())) {
+					throw new ClassNotFoundException(name);
+				}
+				return super.loadClass(name, resolve);
+			}
+		}.defineTestClass();
+		ITestReference test= load(testClass, null);
+		assertEquals(1, test.countTestCases());
+		assertEquals("initializationError(" + testClassName + ")", tree(test).get(1).getName()); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 	private static ITestReference load(Class<?> testClass, String methodName) {
 		return new JUnit4TestLoader().loadTests(new Class<?>[] { testClass }, methodName, null, null, null, null, null)[0];
 	}
 
 	private static List<ITestIdentifier> tree(ITestReference test) {
-		List<ITestIdentifier> entries= new ArrayList<>();
-		test.sendTree((identifier, hasChildren, count, dynamic, parentId) -> entries.add(identifier));
+		return treeEntries(test).stream().map(TreeEntry::identifier).toList();
+	}
+
+	private record TreeEntry(ITestIdentifier identifier, boolean suite, int count) {
+	}
+
+	private static List<TreeEntry> treeEntries(ITestReference test) {
+		List<TreeEntry> entries= new ArrayList<>();
+		test.sendTree((identifier, suite, count, dynamic, parentId) -> entries.add(new TreeEntry(identifier, suite, count)));
 		return entries;
+	}
+
+	private static void assertEmptySuite(ITestReference test) {
+		List<TreeEntry> entries= treeEntries(test);
+		assertEquals(1, entries.size());
+		assertTrue("An empty suite must not be emitted as a test case", entries.get(0).suite()); //$NON-NLS-1$
+		assertEquals(0, entries.get(0).count());
+		assertEquals(0, test.countTestCases());
 	}
 
 	public static class UnnamedSuite {
@@ -179,6 +290,26 @@ public class JUnit4SuiteSourceTest {
 		}
 	}
 
+	public static class MethodLikeEmptySuite {
+		public static junit.framework.Test suite() {
+			return new TestSuite("runBare(junit.framework.TestCase)"); //$NON-NLS-1$
+		}
+	}
+
+	public static class DecoratedEmptySuite {
+		public static junit.framework.Test suite() {
+			return new TestSetup(EmptySuite.suite());
+		}
+	}
+
+	public static class NestedEmptySuite {
+		public static junit.framework.Test suite() {
+			TestSuite suite= new TestSuite("Outer suite"); //$NON-NLS-1$
+			suite.addTest(EmptySuite.suite());
+			return suite;
+		}
+	}
+
 	public static class MisleadingNameSuite {
 		public static junit.framework.Test suite() {
 			TestSuite suite= (TestSuite) UnnamedSuite.suite();
@@ -196,6 +327,32 @@ public class JUnit4SuiteSourceTest {
 	public static class SingleTestSuite {
 		public static junit.framework.Test suite() {
 			return new SampleTest("testFirst"); //$NON-NLS-1$
+		}
+	}
+
+	public static class CountingSuite {
+		static int calls;
+
+		public static junit.framework.Test suite() {
+			calls++;
+			return new SampleTest("testFirst"); //$NON-NLS-1$
+		}
+	}
+
+	@Ignore
+	public static class IgnoredSuite extends CountingSuite {
+	}
+
+	@RunWith(BlockJUnit4ClassRunner.class)
+	public static class ExplicitRunnerSuite extends CountingSuite {
+		@Test
+		public void actualTest() {
+		}
+	}
+
+	public static class FailingSuite {
+		public static junit.framework.Test suite() {
+			throw new IllegalStateException("suite failed"); //$NON-NLS-1$
 		}
 	}
 
