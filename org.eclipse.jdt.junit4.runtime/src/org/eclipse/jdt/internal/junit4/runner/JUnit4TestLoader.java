@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -191,7 +191,7 @@ public class JUnit4TestLoader implements ITestLoader {
 		Request request= sortByFailures(Request.aClass(clazz), failureNames);
 		Runner runner= request.getRunner();
 		Description description= runner.getDescription();
-		return new JUnit4TestReference(runner, description);
+		return new JUnit4TestReference(runner, description, clazz);
 	}
 
 	private Request sortByFailures(Request request, String[] failureNames) {

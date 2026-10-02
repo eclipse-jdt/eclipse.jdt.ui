@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -49,6 +49,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -259,6 +260,7 @@ public class TestViewer {
 		fTreeViewer.setContentProvider(fTreeContentProvider);
 		fTreeLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
 		fTreeViewer.setLabelProvider(new ColoringLabelProvider(fTreeLabelProvider));
+		ColumnViewerToolTipSupport.enableFor(fTreeViewer);
 
 		fTableViewer= new TableViewer(fViewerbook, SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
 		fTableViewer.setUseHashlookup(true);
@@ -266,6 +268,7 @@ public class TestViewer {
 		fTableViewer.setContentProvider(fTableContentProvider);
 		fTableLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_FLAT);
 		fTableViewer.setLabelProvider(new ColoringLabelProvider(fTableLabelProvider));
+		ColumnViewerToolTipSupport.enableFor(fTableViewer);
 
 		fSelectionProvider= new SelectionProviderMediator(new StructuredViewer[] { fTreeViewer, fTableViewer }, fTreeViewer);
 		fSelectionProvider.addSelectionChangedListener(new TestSelectionListener());
@@ -513,6 +516,19 @@ public class TestViewer {
 
 	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
 		String testName= testSuite.getTestName();
+		if (testSuite.getDisplayName() != null && testName.indexOf('(') < 0) {
+			IJavaProject project= fTestRunnerPart.getLaunchedProject();
+			try {
+				// A distinct display name can describe a suite whose source is not
+				// its first child. Prefer that source before the group fallback.
+				String className= testSuite.getSuiteTypeName();
+				if (project != null && project.findType(className) != null) {
+					return new OpenTestAction(fTestRunnerPart, className);
+				}
+			} catch (JavaModelException e) {
+				// Fall back to the existing navigation for groups without a source.
+			}
+		}
 		ITestElement[] children= testSuite.getChildren();
 
 		if (children.length > 0 && children[0] instanceof TestCaseElement tce) {
