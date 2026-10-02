@@ -15,16 +15,15 @@
 
 package org.eclipse.jdt.internal.junit4.runner;
 
-import java.lang.reflect.Modifier;
+import java.util.List;
 
+import org.junit.runner.Describable;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
-import org.junit.runner.RunWith;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runner.notification.StoppedByUserException;
-import org.junit.runners.AllTests;
 
 import org.eclipse.jdt.internal.junit.runner.IStopListener;
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
@@ -32,62 +31,47 @@ import org.eclipse.jdt.internal.junit.runner.ITestReference;
 import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
 import org.eclipse.jdt.internal.junit.runner.TestExecution;
 
-import junit.framework.TestCase;
+import junit.extensions.TestDecorator;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class JUnit4TestReference implements ITestReference {
 	protected final Runner fRunner;
 
 	protected final Description fRoot;
 	private final ITestIdentifier fRootIdentifier;
+	private final Test fLegacyTest;
 
 	public JUnit4TestReference(Runner runner, Description root) {
-		this(runner, root, null);
+		this(runner, root, null, null);
 	}
 
-	public JUnit4TestReference(Runner runner, Description root, Class<?> testClass) {
+	public JUnit4TestReference(Runner runner, Description root, Class<?> testClass, Test legacyTest) {
 		fRunner= runner;
 		fRoot= root;
-		// In particular, SuiteMethod loses the declaring class when adapting a named
-		// or unnamed JUnit 3 suite. Keep its display name and identity unchanged.
-		String className= null;
-		if (testClass != null && (root.isSuite() || root.getTestClass() == null
-				|| (runner instanceof AllTests || hasSuiteMethod(testClass)) && !isJUnit3TestMethod(root))) {
-			className= testClass.getName();
-		}
+		fLegacyTest= legacyTest;
+		// Empty legacy suites and genuine TestCase leaves both have descriptions
+		// without children. Use the actual Test, never a parsed display name.
+		String className= testClass != null && isSuite(root, legacyTest) ? testClass.getName() : null;
 		fRootIdentifier= new JUnit4Identifier(root, className);
 	}
 
-	private static boolean hasSuiteMethod(Class<?> testClass) {
-		// An explicit runner takes precedence over a legacy suite() method.
-		if (testClass.getAnnotation(RunWith.class) != null) {
-			return false;
-		}
-		try {
-			return Modifier.isStatic(testClass.getMethod("suite").getModifiers()); //$NON-NLS-1$
-		} catch (NoSuchMethodException | SecurityException e) {
-			return false;
-		}
+	private static boolean isSuite(Description description, Test test) {
+		return unwrap(test) instanceof TestSuite || description.isSuite();
 	}
 
-	private static boolean isJUnit3TestMethod(Description description) {
-		// A suite() method can return a single TestCase. Keep that method's source.
-		// getTestClass() alone is insufficient: JUnit also tries to derive it from
-		// arbitrary suite display names, including text in parentheses.
-		Class<?> testClass= description.getTestClass();
-		String methodName= description.getMethodName();
-		if (testClass == null || !TestCase.class.isAssignableFrom(testClass) || methodName == null) {
-			return false;
+	private static Test unwrap(Test test) {
+		// JUnit uses a Describable decorator's own description; only ordinary
+		// decorators have the same tree as the wrapped test.
+		while (test instanceof TestDecorator && !(test instanceof Describable)) {
+			test= ((TestDecorator) test).getTest();
 		}
-		try {
-			return testClass.getMethod(methodName).getReturnType() == void.class;
-		} catch (NoSuchMethodException | SecurityException e) {
-			return false;
-		}
+		return test;
 	}
 
 	@Override
 	public int countTestCases() {
-		return countTestCases(fRoot);
+		return fLegacyTest != null ? fLegacyTest.countTestCases() : countTestCases(fRoot);
 	}
 
 	private int countTestCases(Description description) {
@@ -148,17 +132,24 @@ public class JUnit4TestReference implements ITestReference {
 
 	@Override
 	public void sendTree(IVisitsTestTrees notified) {
-		sendTree(notified, fRoot);
+		sendTree(notified, fRoot, fLegacyTest);
 	}
 
-	private void sendTree(final IVisitsTestTrees notified, Description description) {
+	private void sendTree(final IVisitsTestTrees notified, Description description, Test test) {
 		ITestIdentifier identifier= description == fRoot ? fRootIdentifier : new JUnit4Identifier(description);
-		if (description.isTest()) {
+		if (!isSuite(description, test)) {
 			notified.visitTreeEntry(identifier, false, 1, false, "-1"); //$NON-NLS-1$
 		} else {
-			notified.visitTreeEntry(identifier, true, description.getChildren().size(), false, "-1"); //$NON-NLS-1$
-			for (Description child : description.getChildren()) {
-				sendTree(notified, child);
+			List<Description> children= description.getChildren();
+			notified.visitTreeEntry(identifier, true, children.size(), false, "-1"); //$NON-NLS-1$
+			Test unwrapped= unwrap(test);
+			TestSuite suite= unwrapped instanceof TestSuite ? (TestSuite) unwrapped : null;
+			if (suite != null && suite.testCount() != children.size()) {
+				suite= null;
+			}
+			for (int i= 0; i < children.size(); i++) {
+				Test childTest= suite != null ? suite.testAt(i) : null;
+				sendTree(notified, children.get(i), childTest);
 			}
 		}
 	}
