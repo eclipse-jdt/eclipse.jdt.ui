@@ -100,6 +100,9 @@ public final class CallHierarchyMessages extends NLS {
 	public static String CallHierarchyViewPart_callsFromMembers_2;
 	public static String CallHierarchyViewPart_callsFromMembers_more;
 	public static String CallHierarchyViewPart_callsFromMethod;
+	public static String CallHierarchyViewPart_scopeDescriptionWithFilters_inMainCode;
+	public static String CallHierarchyViewPart_scopeDescriptionWithFilters_inTestCode;
+	public static String CallHierarchyViewPart_scopeDescriptionWithFilters_activeFilters;
 	public static String ExpandWithConstructorsConfigurationBlock_description;
 	public static String ExpandWithConstructorsConfigurationBlock_newType_button;
 	public static String ExpandWithConstructorsConfigurationBlock_newMember_button;
