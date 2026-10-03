@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ import org.osgi.framework.Constants;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -72,6 +73,7 @@ import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.launcher.JUnitRuntimeClasspathEntry;
+import org.eclipse.jdt.internal.junit.launcher.SeparateVMsLaunch;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.IJUnitStatusConstants;
@@ -163,13 +165,10 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				return null;
 			}
 
-			fKeepAlive= ILaunchManager.DEBUG_MODE.equals(mode) && configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
-			fPort= evaluatePort();
-			launch.setAttribute(JUnitLaunchConfigurationConstants.ATTR_PORT, String.valueOf(fPort));
-
 			ITestKind testKind= getTestRunnerKind(configuration);
 			IJavaProject javaProject= getJavaProject(configuration);
-			if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind.getId()) || TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId())) {
+			if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind.getId()) || TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId())
+					|| launch instanceof SeparateVMsLaunch) {
 				fTestElements= evaluateTests(configuration, subMon.newChild( 1));
 			} else {
 				IJavaElement testTarget= getTestTarget(configuration, javaProject);
@@ -179,6 +178,14 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					fTestElements= evaluateTests(configuration, subMon.newChild(1));
 				}
 			}
+
+			// separate VMs are run one after the other, so they cannot be kept alive
+			fKeepAlive= ILaunchManager.DEBUG_MODE.equals(mode) && configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false) && !isRunInSeparateVMs(launch);
+			fPort= evaluatePort();
+			if (isRunInSeparateVMs(launch)) {
+				launch.setAttribute(JUnitLaunchConfigurationConstants.ATTR_VM_COUNT, String.valueOf(fTestElements.length));
+			}
+			launch.setAttribute(JUnitLaunchConfigurationConstants.ATTR_PORT, String.valueOf(fPort));
 
 			String mainTypeName= verifyMainTypeName(configuration);
 
@@ -308,7 +315,11 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			monitor.worked(1);
 
 			// Launch the configuration - 1 unit of work
-			runner.run(runConfig, launch, monitor);
+			if (isRunInSeparateVMs(launch)) {
+				((SeparateVMsLaunch) launch).startVMs(createSeparateVMs(runner, runConfig, launch), monitor);
+			} else {
+				runner.run(runConfig, launch, monitor);
+			}
 
 			// check for cancellation
 			if (monitor.isCanceled()) {
@@ -318,6 +329,43 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			fTestElements= null;
 			monitor.done();
 		}
+	}
+
+	@Override
+	public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
+		if (configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_SEPARATE_VM_PER_TEST_CLASS, false)) {
+			return new SeparateVMsLaunch(configuration, mode);
+		}
+		return super.getLaunch(configuration, mode);
+	}
+
+	private boolean isRunInSeparateVMs(ILaunch launch) {
+		return launch instanceof SeparateVMsLaunch && fTestElements.length > 1;
+	}
+
+	/**
+	 * Creates one VM per test class. The VMs only differ by the file that lists the test class to run.
+	 *
+	 * @param runner the VM runner
+	 * @param runConfig the VM runner configuration to run all the test classes
+	 * @param launch the launch to which the VMs are added
+	 * @return the VMs to start one after the other
+	 * @throws CoreException if a file listing a test class cannot be created
+	 */
+	private List<ICoreRunnable> createSeparateVMs(IVMRunner runner, VMRunnerConfiguration runConfig, ILaunch launch) throws CoreException {
+		String[] programArguments= runConfig.getProgramArguments();
+		int testNameFileIndex= Arrays.asList(programArguments).indexOf("-testNameFile") + 1; //$NON-NLS-1$
+		Assert.isTrue(testNameFileIndex > 0);
+		List<ICoreRunnable> vms= new ArrayList<>();
+		for (IJavaElement testElement : fTestElements) {
+			String[] vmProgramArguments= programArguments.clone();
+			vmProgramArguments[testNameFileIndex]= createTestNamesFile(new IJavaElement[] { testElement });
+			vms.add(monitor -> {
+				runConfig.setProgramArguments(vmProgramArguments);
+				runner.run(runConfig, launch, monitor);
+			});
+		}
+		return vms;
 	}
 
 	private int evaluatePort() throws CoreException {
@@ -406,6 +454,16 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		HashSet<IType> result= new HashSet<>();
 		ITestKind testKind= getTestRunnerKind(configuration);
 		testKind.getFinder().findTestsInContainer(testTarget, result, monitor);
+		if (testTarget instanceof IPackageFragment packageFragment
+				&& (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) || TestKindRegistry.JUNIT6_TEST_KIND_ID.equals(testKind.getId()))) {
+			// like createPackageNamesFile(), also run the tests of the subpackages
+			String subpackagePrefix= packageFragment.getElementName() + '.';
+			for (IJavaElement child : ((IPackageFragmentRoot) packageFragment.getParent()).getChildren()) {
+				if (child.getElementName().startsWith(subpackagePrefix)) {
+					testKind.getFinder().findTestsInContainer(child, result, monitor);
+				}
+			}
+		}
 		if (result.isEmpty()) {
 			String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_notests_kind, testKind.getDisplayName());
 			abort(msg, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
