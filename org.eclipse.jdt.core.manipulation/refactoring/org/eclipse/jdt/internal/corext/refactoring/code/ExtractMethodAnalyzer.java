@@ -340,9 +340,22 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 					fReturnTypeBinding= fReturnType != null ? fReturnType.resolveBinding() : null;
 				}
 				break;
+			case NO:
+				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+					Type retType= ((MethodDeclaration) fEnclosingBodyDeclaration).getReturnType2();
+					if (retType != null) {
+						if (!isVoidMethod() && isLastStatementSelected() && fInputFlowInfo.isThrow()) {
+							fReturnType= ((MethodDeclaration) fEnclosingBodyDeclaration).getReturnType2();
+							fReturnTypeBinding= fReturnType != null ? fReturnType.resolveBinding() : null;
+						}
+					}
+				}
+				//$FALL-THROUGH$
 			default:
-				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
-				fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
+				if (fReturnType == null) {
+					fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
+					fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
+				}
 		}
 		if (fReturnType == null) {
 			fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
