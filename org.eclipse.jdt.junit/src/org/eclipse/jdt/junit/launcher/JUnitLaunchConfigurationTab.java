@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -139,6 +139,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 	private Button fKeepRunning;
 
+	private Button fSeparateVMPerTestClass;
+
 	// Test class UI widgets
 	private Text fTestText;
 
@@ -209,6 +211,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		createSpacer(comp);
 
 		createKeepAliveGroup(comp);
+		createSeparateVMGroup(comp);
 		Dialog.applyDialogFont(comp);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJUnitHelpContextIds.LAUNCH_CONFIGURATION_DIALOG_JUNIT_MAIN_TAB);
 		validatePage();
@@ -460,6 +463,16 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fKeepRunning.setLayoutData(gd);
 	}
 
+	private void createSeparateVMGroup(Composite comp) {
+		fSeparateVMPerTestClass= new Button(comp, SWT.CHECK);
+		fSeparateVMPerTestClass.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> updateLaunchConfigurationDialog()));
+		fSeparateVMPerTestClass.setText(JUnitMessages.JUnitLaunchConfigurationTab_label_separate_vm_per_test_class);
+		GridData gd= new GridData();
+		gd.horizontalAlignment= GridData.FILL;
+		gd.horizontalSpan= 2;
+		fSeparateVMPerTestClass.setLayoutData(gd);
+	}
+
 	private static Image createImage(String path) {
 		return JUnitPlugin.getImageDescriptor(path).createImage();
 	}
@@ -482,6 +495,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				updateTestTypeFromConfig(config);
 			}
 			updateKeepRunning(config);
+			updateSeparateVMPerTestClass(config);
 			updateTestLoaderFromConfig(config);
 
 			calculateMethodsCache();
@@ -517,6 +531,15 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		} catch (CoreException ce) {
 		}
 		fKeepRunning.setSelection(running);
+	}
+
+	private void updateSeparateVMPerTestClass(ILaunchConfiguration config) {
+		boolean separateVM= false;
+		try {
+			separateVM= config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_SEPARATE_VM_PER_TEST_CLASS, false);
+		} catch (CoreException ce) {
+		}
+		fSeparateVMPerTestClass.setSelection(separateVM);
 	}
 
 	private void updateProjectFromConfig(ILaunchConfiguration config) {
@@ -589,6 +612,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, fTestMethodText.getText());
 		}
 		config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
+		// only stored if selected, so that existing launch configurations are not changed
+		if (fSeparateVMPerTestClass.getSelection()) {
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_SEPARATE_VM_PER_TEST_CLASS, true);
+		} else {
+			config.removeAttribute(JUnitLaunchConfigurationConstants.ATTR_SEPARATE_VM_PER_TEST_CLASS);
+		}
 		try {
 			mapResources(config);
 		} catch (CoreException e) {
