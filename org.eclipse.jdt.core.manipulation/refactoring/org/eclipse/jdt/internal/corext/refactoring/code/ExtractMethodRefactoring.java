@@ -1265,6 +1265,15 @@ public class ExtractMethodRefactoring extends Refactoring {
 				}
 				call= rs;
 				break;
+			case ExtractMethodAnalyzer.NO:
+				if (fAnalyzer.getReturnTypeBinding() != fAST.resolveWellKnownType("void")) { //$NON-NLS-1$
+					ReturnStatement rstmt= fAST.newReturnStatement();
+					rstmt.setExpression(invocation);
+					call= rstmt;
+				} else {
+					call= invocation;
+				}
+				break;
 			default:
 				call= invocation;
 		}
