@@ -1824,6 +1824,12 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 		expressionTest();
 	}
 
+	// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/3235
+	@Test
+	public void test630() throws Exception {
+		expressionTest();
+	}
+
 	//---- Test nested methods and constructor
 
 	@Test
