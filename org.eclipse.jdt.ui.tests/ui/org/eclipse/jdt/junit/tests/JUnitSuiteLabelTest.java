@@ -227,7 +227,7 @@ public class JUnitSuiteLabelTest extends AbstractTestRunListenerTest {
 	public void testExportAndImportPreserveBothNames() throws Exception {
 		suite("pack.NamedSuite", "Readable suite (with punctuation)"); //$NON-NLS-1$ //$NON-NLS-2$
 		File file= fTemporaryFolder.newFile("suite.xml"); //$NON-NLS-1$
-		JUnitModel.exportTestRunSession(fSession, file);
+		JUnitCore.exportTestRunSession(fSession, file);
 		TestRunSession imported= JUnitModel.importTestRunSession(file);
 		try {
 			TestSuiteElement suite= (TestSuiteElement) imported.getChildren()[0];
