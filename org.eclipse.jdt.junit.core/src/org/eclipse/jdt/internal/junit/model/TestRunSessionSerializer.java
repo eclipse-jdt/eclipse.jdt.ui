@@ -105,8 +105,7 @@ public class TestRunSessionSerializer implements XMLReader {
 	}
 
 	private void handleTestElement(ITestElement testElement) throws SAXException {
-		if (testElement instanceof TestSuiteElement) {
-			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
+		if (testElement instanceof TestSuiteElement testSuiteElement) {
 
 			AttributesImpl atts= new AttributesImpl();
 			// Need to store the full #getTestName instead of only the #getSuiteTypeName for test factory methods
@@ -140,8 +139,7 @@ public class TestRunSessionSerializer implements XMLReader {
 			}
 			endElement(IXMLTags.NODE_TESTSUITE);
 
-		} else if (testElement instanceof TestCaseElement) {
-			TestCaseElement testCaseElement= (TestCaseElement) testElement;
+		} else if (testElement instanceof TestCaseElement testCaseElement) {
 
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestMethodName());

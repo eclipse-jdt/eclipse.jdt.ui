@@ -29,7 +29,6 @@ import org.eclipse.jdt.junit.model.ITestRunSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -198,11 +197,8 @@ public class JUnitCore {
 	public static void exportTestRunSession(ITestRunSession testRunSession, OutputStream output) throws CoreException {
 		try {
 			JUnitModel.exportTestRunSession((TestRunSession)testRunSession, output);
-
 		} catch (TransformerException exception) {
-			String pluginID= JUnitCorePlugin.getPluginId();
-			String message= ModelMessages.JUnitModel_could_not_export;
-			throw new CoreException(new Status(IStatus.ERROR, pluginID, message, exception));
+			throw new CoreException(Status.error(ModelMessages.JUnitModel_could_not_export, exception));
 		}
 	}
 
@@ -232,13 +228,9 @@ public class JUnitCore {
 	public static ITestRunSession importTestRunSession(final String url, IProgressMonitor monitor) throws CoreException {
 		try {
 			return JUnitModel.importTestRunSession(url, monitor);
-
 		} catch (InvocationTargetException exception) {
-			String pluginID= JUnitCorePlugin.getPluginId();
-			String message= ModelMessages.JUnitModel_could_not_import;
 			Throwable throwable= exception.getCause() != null ? exception.getCause() : exception;
-			throw new CoreException(new Status(IStatus.ERROR, pluginID, message, throwable));
-
+			throw new CoreException(Status.error(ModelMessages.JUnitModel_could_not_import, throwable));
 		} catch (InterruptedException interrupt) {
 			return null;
 		}
