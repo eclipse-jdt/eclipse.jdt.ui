@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -66,6 +66,7 @@ public class JUnitCore {
 	 * @see #JUNIT3_CONTAINER_PATH
 	 * @see #JUNIT4_CONTAINER_PATH
 	 * @see #JUNIT5_CONTAINER_PATH
+	 * @see #JUNIT6_CONTAINER_PATH
 	 * @since 3.6
 	 */
 	public static final String JUNIT_CONTAINER_ID= "org.eclipse.jdt.junit.JUNIT_CONTAINER"; //$NON-NLS-1$
