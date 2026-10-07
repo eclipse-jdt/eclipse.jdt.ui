@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -310,7 +311,16 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 				if (expression.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
 					fExpressionBinding= ((ClassInstanceCreation)expression).getType().resolveBinding();
 				} else {
-					fExpressionBinding= expression.resolveTypeBinding();
+					if(expression instanceof InfixExpression) {
+						ASTNode firstParent = getFirstSelectedNode().getParent();
+						if(firstParent instanceof VariableDeclarationFragment varD && varD.getParent() instanceof VariableDeclarationStatement varS) {
+							fExpressionBinding = varS.getType().resolveBinding();
+						} else {
+							fExpressionBinding= expression.resolveTypeBinding();
+						}
+					} else {
+						fExpressionBinding= expression.resolveTypeBinding();
+					}
 				}
 				if (fExpressionBinding != null) {
 					if (fExpressionBinding.isNullType()) {
