@@ -133,7 +133,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCaseCommon {
 			}
 		}
 
-		javaProject.getProject().getWorkspace().run((IWorkspaceRunnable) monitor -> javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null), null);
+		javaProject.getProject().getWorkspace().run((IWorkspaceRunnable) _ -> javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null), null);
 		getViewer().expandToLevel(classFolder, 1);
 
 		PackageExplorerPart view= getView();

@@ -106,7 +106,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		gd.horizontalSpan = 2;
 		fTomcatDir.setLayoutData(gd);
 		fTomcatDir.setFont(font);
-		fTomcatDir.addModifyListener(evt -> updateLaunchConfigurationDialog());
+		fTomcatDir.addModifyListener(_ -> updateLaunchConfigurationDialog());
 
 		fBrowseButton = createPushButton(composite, LaunchingMessages.TomcatTab_21, null);
 		fBrowseButton.addSelectionListener(new SelectionAdapter() {
@@ -130,7 +130,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		gd.horizontalSpan = 2;
 		fProjectText.setLayoutData(gd);
 		fProjectText.setFont(font);
-		fProjectText.addModifyListener(evt -> updateLaunchConfigurationDialog());
+		fProjectText.addModifyListener(_ -> updateLaunchConfigurationDialog());
 
 		fProjectButton = createPushButton(composite, LaunchingMessages.TomcatTab_23, null);
 		fProjectButton.addSelectionListener(new SelectionAdapter() {

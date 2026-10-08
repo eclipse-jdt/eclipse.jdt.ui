@@ -246,7 +246,7 @@ public class KeyboardProbe {
 	private void addListeners(Text control) {
 		control.addListener(SWT.KeyDown, this::onKeyDown);
 		control.addListener(SWT.KeyUp, this::onKeyUp);
-		control.addListener(SWT.Modify, event -> onModify());
+		control.addListener(SWT.Modify, _ -> onModify());
 	}
 
 	private Text createControl(Display display) {
