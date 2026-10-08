@@ -49,7 +49,8 @@ public class TypeRenameParticipant extends JUnitRenameParticipant {
 			String prefix;
 			if (index == -1)
 				prefix= ""; //$NON-NLS-1$
-			prefix= mainType.substring(0, index + 1);
+			else
+				prefix= mainType.substring(0, index + 1);
 			String newValue= prefix + getNewName();
 			list.addAttributeChange(config, IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, newValue);
 
