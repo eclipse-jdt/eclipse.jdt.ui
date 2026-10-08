@@ -574,7 +574,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 				info.setAction(MemberActionInfo.NO_ACTION);
 			updateWizardPage(null, true);
 		});
-		fTableViewer.addDoubleClickListener(event -> editSelectedMembers());
+		fTableViewer.addDoubleClickListener(_ -> editSelectedMembers());
 
 		setTableInput();
 		checkPullUp(fProcessor.getMembersToMove(), false);

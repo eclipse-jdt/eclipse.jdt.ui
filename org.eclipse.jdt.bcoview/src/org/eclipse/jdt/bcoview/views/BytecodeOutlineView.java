@@ -739,13 +739,13 @@ public class BytecodeOutlineView extends ViewPart implements IBytecodePart {
 		IDocument document = new Document(""); //$NON-NLS-1$
 		textViewer.setDocument(document);
 
-		textSelectionListener = event -> {
+		textSelectionListener = _ -> {
 			for (String selectionAction : selectionActions) {
 				updateAction(selectionAction);
 			}
 		};
 
-		textListener = event -> {
+		textListener = _ -> {
 			IUpdate findReplace = (IUpdate) globalActions.get(ActionFactory.FIND.getId());
 			if (findReplace != null) {
 				findReplace.update();

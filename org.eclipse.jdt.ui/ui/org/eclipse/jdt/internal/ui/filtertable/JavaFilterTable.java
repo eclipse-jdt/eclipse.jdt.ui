@@ -347,15 +347,15 @@ public class JavaFilterTable {
 		buttonContainer.setLayout(buttonLayout);
 
 		//Add filter button
-		fAddFilterButton= createPushButton(buttonContainer, config.addFilter, event -> addFilter());
+		fAddFilterButton= createPushButton(buttonContainer, config.addFilter, _ -> addFilter());
 		//Add type button
-		fAddTypeButton= createPushButton(buttonContainer, config.addType, event -> addType());
+		fAddTypeButton= createPushButton(buttonContainer, config.addType, _ -> addType());
 		//Add package button
-		fAddPackageButton= createPushButton(buttonContainer, config.addPackage, event -> addPackage());
+		fAddPackageButton= createPushButton(buttonContainer, config.addPackage, _ -> addPackage());
 		//Add edit button
-		fEditFilterButton= createPushButton(buttonContainer, config.editFilter, event -> editFilter(), false);
+		fEditFilterButton= createPushButton(buttonContainer, config.editFilter, _ -> editFilter(), false);
 		//Remove button
-		fRemoveFilterButton= createPushButton(buttonContainer, config.remove, event -> removeFilters(), false);
+		fRemoveFilterButton= createPushButton(buttonContainer, config.remove, _ -> removeFilters(), false);
 
 		Label separator= new Label(buttonContainer, SWT.NONE);
 		separator.setVisible(false);
@@ -367,10 +367,10 @@ public class JavaFilterTable {
 		if (fTableViewer instanceof CheckboxTableViewer) {
 			CheckboxTableViewer checkableViewer = (CheckboxTableViewer) fTableViewer;
 			//Select All button
-			fSelectAllButton= createPushButton(buttonContainer, config.selectAll, event -> checkableViewer.setAllChecked(true));
+			fSelectAllButton= createPushButton(buttonContainer, config.selectAll, _ -> checkableViewer.setAllChecked(true));
 
 			//De-Select All button
-			fDeselectAllButton= createPushButton(buttonContainer, config.deselectAll, event -> checkableViewer.setAllChecked(false));
+			fDeselectAllButton= createPushButton(buttonContainer, config.deselectAll, _ -> checkableViewer.setAllChecked(false));
 		}
 
 	}

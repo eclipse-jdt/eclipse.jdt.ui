@@ -177,7 +177,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		createListDialogField(sortComposite, fSortOrderList);
 
 		fUseVisibilitySortField= new SelectionButtonDialogField(SWT.CHECK);
-		fUseVisibilitySortField.setDialogFieldListener(field -> fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected()));
+		fUseVisibilitySortField.setDialogFieldListener(_ -> fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected()));
 		fUseVisibilitySortField.setLabelText(PreferencesMessages.MembersOrderPreferencePage_usevisibilitysort_label);
 		fUseVisibilitySortField.doFillIntoGrid(sortComposite, 2);
 		fUseVisibilitySortField.setSelection(fUseVisibilitySort);

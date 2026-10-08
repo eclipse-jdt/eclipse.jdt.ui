@@ -52,7 +52,7 @@ public class ImportsFix extends TextEditFix {
 			return null;
 
 		final boolean hasAmbiguity[]= new boolean[] { false };
-		IChooseImportQuery query= (openChoices, ranges) -> {
+		IChooseImportQuery query= (_, _) -> {
 			hasAmbiguity[0]= true;
 			return new TypeNameMatch[0];
 		};

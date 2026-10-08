@@ -113,7 +113,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		cleanUpListBlock.setLayoutData(gridData);
 		cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
 
-		profileManager.addObserver((o, arg) -> {
+		profileManager.addObserver((_, arg) -> {
 			final int value= ((Integer)arg);
 			switch (value) {
 			case ProfileManager.PROFILE_CREATED_EVENT:
@@ -181,7 +181,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		if (showWizard)
 			fShowCleanUpWizardDialogField.setSelection(true);
 
-	    fShowCleanUpWizardDialogField.setDialogFieldListener(field -> doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected()));
+	    fShowCleanUpWizardDialogField.setDialogFieldListener(_ -> doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected()));
 
 		return composite;
 	}
@@ -205,7 +205,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		boolean showWizard= DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
 		fShowCleanUpWizardDialogField.setDialogFieldListener(null);
 		fShowCleanUpWizardDialogField.setSelection(showWizard);
-		fShowCleanUpWizardDialogField.setDialogFieldListener(field -> doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected()));
+		fShowCleanUpWizardDialogField.setDialogFieldListener(_ -> doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected()));
 	}
 
 	@Override

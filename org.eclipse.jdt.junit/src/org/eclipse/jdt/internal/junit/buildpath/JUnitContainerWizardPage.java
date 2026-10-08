@@ -137,7 +137,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		} else {
 			fVersionCombo.select(3);
 		}
-		fVersionCombo.addModifyListener(e -> doSelectionChanged());
+		fVersionCombo.addModifyListener(_ -> doSelectionChanged());
 
 		label= new Label(composite, SWT.NONE);
 		label.setFont(composite.getFont());

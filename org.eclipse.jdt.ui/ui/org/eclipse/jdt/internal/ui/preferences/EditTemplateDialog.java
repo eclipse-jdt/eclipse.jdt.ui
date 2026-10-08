@@ -460,7 +460,7 @@ public class EditTemplateDialog extends StatusDialog {
 				doSourceChanged(event.getDocumentEvent().getDocument());
 		});
 
-		viewer.addSelectionChangedListener(event -> updateSelectionDependentActions());
+		viewer.addSelectionChangedListener(_ -> updateSelectionDependentActions());
 
 		return viewer;
 	}
@@ -479,7 +479,7 @@ public class EditTemplateDialog extends StatusDialog {
 		final IHandlerService handlerService= PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		final Expression expression= new ActiveShellExpression(fPatternEditor.getControl().getShell());
 
-		getShell().addDisposeListener(e -> handlerService.deactivateHandlers(handlerActivations));
+		getShell().addDisposeListener(_ -> handlerService.deactivateHandlers(handlerActivations));
 
 		fPatternEditor.getTextWidget().addFocusListener(new FocusListener() {
 			@Override

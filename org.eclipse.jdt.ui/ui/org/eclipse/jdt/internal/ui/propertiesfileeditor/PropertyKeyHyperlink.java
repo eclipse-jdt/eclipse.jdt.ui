@@ -343,7 +343,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
 		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details);
-		dialog.setLowerListComparator((o1, o2) -> 0);
+		dialog.setLowerListComparator((_, _) -> 0);
 		dialog.setTitle(PropertiesFileEditorMessages.OpenAction_SelectionDialog_title);
 		dialog.setMessage(PropertiesFileEditorMessages.OpenAction_SelectionDialog_message);
 		dialog.setElements(keyReferences);

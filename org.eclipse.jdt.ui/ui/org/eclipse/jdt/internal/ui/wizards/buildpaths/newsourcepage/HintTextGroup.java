@@ -87,7 +87,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
         fTopComposite.setLayout(gridLayout);
         fTopComposite.setLayoutData(gridData);
         fTopComposite.setData(null);
-        fTopComposite.addDisposeListener(e -> {
+        fTopComposite.addDisposeListener(_ -> {
 		    Collection<Image> collection= fImageMap.values();
 		    Iterator<Image> iterator= collection.iterator();
 		    while(iterator.hasNext()) {

@@ -220,7 +220,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		fStyleSheetText.addModifyListener(e -> doValidation(STYLESHEETSTATUS));
+		fStyleSheetText.addModifyListener(_ -> doValidation(STYLESHEETSTATUS));
 
 		fStyleSheetBrowseButton.addSelectionListener(new SelectionAdapter() {
 			@Override

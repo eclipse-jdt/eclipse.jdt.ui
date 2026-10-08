@@ -90,7 +90,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 
 		fTableViewer= new TableViewer(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		fTableViewer.addSelectionChangedListener(event -> doSelectionChanged(((IStructuredSelection) event.getSelection()).toArray()));
-		fTableViewer.addDoubleClickListener(event -> okPressed());
+		fTableViewer.addDoubleClickListener(_ -> okPressed());
 		GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
 		data.heightHint= SIZING_SELECTION_WIDGET_HEIGHT;
 		data.widthHint= SIZING_SELECTION_WIDGET_WIDTH;

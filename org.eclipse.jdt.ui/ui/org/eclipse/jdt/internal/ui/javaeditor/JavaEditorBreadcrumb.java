@@ -599,7 +599,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		fViewer.setToolTipLabelProvider(createToolTipLabelProvider());
 
 		fViewer.setContentProvider(createContentProvider());
-		fViewer.addSelectionChangedListener(event -> fBreadcrumbActionGroup.setContext(new ActionContext(fViewer.getSelection())));
+		fViewer.addSelectionChangedListener(_ -> fBreadcrumbActionGroup.setContext(new ActionContext(fViewer.getSelection())));
 
 		fBreadcrumbActionGroup= new JavaEditorBreadcrumbActionGroup(getJavaEditor(), fViewer);
 
