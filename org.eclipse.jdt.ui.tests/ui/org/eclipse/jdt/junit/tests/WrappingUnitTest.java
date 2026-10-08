@@ -36,7 +36,7 @@ public class WrappingUnitTest {
 	public void test00wrapSecondLine() throws Exception {
 		TextualTrace trace = new TextualTrace("12345\n1234512345",
 				new String[0]);
-		trace.display((lineType, label) -> assertEquals("12345", label), 5);
+		trace.display((_, label) -> assertEquals("12345", label), 5);
 	}
 
 	@Test

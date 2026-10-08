@@ -216,7 +216,7 @@ public class OverrideIndicatorLabelDecoratorTest extends CoreTests {
 	 * is running.
 	 */
 	private void runBuildWithProbe(Runnable probe) throws Exception {
-		IResourceChangeListener probeListener= event -> probe.run();
+		IResourceChangeListener probeListener= _ -> probe.run();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(probeListener, IResourceChangeEvent.PRE_BUILD);
 		try {
 			ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
