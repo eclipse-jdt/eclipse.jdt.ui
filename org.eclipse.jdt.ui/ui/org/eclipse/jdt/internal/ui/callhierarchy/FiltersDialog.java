@@ -99,7 +99,7 @@ class FiltersDialog extends StatusDialog {
         fMaxCallDepth = new Text(composite, SWT.SINGLE | SWT.BORDER);
         fMaxCallDepth.setFont(composite.getFont());
         fMaxCallDepth.setTextLimit(6);
-        fMaxCallDepth.addModifyListener(e -> validateInput());
+        fMaxCallDepth.addModifyListener(_ -> validateInput());
 
         GridData gridData = new GridData();
         gridData.widthHint = convertWidthInCharsToPixels(12);
@@ -110,11 +110,11 @@ class FiltersDialog extends StatusDialog {
         fFilterOnNames = createCheckbox(parent,
                 CallHierarchyMessages.FiltersDialog_filterOnNames, true);
 
-        fFilterOnNames.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> validateInput()));
+        fFilterOnNames.addSelectionListener(SelectionListener.widgetSelectedAdapter(_ -> validateInput()));
 
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
         fNames.setFont(parent.getFont());
-        fNames.addModifyListener(e -> validateInput());
+        fNames.addModifyListener(_ -> validateInput());
 
         GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
         gridData.widthHint = convertWidthInCharsToPixels(80);

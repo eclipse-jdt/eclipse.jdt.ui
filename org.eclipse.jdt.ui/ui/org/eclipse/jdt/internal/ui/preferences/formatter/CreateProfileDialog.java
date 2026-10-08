@@ -106,7 +106,7 @@ public class CreateProfileDialog extends StatusDialog {
 		gd.horizontalSpan= numColumns;
 		fNameText= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fNameText.setLayoutData(gd);
-		fNameText.addModifyListener( e -> doValidation());
+		fNameText.addModifyListener( _ -> doValidation());
 
 		// Create "Initialize settings ..." label
 		gd = new GridData();

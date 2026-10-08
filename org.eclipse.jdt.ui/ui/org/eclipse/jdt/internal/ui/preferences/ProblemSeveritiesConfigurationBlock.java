@@ -656,13 +656,13 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		private void detectedAnnotationTargets(AnnotationDialogField field, AnnotationListDialogField list, Map<AnnotationTarget, List<String>> namesPerTarget) {
 			String name1= field.getText();
 			AnnotationTarget target1= getAnnotationKind(name1);
-			List<String> perTarget= namesPerTarget.computeIfAbsent(target1, k -> new ArrayList<>());
+			List<String> perTarget= namesPerTarget.computeIfAbsent(target1, _ -> new ArrayList<>());
 			perTarget.add(name1);
 			for (AnnotationWrapper otherWrapper : list.getElements()) {
 				String otherName= otherWrapper.annotationName;
 				if (otherName.isBlank()) continue;
 				AnnotationTarget other= getAnnotationKind(otherName);
-				perTarget= namesPerTarget.computeIfAbsent(other, k -> new ArrayList<>());
+				perTarget= namesPerTarget.computeIfAbsent(other, _ -> new ArrayList<>());
 				perTarget.add(otherName);
 			}
 		}

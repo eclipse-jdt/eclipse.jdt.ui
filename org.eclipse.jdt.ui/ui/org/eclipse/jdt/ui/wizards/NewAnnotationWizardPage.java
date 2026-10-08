@@ -243,7 +243,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 
 			fEnumButtons= new SelectionButtonDialogFieldGroup(style, enumLabels, nColumns);
 
-			fEnableButton.setDialogFieldListener(field -> fEnumButtons.setEnabled(fEnableButton.isSelected()));
+			fEnableButton.setDialogFieldListener(_ -> fEnumButtons.setEnabled(fEnableButton.isSelected()));
 		}
 
 		private String[] toStringArray(Class<E> enumClass) {

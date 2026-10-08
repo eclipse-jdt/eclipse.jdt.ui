@@ -390,7 +390,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				}
 				templateName.setSelection(0, templateName.getText().length());
 
-				templateName.addModifyListener(e -> validate(templateName.getText()));
+				templateName.addModifyListener(_ -> validate(templateName.getText()));
 
 				//Ctrl+Enter should execute the default button, workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=145959
 				template.addTraverseListener(e -> {
@@ -1233,7 +1233,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		treeViewer.collapseAll();
 		treeViewer.expandToLevel(GenerateToStringContentProvider.fieldsNode, 1);
 
-		treeViewer.addSelectionChangedListener(event -> {
+		treeViewer.addSelectionChangedListener(_ -> {
 			IStructuredSelection selection= (IStructuredSelection)getTreeViewer().getSelection();
 
 			Object selected= selection.size() > 0 ? selection.toList().get(0) : null;

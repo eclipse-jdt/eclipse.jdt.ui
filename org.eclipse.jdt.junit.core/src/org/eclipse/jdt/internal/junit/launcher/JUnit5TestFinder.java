@@ -236,7 +236,7 @@ public class JUnit5TestFinder implements ITestFinder {
 						addTypeAndSubtypes(type, result, hierarchy);
 					}
 				} else {
-					typesByCompilationUnit.computeIfAbsent(compilationUnit, key -> new ArrayList<>()).add(type);
+					typesByCompilationUnit.computeIfAbsent(compilationUnit, _ -> new ArrayList<>()).add(type);
 				}
 			}
 		}

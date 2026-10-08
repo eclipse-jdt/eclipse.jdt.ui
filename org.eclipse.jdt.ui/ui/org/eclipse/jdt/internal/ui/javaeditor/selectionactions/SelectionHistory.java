@@ -36,7 +36,7 @@ public class SelectionHistory {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		fHistory= new ArrayList<>(3);
-		fSelectionListener= event -> {
+		fSelectionListener= _ -> {
 			if (fSelectionChangeListenerCounter == 0)
 				flush();
 		};

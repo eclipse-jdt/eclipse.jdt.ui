@@ -69,7 +69,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * classes. It is added by the respective factory methods and
 	 * updates the page's preview on each change.
 	 */
-	protected final Observer fUpdater= (o, arg) -> {
+	protected final Observer fUpdater= (_, _) -> {
 		doUpdatePreview();
 		notifyValuesModified();
 	};
@@ -376,7 +376,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				}
 			});
 
-			fNumberText.addModifyListener(e -> fieldModified());
+			fNumberText.addModifyListener(_ -> fieldModified());
 		}
 
 		private IStatus createErrorStatus() {
@@ -541,7 +541,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				}
 			});
 
-			fText.addModifyListener(e -> fieldModified());
+			fText.addModifyListener(_ -> fieldModified());
 		}
 
 		private IStatus createErrorStatus(String errorText) {
@@ -895,7 +895,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		b.setEnabled(true);
 		b.setVisible(true);
 		SWTUtil.setButtonDimensionHint(b);
-		b.addSelectionListener(widgetSelectedAdapter((e) -> { doSetAll(true); }));
+		b.addSelectionListener(widgetSelectedAdapter((_) -> { doSetAll(true); }));
 
 		b= new Button(buttonHolder, SWT.PUSH);
 		b.setText(FormatterMessages.ModifyDialogTabPage_deselectAll_text);
@@ -904,7 +904,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		b.setEnabled(true);
 		b.setVisible(true);
 		SWTUtil.setButtonDimensionHint(b);
-		b.addSelectionListener(widgetSelectedAdapter((e) -> { doSetAll(false); }));
+		b.addSelectionListener(widgetSelectedAdapter((_) -> { doSetAll(false); }));
 
 		final Composite previewPane= new Composite(sashForm, SWT.NONE);
 		previewPane.setLayout(createGridLayout(numColumns, true));

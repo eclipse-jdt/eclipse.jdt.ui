@@ -1004,7 +1004,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 			if (removeUnusedParameter && id == IProblem.ArgumentIsNeverUsed) {
 				SimpleName parameter= getUnusedName(compilationUnit, problem);
 				MethodDeclaration method= ASTNodes.getTypedAncestor(parameter, MethodDeclaration.class);
-				parametersToRemove.computeIfAbsent(method, (MethodDeclaration key) -> new LinkedHashSet<>()).add(parameter);
+				parametersToRemove.computeIfAbsent(method, (MethodDeclaration _) -> new LinkedHashSet<>()).add(parameter);
 			}
 		}
 		for (List<SimpleName> names : variableDeclarations.values()) {

@@ -220,7 +220,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 
 		fAddSystemModuleButton= new Button(left, SWT.NONE);
 		fAddSystemModuleButton.setText(NewWizardMessages.ModuleDependenciesPage_addSystemModule_button);
-		fAddSystemModuleButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> addSystemModules()));
+		fAddSystemModuleButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(_ -> addSystemModules()));
 
 		// === right: ===
 		Composite right= new Composite(composite, SWT.NONE);

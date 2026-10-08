@@ -149,7 +149,7 @@ public class ChangeExceptionsControl extends Composite {
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(new ExceptionInfoContentProvider());
 		fTableViewer.setLabelProvider(new ExceptionInfoLabelProvider());
-		fTableViewer.addSelectionChangedListener(event -> updateButtonsEnabledState());
+		fTableViewer.addSelectionChangedListener(_ -> updateButtonsEnabledState());
 	}
 
 	private ExceptionInfo[] getSelectedItems() {

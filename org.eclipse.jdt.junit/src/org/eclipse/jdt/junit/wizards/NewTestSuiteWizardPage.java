@@ -313,7 +313,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			fClassesInSuiteTable.getTable().setLayoutData(gd);
 			fClassesInSuiteTable.setContentProvider(new SuiteClassesContentProvider(isJUnit4(), isJUnit5()));
 			fClassesInSuiteTable.setLabelProvider(new JavaElementLabelProvider());
-			fClassesInSuiteTable.addCheckStateListener(event -> handleFieldChanged(CLASSES_IN_SUITE));
+			fClassesInSuiteTable.addCheckStateListener(_ -> handleFieldChanged(CLASSES_IN_SUITE));
 
 			Composite buttonContainer= new Composite(parent, SWT.NONE);
 			gd= new GridData(GridData.FILL_VERTICAL);

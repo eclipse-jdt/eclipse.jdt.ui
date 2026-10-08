@@ -138,7 +138,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
 			final Text classNameField= new Text(result, SWT.BORDER | SWT.SINGLE);
 			classNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			classNameField.addModifyListener(e -> {
+			classNameField.addModifyListener(_ -> {
 				ConvertAnonymousToNestedInputPage.this.getConvertRefactoring().setClassName(classNameField.getText());
 				ConvertAnonymousToNestedInputPage.this.updateStatus();
 			});
