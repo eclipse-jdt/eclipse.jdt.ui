@@ -91,4 +91,4 @@ Import-Package: org.commonmark;version="0.24.0",
  org.commonmark.node;version="0.24.0",
  org.commonmark.parser;version="0.24.0",
  org.commonmark.renderer.html;version="0.24.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-21
+Bundle-RequiredExecutionEnvironment: JavaSE-25
