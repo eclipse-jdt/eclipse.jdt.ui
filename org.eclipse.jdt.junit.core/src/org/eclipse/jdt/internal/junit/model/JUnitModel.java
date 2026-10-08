@@ -17,7 +17,6 @@
 package org.eclipse.jdt.internal.junit.model;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -34,7 +33,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.sax.SAXSource;
@@ -45,11 +43,11 @@ import org.xml.sax.SAXException;
 
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.junit.TestRunListener;
+import org.eclipse.jdt.junit.model.ITestElement;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
@@ -368,7 +366,7 @@ public final class JUnitModel {
 	 */
 	public static TestRunSession importTestRunSession(File file) throws CoreException {
 		File sourceFile= file.toPath().toAbsolutePath().normalize().toFile();
-		TestRunSession session= readTestRunSession(sourceFile);
+		TestRunSession session= importIntoTestRunSession(sourceFile, null);
 		JUnitCorePlugin.getModel().addTestRunSession(session, sourceFile);
 		return session;
 	}
@@ -390,30 +388,11 @@ public final class JUnitModel {
 			return null;
 		}
 
-		TestRunSession replacementSession= readTestRunSession(sourceFile);
+		TestRunSession replacementSession= importIntoTestRunSession(sourceFile, null);
 		if (!model.replaceTestRunSession(testRunSession, replacementSession, sourceFile)) {
 			return null;
 		}
 		return replacementSession;
-	}
-
-	private static TestRunSession readTestRunSession(File file) throws CoreException {
-		try {
-			SAXParserFactory parserFactory= XmlProcessorFactoryJdtJunit.createSAXFactoryWithErrorOnDOCTYPE();
-//			parserFactory.setValidating(true); // TODO: add DTD and debug flag
-			SAXParser parser= parserFactory.newSAXParser();
-			TestRunHandler handler= new TestRunHandler();
-			parser.parse(file, handler);
-			return handler.getTestRunSession();
-		} catch (ParserConfigurationException | SAXException e) {
-			throwImportError(file, e);
-		} catch (IOException e) {
-			throwImportError(file, e);
-		} catch (IllegalArgumentException e) {
-			// Bug in parser: can throw IAE even if file is not null
-			throwImportError(file, e);
-		}
-		return null; // does not happen
 	}
 
 	/**
@@ -455,8 +434,8 @@ public final class JUnitModel {
 				}
 			}
 			private void storeImportError(Exception e) {
-				exception[0]= new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-						JUnitCorePlugin.getPluginId(), ModelMessages.JUnitModel_could_not_import, e));
+				exception[0]= new CoreException(org.eclipse.core.runtime.Status.error(
+						ModelMessages.JUnitModel_could_not_import, e));
 			}
 		};
 		importThread.start();
@@ -482,46 +461,28 @@ public final class JUnitModel {
 		return session[0];
 	}
 
-	public static void importIntoTestRunSession(File swapFile, TestRunSession testRunSession) throws CoreException {
+	static TestRunSession importIntoTestRunSession(File file, TestRunSession testRunSession) throws CoreException {
 		try {
 			SAXParserFactory parserFactory= XmlProcessorFactoryJdtJunit.createSAXFactoryWithErrorOnDOCTYPE();
 //			parserFactory.setValidating(true); // TODO: add DTD and debug flag
 			SAXParser parser= parserFactory.newSAXParser();
 			TestRunHandler handler= new TestRunHandler(testRunSession);
-			parser.parse(swapFile, handler);
-		} catch (ParserConfigurationException | SAXException e) {
-			throwImportError(swapFile, e);
-		} catch (IOException e) {
-			throwImportError(swapFile, e);
-		} catch (IllegalArgumentException e) {
+			parser.parse(file, handler);
+			return handler.getTestRunSession();
+		} catch (ParserConfigurationException | SAXException | IOException | IllegalArgumentException e) {
 			// Bug in parser: can throw IAE even if file is not null
-			throwImportError(swapFile, e);
+			throw new CoreException(org.eclipse.core.runtime.Status.error(
+					Messages.format(ModelMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file)),
+					e));
 		}
 	}
 
-	/**
-	 * Exports the given test run session.
-	 *
-	 * @param testRunSession the test run session
-	 * @param file the destination
-	 * @throws CoreException if an error occurred
-	 */
-	public static void exportTestRunSession(TestRunSession testRunSession, File file) throws CoreException {
-		try (FileOutputStream out= new FileOutputStream(file)) {
-			exportTestRunSession(testRunSession, out);
-		} catch (IOException | TransformerConfigurationException e) {
-			throwExportError(file, e);
-		} catch (TransformerException e) {
-			throwExportError(file, e);
-		}
-	}
-
-	public static void exportTestRunSession(TestRunSession testRunSession, OutputStream out)
+	public static void exportTestElement(ITestElement testElement, OutputStream out)
 			throws TransformerFactoryConfigurationError, TransformerException {
 
 		Transformer transformer= XmlProcessorFactoryJdtJunit.createTransformerFactoryWithErrorOnDOCTYPE().newTransformer();
 		InputSource inputSource= new InputSource();
-		SAXSource source= new SAXSource(new TestRunSessionSerializer(testRunSession), inputSource);
+		SAXSource source= new SAXSource(new TestRunSessionSerializer(testElement), inputSource);
 		StreamResult result= new StreamResult(out);
 		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
@@ -538,20 +499,6 @@ public final class JUnitModel {
 			// no indentation today...
 		}
 		transformer.transform(source, result);
-	}
-
-	private static void throwExportError(File file, Exception e) throws CoreException {
-		throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-				JUnitCorePlugin.getPluginId(),
-				Messages.format(ModelMessages.JUnitModel_could_not_write, BasicElementLabels.getPathLabel(file)),
-				e));
-	}
-
-	private static void throwImportError(File file, Exception e) throws CoreException {
-		throw new CoreException(new org.eclipse.core.runtime.Status(IStatus.ERROR,
-				JUnitCorePlugin.getPluginId(),
-				Messages.format(ModelMessages.JUnitModel_could_not_read, BasicElementLabels.getPathLabel(file)),
-				e));
 	}
 
 	private boolean replaceTestRunSession(TestRunSession oldSession, TestRunSession newSession, File sourceFile) {

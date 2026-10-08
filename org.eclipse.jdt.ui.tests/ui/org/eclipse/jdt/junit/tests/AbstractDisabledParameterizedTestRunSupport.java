@@ -17,8 +17,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
@@ -95,17 +95,17 @@ public abstract class AbstractDisabledParameterizedTestRunSupport extends Abstra
 		assertNotNull(session);
 		assertDisabledParameterizedTest(session);
 
-		File file= File.createTempFile("disabled-parameterized-test", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path file= Files.createTempFile("disabled-parameterized-test", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		TestRunSession importedSession= null;
 		try {
-			JUnitModel.exportTestRunSession(session, file);
-			importedSession= JUnitModel.importTestRunSession(file);
+			JUnitCore.exportTestElement(session, file);
+			importedSession= JUnitModel.importTestRunSession(file.toFile());
 			assertDisabledParameterizedTest(importedSession);
 		} finally {
 			if (importedSession != null) {
 				JUnitCorePlugin.getModel().removeTestRunSession(importedSession);
 			}
-			Files.deleteIfExists(file.toPath());
+			Files.deleteIfExists(file);
 		}
 	}
 
