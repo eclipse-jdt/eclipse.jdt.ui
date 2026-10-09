@@ -322,7 +322,10 @@
            </with>
            <with variable="element">
              <instanceof value="org.eclipse.jdt.core.IType"/>
- 	         <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+             <or>
+               <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+               <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="org.junit.platform.commons.annotation.Testable"/>
+             </or>
             </with>
          </enablement>
       </renameParticipant>
@@ -338,7 +341,10 @@
            </with>
            <with variable="element">
    	         <instanceof value="org.eclipse.jdt.core.IJavaProject"/>
-	         <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+             <or>
+               <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+               <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="org.junit.platform.commons.annotation.Testable"/>
+             </or>
            </with>
          </enablement>
       </renameParticipant>
