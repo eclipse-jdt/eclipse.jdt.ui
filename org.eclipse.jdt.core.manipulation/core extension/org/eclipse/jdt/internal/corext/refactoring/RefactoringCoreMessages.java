@@ -565,6 +565,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_cannot_extract_from_annotation;
 
+	public static String ExtractMethodAnalyzer_cannot_extract_local_type_reference;
+
 	public static String ExtractMethodAnalyzer_cannot_extract_method_name_reference;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name;
@@ -588,6 +590,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractMethodAnalyzer_cannot_extract_yield;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_final_field_assignment;
+
+	public static String ExtractMethodAnalyzer_cannot_return_anonymous_type;
 
 	public static String ExtractMethodAnalyzer_compile_errors;
 
@@ -2560,8 +2564,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ConvertToRecordRefactoring_has_initializer;
 
 	public static String ConvertToRecordRefactoring_member_types_not_supported;
-
-	public static String ExtractMethodAnalyzer_cannot_extract_local_type_reference;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
