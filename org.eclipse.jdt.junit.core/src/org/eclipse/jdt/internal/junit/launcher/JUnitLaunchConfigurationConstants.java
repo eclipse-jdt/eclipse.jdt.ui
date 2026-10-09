@@ -43,6 +43,12 @@ public class JUnitLaunchConfigurationConstants {
 
 	public static final String ATTR_PORT= JUnitCorePlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
 
+	/**
+	 * The number of VMs that connect one after the other to the {@link #ATTR_PORT port} of the
+	 * launch, if there are several.
+	 */
+	public static final String ATTR_VM_COUNT= JUnitCorePlugin.PLUGIN_ID + ".VM_COUNT"; //$NON-NLS-1$
+
 	public static final String ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY= JUnitCorePlugin.PLUGIN_ID + ".DONT_ADD_MISSING_JUNIT5_DEPENDENCY"; //$NON-NLS-1$
 
 	/**
@@ -64,6 +70,11 @@ public class JUnitLaunchConfigurationConstants {
 	public static final String ATTR_TEST_METHOD_NAME= ATTR_TEST_NAME;
 
 	public static final String ATTR_KEEPRUNNING = JUnitCorePlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
+
+	/**
+	 * Whether each test class is run in a separate VM, the VMs being run one after the other.
+	 */
+	public static final String ATTR_SEPARATE_VM_PER_TEST_CLASS= JUnitCorePlugin.PLUGIN_ID + ".SEPARATE_VM_PER_TEST_CLASS"; //$NON-NLS-1$
 	/**
 	 * The launch container, or "" iff running a single test type.
 	 */

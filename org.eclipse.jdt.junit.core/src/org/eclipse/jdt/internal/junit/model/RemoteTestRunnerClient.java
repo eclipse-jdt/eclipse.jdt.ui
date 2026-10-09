@@ -268,6 +268,15 @@ public class RemoteTestRunnerClient {
 
 	private volatile boolean stopped;
 	private volatile boolean ended;
+	/**
+	 * The number of test runs still expected, including the current one. Each test run is performed
+	 * by a VM that connects to the server socket after the VM of the previous test run.
+	 */
+	private volatile int fRemainingTestRuns;
+	/**
+	 * The elapsed time of the previous test runs
+	 */
+	private long fPreviousElapsedTime;
 	private final ITestKind testRunnerKind;
 
 	public RemoteTestRunnerClient(ITestKind testRunnerKind) {
@@ -290,13 +299,15 @@ public class RemoteTestRunnerClient {
 			try {
 				if (fDebug)
 					System.out.println("Creating server socket "+fServerPort); //$NON-NLS-1$
-				fServerSocket= new ServerSocket(fServerPort);
-				fSocket= fServerSocket.accept();
-				fPushbackReader= new PushbackReader(new BufferedReader(new InputStreamReader(fSocket.getInputStream(), StandardCharsets.UTF_8)));
-				fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream(), StandardCharsets.UTF_8), true);
-				String message;
-				while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
-					receiveMessage(message);
+				ServerSocket serverSocket= fServerSocket= new ServerSocket(fServerPort);
+				do {
+					fSocket= serverSocket.accept();
+					fPushbackReader= new PushbackReader(new BufferedReader(new InputStreamReader(fSocket.getInputStream(), StandardCharsets.UTF_8)));
+					fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream(), StandardCharsets.UTF_8), true);
+					String message;
+					while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
+						receiveMessage(message);
+				} while (prepareNextTestRun());
 			} catch (SocketException e) {
 				notifyTestRunTerminated();
 			} catch (IOException e) {
@@ -308,15 +319,17 @@ public class RemoteTestRunnerClient {
 	}
 
 	/**
-	 * Start listening to a test run. Start a server connection that
-	 * the RemoteTestRunner can connect to.
+	 * Start listening to test runs. Start a server connection that
+	 * the RemoteTestRunners can connect to, one after the other.
 	 *
 	 * @param listeners listeners to inform
 	 * @param port port on which the server socket will be opened
+	 * @param testRunCount the number of test runs, each one performed by a VM
 	 */
-	public synchronized void startListening(ITestRunListener2[] listeners, int port) {
+	public synchronized void startListening(ITestRunListener2[] listeners, int port, int testRunCount) {
 		fListeners= listeners;
 		fPort= port;
+		fRemainingTestRuns= testRunCount;
 		ServerConnection connection= new ServerConnection(port);
 		connection.start();
 	}
@@ -325,6 +338,7 @@ public class RemoteTestRunnerClient {
 	 * Requests to stop the remote test run.
 	 */
 	public synchronized void stopTest() {
+		fRemainingTestRuns= 1;
 		if (isRunning()) {
 			fWriter.println(MessageIds.TEST_STOP);
 			fWriter.flush();
@@ -333,15 +347,28 @@ public class RemoteTestRunnerClient {
 	}
 
 	public synchronized void stopWaiting() {
+		// no other VM will connect
+		fRemainingTestRuns= 1;
 		if (fServerSocket != null  && ! fServerSocket.isClosed() && fSocket == null) {
 			shutDown(); // will throw a SocketException in Threads that wait in ServerSocket#accept()
 		}
 	}
 
-	private synchronized void shutDown() {
-		if (fDebug)
-			System.out.println("shutdown "+fPort); //$NON-NLS-1$
+	/**
+	 * Closes the connection of the finished test run, if another test run is expected.
+	 *
+	 * @return <code>true</code> if another test run is expected
+	 */
+	private synchronized boolean prepareNextTestRun() {
+		if (fServerSocket == null || --fRemainingTestRuns <= 0) {
+			return false;
+		}
+		closeConnection();
+		fCurrentState= fDefaultState;
+		return true;
+	}
 
+	private void closeConnection() {
 		if (fWriter != null) {
 			fWriter.close();
 			fWriter= null;
@@ -360,6 +387,13 @@ public class RemoteTestRunnerClient {
 			}
 		} catch(IOException e) {
 		}
+	}
+
+	private synchronized void shutDown() {
+		if (fDebug)
+			System.out.println("shutdown "+fPort); //$NON-NLS-1$
+
+		closeConnection();
 		try{
 			if (fServerSocket != null) {
 				fServerSocket.close();
@@ -570,14 +604,20 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void testRunEnded(final long elapsedTime) {
+		if (fRemainingTestRuns > 1) {
+			// the test run continues in the next VM
+			fPreviousElapsedTime+= elapsedTime;
+			return;
+		}
 		ended = true;
 		if (JUnitCorePlugin.isStopped())
 			return;
+		final long totalElapsedTime= fPreviousElapsedTime + elapsedTime;
 		for (ITestRunListener2 listener : fListeners) {
 			SafeRunner.run(new ListenerSafeRunnable() {
 				@Override
 				public void run() {
-					listener.testRunEnded(elapsedTime);
+					listener.testRunEnded(totalElapsedTime);
 				}
 			});
 		}
