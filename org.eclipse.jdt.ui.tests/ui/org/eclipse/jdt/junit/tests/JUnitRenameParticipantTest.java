@@ -146,15 +146,17 @@ public class JUnitRenameParticipantTest {
 		fProject= JavaProjectHelper.createJavaProject("JUnitRenameParticipantTest" + junitVersion, "bin");
 		JavaProjectHelper.addRTJar_17(fProject, false);
 		JavaProjectHelper.set17CompilerOptions(fProject, false);
-		if (junitVersion == 5) {
-			// Use only Jupiter's API dependencies: the JUnit 5 container can also supply
-			// JUnit 4, which would hide bug 570024.
-			JavaProjectHelper.addToClasspath(fProject, BuildPathSupport.getJUnitJupiterApiLibraryEntry());
-			JavaProjectHelper.addToClasspath(fProject, BuildPathSupport.getJUnitPlatformCommonsLibraryEntry());
+		if (junitVersion == 4) {
+			JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(new Path(JUnitCore.JUNIT_CONTAINER_ID).append(Integer.toString(junitVersion))));
+		} else {
+			// Use only Jupiter's API dependencies for both JUnit 5 and 6, so container
+			// contents cannot introduce JUnit 4 and hide bug 570024.
+			JavaProjectHelper.addToClasspath(fProject, junitVersion == 5
+					? BuildPathSupport.getJUnitJupiterApiLibraryEntry() : BuildPathSupport.getJUnit6JupiterApiLibraryEntry());
+			JavaProjectHelper.addToClasspath(fProject, junitVersion == 5
+					? BuildPathSupport.getJUnitPlatformCommonsLibraryEntry() : BuildPathSupport.getJUnit6PlatformCommonsLibraryEntry());
 			JavaProjectHelper.addToClasspath(fProject, BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			JavaProjectHelper.addToClasspath(fProject, BuildPathSupport.getJUnitApiGuardianLibraryEntry());
-		} else {
-			JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(new Path(JUnitCore.JUNIT_CONTAINER_ID).append(Integer.toString(junitVersion))));
 		}
 		if (junitVersion == 4) {
 			assertNotNull(fProject.findType("junit.framework.Test"));
