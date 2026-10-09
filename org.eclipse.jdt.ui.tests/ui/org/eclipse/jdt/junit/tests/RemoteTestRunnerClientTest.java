@@ -172,8 +172,8 @@ public class RemoteTestRunnerClientTest {
 		int port= findFreePort();
 		RemoteTestRunnerClient client= startClient(listener, port, testKindId);
 		try {
-			try (Socket socket= connect(port)) {
-				OutputStream output= socket.getOutputStream();
+			try (Socket socket= connect(port);
+					OutputStream output= socket.getOutputStream()) {
 				sendRunStarted(output, listener);
 				if (completeRun) {
 					sendMessage(output, MessageIds.TEST_RUN_END + "0"); //$NON-NLS-1$
