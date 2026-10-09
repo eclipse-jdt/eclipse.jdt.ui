@@ -429,7 +429,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		}
 
 		JavaManipulation.setCodeTemplateStore(getCodeTemplateStore());
-		JavaManipulation.setCodeTemplateContextRegistry(getCodeTemplateContextRegistry());
+		JavaManipulation.setCodeTemplateContextRegistry(getCodeTemplateContextRegistryCore());
 		disableNewCodeAssistCategoryPreferences();
 		setTypeFilterPreferences();
 	}
@@ -795,12 +795,26 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	}
 
 	/**
-	 * Returns the template context type registry for the java plug-in.
+	 * Returns the context type registry for the Java editor templates.
 	 *
-	 * @return the template context type registry for the java plug-in
+	 * @return the template context type registry
 	 * @since 3.0
+	 * @deprecated Use {@link #getTemplateContextRegistryCore()}. This method retains its original
+	 *             return type for binary compatibility with existing plug-ins.
 	 */
-	public ContextTypeRegistry getTemplateContextRegistry() {
+	@Deprecated
+	public org.eclipse.jface.text.templates.ContextTypeRegistry getTemplateContextRegistry() {
+		getTemplateContextRegistryCore();
+		return fContextTypeRegistry;
+	}
+
+	/**
+	 * Returns the context type registry for the Java editor templates using the
+	 * non-deprecated registry type.
+	 *
+	 * @return the template context type registry
+	 */
+	public ContextTypeRegistry getTemplateContextRegistryCore() {
 		ContextTypeRegistry result= fContextTypeRegistry;
 		if (result != null) { // First check (no locking)
 			return result;
@@ -838,7 +852,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the contribution template context registry
 	 */
 	public ContributionContextTypeRegistry getContributionTemplateContextRegistry() {
-		getTemplateContextRegistry();
+		getTemplateContextRegistryCore();
 		return fContextTypeRegistry;
 	}
 
@@ -871,7 +885,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 				}
 
 				final IPreferenceStore store= getPreferenceStore();
-				getTemplateContextRegistry();
+				getTemplateContextRegistryCore();
 				ContributionTemplateStore templateStore = new ContributionTemplateStore(fContextTypeRegistry, store, TEMPLATES_KEY);
 				try {
 					templateStore.load();
@@ -887,14 +901,28 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	}
 
 	/**
-	 * Returns the template context type registry for the code generation
-	 * templates.
+	 * Returns the context type registry for the code generation templates.
 	 *
-	 * @return the template context type registry for the code generation
-	 *         templates
+	 * @return the template context type registry
 	 * @since 3.0
+	 * @deprecated Use {@link #getCodeTemplateContextRegistryCore()}. This method retains its original
+	 *             return type for binary compatibility with existing plug-ins.
+	 * External clients should use {@link JavaManipulation#getCodeTemplateContextRegistry()}
+	 * after activating the JDT UI plug-in.
 	 */
-	public ContextTypeRegistry getCodeTemplateContextRegistry() {
+	@Deprecated
+	public org.eclipse.jface.text.templates.ContextTypeRegistry getCodeTemplateContextRegistry() {
+		getCodeTemplateContextRegistryCore();
+		return fCodeTemplateContextTypeRegistry;
+	}
+
+	/**
+	 * Returns the context type registry for the code generation templates using the
+	 * non-deprecated registry type.
+	 *
+	 * @return the template context type registry
+	 */
+	public ContextTypeRegistry getCodeTemplateContextRegistryCore() {
 		if (fCodeTemplateContextTypeRegistry == null) {
 			synchronized (this) {
 				if (fCodeTemplateContextTypeRegistry != null) {
@@ -927,7 +955,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 				}
 
 				IPreferenceStore store= getPreferenceStore();
-				getCodeTemplateContextRegistry();
+				getCodeTemplateContextRegistryCore();
 				ContributionTemplateStore templateStore = new ContributionTemplateStore(fCodeTemplateContextTypeRegistry, store, CODE_TEMPLATES_KEY);
 				try {
 					templateStore.load();
