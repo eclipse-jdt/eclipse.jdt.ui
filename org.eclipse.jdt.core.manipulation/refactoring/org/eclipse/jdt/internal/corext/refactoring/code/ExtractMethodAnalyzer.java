@@ -295,13 +295,6 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 	}
 
 	private class AnonymousClassChecker extends ASTVisitor {
-		private final AnonymousClassDeclaration fDecl;
-		private final ITypeBinding fTypeBinding;
-
-		public AnonymousClassChecker(AnonymousClassDeclaration decl) {
-			this.fDecl= decl;
-			this.fTypeBinding= decl.resolveBinding();
-		}
 		@Override
 		public boolean visit(MethodDeclaration node) {
 			IMethodBinding methodBinding= node.resolveBinding();
@@ -332,7 +325,7 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 					if (initializer instanceof ClassInstanceCreation classCreation
 							&& classCreation.getAnonymousClassDeclaration() != null) {
 						try {
-							AnonymousClassChecker checker= new AnonymousClassChecker(classCreation.getAnonymousClassDeclaration());
+							AnonymousClassChecker checker= new AnonymousClassChecker();
 							classCreation.getAnonymousClassDeclaration().accept(checker);
 						} catch (AbortSearchException e) {
 							getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_return_anonymous_type, JavaStatusContext.create(fCUnit, declaration));
@@ -351,7 +344,7 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 					ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation)expression;
 					if (classInstanceCreation.getAnonymousClassDeclaration() != null) {
 						try {
-							AnonymousClassChecker checker= new AnonymousClassChecker(classInstanceCreation.getAnonymousClassDeclaration());
+							AnonymousClassChecker checker= new AnonymousClassChecker();
 							classInstanceCreation.getAnonymousClassDeclaration().accept(checker);
 						} catch (AbortSearchException e) {
 							getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_return_anonymous_type, JavaStatusContext.create(fCUnit, classInstanceCreation));
