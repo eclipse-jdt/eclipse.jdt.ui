@@ -133,6 +133,77 @@ public class RemoteTestRunnerClientTest {
 		assertEquals(0, listener.terminatedCount.get());
 	}
 
+	@Test
+	public void testSocketResetNotifiesTerminationForJUnit5() throws Exception {
+		assertSocketResetNotifiesTermination(TestKindRegistry.JUNIT5_TEST_KIND_ID);
+	}
+
+	@Test
+	public void testSocketResetNotifiesTerminationForJUnit6() throws Exception {
+		assertSocketResetNotifiesTermination(TestKindRegistry.JUNIT6_TEST_KIND_ID);
+	}
+
+	private static void assertSocketResetNotifiesTermination(String testKindId) throws Exception {
+		RecordingListener listener= runWithSocketReset(testKindId, false);
+		assertEquals(0, listener.endedCount.get());
+		assertEquals(0, listener.stoppedCount.get());
+		assertEquals(1, listener.terminatedCount.get());
+	}
+
+	@Test
+	public void testSocketResetAfterRunEndDoesNotNotifyTerminationForJUnit5() throws Exception {
+		assertSocketResetAfterRunEndDoesNotNotifyTermination(TestKindRegistry.JUNIT5_TEST_KIND_ID);
+	}
+
+	@Test
+	public void testSocketResetAfterRunEndDoesNotNotifyTerminationForJUnit6() throws Exception {
+		assertSocketResetAfterRunEndDoesNotNotifyTermination(TestKindRegistry.JUNIT6_TEST_KIND_ID);
+	}
+
+	private static void assertSocketResetAfterRunEndDoesNotNotifyTermination(String testKindId) throws Exception {
+		RecordingListener listener= runWithSocketReset(testKindId, true);
+		assertEquals(1, listener.endedCount.get());
+		assertEquals(0, listener.stoppedCount.get());
+		assertEquals(0, listener.terminatedCount.get());
+	}
+
+	private static RecordingListener runWithSocketReset(String testKindId, boolean completeRun) throws Exception {
+		RecordingListener listener= new RecordingListener();
+		int port= findFreePort();
+		RemoteTestRunnerClient client= startClient(listener, port, testKindId);
+		try {
+			try (Socket socket= connect(port)) {
+				OutputStream output= socket.getOutputStream();
+				sendRunStarted(output, listener);
+				if (completeRun) {
+					sendMessage(output, MessageIds.TEST_RUN_END + "0"); //$NON-NLS-1$
+					assertTrue("JUnit client did not report the test run end", //$NON-NLS-1$
+							listener.ended.await(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+				}
+				// Closing with a zero linger timeout sends a reset instead of an orderly EOF.
+				socket.setSoLinger(true, 0);
+			}
+			waitForShutdown(client);
+		} finally {
+			client.stopWaiting();
+		}
+		return listener;
+	}
+
+	private static void waitForShutdown(RemoteTestRunnerClient client) throws Exception {
+		long deadline= System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(TIMEOUT_MILLIS);
+		do {
+			// The shutdown monitor also ensures that all terminal callbacks have completed.
+			synchronized (client) {
+				if (!client.isRunning()) {
+					return;
+				}
+			}
+			Thread.sleep(10);
+		} while (System.nanoTime() < deadline);
+		throw new AssertionError("JUnit client did not shut down after the socket reset"); //$NON-NLS-1$
+	}
+
 	private static RemoteTestRunnerClient startClient(RecordingListener listener, int port, String testKindId) {
 		ITestKind testKind= TestKindRegistry.getDefault().getKind(testKindId);
 		assertFalse("JUnit test kind is unavailable: " + testKindId, testKind.isNull());
@@ -188,6 +259,7 @@ public class RemoteTestRunnerClientTest {
 	private static class RecordingListener implements ITestRunListener2 {
 
 		final CountDownLatch started= new CountDownLatch(1);
+		final CountDownLatch ended= new CountDownLatch(1);
 		final AtomicInteger endedCount= new AtomicInteger();
 		final AtomicInteger stoppedCount= new AtomicInteger();
 		final AtomicInteger terminatedCount= new AtomicInteger();
@@ -200,6 +272,7 @@ public class RemoteTestRunnerClientTest {
 		@Override
 		public void testRunEnded(long elapsedTime) {
 			endedCount.incrementAndGet();
+			ended.countDown();
 		}
 
 		@Override

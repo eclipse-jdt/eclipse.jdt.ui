@@ -122,7 +122,7 @@ public class RemoteTestRunnerClient {
 	        if (message.startsWith(MessageIds.TEST_STOPPED)) {
 	            long elapsedTime = Long.parseLong(arg);
 	            notifyTestRunStopped(elapsedTime);
-	            shutDown();
+	            shutDown(false);
 	            return this;
 	        }
 	        if (message.startsWith(MessageIds.TEST_TREE)) {
@@ -289,6 +289,7 @@ public class RemoteTestRunnerClient {
 
 		@Override
 		public void run() {
+			boolean socketFailure= false;
 			try {
 				if (fDebug)
 					System.out.println("Creating server socket "+fServerPort); //$NON-NLS-1$
@@ -300,12 +301,12 @@ public class RemoteTestRunnerClient {
 				while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
 					receiveMessage(message);
 			} catch (SocketException e) {
-				// fall through
+				socketFailure= true;
 			} catch (IOException e) {
 				LOG.error(e.getMessage(), e);
 				// fall through
 			}
-			shutDown();
+			shutDown(socketFailure);
 		}
 	}
 
@@ -336,11 +337,11 @@ public class RemoteTestRunnerClient {
 
 	public synchronized void stopWaiting() {
 		if (fServerSocket != null  && ! fServerSocket.isClosed() && fSocket == null) {
-			shutDown(); // will throw a SocketException in Threads that wait in ServerSocket#accept()
+			shutDown(false); // will throw a SocketException in Threads that wait in ServerSocket#accept()
 		}
 	}
 
-	private synchronized void shutDown() {
+	private synchronized void shutDown(boolean socketFailure) {
 		if (fDebug)
 			System.out.println("shutdown "+fPort); //$NON-NLS-1$
 
@@ -376,7 +377,7 @@ public class RemoteTestRunnerClient {
 		String testKind= testRunnerKind.getId();
 		boolean isJUnit3Or4= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind)
 				|| TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind);
-		if (isJUnit3Or4 && !stopped) {
+		if (socketFailure || (isJUnit3Or4 && !stopped)) {
 			// An externally terminated VM can close the socket without sending a final protocol message.
 			notifyTestRunTerminated();
 		} else {
