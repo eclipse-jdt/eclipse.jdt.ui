@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.help.IContextProvider;
 
@@ -116,6 +117,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
@@ -1643,7 +1645,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		int i= 0;
 		while (elementId != null) {
 			input= JavaCore.create(elementId);
-			if (input == null || !input.exists()) {
+			if (input == null) {
 				inputList= null;
 				break;
 			}
@@ -1654,16 +1656,24 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			doRestoreState(memento, input);
 		} else {
 			final IJavaElement[] hierarchyInput= inputList.toArray(new IJavaElement[inputList.size()]);
-
 			synchronized (this) {
-				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, HistoryAction.getElementLabel(hierarchyInput));
+				long flags = JavaElementLabels.M_APP_TYPE_PARAMETERS| JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.P_COMPRESSED;
+				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, HistoryAction.getElementLabel(hierarchyInput, flags));
 				fNoHierarchyShownLabel.setText(label);
 
 				fRestoreStateJob= new Job(label) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
-							doRestoreInBackground(memento, hierarchyInput, monitor);
+							Job.getJobManager().join(JavaUI.ID_PLUGIN, monitor);
+							IJavaElement[] existingHierarchyInput = Stream.of(hierarchyInput).filter(IJavaElement::exists).toArray(length -> new IJavaElement[length]);
+							if(existingHierarchyInput.length == 0) {
+								PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+									doRestoreState(memento, new IJavaElement[0]);
+								});
+							} else {
+								doRestoreInBackground(memento, existingHierarchyInput, monitor);
+							}
 						} catch (JavaModelException e) {
 							return e.getStatus();
 						} catch (OperationCanceledException e) {
@@ -1671,6 +1681,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 								showEmptyViewer();
 							}
 							return Status.CANCEL_STATUS;
+						} catch (InterruptedException e) {
+							showEmptyViewer();
 						}
 						return Status.OK_STATUS;
 					}
