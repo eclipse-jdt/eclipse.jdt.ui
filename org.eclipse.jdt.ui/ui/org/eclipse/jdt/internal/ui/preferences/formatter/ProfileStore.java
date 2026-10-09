@@ -26,9 +26,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -291,11 +292,11 @@ public class ProfileStore {
 		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile.getVersion()));
 		element.setAttribute(XML_ATTRIBUTE_PROFILE_KIND, profileVersioner.getProfileKind());
 
-		final Iterator<String> keyIter= profile.getSettings().keySet().iterator();
+		Map<String, String> sorted = new TreeMap<>(profile.getSettings());
 
-		while (keyIter.hasNext()) {
-			final String key= keyIter.next();
-			final String value= profile.getSettings().get(key);
+		for (Entry<String, String> entry : sorted.entrySet()) {
+			final String key= entry.getKey();
+			final String value= entry.getValue();
 			if (value != null) {
 				final Element setting= document.createElement(XML_NODE_SETTING);
 				setting.setAttribute(XML_ATTRIBUTE_ID, key);
@@ -305,6 +306,7 @@ public class ProfileStore {
 				JavaPlugin.logErrorMessage("ProfileStore: Profile does not contain value for key " + key); //$NON-NLS-1$
 			}
 		}
+
 		return element;
 	}
 
