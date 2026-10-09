@@ -27,6 +27,7 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	private List<TestElement> fChildren;
 	private Status fChildrenStatus;
 	private long fChildrenStartTimeNanos= NO_TIME;
+	private boolean fIgnored;
 
 	public TestSuiteElement(TestSuiteElement parent, String id, String testName, int childrenCount, String displayName, String[] parameterTypes, String uniqueId) {
 		super(parent, id, testName, displayName, parameterTypes, uniqueId);
@@ -35,11 +36,19 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
 	@Override
 	public Result getTestResult(boolean includeChildren) {
-		if (includeChildren) {
-			return getStatus().convertToResult();
-		} else {
-			return super.getStatus().convertToResult();
+		Result result= includeChildren ? getStatus().convertToResult() : super.getStatus().convertToResult();
+		if (result == Result.ERROR || result == Result.FAILURE) {
+			return result;
 		}
+		return fIgnored ? Result.IGNORED : result;
+	}
+
+	public void setIgnored(boolean ignored) {
+		fIgnored= ignored;
+	}
+
+	public boolean isIgnored() {
+		return fIgnored;
 	}
 
 	@Override

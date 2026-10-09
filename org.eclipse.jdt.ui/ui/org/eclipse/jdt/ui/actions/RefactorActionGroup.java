@@ -152,6 +152,7 @@ public class RefactorActionGroup extends ActionGroup {
  	private SelectionDispatchAction fMoveAction;
 	private SelectionDispatchAction fRenameAction;
 	private SelectionDispatchAction fModifyParametersAction;
+	private SelectionDispatchAction fModifyRecordParametersAction;
 	private SelectionDispatchAction fConvertAnonymousToNestedAction;
 	private SelectionDispatchAction fConvertClassToRecordAction;
 	private SelectionDispatchAction fConvertNestedToTopAction;
@@ -260,6 +261,10 @@ public class RefactorActionGroup extends ActionGroup {
 			fModifyParametersAction= new ModifyParametersAction(editor);
 			initAction(fModifyParametersAction, selection, IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
 			editor.setAction("ModifyParameters", fModifyParametersAction); //$NON-NLS-1$
+
+			fModifyRecordParametersAction= new ModifyRecordParametersAction(editor);
+			initAction(fModifyRecordParametersAction, selection, IJavaEditorActionDefinitionIds.MODIFY_RECORD_PARAMETERS);
+			editor.setAction("ModifyRecordParameters", fModifyRecordParametersAction); //$NON-NLS-1$
 
 			fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(editor);
 			initUpdatingAction(fConvertAnonymousToNestedAction, provider, null, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
@@ -385,6 +390,9 @@ public class RefactorActionGroup extends ActionGroup {
 			fModifyParametersAction= new ModifyParametersAction(fSite);
 			initUpdatingAction(fModifyParametersAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
 
+			fModifyRecordParametersAction= new ModifyRecordParametersAction(fSite);
+			initUpdatingAction(fModifyRecordParametersAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MODIFY_RECORD_PARAMETERS);
+
 			fMakeStaticAction= new MakeStaticAction(fSite);
 			initUpdatingAction(fMakeStaticAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MAKE_STATIC);
 
@@ -488,6 +496,7 @@ public class RefactorActionGroup extends ActionGroup {
 			actionBars.setGlobalActionHandler(JdtActionConstants.MOVE, fMoveAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.RENAME, fRenameAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.MODIFY_PARAMETERS, fModifyParametersAction);
+			actionBars.setGlobalActionHandler(JdtActionConstants.MODIFY_RECORD_PARAMETERS, fModifyRecordParametersAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.PULL_UP, fPullUpAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.PUSH_DOWN, fPushDownAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
@@ -542,6 +551,7 @@ public class RefactorActionGroup extends ActionGroup {
 			disposeAction(fMoveAction, fSelectionProvider);
 			disposeAction(fRenameAction, fSelectionProvider);
 			disposeAction(fModifyParametersAction, fSelectionProvider);
+			disposeAction(fModifyRecordParametersAction, fSelectionProvider);
 			disposeAction(fMakeStaticAction, fSelectionProvider);
 			disposeAction(fPullUpAction, fSelectionProvider);
 			disposeAction(fPushDownAction, fSelectionProvider);
@@ -606,6 +616,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fMoveAction);
 		refactorSubmenu.add(new Separator(GROUP_CODING));
 		added+= addAction(refactorSubmenu, fModifyParametersAction);
+		added+= addAction(refactorSubmenu, fModifyRecordParametersAction);
 		added+= addAction(refactorSubmenu, fExtractMethodAction);
 		added+= addAction(refactorSubmenu, fExtractTempAction);
 		added+= addAction(refactorSubmenu, fExtractConstantAction);

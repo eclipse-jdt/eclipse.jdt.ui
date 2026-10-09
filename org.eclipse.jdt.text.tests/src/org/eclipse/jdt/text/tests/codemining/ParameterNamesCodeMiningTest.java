@@ -227,7 +227,7 @@ public class ParameterNamesCodeMiningTest {
 		waitReconciled(editor, viewer);
 
 		AtomicReference<IStatus> errorInLog= new AtomicReference<>();
-		ILogListener logListener= (status, plugin) -> {
+		ILogListener logListener= (status, _) -> {
 			if (status.getSeverity() == IStatus.ERROR) {
 				errorInLog.set(status);
 			}

@@ -1273,7 +1273,7 @@ public class ClasspathModifier {
 					URI projLocation= project.getProject().getLocationURI();
 					if (projLocation != null) {
 						IFileStore store= EFS.getStore(projLocation).getFileStore(path);
-						if (store.fetchInfo().exists()) {
+						if (store.exists()) {
 							rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase);
 							throw new CoreException(rootStatus);
 						}

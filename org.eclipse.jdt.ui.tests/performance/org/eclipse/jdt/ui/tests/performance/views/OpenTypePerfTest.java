@@ -187,7 +187,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCaseCommon {
 				new TypeSelectionExtension() {
 					@Override
 					public ISelectionStatusValidator getSelectionValidator() {
-						return selection -> {
+						return _ -> {
 							finish(openFirst);
 							return Status.OK_STATUS;
 						};

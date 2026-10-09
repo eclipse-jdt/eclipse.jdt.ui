@@ -172,7 +172,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			text.setText(fDescriptor.getClassName());
 			text.selectAll();
 			text.setFocus();
-			text.addModifyListener(e -> {
+			text.addModifyListener(_ -> {
 				fDescriptor.setClassName(text.getText());
 				validateRefactoring();
 			});
@@ -214,7 +214,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			final Text text= new Text(group, SWT.BORDER);
 			fParameterNameDecoration= new ControlDecoration(text, SWT.TOP | SWT.LEAD);
 			text.setText(fDescriptor.getFieldName());
-			text.addModifyListener(e -> {
+			text.addModifyListener(_ -> {
 				fDescriptor.setFieldName(text.getText());
 				validateRefactoring();
 			});
@@ -306,7 +306,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 				validateRefactoring();
 				tv.refresh(element, true);
 			});
-			tv.addSelectionChangedListener(event -> {
+			tv.addSelectionChangedListener(_ -> {
 				IStructuredSelection selection= (IStructuredSelection) tv.getSelection();
 				Field field= (Field) selection.getFirstElement();
 				if (selection.isEmpty()) {

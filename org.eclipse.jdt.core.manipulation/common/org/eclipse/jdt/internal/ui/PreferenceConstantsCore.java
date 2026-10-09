@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,15 @@ public class PreferenceConstantsCore {
 	 * @since 3.0
 	 */
 	public static final String TYPEFILTER_DISABLED= "org.eclipse.jdt.ui.typefilter.disabled"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that determines if a quick-fix for a method name will hold back methods if they
+	 * are deprecated.
+	 * <p>
+	 * Value is of type <code>Boolean</code>
+	 * @since 3.40
+	 */
+	public static final String QUICKFIX_HIDE_DEPRECATED_METHODS= "org.eclipse.jdt.ui.quickfix_hide_deprecated_methods"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether code snippets are formatted

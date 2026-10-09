@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7110,5 +7110,132 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_enhanced_for_to_foreach);
+	}
+	@Test
+	public void testConvertSystemOutPrintToIOPrint() throws Exception {
+		JavaProjectHelper.set25CompilerOptions(fJProject1, false);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+				public class E {
+				    public void foo() {
+				        System.out.print("hello");
+				    }
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		int offset= str.indexOf("System.out.print");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_switch_to_IO_print);
+
+		String expected= """
+				package test1;
+				public class E {
+				    public void foo() {
+				        IO.print("hello");
+				    }
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertSystemOutPrintlnToIOPrintln() throws Exception {
+		JavaProjectHelper.set25CompilerOptions(fJProject1, false);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+				public class E {
+				    public void foo() {
+				        System.out.println(42);
+				    }
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		int offset= str.indexOf("System.out.println");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_switch_to_IO_print);
+
+		String expected= """
+				package test1;
+				public class E {
+				    public void foo() {
+				        IO.println(42);
+				    }
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertIOPrintToSystemOutPrint() throws Exception {
+		JavaProjectHelper.set25CompilerOptions(fJProject1, false);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+				public class E {
+				    public void foo() {
+				        IO.print("hello");
+				    }
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		int offset= str.indexOf("IO.print");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_switch_to_System_print);
+
+		String expected= """
+				package test1;
+				public class E {
+				    public void foo() {
+				        System.out.print("hello");
+				    }
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConvertIOPrintlnToSystemOutPrintln() throws Exception {
+		JavaProjectHelper.set25CompilerOptions(fJProject1, false);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+				public class E {
+				    public void foo() {
+				        IO.println(42);
+				    }
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		int offset= str.indexOf("IO.println");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_switch_to_System_print);
+
+		String expected= """
+				package test1;
+				public class E {
+				    public void foo() {
+				        System.out.println(42);
+				    }
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 }

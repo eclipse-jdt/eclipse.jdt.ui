@@ -107,8 +107,8 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			fViewer.setLabelProvider(createLabelProvider());
 			fViewer.setContentProvider(ArrayContentProvider.getInstance());
 			fViewer.setComparator(new SupertypeSelectionViewerSorter());
-			fViewer.addSelectionChangedListener(event -> performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray()));
-			fViewer.addDoubleClickListener(event -> {
+			fViewer.addSelectionChangedListener(_ -> performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray()));
+			fViewer.addDoubleClickListener(_ -> {
 				performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray());
 				close();
 			});
@@ -325,7 +325,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 				}
 			}
 		});
-		fTableViewer.addSelectionChangedListener(event -> {
+		fTableViewer.addSelectionChangedListener(_ -> {
 			final IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
 			if (selection.isEmpty()) {
 				removeButton.setEnabled(false);
@@ -382,7 +382,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		label.setLayoutData(new GridData());
 
 		fNameField= new Text(parent, SWT.BORDER);
-		fNameField.addModifyListener(e -> handleNameChanged(fNameField.getText()));
+		fNameField.addModifyListener(_ -> handleNameChanged(fNameField.getText()));
 		fNameField.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 		TextFieldNavigationHandler.install(fNameField);
 	}

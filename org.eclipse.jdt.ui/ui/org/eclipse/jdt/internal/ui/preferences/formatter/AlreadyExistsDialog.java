@@ -90,7 +90,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 		fNameText.setSelection(0, fProfile.getName().length());
 		fNameText.setFocus();
 
-		fNameText.addModifyListener( e -> doValidation());
+		fNameText.addModifyListener( _ -> doValidation());
 
 		fRenameRadio.addSelectionListener(new SelectionListener() {
 			@Override

@@ -45,6 +45,8 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.expressions.Expression;
 
+import org.eclipse.text.templates.ContextTypeRegistry;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -67,7 +69,6 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -459,7 +460,7 @@ public class EditTemplateDialog extends StatusDialog {
 				doSourceChanged(event.getDocumentEvent().getDocument());
 		});
 
-		viewer.addSelectionChangedListener(event -> updateSelectionDependentActions());
+		viewer.addSelectionChangedListener(_ -> updateSelectionDependentActions());
 
 		return viewer;
 	}
@@ -478,7 +479,7 @@ public class EditTemplateDialog extends StatusDialog {
 		final IHandlerService handlerService= PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		final Expression expression= new ActiveShellExpression(fPatternEditor.getControl().getShell());
 
-		getShell().addDisposeListener(e -> handlerService.deactivateHandlers(handlerActivations));
+		getShell().addDisposeListener(_ -> handlerService.deactivateHandlers(handlerActivations));
 
 		fPatternEditor.getTextWidget().addFocusListener(new FocusListener() {
 			@Override

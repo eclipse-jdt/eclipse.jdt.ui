@@ -3369,7 +3369,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void installOccurrencesFinder(boolean forceUpdate) {
 		fMarkOccurrenceAnnotations= true;
 
-		fPostSelectionListenerWithAST= (part, selection, astRoot) -> updateOccurrenceAnnotations(selection, astRoot);
+		fPostSelectionListenerWithAST= (_, selection, astRoot) -> updateOccurrenceAnnotations(selection, astRoot);
 		SelectionListenerWithASTManager.getDefault().addListener(this, fPostSelectionListenerWithAST);
 		if (forceUpdate && getSelectionProvider() != null) {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();

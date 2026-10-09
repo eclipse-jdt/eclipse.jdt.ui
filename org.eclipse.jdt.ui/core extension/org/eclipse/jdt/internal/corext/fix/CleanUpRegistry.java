@@ -230,7 +230,7 @@ public class CleanUpRegistry {
 					fOptionsProvider= (ICleanUpOptionsInitializer)fElement.createExecutableExtension(ATTRIBUTE_NAME_CLASS);
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
-					fOptionsProvider= options -> {
+					fOptionsProvider= _ -> {
 					};
 				}
 			}

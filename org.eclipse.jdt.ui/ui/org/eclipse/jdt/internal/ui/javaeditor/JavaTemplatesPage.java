@@ -20,6 +20,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.Window;
@@ -35,7 +37,6 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
@@ -77,7 +78,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	private static final String PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage"; //$NON-NLS-1$
 	private static final TemplateStore TEMPLATE_STORE= JavaPlugin.getDefault().getTemplateStore();
 	private static final IPreferenceStore PREFERENCE_STORE= JavaPlugin.getDefault().getPreferenceStore();
-	private static final ContextTypeRegistry TEMPLATE_CONTEXT_REGISTRY= JavaPlugin.getDefault().getTemplateContextRegistry();
+	private static final ContextTypeRegistry TEMPLATE_CONTEXT_REGISTRY= JavaPlugin.getDefault().getContributionTemplateContextRegistry();
 
 	private TemplateVariableProcessor fTemplateProcessor;
 	private JavaEditor fJavaEditor;

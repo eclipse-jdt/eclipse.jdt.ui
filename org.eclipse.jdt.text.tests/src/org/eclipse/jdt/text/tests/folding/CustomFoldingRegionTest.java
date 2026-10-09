@@ -32,6 +32,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.folding.FoldingTestUtils.ProjectionRegion;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -908,6 +909,42 @@ public class CustomFoldingRegionTest {
 			assertContainsCustomFoldingPositionWithElement(code, model, "// region 3rd nested within class", "Test", IJavaElement.TYPE);
 			assertContainsCustomFoldingPositionWithElement(code, model, "// region within method", "someMethod", IJavaElement.METHOD);
 			assertContainsCustomFoldingPositionWithElement(code, model, "// region at the EOF", "Test.java", IJavaElement.COMPILATION_UNIT);
+		} finally {
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testCollapseAllWithCustomFoldingRegion() throws Exception {
+		String str= """
+				package org.example.test;
+
+				// region outside class                 //here should be an annotation
+
+				// endregion
+
+				class A {                               //here should be an annotation
+				    // region inside class              //here should be an annotation
+				    public void foo() {					//here should be an annotation
+				        System.out.println("Hello");
+				    }
+
+				    // endregion
+				}
+				""";
+
+		ICompilationUnit cu= fPackageFragment.createCompilationUnit("A.java", str, true, null);
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+		try {
+
+			ProjectionAnnotationModel model= editor.getAdapter(ProjectionAnnotationModel.class);
+			model.collapseAll(0, str.length());
+
+			List<ProjectionRegion> regions= FoldingTestUtils.extractRegions(model);
+			FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 2, 4); // region
+			FoldingTestUtils.assertContainsExpandedRegionUsingStartAndEndLine(regions, str, 6, 13); // class A
+			FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 7, 12); // region
+			FoldingTestUtils.assertContainsCollapsedRegionUsingStartAndEndLine(regions, str, 8, 10);// foo method
 		} finally {
 			editor.close(false);
 		}

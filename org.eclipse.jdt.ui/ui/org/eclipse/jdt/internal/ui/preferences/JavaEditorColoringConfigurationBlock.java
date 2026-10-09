@@ -661,7 +661,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd.widthHint= convertWidthInCharsToPixels(20);
 		previewer.setLayoutData(gd);
 
-		fTreeViewer.addSelectionChangedListener(event -> handleSyntaxColorListSelection());
+		fTreeViewer.addSelectionChangedListener(_ -> handleSyntaxColorListSelection());
 
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
 			@Override

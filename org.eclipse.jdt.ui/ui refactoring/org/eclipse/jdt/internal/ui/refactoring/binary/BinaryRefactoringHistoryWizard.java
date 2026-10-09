@@ -201,7 +201,8 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			final IClasspathEntry[] entries= project.getRawClasspath();
 			final List<IClasspathEntry> list= new ArrayList<>(Arrays.asList(entries));
 			final IFileStore store= EFS.getLocalFileSystem().getStore(JavaPlugin.getDefault().getStateLocation().append(STUB_FOLDER).append(project.getElementName()));
-			if (store.fetchInfo(EFS.NONE, Progress.subMonitorSupressed(monitor, 25)).exists())
+			Progress.subMonitorSupressed(monitor, 25); // for existence check
+			if (store.exists())
 				store.delete(EFS.NONE, Progress.subMonitorSupressed(monitor, 25));
 			store.mkdir(EFS.NONE, Progress.subMonitorSupressed(monitor, 25));
 			folder.createLink(store.toURI(), IResource.NONE, Progress.subMonitorSupressed(monitor, 25));
@@ -558,7 +559,8 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			}
 			if (fSourceFolder != null) {
 				final IFileStore store= EFS.getStore(fSourceFolder.getRawLocationURI());
-				if (store.fetchInfo(EFS.NONE, Progress.subMonitorSupressed(monitor, 10)).exists())
+				Progress.subMonitorSupressed(monitor, 10); // for existence check
+				if (store.exists())
 					store.delete(EFS.NONE, Progress.subMonitorSupressed(monitor, 10));
 				fSourceFolder.delete(true, false, Progress.subMonitorSupressed(monitor, 10));
 				fSourceFolder.clearHistory(Progress.subMonitorSupressed(monitor, 10));

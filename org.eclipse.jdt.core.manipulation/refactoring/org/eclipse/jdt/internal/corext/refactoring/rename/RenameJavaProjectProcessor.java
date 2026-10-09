@@ -205,7 +205,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 
 		IFileStore newProjectStore= projectStore.getParent().getChild(newName);
 
-		return newProjectStore.fetchInfo().exists();
+		return newProjectStore.exists();
 	}
 
 	@Override

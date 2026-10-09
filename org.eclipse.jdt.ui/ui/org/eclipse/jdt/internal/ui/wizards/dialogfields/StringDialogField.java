@@ -127,7 +127,7 @@ public class StringDialogField extends DialogField {
 	public Text getTextControl(Composite parent) {
 		if (fTextControl == null) {
 			assertCompositeNotNull(parent);
-			fModifyListener= e -> doModifyText();
+			fModifyListener= _ -> doModifyText();
 
 			fTextControl= createTextControl(parent);
 			// moved up due to 1GEUNW2

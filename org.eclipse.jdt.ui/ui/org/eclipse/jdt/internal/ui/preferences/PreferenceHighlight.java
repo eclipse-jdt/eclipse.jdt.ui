@@ -104,7 +104,7 @@ public final class PreferenceHighlight implements PaintListener {
 		parent.addMouseMoveListener(e -> {
 			highlight.setHover(highlight.isAroundLabel(e));
 		});
-		parent.addMouseTrackListener(MouseTrackListener.mouseExitAdapter(e -> {
+		parent.addMouseTrackListener(MouseTrackListener.mouseExitAdapter(_ -> {
 			highlight.setHover(false);
 		}));
 		parent.addMouseListener(MouseListener.mouseDownAdapter(e -> {
@@ -113,7 +113,7 @@ public final class PreferenceHighlight implements PaintListener {
 		}));
 
 		if (labelControl instanceof Label) {
-			labelControl.addMouseListener(MouseListener.mouseDownAdapter(e -> mainControl.setFocus()));
+			labelControl.addMouseListener(MouseListener.mouseDownAdapter(_ -> mainControl.setFocus()));
 		}
 
 		return highlight;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -211,6 +211,7 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_add_static_import_description;
 	public static String UnresolvedElementsSubProcessor_addargumentcast_description;
 	public static String UnresolvedElementsSubProcessor_changemethod_description;
+	public static String UnresolvedElementsSubProcessor_changemethod_to_deprecated_description;
 	public static String UnresolvedElementsSubProcessor_changetoouter_description;
 	public static String UnresolvedElementsSubProcessor_changetomethod_description;
 	public static String UnresolvedElementsSubProcessor_create_loop_variable_description;
@@ -519,4 +520,7 @@ public final class CorrectionMessages extends NLS {
 	public static String PreviewFeaturesSubProcessor_open_compliance_page_enable_preview_features_info;
 	public static String PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
 	public static String PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features_info;
+	public static String QuickAssistProcessor_switch_to_IO_print;
+	public static String QuickAssistProcessor_switch_to_System_print;
+	public static String QuickAssistProcessor_switch_Out_operation;
 }

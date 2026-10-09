@@ -33,6 +33,8 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IMemento;
@@ -69,6 +71,7 @@ public class JavaNavigatorContentProvider extends
 	private IExtensionStateModel fStateModel;
 
 	private IPropertyChangeListener fLayoutPropertyListener;
+	private TreeViewer fNavigatorViewer;
 
 	@Override
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
@@ -111,6 +114,16 @@ public class JavaNavigatorContentProvider extends
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, findInputElement(newInput));
+		fNavigatorViewer= (TreeViewer) viewer;
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		super.propertyChange(event);
+		if (PreferenceConstants.APPEARANCE_SORT_LIBRARY_ENTRIES_BY_NAME.equals(event.getProperty())
+				&& fNavigatorViewer != null && !fNavigatorViewer.getControl().isDisposed()) {
+			fNavigatorViewer.refresh();
+		}
 	}
 
 	@Override

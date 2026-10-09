@@ -366,6 +366,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			fIsComment= isComment;
 		}
 
+		@Override
+		protected boolean includeInCollapseAll() {
+			return fIsComment || fJavaElement.getElementType() != IJavaElement.TYPE || isInnerType((IType) fJavaElement);
+		}
+
 		/*
 		 * @see java.lang.Object#toString()
 		 */
@@ -1307,7 +1312,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * @param type the type to test
 	 * @return <code>true</code> if <code>type</code> is an inner type
 	 */
-	private boolean isInnerType(IType type) {
+	private static boolean isInnerType(IType type) {
 		return type.getDeclaringType() != null;
 	}
 

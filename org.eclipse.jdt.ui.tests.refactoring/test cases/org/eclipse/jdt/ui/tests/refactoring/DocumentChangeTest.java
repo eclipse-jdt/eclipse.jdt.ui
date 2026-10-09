@@ -140,10 +140,10 @@ public class DocumentChangeTest extends GenericRefactoringTest {
 
 		final MultiStatus statusCollector= new MultiStatus(JavaTestPlugin.getPluginId(), 0, "", null);
 
-		ILogListener logListener= (status, plugin) -> statusCollector.add(status);
+		ILogListener logListener= (status, _) -> statusCollector.add(status);
 		Platform.addLogListener(logListener);
 		try {
-			IRunnableWithProgress runnable= monitor -> {
+			IRunnableWithProgress runnable= _ -> {
 				try {
 					performRefactoring(ref);
 				} catch (Exception e) {
@@ -159,7 +159,7 @@ public class DocumentChangeTest extends GenericRefactoringTest {
 
 			// undo:
 
-			runnable= monitor -> {
+			runnable= _ -> {
 				try {
 					RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 				} catch (Exception e) {
@@ -178,7 +178,7 @@ public class DocumentChangeTest extends GenericRefactoringTest {
 
 			JavaPlugin.getActivePage().closeEditor(editor, true);
 
-			runnable= monitor -> {
+			runnable= _ -> {
 				try {
 					RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
 				} catch (Exception e) {

@@ -1184,4 +1184,62 @@ public class MarkdownCommentTests extends CoreTests {
 		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
 		assertEquals("external markdown link should navigate directly to the site", expectedContent, actualSnippet);
 	}
+
+	@Test
+	public void testMarkdownCodeTagRenderingIssue_01() throws CoreException {
+		String source ="""
+				/// This is {@code code}.
+				public class Markdown{}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Markdown.java", source, null);
+		assertNotNull("Markdown.java", cu);
+		String expectedContent = "This is <code>code</code>.";
+		IType type= cu.getType("Markdown");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		int index= actualHtmlContent.lastIndexOf("This is ");
+		assertNotEquals(-1, index);
+		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
+		assertEquals("Code tag should parse properly", expectedContent, actualSnippet);
+	}
+
+	@Test
+	public void testMarkdownCodeTagRenderingIssue_02() throws CoreException {
+		String source= """
+				/// Performs:
+				/// ```
+				/// abc
+				/// ```
+				/// This is {@code code}.
+				public class Markdown{}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Markdown.java", source, null);
+		assertNotNull("Markdown.java", cu);
+		String expectedContent = "This is <code>code</code>.";
+		IType type= cu.getType("Markdown");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		int index= actualHtmlContent.lastIndexOf("This is ");
+		assertNotEquals(-1, index);
+		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
+		assertEquals("The code tag should parse properly", expectedContent, actualSnippet);
+	}
+
+	@Test
+	public void testMarkdownCodeTagRenderingIssue_03() throws CoreException {
+		String source= """
+				/// This is {@code code}.
+				/// ```
+				/// block
+				/// ```
+				public class Markdown{}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/Markdown.java", source, null);
+		assertNotNull("Markdown.java", cu);
+		String expectedContent = "This is <code>code</code>.";
+		IType type= cu.getType("Markdown");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		int index= actualHtmlContent.indexOf("This is ");
+		assertNotEquals(-1, index);
+		String actualSnippet= actualHtmlContent.substring(index, index + expectedContent.length());
+		assertEquals("The code tag should parse properly", expectedContent, actualSnippet);
+	}
 }

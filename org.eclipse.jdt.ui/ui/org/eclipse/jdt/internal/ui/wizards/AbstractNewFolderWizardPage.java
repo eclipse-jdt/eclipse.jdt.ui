@@ -351,7 +351,7 @@ public abstract class AbstractNewFolderWizardPage extends NewElementWizardPage {
 					if (projLocation != null) {
 						try {
 							IFileStore store= EFS.getStore(projLocation).getChild(str);
-							if (store.fetchInfo().exists()) {
+							if (store.exists()) {
 								fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase);
 								return;
 							}

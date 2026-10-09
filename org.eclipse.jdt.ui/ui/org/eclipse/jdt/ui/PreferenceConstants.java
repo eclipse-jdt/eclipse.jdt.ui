@@ -421,6 +421,15 @@ public class PreferenceConstants {
 
 
 	/**
+	 * A named preference that determines if a quick-fix for a method name will hold back methods if they
+	 * are deprecated.
+	 * <p>
+	 * Value is of type <code>Boolean</code>
+	 * @since 3.40
+	 */
+	public static final String QUICKFIX_HIDE_DEPRECATED_METHODS= PreferenceConstantsCore.QUICKFIX_HIDE_DEPRECATED_METHODS;
+
+	/**
 	 * A named preference that holds a list of semicolon separated package names. The list specifies the import order used by
 	 * the "Organize Imports" operation.
 	 * <p>
@@ -4302,6 +4311,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.RelevanceSorter"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, ""); //$NON-NLS-1$
+
+		store.setDefault(PreferenceConstants.QUICKFIX_HIDE_DEPRECATED_METHODS, false);
 
 		store.setDefault(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, true);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_PASTE, true);

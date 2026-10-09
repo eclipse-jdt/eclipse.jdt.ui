@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.Assert;
@@ -147,7 +146,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 	private boolean hasExistingContent(URI realLocation) throws CoreException {
 		IFileStore file= EFS.getStore(realLocation);
-		return file.fetchInfo().exists();
+		return file.exists();
 	}
 
 	private IStatus changeToNewProject() {
@@ -324,9 +323,9 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 	private void deleteProjectFile(URI projectLocation) throws CoreException {
 		IFileStore file= EFS.getStore(projectLocation);
-		if (file.fetchInfo().exists()) {
+		if (file.exists()) {
 			IFileStore projectFile= file.getChild(FILENAME_PROJECT);
-			if (projectFile.fetchInfo().exists()) {
+			if (projectFile.exists()) {
 				projectFile.delete(EFS.NONE, null);
 			}
 		}
@@ -337,8 +336,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 		try {
 			for (IFileStore child : EFS.getStore(projectLocation).childStores(EFS.NONE, null)) {
-				IFileInfo info= child.fetchInfo();
-				if (info.isDirectory() && info.exists()) {
+				if (child.isDirectory()) {
 					fOrginalFolders.add(child);
 				}
 			}
@@ -366,8 +364,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 		try {
 			for (IFileStore child : EFS.getStore(projectLocation).childStores(EFS.NONE, null)) {
-				IFileInfo info= child.fetchInfo();
-				if (info.isDirectory() && info.exists() && !foldersToKeep.contains(child)) {
+				if (child.isDirectory() && !foldersToKeep.contains(child)) {
 					child.delete(EFS.NONE, null);
 					fOrginalFolders.remove(child);
 				}
@@ -386,13 +383,13 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		fDotClasspathBackup= null;
 
 		IFileStore file= EFS.getStore(projectLocation);
-		if (file.fetchInfo().exists()) {
+		if (file.exists()) {
 			IFileStore projectFile= file.getChild(FILENAME_PROJECT);
-			if (projectFile.fetchInfo().exists()) {
+			if (projectFile.exists()) {
 				fDotProjectBackup= createBackup(projectFile, "project-desc"); //$NON-NLS-1$
 			}
 			IFileStore classpathFile= file.getChild(FILENAME_CLASSPATH);
-			if (classpathFile.fetchInfo().exists()) {
+			if (classpathFile.exists()) {
 				fDotClasspathBackup= createBackup(classpathFile, "classpath-desc"); //$NON-NLS-1$
 			}
 		}

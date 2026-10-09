@@ -380,7 +380,7 @@ public static String[] getJavaClassLibs() {
 		String[] jarsNames = null;
 		ArrayList<String> paths = new ArrayList<>();
 		if ("DRLVM".equals(vmName)) {
-			FilenameFilter jarFilter = (dir, name) -> name.endsWith(".jar") & !name.endsWith("-src.jar");
+			FilenameFilter jarFilter = (_, name) -> name.endsWith(".jar") & !name.endsWith("-src.jar");
 			jarsNames = new File(jreDir + "/lib/boot/").list(jarFilter);
 			addJarEntries(jreDir + "/lib/boot/", jarsNames, paths);
 		} else {
