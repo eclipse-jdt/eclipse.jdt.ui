@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock;
+import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock2;
 import org.eclipse.jdt.ui.text.folding.IScopedJavaFoldingPreferenceBlock;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -193,7 +194,7 @@ class FoldingConfigurationBlock implements IPreferenceAndPropertyConfigurationBl
 			public void widgetSelected(SelectionEvent e) {
 				boolean enabled= fFoldingCheckbox.getSelection();
 				fStore.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, enabled);
-				updateCheckboxDependencies();
+				updateCheckboxDependencies(enabled);
 			}
 
 			@Override
@@ -282,7 +283,12 @@ class FoldingConfigurationBlock implements IPreferenceAndPropertyConfigurationBl
 		return viewer;
 	}
 
-	private void updateCheckboxDependencies() {
+	private void updateCheckboxDependencies(boolean enabled) {
+		for (IJavaFoldingPreferenceBlock block : fProviderPreferences.values()) {
+			if (block instanceof IJavaFoldingPreferenceBlock2 block2) {
+				block2.updateEnablements(enabled);
+			}
+		}
 	}
 
 	void updateListDependencies() {
@@ -333,6 +339,7 @@ class FoldingConfigurationBlock implements IPreferenceAndPropertyConfigurationBl
 		fGroup.getParent().layout();
 
 		prefs.initialize();
+		updateCheckboxDependencies(fFoldingCheckbox.getSelection());
 	}
 
 	@Override
@@ -353,6 +360,7 @@ class FoldingConfigurationBlock implements IPreferenceAndPropertyConfigurationBl
 		for (IJavaFoldingPreferenceBlock prefs : fProviderPreferences.values()) {
 			prefs.performDefaults();
 		}
+		updateCheckboxDependencies(fFoldingCheckbox.getSelection());
 	}
 
 	@Override
@@ -365,7 +373,7 @@ class FoldingConfigurationBlock implements IPreferenceAndPropertyConfigurationBl
 	private void restoreFromPreferences() {
 		boolean enabled= fStore.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
 		fFoldingCheckbox.setSelection(enabled);
-		updateCheckboxDependencies();
+		updateCheckboxDependencies(enabled);
 
 		IPreferenceStore globalStore = getGlobalPreferenceStore();
 
