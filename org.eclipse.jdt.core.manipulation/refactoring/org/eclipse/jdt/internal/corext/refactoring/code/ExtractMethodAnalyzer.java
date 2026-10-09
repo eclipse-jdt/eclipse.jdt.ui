@@ -294,6 +294,32 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 		}
 	}
 
+	private class AnonymousClassChecker extends ASTVisitor {
+		private final AnonymousClassDeclaration fDecl;
+		private final ITypeBinding fTypeBinding;
+
+		public AnonymousClassChecker(AnonymousClassDeclaration decl) {
+			this.fDecl= decl;
+			this.fTypeBinding= decl.resolveBinding();
+		}
+		@Override
+		public boolean visit(MethodDeclaration node) {
+			IMethodBinding methodBinding= node.resolveBinding();
+			if (methodBinding != null) {
+				IMethodBinding overridden= Bindings.findOverriddenMethod(methodBinding, true);
+				if (overridden != null) {
+					return false;
+				}
+			}
+			throw new AbortSearchException();
+		}
+
+		@Override
+		public boolean visit(FieldDeclaration node) {
+			throw new AbortSearchException();
+		}
+	}
+
 	private void initReturnType(ImportRewrite rewriter) {
 		AST ast= fEnclosingBodyDeclaration.getAST();
 		fReturnType= null;
@@ -301,6 +327,19 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
 				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingBodyDeclaration);
+				if (declaration.getInitializer() != null) {
+					Expression initializer= ASTNodes.getUnparenthesedExpression(declaration.getInitializer());
+					if (initializer instanceof ClassInstanceCreation classCreation
+							&& classCreation.getAnonymousClassDeclaration() != null) {
+						try {
+							AnonymousClassChecker checker= new AnonymousClassChecker(classCreation.getAnonymousClassDeclaration());
+							classCreation.getAnonymousClassDeclaration().accept(checker);
+						} catch (AbortSearchException e) {
+							getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_return_anonymous_type, JavaStatusContext.create(fCUnit, declaration));
+							return;
+						}
+					}
+				}
 				fReturnType= ASTNodeFactory.newNonVarType(ast, declaration, rewriter, new ContextSensitiveImportRewriteContext(declaration, rewriter));
 				if (declaration.resolveBinding() != null) {
 					fReturnTypeBinding= declaration.resolveBinding().getType();
@@ -309,7 +348,17 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();
 				if (expression.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-					fExpressionBinding= ((ClassInstanceCreation)expression).getType().resolveBinding();
+					ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation)expression;
+					if (classInstanceCreation.getAnonymousClassDeclaration() != null) {
+						try {
+							AnonymousClassChecker checker= new AnonymousClassChecker(classInstanceCreation.getAnonymousClassDeclaration());
+							classInstanceCreation.getAnonymousClassDeclaration().accept(checker);
+						} catch (AbortSearchException e) {
+							getStatus().addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_return_anonymous_type, JavaStatusContext.create(fCUnit, classInstanceCreation));
+							return;
+						}
+					}
+					fExpressionBinding= classInstanceCreation.getType().resolveBinding();
 				} else {
 					if(expression instanceof InfixExpression) {
 						ASTNode firstParent = getFirstSelectedNode().getParent();
