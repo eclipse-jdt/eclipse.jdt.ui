@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -393,6 +394,19 @@ public class AbstractTestRunListenerTest {
 					sb.append(System.lineSeparator());
 					sb.append(errors);
 					sb.append(System.lineSeparator());
+				}
+				String id= process.getAttribute(IProcess.ATTR_PROCESS_ID);
+				if (id != null) {
+					try {
+						// print on standard out to not complicate this code too much with reading output
+						System.out.println("Printing jstack for process: " + id);
+						ProcessBuilder pb = new ProcessBuilder("jstack", id);
+						pb.inheritIO();
+						Process p= pb.start();
+						p.waitFor(30, TimeUnit.SECONDS);
+					} catch (Throwable t) {
+						// we tried to get more info of the process that did not terminate, ignore the exception here
+					}
 				}
 			}
 			JavaPlugin.logErrorMessage(sb.toString());
