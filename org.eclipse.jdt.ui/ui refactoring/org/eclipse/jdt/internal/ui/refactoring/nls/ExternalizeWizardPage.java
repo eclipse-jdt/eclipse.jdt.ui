@@ -827,7 +827,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fPrefixField.setText(fNLSRefactoring.getPrefix());
 		fPrefixField.selectAll();
 
-		fPrefixField.addModifyListener(e -> {
+		fPrefixField.addModifyListener(_ -> {
 			fNLSRefactoring.setPrefix(fPrefixField.getText());
 			validateKeys(true);
 		});

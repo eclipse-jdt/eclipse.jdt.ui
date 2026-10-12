@@ -783,7 +783,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 						try {
 							if (getTextViewer().getSelectedRange().y > 1 || flags != ILinkedModeListener.EXTERNAL_MODIFICATION)
 								return;
-							((IDocumentExtension) document).registerPostNotificationReplace(null, (d, owner) -> {
+							((IDocumentExtension) document).registerPostNotificationReplace(null, (d, _) -> {
 								try {
 									if ((firstBracketPosition.length == 0 || firstBracketPosition.isDeleted) && !secondBracketPosition.isDeleted) {
 										d.replace(firstBracketPosition.offset, secondBracketPosition.offset - firstBracketPosition.offset, ""); //$NON-NLS-1$

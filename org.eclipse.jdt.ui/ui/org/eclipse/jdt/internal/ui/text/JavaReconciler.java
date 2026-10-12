@@ -398,7 +398,7 @@ public class JavaReconciler extends MonoReconciler {
 			super.initialProcess();
 		}
 		if (initialProcessDone()) {
-			Job.createSystem("Reconciler init", (ICoreRunnable) monitor -> forceReconciling()).schedule();  //$NON-NLS-1$
+			Job.createSystem("Reconciler init", (ICoreRunnable) _ -> forceReconciling()).schedule();  //$NON-NLS-1$
 		}
 	}
 

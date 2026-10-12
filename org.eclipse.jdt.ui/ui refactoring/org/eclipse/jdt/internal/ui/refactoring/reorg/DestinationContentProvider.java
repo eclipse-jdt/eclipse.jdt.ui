@@ -133,7 +133,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 	}
 
 	private synchronized Set<IPath> getClassPathRoots(IJavaProject javaProject) {
-		return classPathRoots.computeIfAbsent(javaProject.getPath(), key -> {
+		return classPathRoots.computeIfAbsent(javaProject.getPath(), _ -> {
 			Set<IPath> classRootPaths= new HashSet<>();
 			try {
 				for (IPackageFragmentRoot classpathRoot : javaProject.getAllPackageFragmentRoots()) {

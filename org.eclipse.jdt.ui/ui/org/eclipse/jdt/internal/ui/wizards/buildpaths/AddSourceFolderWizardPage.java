@@ -109,7 +109,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 			fVariables= new SelectionButtonDialogField(SWT.PUSH);
 			fVariables.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_variables_desc);
-			fVariables.setDialogFieldListener(field -> handleVariablesButtonPressed());
+			fVariables.setDialogFieldListener(_ -> handleVariablesButtonPressed());
 		}
 
 		public void setDialogFieldListener(RootFieldAdapter adapter) {
@@ -682,7 +682,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			if (parentLocation != null) {
 				try {
 					IFileStore store= EFS.getStore(parentLocation).getChild(str);
-					if (store.fetchInfo().exists()) {
+					if (store.exists()) {
 						result.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase);
 						return result;
 					}

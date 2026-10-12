@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.swt.custom.StyleRange;
@@ -430,25 +431,35 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 	}
 
 	/**
-	 * Invalidate text presentation of positions with the given highlighting.
-	 *
-	 * @param highlighting The highlighting
+	 * Invalidate text presentation of positions with one of the given highlightings.
 	 */
-	public void highlightingStyleChanged(Highlighting highlighting) {
-		for (Position fPosition : fPositions) {
-			HighlightedPosition position= (HighlightedPosition) fPosition;
-			if (position.getHighlighting() == highlighting)
-				fSourceViewer.invalidateTextPresentation(position.getOffset(), position.getLength());
-		}
+	public void highlightingStylesChanged(Collection<Highlighting> highlightings) {
+		invalidateTextPresentation(highlightings);
 	}
 
 	/**
 	 * Invalidate text presentation of all positions.
 	 */
 	private void invalidateTextPresentation() {
+		invalidateTextPresentation(null);
+	}
+
+	/**
+	 * Invalidates the span from the first to the last matching position (all positions if
+	 * <code>null</code>) in one call, since each ranged invalidation merges into the whole
+	 * style range list of the widget.
+	 */
+	private void invalidateTextPresentation(Collection<Highlighting> highlightings) {
+		int start= Integer.MAX_VALUE;
+		int end= -1;
 		for (Position position : fPositions) {
-			fSourceViewer.invalidateTextPresentation(position.getOffset(), position.getLength());
+			if (highlightings == null || highlightings.contains(((HighlightedPosition) position).getHighlighting())) {
+				start= Math.min(start, position.getOffset());
+				end= Math.max(end, position.getOffset() + position.getLength());
+			}
 		}
+		if (end >= 0)
+			fSourceViewer.invalidateTextPresentation(start, end - start);
 	}
 
 	/**

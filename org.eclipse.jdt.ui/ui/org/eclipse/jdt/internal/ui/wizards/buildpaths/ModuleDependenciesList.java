@@ -166,7 +166,7 @@ class ModuleDependenciesList {
 	}
 
 	public void setSelectionChangedListener(BiConsumer<List<CPListElement>,IModuleDescription> listener) {
-		fViewer.addSelectionChangedListener(e -> listener.accept(getSelectedElements(), getSelectedModule()));
+		fViewer.addSelectionChangedListener(_ -> listener.accept(getSelectedElements(), getSelectedModule()));
 	}
 
 	public void addModule(IModuleDescription module, CPListElement cpe, ModuleKind kind) {

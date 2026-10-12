@@ -291,7 +291,7 @@ public class TextFieldNavigationHandler {
 			control.addFocusListener(this);
 			if (control.isFocusControl())
 				activate();
-			control.addDisposeListener(e -> deactivate());
+			control.addDisposeListener(_ -> deactivate());
 		}
 
 		@Override

@@ -855,6 +855,11 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		@Override
+		public void testChanged(TestElement testElement) {
+			fTestViewer.registerViewersRefresh();
+		}
+
+		@Override
 		public void testReran(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expectedResult, String actualResult) {
 			fTestViewer.registerViewerUpdate(testCaseElement); //TODO: autoExpand?
 			postSyncProcessChanges();
@@ -2159,7 +2164,7 @@ action enablement
 
 		fActivateOnErrorAction= new ActivateOnErrorAction();
 		viewMenu.add(fActivateOnErrorAction);
-		fViewMenuListener= manager -> fActivateOnErrorAction.update();
+		fViewMenuListener= _ -> fActivateOnErrorAction.update();
 
 		viewMenu.addMenuListener(fViewMenuListener);
 

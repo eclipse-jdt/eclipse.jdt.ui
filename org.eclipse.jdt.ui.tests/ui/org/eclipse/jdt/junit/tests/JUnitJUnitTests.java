@@ -34,6 +34,9 @@ TestRunListenerTest3.class,
 TestRunListenerTest4.class,
 TestRunListenerTest5.class,
 TestRunListenerTest6.class,
+DisabledParameterizedTestRunTest5.class,
+DisabledParameterizedTestRunTest6.class,
+DisabledParameterizedTestViewTest.class,
 
 TestRunFilteredStandardRunnerTest4.class,
 TestRunFilteredParameterizedRunnerTest4.class,
@@ -52,6 +55,11 @@ JUnit6TestFinderJupiterTest.class,
 JUnitStandaloneDetectionTest.class,
 
 JUnitQuickAssistTest.class,
+EnumSourceFilterTest.class,
+EnumSourceSafetyTest.class,
+EnumSourceValidationTest.class,
+EnumSourceLastValueTest.class,
+EnumSourceSaveStateTest.class,
 
 TestSorting.class
 //LegacyTestRunListenerTest.class

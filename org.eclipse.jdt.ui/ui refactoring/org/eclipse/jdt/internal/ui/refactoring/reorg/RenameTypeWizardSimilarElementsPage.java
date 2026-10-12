@@ -459,7 +459,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		fTreeViewerLabelProvider= new SimilarLabelProvider();
 		fTreeViewer.setLabelProvider(fTreeViewerLabelProvider);
 		fTreeViewer.addSelectionChangedListener(RenameTypeWizardSimilarElementsPage.this::treeViewerSelectionChanged);
-		fTreeViewer.addDoubleClickListener(event -> RenameTypeWizardSimilarElementsPage.this.editCurrentElement());
+		fTreeViewer.addDoubleClickListener(_ -> RenameTypeWizardSimilarElementsPage.this.editCurrentElement());
 	}
 
 	private void createSourceViewerComposite(Composite parent) {

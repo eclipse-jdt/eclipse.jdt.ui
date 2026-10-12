@@ -693,7 +693,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			// Not expecting proposals, but a log message, due to incomplete AST (no binding information available).
 			final IStatus[] resultingStatus= new IStatus[1];
-			logListener= (status, plugin) -> {
+			logListener= (status, _) -> {
 				assertNull("Only one status", resultingStatus[0]);
 				assertEquals("Expected status message",
 						"Error during computation of Annotate proposals: " +

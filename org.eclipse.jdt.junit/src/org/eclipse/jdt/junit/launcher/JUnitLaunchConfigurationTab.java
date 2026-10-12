@@ -261,7 +261,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestLoaderViewer.setInput(items);
 		fTestLoaderViewer.addSelectionChangedListener(event -> {
 			setEnableTagsGroup(event);
-			try (var __= fTestMethodsCache.runNestedCancelable()) {
+			try (var _= fTestMethodsCache.runNestedCancelable()) {
 				calculateMethodsCache();
 				validatePage();
 			}
@@ -313,8 +313,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 		fProjText= new Text(comp, SWT.SINGLE | SWT.BORDER);
 		fProjText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fProjText.addModifyListener(evt -> {
-			try (var __= fTestMethodsCache.runNestedCancelable()) {
+		fProjText.addModifyListener(_ -> {
+			try (var _= fTestMethodsCache.runNestedCancelable()) {
 				calculateMethodsCache();
 				validatePage();
 			}
@@ -341,8 +341,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 		fTestText= new Text(comp, SWT.SINGLE | SWT.BORDER);
 		fTestText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fTestText.addModifyListener(evt -> {
-			try (var __= fTestMethodsCache.runNestedCancelable()) {
+		fTestText.addModifyListener(_ -> {
+			try (var _= fTestMethodsCache.runNestedCancelable()) {
 				calculateMethodsCache();
 				validatePage();
 			}
@@ -371,7 +371,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		fTestMethodText.setLayoutData(gd);
 
-		fTestMethodText.addModifyListener(evt -> {
+		fTestMethodText.addModifyListener(_ -> {
 			validatePage();
 			updateLaunchConfigurationDialog();
 		});
@@ -414,7 +414,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		gd.horizontalIndent= 25;
 		gd.horizontalSpan= 2;
 		fContainerText.setLayoutData(gd);
-		fContainerText.addModifyListener(evt -> updateLaunchConfigurationDialog());
+		fContainerText.addModifyListener(_ -> updateLaunchConfigurationDialog());
 
 		fContainerSearchButton= new Button(comp, SWT.PUSH);
 		fContainerSearchButton.setText(JUnitMessages.JUnitLaunchConfigurationTab_label_search);
@@ -466,7 +466,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration config) {
-		try (var __= fTestMethodsCache.runNestedCancelable()) {
+		try (var _= fTestMethodsCache.runNestedCancelable()) {
 			fLaunchConfiguration= config;
 
 			updateProjectFromConfig(config);
@@ -500,7 +500,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID);
 			}
 		}
-		try (var __= fTestMethodsCache.runNestedCancelable()) {
+		try (var _= fTestMethodsCache.runNestedCancelable()) {
 			fTestLoaderViewer.setSelection(new StructuredSelection(testKind));
 		}
 	}
@@ -525,7 +525,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			projectName= config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {
 		}
-		try (var __= fTestMethodsCache.runNestedCancelable()) {
+		try (var _= fTestMethodsCache.runNestedCancelable()) {
 			fProjText.setText(projectName);
 		}
 	}
@@ -543,7 +543,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		setEnableContainerTestGroup(false);
 		fTestContainerRadioButton.setSelection(false);
 
-		try (var __= fTestMethodsCache.runNestedCancelable()) {
+		try (var _= fTestMethodsCache.runNestedCancelable()) {
 			fTestText.setText(testTypeName);
 			fContainerText.setText(""); //$NON-NLS-1$
 			fTestMethodText.setText(fOriginalTestMethodName);
@@ -569,7 +569,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		if (fContainerElement != null)
 			fContainerText.setText(getPresentationName(fContainerElement));
 
-		try (var __= fTestMethodsCache.runNestedCancelable()) {
+		try (var _= fTestMethodsCache.runNestedCancelable()) {
 			fTestText.setText(""); //$NON-NLS-1$
 		}
 	}
@@ -690,7 +690,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		IType type= (IType) results[0];
 
 		if (type != null) {
-			try (var __= fTestMethodsCache.runNestedCancelable()) {
+			try (var _= fTestMethodsCache.runNestedCancelable()) {
 				fTestText.setText(type.getFullyQualifiedName('.'));
 				javaProject= type.getJavaProject();
 				fProjText.setText(javaProject.getElementName());
@@ -709,14 +709,14 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			return;
 		}
 
-		try (var __= fTestMethodsCache.runNestedCancelable()) {
+		try (var _= fTestMethodsCache.runNestedCancelable()) {
 			String projectName= project.getElementName();
 			fProjText.setText(projectName);
 		}
 	}
 
 	private void handleTestMethodSearchButtonSelected() {
-		try (var __= fTestMethodsCache.runNestedCancelable()) {
+		try (var _= fTestMethodsCache.runNestedCancelable()) {
 			IJavaProject javaProject= getJavaProject();
 			IType testType= javaProject.findType(fTestText.getText());
 			Set<String> methodNames= getMethodsForType(javaProject, testType, getSelectedTestKind());

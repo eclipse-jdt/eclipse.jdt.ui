@@ -251,7 +251,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			for (var type : types) {
 				var parent= type.getParent();
 				var parentInTree= types.contains(parent) ? parent : ROOT;
-				tree.compute(parentInTree, (key, value) -> {
+				tree.compute(parentInTree, (_, value) -> {
 					var list= value != null ? value : new ArrayList<IType>();
 					list.add(type);
 					return list;

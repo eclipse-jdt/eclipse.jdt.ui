@@ -894,7 +894,7 @@ public final class StubUtility2Core {
 		}
 
 		if (ignoreTheseMethods == null) {
-			ignoreTheseMethods= m->false;
+			ignoreTheseMethods= _->false;
 		}
 		List<IMethodBinding> allMethods= new ArrayList<>();
 		IMethodBinding[] declaredMethods= type.getDeclaredMethods();

@@ -727,7 +727,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		private StringPreference(Text control, String label, String key) {
 			super(control, label, key, FilteredPreferenceTree.TEXT_VALUE_MATCHER);
 
-			fControl.addModifyListener(e -> updateValue());
+			fControl.addModifyListener(_ -> updateValue());
 
 			fControl.addFocusListener(new FocusAdapter() {
 				@Override
@@ -857,6 +857,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 			ExpandableComposite excomposite= section.getControl();
 			getScrolledPageContent().adaptChild(excomposite);
+			excomposite.setBackground(excomposite.getParent().getBackground());
 
 			Menu expandAllMenu= new Menu(excomposite);
 			MenuItem expandAllItem= new MenuItem(expandAllMenu, SWT.NONE);
@@ -897,7 +898,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			super.addChild(parent, node);
 			fFocusManager.add(node);
 			if (node instanceof Preference<?>) {
-				Predicate<String> validator = v -> {
+				Predicate<String> validator = _ -> {
 					doValidate();
 					return true;
 				};
@@ -1051,7 +1052,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		private Map<ImageDescriptor, Image> imagesMap= new HashMap<>();
 
 		protected Images(Composite rootComposite) {
-			rootComposite.addDisposeListener(e -> {
+			rootComposite.addDisposeListener(_ -> {
 				for (Image image : imagesMap.values())
 					image.dispose();
 				imagesMap.clear();
@@ -1130,7 +1131,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 				int style= italic ? (fd.getStyle() | SWT.ITALIC) : (fd.getStyle() & ~SWT.ITALIC);
 				FontData fontData= new FontData(fd.getName(), fd.getHeight(), style);
 				Font font= new Font(control.getDisplay(), fontData);
-				control.addDisposeListener(e -> font.dispose());
+				control.addDisposeListener(_ -> font.dispose());
 				control.setFont(font);
 				if (control instanceof Composite)
 					((Composite) control).layout();
@@ -1303,7 +1304,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		fProfileNameField.setText(fProfile.getName());
 		fProfileNameField.getLabelControl(nameComposite).setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		fProfileNameField.getTextControl(nameComposite).setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		fProfileNameField.setDialogFieldListener(field -> doValidate());
+		fProfileNameField.setDialogFieldListener(_ -> doValidate());
 
 		fSaveButton= createButton(nameComposite, SAVE_BUTTON_ID, FormatterMessages.ModifyDialog_Export_Button, false);
 	}
@@ -1520,6 +1521,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 		fPreview= new JavaPreview(fWorkingValues, previewPane);
 		fPreview.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		fPreview.getControl().setData("org.eclipse.e4.ui.css.disabled", Boolean.TRUE); //$NON-NLS-1$);
 
 		return previewPane;
 	}

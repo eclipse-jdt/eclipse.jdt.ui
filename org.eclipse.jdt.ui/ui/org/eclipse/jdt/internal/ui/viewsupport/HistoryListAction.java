@@ -112,7 +112,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		private void createMaxEntriesField() {
 			fMaxEntriesField= new StringDialogField();
 			fMaxEntriesField.setLabelText(fHistory.getMaxEntriesMessage());
-			fMaxEntriesField.setDialogFieldListener(field -> {
+			fMaxEntriesField.setDialogFieldListener(_ -> {
 				String maxString= fMaxEntriesField.getText();
 				boolean valid;
 				try {

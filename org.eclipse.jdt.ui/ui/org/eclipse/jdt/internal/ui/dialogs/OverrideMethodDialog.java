@@ -442,7 +442,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	@Override
 	protected void addMethodSearchFilter(Text filterText, CheckboxTreeViewer treeViewer) {
 
-		filterText.addModifyListener(e -> {
+		filterText.addModifyListener(_ -> {
 			final String searchText = filterText.getText();
 
 			PatternMatcher matcher = new PatternMatcher(searchText);

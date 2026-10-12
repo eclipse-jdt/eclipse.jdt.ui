@@ -608,7 +608,7 @@ class BreadcrumbItemDropDown {
 		};
 		fToolBar.getShell().addControlListener(controlListener);
 
-		shell.addDisposeListener(e -> {
+		shell.addDisposeListener(_ -> {
 			if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 				System.out.println("==> shell disposed"); //$NON-NLS-1$
 

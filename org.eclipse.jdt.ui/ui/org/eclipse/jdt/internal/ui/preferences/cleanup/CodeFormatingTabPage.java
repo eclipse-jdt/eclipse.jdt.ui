@@ -78,7 +78,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		if (!isSaveAction()) {
 			final CheckboxPreference format= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
 			registerPreference(format);
-			format.addObserver((o, arg) -> {
+			format.addObserver((_, _) -> {
 				fPreview.setFormat(format.getChecked());
 				fPreview.update();
 			});
@@ -92,7 +92,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference correctIndentation= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_correctIndentation_checkbox_text, CleanUpConstants.FORMAT_CORRECT_INDENTATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(correctIndentation);
-		correctIndentation.addObserver((o, arg) -> {
+		correctIndentation.addObserver((_, _) -> {
 			fPreview.setCorrectIndentation(correctIndentation.getChecked());
 			fPreview.update();
 		});
@@ -126,14 +126,14 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		final Label warningLabel= createLabel(numColumns - 2, sortMembersGroup, CleanUpMessages.CodeFormatingTabPage_SortMembersSemanticChange_warning);
 
 		registerSlavePreference(sortMembersPref, new RadioPreference[] {sortAllPref});
-		sortMembersPref.addObserver((o, arg) -> {
+		sortMembersPref.addObserver((_, _) -> {
 			nullRadio.setEnabled(sortMembersPref.getChecked());
 
 			boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
 			warningImage.setEnabled(warningEnabled);
 			warningLabel.setEnabled(warningEnabled);
 		});
-		sortAllPref.addObserver((o, arg) -> {
+		sortAllPref.addObserver((_, _) -> {
 			boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
 			warningImage.setEnabled(warningEnabled);
 			warningLabel.setEnabled(warningEnabled);

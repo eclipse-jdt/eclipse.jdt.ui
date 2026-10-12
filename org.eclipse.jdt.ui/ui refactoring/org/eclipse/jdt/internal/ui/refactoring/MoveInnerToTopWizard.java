@@ -82,7 +82,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 					getMoveRefactoring().setMarkInstanceFieldAsFinal(fFinalCheckBox.getSelection());
 				}
 			});
-			fFieldNameEntryText.addModifyListener(event -> {
+			fFieldNameEntryText.addModifyListener(_ -> {
 				final String text= fFieldNameEntryText.getText();
 				final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
 				if (refactoring.isCreatingInstanceFieldMandatory())

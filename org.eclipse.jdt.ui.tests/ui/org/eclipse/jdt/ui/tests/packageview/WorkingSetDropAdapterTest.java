@@ -62,7 +62,7 @@ public class WorkingSetDropAdapterTest {
 	private PackageExplorerPart fPackageExplorer;
 	private Accessor fPackageExplorerPartAccessor;
 	private WorkingSetDropAdapter fAdapter;
-	private ILogListener expectNoLogging= (status, plugin) -> {throw new AssertionError(status.getMessage(), status.getException());};
+	private ILogListener expectNoLogging= (status, _) -> {throw new AssertionError(status.getMessage(), status.getException());};
 
 	@BeforeEach
 	public void setUp() throws Exception {

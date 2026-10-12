@@ -35,7 +35,7 @@ public class SemanticTokensProviderErrorTest extends AbstractSemanticHighlightin
 	@Test
 	public void nullTokenTypeLogsError() throws Exception {
 		List<IStatus> errors= new ArrayList<>();
-		ILogListener logListener= (status, plugin) -> {
+		ILogListener logListener= (status, _) -> {
 			if (status.getSeverity() == IStatus.ERROR) {
 				errors.add(status);
 			}

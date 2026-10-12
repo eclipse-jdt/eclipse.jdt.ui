@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.ui; singleton:=true
-Bundle-Version: 3.39.100.qualifier
+Bundle-Version: 3.40.0.qualifier
 Bundle-Activator: org.eclipse.jdt.internal.ui.JavaPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
@@ -121,5 +121,5 @@ Require-Bundle:
  org.eclipse.ui.navigator.resources;bundle-version="[3.10.200,4.0.0)",
  org.eclipse.jdt.core.manipulation;bundle-version="[1.25.100,2.0.0)",
  org.eclipse.equinox.bidi;bundle-version="[1.5.400,2.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-21
+Bundle-RequiredExecutionEnvironment: JavaSE-25
 Require-Capability: eclipse.swt;filter:="(image.format=svg)"

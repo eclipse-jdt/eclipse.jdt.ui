@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldCompositeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeRecordSignatureProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractClassRefactoring;
@@ -114,6 +115,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.ChangeRecordSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ConvertAnonymousToNestedWizard;
@@ -189,6 +191,25 @@ public final class RefactoringExecutionStarter {
 				return RenameSupport.create((IModuleDescription) element, newName, flags);
 		}
 		return null;
+	}
+
+	public static void startChangeRecordSignatureRefactoring(final IType type, final Shell shell) {
+		// Grab access to the ASTNode andInstantiate the processor
+		try {
+			ChangeRecordSignatureProcessor processor = new ChangeRecordSignatureProcessor(type);
+			RefactoringStatus status = processor.checkInitialConditions(new NullProgressMonitor());
+			if (status.hasFatalError()) {
+				RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
+			    MessageDialog.openInformation(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, entry.getMessage());
+			    return;
+			}
+			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+			ChangeRecordSignatureWizard wizard= new ChangeRecordSignatureWizard(processor, refactoring);
+			new RefactoringStarter().activate(wizard, shell, wizard.getDefaultPageTitle(), IRefactoringSaveModes.SAVE_REFACTORING);
+		} catch (CoreException e) {
+				ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.RefactoringStarter_unexpected_exception);
+		}
+		return;
 	}
 
 	public static void startChangeSignatureRefactoring(final IMethod method, final SelectionDispatchAction action, final Shell shell) throws JavaModelException {

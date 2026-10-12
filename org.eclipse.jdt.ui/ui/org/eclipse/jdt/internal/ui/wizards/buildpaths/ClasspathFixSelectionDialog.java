@@ -78,7 +78,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 	public static boolean openClasspathFixSelectionDialog(Shell parent, final IJavaProject project, final String missingType, IRunnableContext context) {
 		final ClasspathFixProposal[][] classPathFixProposals= { null };
 		try {
-			context.run(true, true, monitor -> {
+			context.run(true, true, _ -> {
 				MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, NewWizardMessages.ClasspathFixSelectionDialog_eval_proposals_error_message, null);
 				classPathFixProposals[0]= ClasspathFixProcessorDescriptor.getProposals(project, missingType, status);
 				if (!status.isOK()) {

@@ -370,7 +370,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 			updateEnableState(isCustom, settingsField, configure, bulletListBlock);
 
-			fUseCustomField.setDialogFieldListener(field -> updateEnableState(fUseCustomField.isSelected(), settingsField, configure, bulletListBlock));
+			fUseCustomField.setDialogFieldListener(_ -> updateEnableState(fUseCustomField.isSelected(), settingsField, configure, bulletListBlock));
 
 			Link preferencePageLink= new Link(composite, SWT.WRAP);
 			preferencePageLink.setText(MultiFixMessages.CleanUpRefactoringWizard_HideWizard_Link);

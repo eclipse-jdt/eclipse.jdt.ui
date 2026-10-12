@@ -154,7 +154,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	}
 
 	public void setup(ToolBar toolbar) {
-		toolbar.addDisposeListener(e -> JavaElementLinks.removeStylingConfigurationListener(this));
+		toolbar.addDisposeListener(_ -> JavaElementLinks.removeStylingConfigurationListener(this));
 	}
 
 	private class NoStylingEnhancementsAction extends Action {

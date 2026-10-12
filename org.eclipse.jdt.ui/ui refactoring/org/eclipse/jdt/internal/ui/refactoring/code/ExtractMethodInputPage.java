@@ -338,7 +338,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 
 	private Text createTextInputField(Composite parent, int style) {
 		Text result= new Text(parent, style);
-		result.addModifyListener(e -> textModified(getText()));
+		result.addModifyListener(_ -> textModified(getText()));
 		TextFieldNavigationHandler.install(result);
 		return result;
 	}

@@ -174,6 +174,7 @@ public interface IJavaHelpContextIds {
 	 */
 	String REPLACE_INVOCATIONS_ACTION= 									PREFIX + "replace_invocations_action"; //$NON-NLS-1$
 	String MODIFY_PARAMETERS_ACTION= 									PREFIX + "modify_parameters_action"; //$NON-NLS-1$
+	String MODIFY_RECORD_PARAMETERS_ACTION=								PREFIX + "modify_record_parameters_action"; //$NON-NLS-1$
 	String MOVE_ACTION= 												PREFIX + "move_action"; //$NON-NLS-1$
 	String OPEN_ACTION= 												PREFIX + "open_action"; //$NON-NLS-1$
 

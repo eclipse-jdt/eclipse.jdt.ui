@@ -1457,15 +1457,35 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		IBinding[] bindings= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
 
 		HashSet<String> suggestedRenames= new HashSet<>();
+		Collection<T> deprecatedProposals= new ArrayList<>();
+		String depCheckPref= JavaCore.getOption(JavaCore.CODEASSIST_DEPRECATION_CHECK);
+		boolean hideDeprecatedProposals= depCheckPref == null ? false : depCheckPref.equals(JavaCore.ENABLED);
+		boolean hasNonDeprecatedProposals= false;
 		for (IBinding b : bindings) {
 			IMethodBinding binding= (IMethodBinding) b;
 			String curr= binding.getName();
 			if (!curr.equals(methodName) && binding.getParameterTypes().length == nArguments && NameMatcher.isSimilarName(methodName, curr) && suggestedRenames.add(curr)) {
-				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_description, BasicElementLabels.getJavaElementName(curr));
-				RenameNodeCorrectionProposalCore core= new RenameNodeCorrectionProposalCore(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, IProposalRelevance.CHANGE_METHOD);
-				T t= renameNodeProposalToT(core, MethodProposal1);
-				if (t != null)
-					proposals.add(t);
+				if (!binding.isDeprecated()) {
+					String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_description, BasicElementLabels.getJavaElementName(curr));
+					RenameNodeCorrectionProposalCore core= new RenameNodeCorrectionProposalCore(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, IProposalRelevance.CHANGE_METHOD);
+					T t= renameNodeProposalToT(core, MethodProposal1);
+					if (t != null) {
+						proposals.add(t);
+						hasNonDeprecatedProposals= true;
+					}
+				} else {
+					// create suggestions to provide a deprecated method call, but add after normal calls
+					String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_to_deprecated_description, BasicElementLabels.getJavaElementName(curr));
+					RenameNodeCorrectionProposalCore core= new RenameNodeCorrectionProposalCore(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, IProposalRelevance.CHANGE_METHOD);
+					T t= renameNodeProposalToT(core, MethodProposal1);
+					if (t != null)
+						deprecatedProposals.add(t);
+				}
+			}
+		}
+		if (!deprecatedProposals.isEmpty()) {
+			if (!hideDeprecatedProposals || !hasNonDeprecatedProposals) {
+				proposals.addAll(deprecatedProposals);
 			}
 		}
 		suggestedRenames= null;
@@ -1477,7 +1497,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 					parameterMismatchs.add((IMethodBinding) binding);
 				}
 			}
-			addParameterMissmatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
+			addParameterMismatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
 		}
 
 		if (sender == null) {
@@ -1744,7 +1764,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		return false;
 	}
 
-	private void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<T> proposals) throws CoreException {
+	private void addParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<T> proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
 		if (argTypes == null || nSimilarElements == 0)  {
@@ -2299,7 +2319,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			}
 		}
 
-		addParameterMissmatchProposals(context, problem, similarElements, selectedNode, arguments, proposals);
+		addParameterMismatchProposals(context, problem, similarElements, selectedNode, arguments, proposals);
 
 		if (targetBinding.isFromSource()) {
 			ITypeBinding targetDecl= targetBinding.getTypeDeclaration();

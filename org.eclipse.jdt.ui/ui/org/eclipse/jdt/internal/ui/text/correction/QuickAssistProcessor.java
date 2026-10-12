@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -236,6 +237,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.NewInterfaceImpleme
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.TogglePrintProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -352,7 +354,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getConvertToSwitchProposals(context, coveringNode, null)
 					|| getUnblockSwitchExpressionCaseProposals(context, coveringNode, null)
 					|| getDeprecatedProposal(context, coveringNode, null, null)
-					|| getReplaceQualifiedNameProposals(context, coveringNode, null);
+					|| getReplaceQualifiedNameProposals(context, coveringNode, null)
+					|| getConvertToIOPrintProposal(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -419,6 +422,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getFixParenthesesInLambdaExpression(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
+				getConvertToIOPrintProposal(context, coveringNode, resultingCollections);
 				getConvertForLoopToForEachProposal(context, coveringNode, resultingCollections);
 				getUnnecessaryArrayCreationProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
@@ -441,6 +445,44 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
+	}
+
+	private static boolean getConvertToIOPrintProposal(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) {
+		if (!JavaModelUtil.is25OrHigher(context.getCompilationUnit().getJavaProject())) {
+			return false;
+		}
+		if(node instanceof Block) {
+			return false;
+		}
+		if (!(node instanceof ExpressionStatement)) {
+			while(!(node instanceof ExpressionStatement) && !(node instanceof Block) && node.getParent()!=null) {
+				node= node.getParent();
+			}
+		}
+		if(!(node instanceof ExpressionStatement)) {
+			return false;
+		}
+		ExpressionStatement expressionStatement = (ExpressionStatement) node;
+		String expression= expressionStatement.getExpression().toString();
+		if (!expression.contains(TogglePrintProposal.SYSOUT) && !expression.contains(TogglePrintProposal.IOPRT)) {
+			return false;
+		}
+		TogglePrintProposal fixProp;
+		if(expression.contains(TogglePrintProposal.SYSOUT)) {
+			fixProp= TogglePrintProposal.togglePrint(context.getASTRoot(), node,CorrectionMessages.QuickAssistProcessor_switch_to_IO_print);
+		} else {
+			fixProp= TogglePrintProposal.togglePrint(context.getASTRoot(), node,CorrectionMessages.QuickAssistProcessor_switch_to_System_print);
+		}
+		if (fixProp != null) {
+			if (resultingCollections == null) {
+				return true;
+			}
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fixProp, null, IProposalRelevance.CONVERT_TO_IO_PRINT, image, context);
+			resultingCollections.add(proposal);
+			return true;
+		}
+		return false;
 	}
 
 	private static boolean getConvertForLoopToForEachProposal(IInvocationContext context, ASTNode node, ArrayList<ICommandAccess> resultingCollections) {

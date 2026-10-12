@@ -58,7 +58,7 @@ public class ViewActionGroup extends ActionGroup {
 		fChangeListener= changeListener;
 		fSite= site;
 		if (fChangeListener == null) {
-			fChangeListener = event -> {};
+			fChangeListener = _ -> {};
 		}
 		fFilterActionGroup= new WorkingSetFilterActionGroup(site, fChangeListener);
 		fShowActionGroup= new WorkingSetShowActionGroup(site);

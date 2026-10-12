@@ -116,7 +116,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	protected void registerPreference(final CheckboxPreference preference) {
 		if (fCheckboxes.add(preference)) {
 			fCount++;
-			preference.addObserver((o, arg) -> {
+			preference.addObserver((_, _) -> {
 				if (preference.getChecked()) {
 					setSelectedCleanUpCount(fSelectedCount + 1);
 				} else {
@@ -163,7 +163,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	protected void registerOptionPreference(final CheckboxPreference main, final CheckboxPreference... options) {
 		registerPreference(main);
 		fCheckboxes.addAll(Arrays.asList(options));
-		main.addObserver((source, arg)-> {
+		main.addObserver((_, _)-> {
 			for (CheckboxPreference option : options) {
 				option.setEnabled(main.getChecked());
 			}
@@ -197,7 +197,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 			for (int i= 0; i < slaves.length; i++) {
 				final CheckboxPreference slave= slaves[i];
 				for (CheckboxPreference subSlave : subSlaves[i]) {
-					master.addObserver((o, arg) -> {
+					master.addObserver((_, _) -> {
 						boolean enabled= master.getChecked() && slave.getChecked();
 						subSlave.setEnabled(enabled);
 					});
@@ -205,7 +205,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 			}
 		}
 
-		master.addObserver((o, arg) -> {
+		master.addObserver((_, _) -> {
 			boolean masterChecked= master.getChecked();
 			for (int i= 0; i < slaves.length; i++) {
 				if (slaves[i].getChecked()) {
@@ -222,7 +222,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		});
 
 		for (CheckboxPreference slave : slaves) {
-			slave.addObserver((o, arg) -> {
+			slave.addObserver((_, _) -> {
 				if (master.getChecked()) {
 					setSelectedCleanUpCount(fSelectedCount + (slave.getChecked() ? 1 : -1));
 				}
@@ -240,7 +240,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	private void internalRegisterSlavePreference(final CheckboxPreference master, final ButtonPreference[] slaves) {
 		fCheckboxes.addAll(Arrays.asList(slaves));
-    	master.addObserver( (o, arg) -> {
+    	master.addObserver( (_, _) -> {
 			for (ButtonPreference slave : slaves) {
 				slave.setEnabled(master.getChecked());
 			}

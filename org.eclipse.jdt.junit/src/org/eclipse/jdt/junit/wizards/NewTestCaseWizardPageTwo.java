@@ -168,7 +168,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 
 		fMethodsTree.setLabelProvider(new JavaElementLabelProvider());
 		fMethodsTree.setAutoExpandLevel(2);
-		fMethodsTree.addCheckStateListener(event -> doCheckedStateChanged());
+		fMethodsTree.addCheckStateListener(_ -> doCheckedStateChanged());
 		fMethodsTree.addFilter(new ViewerFilter() {
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {

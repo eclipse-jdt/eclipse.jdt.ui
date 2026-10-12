@@ -105,15 +105,20 @@ public class TestRunSessionSerializer implements XMLReader {
 	}
 
 	private void handleTestElement(ITestElement testElement) throws SAXException {
-		if (testElement instanceof TestSuiteElement) {
-			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
+		if (testElement instanceof TestSuiteElement testSuiteElement) {
 
 			AttributesImpl atts= new AttributesImpl();
 			// Need to store the full #getTestName instead of only the #getSuiteTypeName for test factory methods
 			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getTestName());
-			addTime(atts, IXMLTags.ATTR_TIME, testSuiteElement.getElapsedTimeInSeconds());
-			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
+			if (! Double.isNaN(testSuiteElement.getElapsedTimeInSeconds()))
+				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testSuiteElement.getElapsedTimeInSeconds()));
+			Result result= testElement.getTestResult(false);
+			boolean completedIgnoredSuite= testSuiteElement.isIgnored() && result == Result.IGNORED;
+			if (testElement.getProgressState() != ProgressState.COMPLETED
+					|| (! completedIgnoredSuite && result != Result.UNDEFINED))
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
+			if (testSuiteElement.isIgnored())
+				addCDATA(atts, IXMLTags.ATTR_IGNORED, Boolean.TRUE.toString());
 			if (testSuiteElement.getDisplayName() != null) {
 				addCDATA(atts, IXMLTags.ATTR_DISPLAY_NAME, testSuiteElement.getDisplayName());
 			}
@@ -134,8 +139,7 @@ public class TestRunSessionSerializer implements XMLReader {
 			}
 			endElement(IXMLTags.NODE_TESTSUITE);
 
-		} else if (testElement instanceof TestCaseElement) {
-			TestCaseElement testCaseElement= (TestCaseElement) testElement;
+		} else if (testElement instanceof TestCaseElement testCaseElement) {
 
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestMethodName());

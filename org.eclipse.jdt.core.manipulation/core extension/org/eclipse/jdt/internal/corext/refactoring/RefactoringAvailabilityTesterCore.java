@@ -233,6 +233,10 @@ public final class RefactoringAvailabilityTesterCore  {
 		return (method != null) && Checks.isAvailable(method) && !Flags.isAnnotation(method.getDeclaringType().getFlags());
 	}
 
+	public static boolean isChangeRecordSignatureAvailable(final IType type) throws JavaModelException {
+		return type != null && Checks.isAvailable(type);
+	}
+
 	public static IType getDeclaringType(IJavaElement element) {
 		if (element == null)
 			return null;

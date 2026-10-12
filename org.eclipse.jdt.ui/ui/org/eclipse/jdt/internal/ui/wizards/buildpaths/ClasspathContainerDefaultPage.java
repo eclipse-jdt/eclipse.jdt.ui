@@ -59,7 +59,7 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 
 		fEntryField= new StringDialogField();
 		fEntryField.setLabelText(NewWizardMessages.ClasspathContainerDefaultPage_path_label);
-		fEntryField.setDialogFieldListener(field -> validatePath());
+		fEntryField.setDialogFieldListener(_ -> validatePath());
 		validatePath();
 	}
 

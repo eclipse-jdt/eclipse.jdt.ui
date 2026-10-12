@@ -15,16 +15,67 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import org.eclipse.jface.text.Position;
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.ITextListener;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.SourceViewer;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 	@RegisterExtension
 	public SemanticHighlightingTestSetup shts= new SemanticHighlightingTestSetup( "/SHTest/src/SHTest.java");
+
+	@Test
+	public void styleChangesInvalidatePresentationOnce() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.DEPRECATED_MEMBER);
+		setUpSemanticHighlighting(SemanticHighlightings.STATIC_FINAL_FIELD);
+
+		String[] suffixes= {
+				PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX,
+				PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX,
+				PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX,
+				PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX,
+		};
+		String[] keys= new String[2 * suffixes.length];
+		for (int i= 0; i < suffixes.length; i++) {
+			keys[2 * i]= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + SemanticHighlightings.DEPRECATED_MEMBER + suffixes[i];
+			keys[2 * i + 1]= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + SemanticHighlightings.STATIC_FINAL_FIELD + suffixes[i];
+		}
+
+		SourceViewer viewer= getSourceViewer();
+		int[] invalidations= { 0 };
+		// an invalidation reaches text listeners without a document event
+		ITextListener listener= event -> {
+			if (event.getDocumentEvent() == null)
+				invalidations[0]++;
+		};
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		viewer.addTextListener(listener);
+		try {
+			for (String key : keys)
+				store.setValue(key, !store.getBoolean(key));
+			EditorTestHelper.runEventQueue(100);
+		} finally {
+			viewer.removeTextListener(listener);
+			for (String key : keys)
+				store.setToDefault(key);
+		}
+
+		assertTrue(invalidations[0] > 0, "presentation not invalidated");
+		assertTrue(invalidations[0] < keys.length, "style changes not coalesced: " + invalidations[0] + " invalidations for " + keys.length + " changes");
+	}
 
 	@Test
 	public void deprecatedMemberHighlighting() throws Exception {

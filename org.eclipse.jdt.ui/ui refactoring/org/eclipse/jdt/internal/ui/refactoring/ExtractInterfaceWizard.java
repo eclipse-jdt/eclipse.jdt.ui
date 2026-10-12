@@ -204,7 +204,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 				ExceptionHandler.handle(e, RefactoringMessages.ExtractInterfaceInputPage_Extract_Interface, RefactoringMessages.ExtractInterfaceInputPage_Internal_Error);
 				fTableViewer.setInput(new IMember[0]);
 			}
-			fTableViewer.addCheckStateListener(event -> ExtractInterfaceInputPage.this.updateUIElementEnablement());
+			fTableViewer.addCheckStateListener(_ -> ExtractInterfaceInputPage.this.updateUIElementEnablement());
 			fTableViewer.setComparator(new JavaElementComparator());
 			fTableViewer.getControl().setEnabled(anyMembersToExtract());
 

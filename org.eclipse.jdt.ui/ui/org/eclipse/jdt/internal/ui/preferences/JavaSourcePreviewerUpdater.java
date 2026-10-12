@@ -57,7 +57,7 @@ public class JavaSourcePreviewerUpdater {
 				viewer.invalidateTextPresentation();
 			}
 		};
-		viewer.getTextWidget().addDisposeListener(e -> {
+		viewer.getTextWidget().addDisposeListener(_ -> {
 			preferenceStore.removePropertyChangeListener(propertyChangeListener);
 			JFaceResources.getFontRegistry().removeListener(fontChangeListener);
 		});

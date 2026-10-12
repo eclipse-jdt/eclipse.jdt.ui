@@ -110,7 +110,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			getPromoteTempRefactoring().setFieldName(firstGuessedFieldName);
 			fNameField.selectAll();
 			fNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fNameField.addModifyListener(e -> {
+			fNameField.addModifyListener(_ -> {
 				PromoteTempInputPage.this.getPromoteTempRefactoring().setFieldName(fNameField.getText());
 				PromoteTempInputPage.this.updateStatus();
 			});

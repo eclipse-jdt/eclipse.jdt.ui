@@ -94,7 +94,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		boolean enabled= isEnabled(context);
 		fEnableField.setSelection(enabled);
 
-		fEnableField.setDialogFieldListener(field -> {
+		fEnableField.setDialogFieldListener(_ -> {
 			fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(getPreferenceKey(), fEnableField.isSelected());
 			enabled(fEnableField.isSelected());
 		});

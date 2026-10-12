@@ -161,7 +161,7 @@ public class OpenTypeSelectionDialog extends FilteredTypesSelectionDialog {
 		};
 		IHandlerActivation handlerActivation= hs.activateHandler(commandId, new ActionHandler(action),
 				new ActiveShellExpression(control.getShell()));
-		control.addDisposeListener(e -> hs.deactivateHandler(handlerActivation));
+		control.addDisposeListener(_ -> hs.deactivateHandler(handlerActivation));
 	}
 
 }

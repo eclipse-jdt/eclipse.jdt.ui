@@ -53,7 +53,7 @@ public class PropertiesFilePartitionerTest {
 		//             01234567890 1234567890 1234567890 123456789
 
 		fDocumentPartitioningChanged= false;
-		fDocument.addDocumentPartitioningListener(document -> fDocumentPartitioningChanged= true);
+		fDocument.addDocumentPartitioningListener(_ -> fDocumentPartitioningChanged= true);
 	}
 
 	@AfterEach

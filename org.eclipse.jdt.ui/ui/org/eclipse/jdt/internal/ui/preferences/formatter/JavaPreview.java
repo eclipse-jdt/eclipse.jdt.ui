@@ -83,7 +83,7 @@ public class JavaPreview {
 
 		    fPreferenceStore.addPropertyChangeListener(propertyListener);
 
-			fSourceViewer.getTextWidget().addDisposeListener(e -> fPreferenceStore.removePropertyChangeListener(propertyListener));
+			fSourceViewer.getTextWidget().addDisposeListener(_ -> fPreferenceStore.removePropertyChangeListener(propertyListener));
 		}
 	}
 

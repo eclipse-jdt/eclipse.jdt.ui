@@ -134,7 +134,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 
 	protected Text createTextInputField(Composite parent, int style) {
 		fTextField= new Text(parent, style);
-		fTextField.addModifyListener(e -> textModified(getText()));
+		fTextField.addModifyListener(_ -> textModified(getText()));
 		fTextField.setText(fInitialValue);
 		TextFieldNavigationHandler.install(fTextField);
 		return fTextField;

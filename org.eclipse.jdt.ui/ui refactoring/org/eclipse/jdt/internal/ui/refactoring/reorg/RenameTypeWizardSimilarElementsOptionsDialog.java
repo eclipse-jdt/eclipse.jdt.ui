@@ -118,17 +118,17 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 		fWarningLabel.setLayoutData(gridData);
 		fWarningLabel.setFont(warningComposite.getFont());
 
-		fExactStrategyRadio.setDialogFieldListener(field -> {
+		fExactStrategyRadio.setDialogFieldListener(_ -> {
 			updateLabel();
 			fSelectedStrategy= RenamingNameSuggestor.STRATEGY_EXACT;
 		});
 
-		fEmbeddedStrategyRadio.setDialogFieldListener(field -> {
+		fEmbeddedStrategyRadio.setDialogFieldListener(_ -> {
 			updateLabel();
 			fSelectedStrategy= RenamingNameSuggestor.STRATEGY_EMBEDDED;
 		});
 
-		fSuffixStrategyRadio.setDialogFieldListener(field -> {
+		fSuffixStrategyRadio.setDialogFieldListener(_ -> {
 			updateLabel();
 			fSelectedStrategy= RenamingNameSuggestor.STRATEGY_SUFFIX;
 		});

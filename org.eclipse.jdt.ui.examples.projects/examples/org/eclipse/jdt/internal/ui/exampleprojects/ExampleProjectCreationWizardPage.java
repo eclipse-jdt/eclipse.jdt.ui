@@ -81,7 +81,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		fTextControl= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fTextControl.setText(fProjectName);
 		fTextControl.setSelection(fProjectName.length());
-		fTextControl.addModifyListener(e -> {
+		fTextControl.addModifyListener(_ -> {
 			if (!fTextControl.isDisposed()) {
 				validateText(fTextControl.getText());
 			}

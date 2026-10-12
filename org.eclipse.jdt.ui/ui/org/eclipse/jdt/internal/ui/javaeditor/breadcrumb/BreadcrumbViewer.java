@@ -113,7 +113,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		gridLayout.horizontalSpacing= 0;
 		fContainer.setLayout(gridLayout);
 
-		fContainer.addListener(SWT.Resize, event -> refresh());
+		fContainer.addListener(SWT.Resize, _ -> refresh());
 	}
 
 	/**

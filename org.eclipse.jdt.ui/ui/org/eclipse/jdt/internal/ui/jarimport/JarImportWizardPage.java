@@ -227,7 +227,7 @@ public final class JarImportWizardPage extends WizardPage {
 			fTreeViewer.setSelection(new StructuredSelection(new Object[] { root}), true);
 			fTreeViewer.expandToLevel(root, 1);
 		}
-		fTreeViewer.addSelectionChangedListener(event -> handleInputChanged());
+		fTreeViewer.addSelectionChangedListener(_ -> handleInputChanged());
 		if (contentProvider.getChildren(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot())).length == 0) {
 			fTreeViewer.getControl().setEnabled(false);
 			label.setEnabled(false);
@@ -252,7 +252,7 @@ public final class JarImportWizardPage extends WizardPage {
 		fLocationControl= new RefactoringLocationControl(fWizard, composite, SETTING_HISTORY);
 		fLocationControl.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 		fLocationControl.loadHistory();
-		fLocationControl.getControl().addModifyListener(event -> handleInputChanged());
+		fLocationControl.getControl().addModifyListener(_ -> handleInputChanged());
 		fLocationControl.getControl().addSelectionListener(new SelectionAdapter() {
 
 			@Override

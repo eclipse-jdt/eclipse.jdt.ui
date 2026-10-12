@@ -416,7 +416,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					final IResource resource = task.resource;
 					Set<AdornmentUpdateJob> jobs = next.getValue();
 					for (AdornmentUpdateJob job : jobs) {
-						changed.compute(job, (k, v) -> {
+						changed.compute(job, (_, v) -> {
 							if(v == null) {
 								v = new LinkedHashSet<>();
 							}
@@ -457,7 +457,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		void schedule(AdornmentTask task, AdornmentUpdateJob job) {
 			AtomicBoolean shouldSchedule = new AtomicBoolean(false);
 			synchronized (queue) {
-				queue.compute(task, (k,v) -> {
+				queue.compute(task, (_,v) -> {
 					if (v == null) {
 						v = new LinkedHashSet<>();
 					}

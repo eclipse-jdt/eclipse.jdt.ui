@@ -189,7 +189,7 @@ public class VisitorTest {
 		Set<ASTNode> nodesprocessed = null;
 		HelperVisitor<ReferenceHolder<String,NodeFound>,String,NodeFound> hv = new HelperVisitor<>(nodesprocessed, new ReferenceHolder<>());
 		BiPredicate<MethodInvocation, ReferenceHolder<String, NodeFound>> bs = this::handleMethodInvocation;
-		BiPredicate<MethodInvocation, ReferenceHolder<String, NodeFound>> after = (mi,mi2)->{
+		BiPredicate<MethodInvocation, ReferenceHolder<String, NodeFound>> after = (_,_)->{
 			return true;
 		};
 		BiPredicate<MethodInvocation, ReferenceHolder<String, NodeFound>> bs2= bs.or(after);
@@ -242,14 +242,14 @@ public class VisitorTest {
 		Set<ASTNode> nodesprocessed = null;
 		HelperVisitor<ReferenceHolder<String,NodeFound>,String,NodeFound> hv = new HelperVisitor<>(nodesprocessed, new ReferenceHolder<String, NodeFound>());
 		VisitorEnum.stream().forEach(ve -> {
-			hv.add(ve, (node, holder) -> {
+			hv.add(ve, (node, _) -> {
 				String x = "Start "+node.getNodeType() + " :" + node;
 				System.out.printf("%-40s %s%n",x,ASTNode.nodeClassForType(node.getNodeType()));
 				return true;
 			});
 		});
 		VisitorEnum.stream().forEach(ve -> {
-			hv.addEnd(ve, (node, holder) -> {
+			hv.addEnd(ve, (node, _) -> {
 				String x = "End   "+node.getNodeType() + " :" + node;
 				System.out.printf("%-40s %s%n",x,ASTNode.nodeClassForType(node.getNodeType()));
 			});
@@ -302,11 +302,11 @@ public class VisitorTest {
 				VisitorEnum.VariableDeclarationStatement,
 				VisitorEnum.VariableDeclarationFragment);
 		ReferenceHolder<ASTNode, String> dataholder = new ReferenceHolder<>();
-		BiPredicate<ASTNode, ReferenceHolder<ASTNode, String>> bs =(node,holder)->{
+		BiPredicate<ASTNode, ReferenceHolder<ASTNode, String>> bs =(node,_)->{
 			System.out.printf("%-40s %s%n","Start "+node.getNodeType() + " :" + node,ASTNode.nodeClassForType(node.getNodeType()));
 			return false;
 		};
-		BiConsumer<ASTNode, ReferenceHolder<ASTNode, String>> bc = (node,holder)->{
+		BiConsumer<ASTNode, ReferenceHolder<ASTNode, String>> bc = (node,_)->{
 			System.out.printf("%-40s %s%n","End   "+node.getNodeType() + " :" + node,ASTNode.nodeClassForType(node.getNodeType()));
 		};
 		HelperVisitor.callVisitor(result, myset, dataholder,null, bs, bc);
@@ -390,7 +390,7 @@ public class VisitorTest {
 				VisitorEnum.VariableDeclarationExpression,
 				VisitorEnum.VariableDeclarationStatement,
 				VisitorEnum.VariableDeclarationFragment), dataholder,null, (node,holder)->{
-			Map<String, Object> pernodemap = holder.computeIfAbsent(node, k -> new HashMap<>());
+			Map<String, Object> pernodemap = holder.computeIfAbsent(node, _ -> new HashMap<>());
 			switch(VisitorEnum.fromNode(node)) {
 			case SingleVariableDeclaration:
 				SingleVariableDeclaration svd=(SingleVariableDeclaration) node;
@@ -429,13 +429,13 @@ public class VisitorTest {
 	@Test
 	public void simpleTest5e() {
 		ReferenceHolder<ASTNode, Map<String,Object>> dataholder = new ReferenceHolder<>();
-		HelperVisitor.callVariableDeclarationStatementVisitor(Iterator.class, result2, dataholder,null, (init_iterator,holder_a)->{
+		HelperVisitor.callVariableDeclarationStatementVisitor(Iterator.class, result2, dataholder,null, (init_iterator,_)->{
 			List<String> computeVarName = computeVarName(init_iterator);
-			HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder,null, (whilestatement,holder)->{
+			HelperVisitor.callWhileStatementVisitor(init_iterator.getParent(), dataholder,null, (whilestatement,_)->{
 				String name = computeNextVarname(whilestatement);
 				if(computeVarName.get(0).equals(name)) {
 					HelperVisitor.callMethodInvocationVisitor("next", whilestatement.getBody() ,dataholder,null, (mi,holder2)->{
-						Map<String, Object> pernodemap2 = holder2.computeIfAbsent(whilestatement, k -> new HashMap<>());
+						Map<String, Object> pernodemap2 = holder2.computeIfAbsent(whilestatement, _ -> new HashMap<>());
 						Expression element2 = mi.getExpression();
 						SimpleName sn= ASTNodes.as(element2, SimpleName.class);
 						if (sn !=null) {
@@ -594,7 +594,7 @@ public class VisitorTest {
 	public void modifyTest1() {
 		Set<ASTNode> nodesprocessed = null;
 		HelperVisitor<ReferenceHolder<String,NodeFound>,String,NodeFound> hv = new HelperVisitor<>(nodesprocessed, new ReferenceHolder<>());
-		hv.addMethodInvocation("println",(node, holder) -> {
+		hv.addMethodInvocation("println",(node, _) -> {
 			System.out.println("Start "+node.getNodeType() + " :" + node);
 			return true;
 		});
@@ -613,24 +613,24 @@ public class VisitorTest {
 		HelperVisitor<ExpectationTracer,ASTNode, SimpleName> hv = new HelperVisitor<>(nodesprocessed, dataholder);
 		Set<SimpleName> names = new HashSet<>();
 		Set<ASTNode> nodes = new HashSet<>();
-		hv.addSingleVariableDeclaration((node, holder) -> {
+		hv.addSingleVariableDeclaration((node, _) -> {
 			names.add(node.getName());
 			return true;
 		});
-		hv.addVariableDeclarationFragment((node, holder) -> {
+		hv.addVariableDeclarationFragment((node, _) -> {
 			names.add(node.getName());
 			return true;
 		});
-		hv.addWhileStatement((node, holder) -> {
+		hv.addWhileStatement((node, _) -> {
 			nodes.add(node);
 			return true;
 		});
-		hv.addWhileStatement((node, holder) -> {
+		hv.addWhileStatement((node, _) -> {
 			nodes.remove(node);
 			Collection<String> usedVarNames= getUsedVariableNames(node.getBody());
 			System.out.println(usedVarNames);
 		});
-		hv.addMethodInvocation("next",(methodinvocationnode, myholder) -> {
+		hv.addMethodInvocation("next",(methodinvocationnode, _) -> {
 			String x = "Start "+methodinvocationnode.getNodeType() + " :" + methodinvocationnode;
 			System.out.printf("%-40s %s%n",x,ASTNode.nodeClassForType(methodinvocationnode.getNodeType()));
 			return true;

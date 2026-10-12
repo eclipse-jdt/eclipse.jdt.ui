@@ -114,7 +114,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 					viewer.invalidateTextPresentation();
 				}
 			};
-			viewer.getTextWidget().addDisposeListener(e -> {
+			viewer.getTextWidget().addDisposeListener(_ -> {
 				preferenceStore.removePropertyChangeListener(propertyChangeListener);
 				JFaceResources.getFontRegistry().removeListener(fontChangeListener);
 			});
@@ -495,7 +495,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		previewer.setLayoutData(gd);
 
 
-		fHighlightingColorListViewer.addSelectionChangedListener(event -> handleSyntaxColorListSelection());
+		fHighlightingColorListViewer.addSelectionChangedListener(_ -> handleSyntaxColorListSelection());
 
 		foregroundColorButton.addSelectionListener(new SelectionAdapter() {
 			@Override

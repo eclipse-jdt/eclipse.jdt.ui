@@ -107,6 +107,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_method_deleted;
 
+	public static String ChangeSignatureRefactoring_record_deleted;
+
 	public static String ChangeSignatureRefactoring_method_name_will_shadow;
 
 	public static String ChangeSignatureRefactoring_method_name_will_shadow2;
@@ -114,6 +116,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeSignatureRefactoring_method_name_not_empty;
 
 	public static String ChangeSignatureRefactoring_modify_Parameters;
+
+	public static String ChangeSignatureRefactoring_modify_RecordParameters;
 
 	public static String ChangeSignatureRefactoring_native;
 
@@ -134,6 +138,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeSignatureRefactoring_parameter_type_contains_type_variable;
 
 	public static String ChangeSignatureRefactoring_parameter_used;
+
+	public static String ChangeSignatureRefactoring_update_error_exception;
 
 	public static String ChangeSignatureRefactoring_preview;
 
@@ -559,6 +565,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_cannot_extract_from_annotation;
 
+	public static String ExtractMethodAnalyzer_cannot_extract_local_type_reference;
+
 	public static String ExtractMethodAnalyzer_cannot_extract_method_name_reference;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name;
@@ -582,6 +590,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractMethodAnalyzer_cannot_extract_yield;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_final_field_assignment;
+
+	public static String ExtractMethodAnalyzer_cannot_return_anonymous_type;
 
 	public static String ExtractMethodAnalyzer_compile_errors;
 

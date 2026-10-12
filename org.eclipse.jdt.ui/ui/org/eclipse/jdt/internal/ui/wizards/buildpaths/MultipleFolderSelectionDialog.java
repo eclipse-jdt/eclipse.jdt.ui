@@ -177,7 +177,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 
 		fViewer.setContentProvider(fContentProvider);
 		fViewer.setLabelProvider(fLabelProvider);
-		fViewer.addCheckStateListener(event -> updateOKStatus());
+		fViewer.addCheckStateListener(_ -> updateOKStatus());
 
 		fViewer.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		if (fFilters != null) {

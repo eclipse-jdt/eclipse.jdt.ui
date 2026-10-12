@@ -454,7 +454,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				}, Display.getDefault()::asyncExec);
 
 			CompletableFuture.runAsync(this::initializeJvmFields)
-				.thenAcceptAsync(VOID -> {
+				.thenAcceptAsync(_ -> {
 					if (fGroup.isDisposed()) {
 						return;
 					}

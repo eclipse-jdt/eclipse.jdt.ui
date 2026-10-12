@@ -51,7 +51,7 @@ public class JavaPartitionerTest {
 		fDocument.set("xxx\n/*xxx*/\nxxx\n/**xxx*/\nxxx\n/**/\nxxx\n/***/\nxxx");
 
 		fDocumentPartitioningChanged= false;
-		fDocument.addDocumentPartitioningListener(document -> fDocumentPartitioningChanged= true);
+		fDocument.addDocumentPartitioningListener(_ -> fDocumentPartitioningChanged= true);
 	}
 
 	@AfterEach

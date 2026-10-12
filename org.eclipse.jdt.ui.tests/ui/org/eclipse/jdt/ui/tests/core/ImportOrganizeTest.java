@@ -102,7 +102,7 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	protected IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
-		return (openChoices, ranges) -> {
+		return (openChoices, _) -> {
 			assertEquals(name + "-query-nchoices1", choices.length, openChoices.length);
 			assertEquals(name + "-query-nchoices2", nEntries.length, openChoices.length);
 			for (int i1= 0; i1 < nEntries.length; i1++) {

@@ -401,7 +401,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		SWTUtil.setAccessibilityText(fInputGroup.getTree(), JarPackagerMessages.JarPackageWizardPage_tree_accessibility_message);
 		SWTUtil.setAccessibilityText(fInputGroup.getTable(), JarPackagerMessages.JarPackageWizardPage_table_accessibility_message);
 
-		ICheckStateListener listener = event -> update();
+		ICheckStateListener listener = _ -> update();
 
 		fInputGroup.addCheckStateListener(listener);
 	}

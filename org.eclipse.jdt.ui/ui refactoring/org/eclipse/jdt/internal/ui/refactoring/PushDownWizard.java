@@ -367,7 +367,7 @@ public final class PushDownWizard extends RefactoringWizard {
 					info.setAction(MemberActionInfo.NO_ACTION);
 				updateWizardPage(null, true);
 			});
-			fTableViewer.addDoubleClickListener(event -> PushDownInputPage.this.editSelectedMembers());
+			fTableViewer.addDoubleClickListener(_ -> PushDownInputPage.this.editSelectedMembers());
 
 			fTableViewer.setInput(fProcessor.getMemberActionInfos());
 			updateWizardPage(null, false);

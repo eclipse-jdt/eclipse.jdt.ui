@@ -84,7 +84,7 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 		if (fEditor == null) {
 			return;
 		}
-		typeRootFutureByEditor.compute(fEditor, (editor, existingFuture) -> {
+		typeRootFutureByEditor.compute(fEditor, (_, existingFuture) -> {
 			if (existingFuture != null) {
 				existingFuture.cancel(false);
 			}

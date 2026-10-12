@@ -151,6 +151,7 @@ public class TestRunHandler extends DefaultHandler {
 				if (uniqueId != null && uniqueId.trim().isEmpty()) {
 					uniqueId= null;
 				}	fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0, false, displayName, paramTypes, uniqueId);
+				fTestSuite.setIgnored(Boolean.parseBoolean(attributes.getValue(IXMLTags.ATTR_IGNORED)));
 				readTime(fTestSuite, attributes);
 				fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 				break;

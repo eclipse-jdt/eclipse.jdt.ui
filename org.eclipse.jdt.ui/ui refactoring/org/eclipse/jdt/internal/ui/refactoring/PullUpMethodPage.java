@@ -400,7 +400,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		fTreeViewer.setUseHashlookup(true);
 		fTreeViewer.setComparator(new JavaElementComparator());
 		fTreeViewer.addSelectionChangedListener(this::treeViewerSelectionChanged);
-		fTreeViewer.addCheckStateListener(event -> updateSelectionLabel());
+		fTreeViewer.addCheckStateListener(_ -> updateSelectionLabel());
 	}
 
 	private void createTypeHierarchyLabel(final Composite composite) {

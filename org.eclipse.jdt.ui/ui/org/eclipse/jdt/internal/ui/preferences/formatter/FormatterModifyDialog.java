@@ -470,7 +470,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 
 			PreferenceTreeNode<?> toolBarNode= new PreferenceTreeNode<>(label, toolBar, true);
 			addChild(toolBarNode);
-			Predicate<String> valueChecker= v -> spinner.getSelection() < Integer.parseInt(preserveLinesPref.getValue());
+			Predicate<String> valueChecker= _ -> spinner.getSelection() < Integer.parseInt(preserveLinesPref.getValue());
 			this.addDependant(toolBarNode, valueChecker);
 			preserveLinesPref.addDependant(toolBarNode, valueChecker);
 
@@ -846,7 +846,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				fWorkingValues.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, tabSize);
 			}
 		});
-		tabSizePref.setValueValidator(v -> {
+		tabSizePref.setValueValidator(_ -> {
 			indentSizePref.updateWidget();
 			updateStatus(null);
 			return true;
@@ -927,11 +927,11 @@ public class FormatterModifyDialog extends ModifyDialog {
 		final CheckboxPreference useSpacesPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_with_spaces,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_WITH_SPACES, CheckboxPreference.FALSE_TRUE);
 		Preference<?> tabCharPref= parentSection.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
-		Predicate<String> anyAlignChecker= v -> DefaultCodeFormatterConstants.TRUE.equals(alignFieldsPref.getValue())
+		Predicate<String> anyAlignChecker= _ -> DefaultCodeFormatterConstants.TRUE.equals(alignFieldsPref.getValue())
 				|| DefaultCodeFormatterConstants.TRUE.equals(alignVariablesPref.getValue())
 				|| DefaultCodeFormatterConstants.TRUE.equals(alignAssignmentsPref.getValue())
 				|| DefaultCodeFormatterConstants.TRUE.equals(alignArrowsPref.getValue());
-		Predicate<String> spacesChecker= anyAlignChecker.and(v -> !JavaCore.SPACE.equals(tabCharPref.getValue()));
+		Predicate<String> spacesChecker= anyAlignChecker.and(_ -> !JavaCore.SPACE.equals(tabCharPref.getValue()));
 		alignFieldsPref.addDependant(useSpacesPref, spacesChecker);
 		alignVariablesPref.addDependant(useSpacesPref, spacesChecker);
 		alignAssignmentsPref.addDependant(useSpacesPref, spacesChecker);
@@ -1630,8 +1630,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 		Preference<?> blockMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
 		Preference<?> headerMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
 
-		Predicate<String> javadocChecker= v -> DefaultCodeFormatterConstants.TRUE.equals(javadocMaster.getValue()) ||  DefaultCodeFormatterConstants.TRUE.equals(markdownMaster.getValue()) || DefaultCodeFormatterConstants.TRUE.equals(headerMaster.getValue());
-		Predicate<String> blockChecker= v -> DefaultCodeFormatterConstants.TRUE.equals(blockMaster.getValue()) || DefaultCodeFormatterConstants.TRUE.equals(headerMaster.getValue());
+		Predicate<String> javadocChecker= _ -> DefaultCodeFormatterConstants.TRUE.equals(javadocMaster.getValue()) ||  DefaultCodeFormatterConstants.TRUE.equals(markdownMaster.getValue()) || DefaultCodeFormatterConstants.TRUE.equals(headerMaster.getValue());
+		Predicate<String> blockChecker= _ -> DefaultCodeFormatterConstants.TRUE.equals(blockMaster.getValue()) || DefaultCodeFormatterConstants.TRUE.equals(headerMaster.getValue());
 
 		List<PreferenceTreeNode<?>> mainItems= section.getChildren();
 		Function<String, Section> sectionFinder= key -> mainItems.stream().filter(n -> n instanceof Section)

@@ -217,7 +217,7 @@ public class ModuleDialog extends StatusDialog {
 		fIsModuleCheckbox= new SelectionButtonDialogField(SWT.CHECK);
 		fIsModuleCheckbox.setLabelText(NewWizardMessages.ModuleDialog_defines_modules_label);
 		fIsModuleCheckbox.setSelection(entryToEdit.getAttribute(CPListElement.MODULE) != null);
-		fIsModuleCheckbox.setDialogFieldListener(field -> doSelectionChangedAllLists());
+		fIsModuleCheckbox.setDialogFieldListener(_ -> doSelectionChangedAllLists());
 
 		// -- contents page initialized in createContentsTab()
 
@@ -308,7 +308,7 @@ public class ModuleDialog extends StatusDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		if (fBasePage.fSWTControl != null) {
 			Button switchButton= createButton(parent, 2, NewWizardMessages.ModuleDialog_switchToTab_button, false);
-			switchButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			switchButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(_ -> {
 				fBasePage.switchToTab(ModuleDependenciesPage.class);
 				cancelPressed();
 			}));
@@ -466,9 +466,9 @@ public class ModuleDialog extends StatusDialog {
 		TableViewer tableViewer= new TableViewer(box, SWT.MULTI | SWT.BORDER);
 		tableViewer.setContentProvider(new ListContentProvider());
 		tableViewer.setLabelProvider(new ModulesLabelProvider());
-		tableViewer.addDoubleClickListener(e -> moveModuleEntry(idx, targetIdx));
+		tableViewer.addDoubleClickListener(_ -> moveModuleEntry(idx, targetIdx));
 		tableViewer.setInput(fModuleLists[idx].fNames);
-		tableViewer.addSelectionChangedListener(e -> validateContents());
+		tableViewer.addSelectionChangedListener(_ -> validateContents());
 		tableViewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
@@ -494,19 +494,19 @@ public class ModuleDialog extends StatusDialog {
 		fAddIncludedButton= new Button(box, SWT.PUSH);
 		fAddIncludedButton.setImage(sharedImages.getImage(org.eclipse.ui.ISharedImages.IMG_TOOL_FORWARD));
 		fAddIncludedButton.setToolTipText(NewWizardMessages.ModuleDialog_addToIncluded_tooltip);
-		fAddIncludedButton.addSelectionListener(widgetSelectedAdapter(e -> moveModuleEntry(IDX_AVAILABLE, IDX_INCLUDED)));
+		fAddIncludedButton.addSelectionListener(widgetSelectedAdapter(_ -> moveModuleEntry(IDX_AVAILABLE, IDX_INCLUDED)));
 
 		fRemoveIncludedButton= new Button(box, SWT.PUSH);
 		fRemoveIncludedButton.setImage(sharedImages.getImage(org.eclipse.ui.ISharedImages.IMG_TOOL_BACK));
 		fRemoveIncludedButton.setToolTipText(NewWizardMessages.ModuleDialog_removeFromIncluded_tooltip);
-		fRemoveIncludedButton.addSelectionListener(widgetSelectedAdapter(e -> moveModuleEntry(IDX_INCLUDED, IDX_AVAILABLE)));
+		fRemoveIncludedButton.addSelectionListener(widgetSelectedAdapter(_ -> moveModuleEntry(IDX_INCLUDED, IDX_AVAILABLE)));
 	}
 
 	private void createVerticalButton(Composite parent) {
 		fPromoteIncludedButton= new Button(parent, SWT.PUSH);
 		fPromoteIncludedButton.setImage(JavaPlugin.getImageDescriptorRegistry().get(JavaPluginImages.DESC_BUTTON_MOVE_UP));
 		fPromoteIncludedButton.setToolTipText(NewWizardMessages.ModuleDialog_addToExplicitlyIncluded_tooltip);
-		fPromoteIncludedButton.addSelectionListener(widgetSelectedAdapter(e -> moveModuleEntry(IDX_IMPLICITLY_INCLUDED, IDX_INCLUDED)));
+		fPromoteIncludedButton.addSelectionListener(widgetSelectedAdapter(_ -> moveModuleEntry(IDX_IMPLICITLY_INCLUDED, IDX_INCLUDED)));
 		GridData gd= new GridData();
 		gd.horizontalAlignment= SWT.CENTER;
 		fPromoteIncludedButton.setLayoutData(gd);

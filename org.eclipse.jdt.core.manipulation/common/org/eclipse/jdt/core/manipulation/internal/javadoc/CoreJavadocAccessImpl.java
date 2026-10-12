@@ -978,7 +978,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		if (isCode || (isLink && addCodeTagOnLink())) {
 			if (isCode) {
 				ASTNode sibling = getNextSiblingElement((TagElement)node.getParent(), node);
-				if (sibling != null) {
+				if (sibling != null && isThreeBackTickOrPre((TagElement)node.getParent(), node)) {
 					fBuf.append("\n </code>"); //$NON-NLS-1$
 				} else {
 					fBuf.append("</code>"); //$NON-NLS-1$
@@ -1001,6 +1001,35 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 	        return null; // no next sibling
 	    }
 		return (ASTNode) fragments.get(index + 1);
+	}
+
+	protected boolean isThreeBackTickOrPre(TagElement parent, ASTNode node) {
+		if (fPreCounter > 0) {
+			return true;
+		}
+		
+		int parentStart= parent.getStartPosition();
+		int nodeStart= node.getStartPosition();
+		if (parentStart >= 0 && nodeStart > parentStart) {
+			String precedingText= fSource.substring(parentStart, nodeStart);
+			int count= 0;
+			int index= precedingText.indexOf("```"); //$NON-NLS-1$
+			while (index != -1) {
+				count++;
+				index= precedingText.indexOf("```", index + 3); //$NON-NLS-1$
+			}
+			if (count % 2 == 1) {
+				return true;
+			}
+		}
+		int nodeEnd= node.getStartPosition() + node.getLength();
+		int lookaheadEnd= Math.min(nodeEnd + 40, fSource.length());
+		if (nodeEnd < lookaheadEnd) {
+			String following= fSource.substring(nodeEnd, lookaheadEnd);
+			String stripped= following.replaceAll("(?s)[\\s*/]+", " ").trim(); //$NON-NLS-1$ //$NON-NLS-2$
+			return stripped.startsWith("```") || stripped.startsWith("<pre>"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return false;
 	}
 
 	protected boolean addCodeTagOnLink() {

@@ -676,7 +676,7 @@ public class JavadocView extends AbstractInfoView {
 		actionBars.setGlobalActionHandler(ActionFactory.BACK.getId(), fBackAction);
 		actionBars.setGlobalActionHandler(ActionFactory.FORWARD.getId(), fForthAction);
 
-		fInputSelectionProvider.addSelectionChangedListener(event -> actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_ATTACHED_JAVA_DOC, fOpenBrowserAction));
+		fInputSelectionProvider.addSelectionChangedListener(_ -> actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_ATTACHED_JAVA_DOC, fOpenBrowserAction));
 
 	}
 

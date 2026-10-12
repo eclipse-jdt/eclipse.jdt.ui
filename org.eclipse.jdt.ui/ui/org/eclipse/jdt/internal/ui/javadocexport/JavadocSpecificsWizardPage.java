@@ -167,7 +167,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		fOverViewText.addModifyListener(e -> doValidation(OVERVIEWSTATUS));
+		fOverViewText.addModifyListener(_ -> doValidation(OVERVIEWSTATUS));
 
 		fOverViewBrowseButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -207,7 +207,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		fAntText.addModifyListener(e -> doValidation(ANTSTATUS));
+		fAntText.addModifyListener(_ -> doValidation(ANTSTATUS));
 
 		fAntBrowseButton.addSelectionListener(new SelectionAdapter() {
 			@Override

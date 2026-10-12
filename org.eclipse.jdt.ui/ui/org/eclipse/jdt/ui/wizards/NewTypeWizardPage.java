@@ -2170,7 +2170,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (location != null) {
 					try {
 						IFileStore store= EFS.getStore(location);
-						if (store.fetchInfo().exists()) {
+						if (store.exists()) {
 							status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameExistsDifferentCase);
 							return status;
 						}
