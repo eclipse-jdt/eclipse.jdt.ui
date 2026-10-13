@@ -731,6 +731,10 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				fReaderThread.start();
 				return true;
 			} catch(IOException e){
+				if (fDebugMode) {
+					System.out.println("RemoteTestRunner: an error occurred while trying to connect"); //$NON-NLS-1$
+					e.printStackTrace(System.out);
+				}
 				exception= e;
 			}
 			try {

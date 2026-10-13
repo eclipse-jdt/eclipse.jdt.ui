@@ -48,6 +48,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -56,7 +58,9 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.core.model.IStreamsProxy;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
+import org.eclipse.debug.internal.ui.views.console.ProcessConsoleManager;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -68,6 +72,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -169,6 +175,7 @@ public class AbstractTestRunListenerTest {
 		if (testKindID != null) {
 			configuration.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindID);
 		}
+		configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "-debugging");
 		return configuration;
 	}
 
@@ -364,6 +371,7 @@ public class AbstractTestRunListenerTest {
 		assertEquals("Finished test cases differ", expected, finished);
 	}
 
+	@SuppressWarnings("restriction")
 	private static void logProcessesInfos(ILaunch launch) {
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -380,20 +388,21 @@ public class AbstractTestRunListenerTest {
 					sb.append("Exit value: " + process.getExitValue());
 					sb.append(System.lineSeparator());
 				}
-				IStreamsProxy streams= process.getStreamsProxy();
-				String output = streams.getOutputStreamMonitor().getContents();
-				if (!output.isEmpty()) {
-					sb.append("Standard output:");
-					sb.append(System.lineSeparator());
-					sb.append(output);
+				String cmd = process.getAttribute(IProcess.ATTR_CMDLINE);
+				if (cmd != null) {
+					sb.append("Command line: " + cmd);
 					sb.append(System.lineSeparator());
 				}
-				String errors = streams.getErrorStreamMonitor().getContents();
-				if (!output.isEmpty()) {
-					sb.append("Standard error:");
-					sb.append(System.lineSeparator());
-					sb.append(errors);
-					sb.append(System.lineSeparator());
+				ProcessConsoleManager manager= DebugUIPlugin.getDefault().getProcessConsoleManager();
+				if (manager != null && manager.getConsole(process) instanceof ProcessConsole console) {
+					IDocument document= console.getDocument();
+					String output= document != null ? document.get() : "";
+					if (output != null && !output.isEmpty()) {
+						sb.append("Process output:");
+						sb.append(System.lineSeparator());
+						sb.append(output);
+						sb.append(System.lineSeparator());
+					}
 				}
 				String id= process.getAttribute(IProcess.ATTR_PROCESS_ID);
 				if (id != null) {
