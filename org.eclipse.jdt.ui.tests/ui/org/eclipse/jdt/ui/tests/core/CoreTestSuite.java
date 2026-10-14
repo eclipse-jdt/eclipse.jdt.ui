@@ -66,7 +66,8 @@ ASTProviderTest.class,
 JDTFlagsTest18.class,
 JavaTokenComparatorTest.class,
 JavaIgnoreWhitespaceContributorTest.class,
-FiltersDialogTest.class
+FiltersDialogTest.class,
+InterfaceIndicatorLabelDecoratorTest.class
 })
 public class CoreTestSuite {
 }
