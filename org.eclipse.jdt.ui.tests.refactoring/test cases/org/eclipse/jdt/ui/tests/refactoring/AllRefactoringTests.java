@@ -57,6 +57,7 @@ import org.junit.platform.suite.api.Suite;
 	ChangeSignatureTests1d8.class,
 	ChangeSignatureTests16.class,
 	IntroduceParameterObjectTests.class,
+	IntroduceParameterObjectTests16.class,
 	PullUpTests.class,
 	PullUpTests1d8.class,
 	PushDownTests.class,

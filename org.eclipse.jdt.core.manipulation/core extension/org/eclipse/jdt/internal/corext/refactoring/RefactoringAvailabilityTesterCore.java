@@ -52,7 +52,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
+import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
@@ -310,25 +310,39 @@ public final class RefactoringAvailabilityTesterCore  {
 		return null;
 	}
 
+	/**
+	 * Tells whether the given method is the canonical constructor of a record, compact or not, as
+	 * the compiler tells it.
+	 * <p>
+	 * This method is called in the UI thread when the selection changes: it does not wait for the
+	 * shared AST of the active editor while the editor is reconciled, which lasts for as long as its
+	 * reconciler does not complete ({@link CoreASTProvider#WAIT_NOT_FOR_RECONCILER}). The answer is
+	 * then <code>false</code>, and a refactoring that must not change a canonical constructor rejects
+	 * it when it starts.
+	 * </p>
+	 *
+	 * @param method the method, or <code>null</code>
+	 * @return <code>true</code> if the method is a canonical constructor
+	 */
 	public static boolean isCanonicalConstructor(IMethod method) {
-		boolean isCanonicalConstructor = false;
 		try {
-			if (method != null && method.isConstructor()) {
-				CompilationUnit cUnit= SharedASTProviderCore.getAST(method.getCompilationUnit(), SharedASTProviderCore.WAIT_YES, null);
-				if (cUnit != null) {
-					MethodDeclaration mDecl= ASTNodeSearchUtil.getMethodDeclarationNode(method, cUnit);
-					if (mDecl != null) {
-						IMethodBinding mBinding= mDecl.resolveBinding();
-						if (mBinding != null && mBinding.isCanonicalConstructor()) {
-							isCanonicalConstructor= true;
-						}
-					}
-				}
+			if (method == null || !method.isConstructor() || !method.getDeclaringType().isRecord()) {
+				return false;
 			}
+			ICompilationUnit unit= method.getCompilationUnit();
+			if (unit == null) {
+				return false;
+			}
+			CompilationUnit cUnit= CoreASTProvider.getInstance().getAST(unit, CoreASTProvider.WAIT_NOT_FOR_RECONCILER, null);
+			if (cUnit == null) {
+				return false;
+			}
+			MethodDeclaration mDecl= ASTNodeSearchUtil.getMethodDeclarationNode(method, cUnit);
+			IMethodBinding mBinding= mDecl == null ? null : mDecl.resolveBinding();
+			return mBinding != null && mBinding.isCanonicalConstructor();
 		} catch (JavaModelException e) {
-			//do nothing
+			return false;
 		}
-		return isCanonicalConstructor;
 	}
 
 	public static boolean isConvertAnonymousAvailable(final IType type) throws JavaModelException {
