@@ -449,7 +449,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
-	 @Override
+	@Override
 	public void dispose() {
 		XMLMemento memento= XMLMemento.createWriteRoot("packageExplorer"); //$NON-NLS-1$
 		saveState(memento);
@@ -602,7 +602,6 @@ public class PackageExplorerPart extends ViewPart
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
 		fDecoratingLabelProvider= new DecoratingJavaLabelProvider(fLabelProvider, false, fIsCurrentLayoutFlat);
 		fViewer.setLabelProvider(fDecoratingLabelProvider);
-		// problem decoration provided by PackageLabelProvider
 	}
 
 	public void setShowLibrariesNode(boolean enabled) {
@@ -634,6 +633,10 @@ public class PackageExplorerPart extends ViewPart
 			fViewer.refresh();
 			fViewer.getControl().setRedraw(true);
 		}
+	}
+
+	PackageExplorerLabelProvider getLabelProvider() {
+		return fLabelProvider;
 	}
 
 	/**
