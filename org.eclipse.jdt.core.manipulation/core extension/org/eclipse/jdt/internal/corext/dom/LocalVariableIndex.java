@@ -26,7 +26,10 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-
+/**
+ * Computes the maximum number of local variable declarations in a method, initializer, or field.
+ * Used to determine the local variable table size for bytecode generation.
+ */
 public class LocalVariableIndex extends ASTVisitor {
 
 	private int fTopIndex;
