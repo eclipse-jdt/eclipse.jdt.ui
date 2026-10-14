@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
+    <!-- #3212: 3.40.100 deliberately distinguishes the repaired internal template
+         registry ABI from already published 3.40.0 builds. SDK consumers need
+         this service version as their minimum dependency. Remove this exception
+         once the API baseline includes 3.40.100. -->
+    <resource path="META-INF/MANIFEST.MF">
+        <filter id="931135546">
+            <message_arguments>
+                <message_argument value="3.40.100"/>
+                <message_argument value="3.39.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="internal compatibility/org/eclipse/jdt/internal/corext/SourceRange.java" type="org.eclipse.jdt.internal.corext.SourceRange">
         <filter id="574619656">
             <message_arguments>
