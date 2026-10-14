@@ -98,6 +98,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
@@ -227,6 +228,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private SelectFieldModeAction[] fToggleFieldModeActions;
     private CallHierarchyFiltersActionGroup fFiltersActionGroup;
     private HistoryDropDownAction fHistoryDropDownAction;
+    private FilterDropDownAction fFilterDropDownAction;
     private RefreshElementAction fRefreshSingleElementAction;
     private RefreshViewAction fRefreshViewAction;
     private OpenLocationAction fOpenLocationAction;
@@ -393,6 +395,40 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
             updateView();
         }
+    }
+
+    void setFilterMode(String mode) {
+
+    	if(mode == CallHierarchyCore.getDefault().getCurrentSelection()) {
+    		return;
+    	}
+
+
+    	switch(mode) {
+    		case CallHierarchyCore.PREF_SHOW_ALL_CODE:
+    			CallHierarchy.getDefault().setShowAll(true);
+    			CallHierarchy.getDefault().setHideTestCode(false);
+    			CallHierarchy.getDefault().setShowTestCode(false);
+
+    			break;
+
+    		case CallHierarchyCore.PREF_HIDE_TEST_CODE:
+    			CallHierarchy.getDefault().setShowAll(false);
+    			CallHierarchy.getDefault().setHideTestCode(true);
+    			CallHierarchy.getDefault().setShowTestCode(false);
+    			break;
+
+    		case CallHierarchyCore.PREF_SHOW_TEST_CODE_ONLY:
+    			CallHierarchy.getDefault().setShowAll(false);
+    			CallHierarchy.getDefault().setHideTestCode(false);
+    			CallHierarchy.getDefault().setShowTestCode(true);
+    			break;
+    	}
+    	fFilterDropDownAction.setActiveFilterString();
+
+//    	CallHierarchy.getDefault().
+    	updateView();
+    	refresh();
     }
 
 	/**
@@ -926,6 +962,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         return fCallerRoots;
     }
 
+    void updateFilters() {
+
+    }
+
     /**
      * Adds the entry if new. Inserted at the beginning of the history entries list.
      * @param entry the entry to add
@@ -1025,7 +1065,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		}
         toolBar.add(fHistoryDropDownAction);
         toolBar.add(fPinViewAction);
-        toolBar.add(fFiltersAction);
+//        toolBar.add(fFiltersAction);
+        toolBar.add(fFilterDropDownAction);
     }
 
     private void makeActions() {
@@ -1044,6 +1085,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fFiltersActionGroup = new CallHierarchyFiltersActionGroup(this,
                 fCallHierarchyViewer);
         fHistoryDropDownAction = new HistoryDropDownAction(this);
+        fFilterDropDownAction = new FilterDropDownAction(this);
         fHistoryDropDownAction.setEnabled(false);
         fCancelSearchAction = new CancelSearchAction(this);
         setCancelEnabled(false);
