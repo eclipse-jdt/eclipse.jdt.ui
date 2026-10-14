@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.Hashtable;
+import java.util.Map;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +34,12 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TypedRegion;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.ui.text.JavaPartitionerManager;
 
 public class JavaPartitionerTest {
 	private JavaTextTools fTextTools;
@@ -810,6 +817,38 @@ public class JavaPartitionerTest {
 
 		} catch (BadLocationException x) {
 			fail();
+		}
+	}
+
+	/**
+	 * A <code>null</code> project means the workspace settings, regardless of the active editor
+	 * or selection.
+	 */
+	@Test
+	public void testCreateDocumentPartitionerWithoutProjectUsesWorkspaceCompliance() {
+		Map<String, String> savedOptions= JavaCore.getOptions();
+		try {
+			Map<String, String> options= JavaCore.getOptions();
+			options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_17);
+			JavaCore.setOptions(new Hashtable<>(options));
+			assertEquals(IJavaPartitions.JAVA_MULTI_LINE_STRING, contentTypeInsideTextBlock(), "text block with workspace compliance 17");
+
+			options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+			JavaCore.setOptions(new Hashtable<>(options));
+			assertFalse(IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(contentTypeInsideTextBlock()), "no text block with workspace compliance 1.8");
+		} finally {
+			JavaCore.setOptions(new Hashtable<>(savedOptions));
+		}
+	}
+
+	private String contentTypeInsideTextBlock() {
+		Document document= new Document("String s= \"\"\"\n  text\n  \"\"\";");
+		IDocumentPartitioner partitioner= JavaPartitionerManager.createDocumentPartitioner(null);
+		partitioner.connect(document);
+		try {
+			return partitioner.getContentType(document.get().indexOf("text"));
+		} finally {
+			partitioner.disconnect();
 		}
 	}
 }
