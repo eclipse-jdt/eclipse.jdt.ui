@@ -29,6 +29,8 @@ TestPriorization.class,
 TestTestSearchEngine.class,
 TestExecutionTiming.class,
 TestExecutionTimingProtocol.class,
+JUnit4SuiteSourceTest.class,
+JUnitSuiteLabelTest.class,
 
 TestRunListenerTest3.class,
 TestRunListenerTest4.class,
