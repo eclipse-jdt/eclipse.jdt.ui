@@ -88,6 +88,14 @@ public interface ITestRunListener2 {
 	void testRunTerminated();
 
 	/**
+	 * The VM of a test run has exited without ending it, e.g. in a fixture method, while the test
+	 * run continues in another VM.
+	 */
+	default void testRunInterrupted() {
+		// optional protocol extension
+	}
+
+	/**
 	 * Information about a member of the test suite that is about to be run. The format of the
 	 * string is:
 	 *
