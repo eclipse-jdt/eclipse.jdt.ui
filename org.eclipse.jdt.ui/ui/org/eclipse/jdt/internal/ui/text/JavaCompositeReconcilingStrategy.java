@@ -22,7 +22,12 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.manipulation.CoreASTProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
@@ -38,6 +43,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 
 	private ITextEditor fEditor;
 	private JavaReconcilingStrategy fJavaStrategy;
+	private JavaReconciler fJavaReconciler;
 
 	/**
 	 * Creates a new Java reconciling strategy.
@@ -77,6 +83,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	 */
 	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
+		aboutToBeReconciledForASTProvider();
 		try {
 			IProblemRequestorExtension e= getProblemRequestorExtension();
 			if (e != null) {
@@ -99,6 +106,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	 */
 	@Override
 	public void reconcile(IRegion partition) {
+		aboutToBeReconciledForASTProvider();
 		try {
 			IProblemRequestorExtension e= getProblemRequestorExtension();
 			if (e != null) {
@@ -131,6 +139,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	 */
 	@Override
 	public void initialReconcile() {
+		aboutToBeReconciledForASTProvider();
 		try {
 			IProblemRequestorExtension e= getProblemRequestorExtension();
 			if (e != null) {
@@ -159,7 +168,30 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	}
 
 	public void aboutToWork(JavaReconciler javaReconciler) {
+		fJavaReconciler= javaReconciler;
 		fJavaStrategy.aboutToWork(javaReconciler);
+	}
+
+	/**
+	 * Tells {@link CoreASTProvider} that a reconcile for this editor's input is starting right now,
+	 * immediately before the try block that unconditionally calls {@link #reconciled()} in its
+	 * finally clause - so the two calls can never become unbalanced the way the old
+	 * aboutToWork()-based registration could (it fired speculatively, before the reconciler
+	 * necessarily reached this method at all; see bugzilla 366048 comment 29).
+	 * <p>
+	 * Only done for {@link CompilationUnitEditor}s since they are the ones notifying
+	 * {@link CoreASTProvider} once the reconcile has finished.
+	 * </p>
+	 */
+	private void aboutToBeReconciledForASTProvider() {
+		if (!(fEditor instanceof CompilationUnitEditor)) {
+			return;
+		}
+		ITypeRoot inputJavaElement= EditorUtility.getEditorInputJavaElement(fEditor, false);
+		if (inputJavaElement != null) {
+			CoreASTProvider.getInstance().aboutToBeReconciled(inputJavaElement,
+					fJavaReconciler != null ? fJavaReconciler::signalWaitForFinish : null);
+		}
 	}
 
 	/**
