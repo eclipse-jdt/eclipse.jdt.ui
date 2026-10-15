@@ -24,6 +24,7 @@ import java.io.PushbackReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.runtime.ILog;
@@ -268,6 +269,32 @@ public class RemoteTestRunnerClient {
 
 	private volatile boolean stopped;
 	private volatile boolean ended;
+	/**
+	 * The number of test runs still expected, including the current one. Each test run is performed
+	 * by a VM that connects to the server socket after the VM of the previous test run.
+	 */
+	private volatile int fRemainingTestRuns;
+	/**
+	 * The elapsed time of the previous test runs, which is added to the one of the current test run
+	 * when the listeners are told that the test runs have ended or have been stopped. Only the
+	 * thread that reads the messages of the test runs changes it.
+	 */
+	private volatile long fPreviousElapsedTime;
+	/**
+	 * Whether the VM of the current test run has ended it, while other test runs were expected: it
+	 * sends nothing more, not even {@link MessageIds#TEST_STOPPED} if the test runs are stopped.
+	 */
+	private volatile boolean fCurrentTestRunEnded;
+	/** The number of test runs, see {@link #startListening(ITestRunListener2[], int, int)}. */
+	private int fTestRunCount;
+	/** The test runs have been stopped, maybe while no VM was connected. */
+	private volatile boolean fStopRequested;
+	/** No VM connected for the next test run: the listeners have been told why. */
+	private volatile boolean fNoVMConnected;
+	/** All the VMs have exited: the ones that have connected are read, no other one will connect. */
+	private volatile boolean fLaunchTerminated;
+	/** How often the server socket checks that the VMs that have not connected yet are still running. */
+	private static final int ACCEPT_TIMEOUT_MILLIS= 500;
 	private final ITestKind testRunnerKind;
 
 	public RemoteTestRunnerClient(ITestKind testRunnerKind) {
@@ -290,13 +317,18 @@ public class RemoteTestRunnerClient {
 			try {
 				if (fDebug)
 					System.out.println("Creating server socket "+fServerPort); //$NON-NLS-1$
-				fServerSocket= new ServerSocket(fServerPort);
-				fSocket= fServerSocket.accept();
-				fPushbackReader= new PushbackReader(new BufferedReader(new InputStreamReader(fSocket.getInputStream(), StandardCharsets.UTF_8)));
-				fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream(), StandardCharsets.UTF_8), true);
-				String message;
-				while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
-					receiveMessage(message);
+				ServerSocket serverSocket= fServerSocket= new ServerSocket(fServerPort);
+				do {
+					Socket socket= accept(serverSocket);
+					if (socket == null) {
+						noVMConnected();
+						break;
+					}
+					connect(socket);
+					String message;
+					while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
+						receiveMessage(message);
+				} while (prepareNextTestRun());
 			} catch (SocketException e) {
 				notifyTestRunTerminated();
 			} catch (IOException e) {
@@ -305,18 +337,85 @@ public class RemoteTestRunnerClient {
 			}
 			shutDown();
 		}
+
+		/**
+		 * Reads the messages of the given VM from now on. A test run stopped while no VM was
+		 * connected is stopped in this VM too.
+		 */
+		private void connect(Socket socket) throws IOException {
+			PushbackReader reader= new PushbackReader(new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8)));
+			PrintWriter writer= new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+			synchronized (RemoteTestRunnerClient.this) {
+				// stopTest() sees the socket with its writer
+				fPushbackReader= reader;
+				fWriter= writer;
+				fSocket= socket;
+				if (fStopRequested) {
+					stopTest();
+				}
+			}
+		}
+
+		/**
+		 * No VM connected for the next test run: all the VMs have exited.
+		 */
+		private void noVMConnected() {
+			fNoVMConnected= true;
+			if (fStopRequested) {
+				// the VM that would have run next has been canceled
+				notifyTestRunStopped(0);
+			} else {
+				// a VM exited without connecting
+				notifyTestRunTerminated();
+			}
+		}
+
+		/**
+		 * Waits for the VM of the next test run.
+		 *
+		 * @return the connection of the VM, or <code>null</code> if all the VMs have exited and
+		 *         none is waiting to be accepted
+		 */
+		private Socket accept(ServerSocket serverSocket) throws IOException {
+			if (fTestRunCount <= 1) {
+				// stopWaiting() closes the server socket if the VM exits without connecting
+				return serverSocket.accept();
+			}
+			// the server socket is not closed: a VM that has connected while the previous one was
+			// read must be read, even if all the VMs have exited since
+			serverSocket.setSoTimeout(ACCEPT_TIMEOUT_MILLIS);
+			while (true) {
+				try {
+					return serverSocket.accept();
+				} catch (SocketTimeoutException e) {
+					if (fLaunchTerminated) {
+						// The VMs exited before: a VM that has connected is waiting to be accepted,
+						// also if it connected while this thread was waiting for the timeout.
+						serverSocket.setSoTimeout(1);
+						try {
+							return serverSocket.accept();
+						} catch (SocketTimeoutException e2) {
+							return null;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
-	 * Start listening to a test run. Start a server connection that
-	 * the RemoteTestRunner can connect to.
+	 * Start listening to test runs. Start a server connection that
+	 * the RemoteTestRunners can connect to, one after the other.
 	 *
 	 * @param listeners listeners to inform
 	 * @param port port on which the server socket will be opened
+	 * @param testRunCount the number of test runs, each one performed by a VM
 	 */
-	public synchronized void startListening(ITestRunListener2[] listeners, int port) {
+	public synchronized void startListening(ITestRunListener2[] listeners, int port, int testRunCount) {
 		fListeners= listeners;
 		fPort= port;
+		fRemainingTestRuns= testRunCount;
+		fTestRunCount= testRunCount;
 		ServerConnection connection= new ServerConnection(port);
 		connection.start();
 	}
@@ -325,6 +424,9 @@ public class RemoteTestRunnerClient {
 	 * Requests to stop the remote test run.
 	 */
 	public synchronized void stopTest() {
+		fRemainingTestRuns= 1;
+		// a VM that connects later is stopped as soon as it connects
+		fStopRequested= true;
 		if (isRunning()) {
 			fWriter.println(MessageIds.TEST_STOP);
 			fWriter.flush();
@@ -333,15 +435,41 @@ public class RemoteTestRunnerClient {
 	}
 
 	public synchronized void stopWaiting() {
-		if (fServerSocket != null  && ! fServerSocket.isClosed() && fSocket == null) {
+		// All the VMs have exited, also when the test runs end normally: the VMs that have connected
+		// are still read, see ServerConnection#accept(ServerSocket).
+		fLaunchTerminated= true;
+		if (fTestRunCount <= 1 && fServerSocket != null  && ! fServerSocket.isClosed() && fSocket == null) {
 			shutDown(); // will throw a SocketException in Threads that wait in ServerSocket#accept()
 		}
 	}
 
-	private synchronized void shutDown() {
-		if (fDebug)
-			System.out.println("shutdown "+fPort); //$NON-NLS-1$
+	/**
+	 * Closes the connection of the finished test run, if another test run is expected.
+	 *
+	 * @return <code>true</code> if another test run is expected
+	 */
+	private boolean prepareNextTestRun() {
+		boolean interrupted;
+		synchronized (this) {
+			if (fServerSocket == null || --fRemainingTestRuns <= 0) {
+				return false;
+			}
+			// the VM may have exited while it was reporting a failure
+			interrupted= !fCurrentTestRunEnded;
+			closeConnection();
+			fCurrentState= fDefaultState;
+			fCurrentTestRunEnded= false;
+			fFailedTrace.setLength(0);
+			fExpectedResult.setLength(0);
+			fActualResult.setLength(0);
+		}
+		if (interrupted) {
+			notifyTestRunInterrupted();
+		}
+		return true;
+	}
 
+	private void closeConnection() {
 		if (fWriter != null) {
 			fWriter.close();
 			fWriter= null;
@@ -360,6 +488,13 @@ public class RemoteTestRunnerClient {
 			}
 		} catch(IOException e) {
 		}
+	}
+
+	private synchronized void shutDown() {
+		if (fDebug)
+			System.out.println("shutdown "+fPort); //$NON-NLS-1$
+
+		closeConnection();
 		try{
 			if (fServerSocket != null) {
 				fServerSocket.close();
@@ -367,11 +502,16 @@ public class RemoteTestRunnerClient {
 			}
 		} catch(IOException e) {
 		}
+		if (fNoVMConnected) {
+			// the listeners have been told that the test runs were stopped or terminated
+			return;
+		}
 		if (stopped || !ended) {
-			// JUnit 3 and 4 RemoteTestRunnerClient properly handle notifying stopped/terminated
+			// JUnit 3 and 4 RemoteTestRunnerClient properly handle notifying stopped/terminated,
+			// unless their test run had ended: the test runs were stopped after it
 			String testKind= testRunnerKind.getId();
-			if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind)
-					|| TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind)) {
+			if (!fCurrentTestRunEnded && (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind)
+					|| TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind))) {
 				return;
 			}
 			notifyTestRunStopped(0);
@@ -558,11 +698,13 @@ public class RemoteTestRunnerClient {
 	private void notifyTestRunStopped(final long elapsedTime) {
 		if (JUnitCorePlugin.isStopped())
 			return;
+		// the test run that is stopped may follow other ones, each one in its VM
+		final long totalElapsedTime= fPreviousElapsedTime + elapsedTime;
 		for (ITestRunListener2 listener : fListeners) {
 			SafeRunner.run(new ListenerSafeRunnable() {
 				@Override
 				public void run() {
-					listener.testRunStopped(elapsedTime);
+					listener.testRunStopped(totalElapsedTime);
 				}
 			});
 		}
@@ -570,14 +712,21 @@ public class RemoteTestRunnerClient {
 	}
 
 	private void testRunEnded(final long elapsedTime) {
+		if (fRemainingTestRuns > 1) {
+			// the test run continues in the next VM
+			fPreviousElapsedTime+= elapsedTime;
+			fCurrentTestRunEnded= true;
+			return;
+		}
 		ended = true;
 		if (JUnitCorePlugin.isStopped())
 			return;
+		final long totalElapsedTime= fPreviousElapsedTime + elapsedTime;
 		for (ITestRunListener2 listener : fListeners) {
 			SafeRunner.run(new ListenerSafeRunnable() {
 				@Override
 				public void run() {
-					listener.testRunEnded(elapsedTime);
+					listener.testRunEnded(totalElapsedTime);
 				}
 			});
 		}
@@ -672,6 +821,23 @@ public class RemoteTestRunnerClient {
 				@Override
 				public void run() {
 					listener.testRunTerminated();
+				}
+			});
+		}
+	}
+
+	/**
+	 * Tells the listeners that the VM of a test run exited without ending it, while other test runs
+	 * are expected.
+	 */
+	private void notifyTestRunInterrupted() {
+		if (JUnitCorePlugin.isStopped())
+			return;
+		for (ITestRunListener2 listener : fListeners) {
+			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
+				public void run() {
+					listener.testRunInterrupted();
 				}
 			});
 		}
