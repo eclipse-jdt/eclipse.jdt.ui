@@ -377,10 +377,13 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			if (isSmartTrigger || trigger == (char) 0) {
 				int referenceOffset= getReplacementOffset() + getReplacementLength();
 				replacement= getReplacementString();
+				int replOffset = getReplacementOffset();
 				//add ; to the replacement string if replacement string do not end with a semicolon and the document do not already have a ; at the reference offset.
 				if (trigger == ';' && replacement.charAt(replacement.length() - 1) != ';' && (referenceOffset >= document.getLength() || document.getChar(referenceOffset) != ';')) {
 					replacement= replacement + ";"; //$NON-NLS-1$
 					setReplacementString(replacement);
+				} else if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
+					replacement = replacement + " "; //$NON-NLS-1$
 				}
 			} else {
 				StringBuilder buffer= new StringBuilder(getReplacementString());
