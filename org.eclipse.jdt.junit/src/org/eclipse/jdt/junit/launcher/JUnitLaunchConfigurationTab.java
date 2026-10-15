@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IProject;
@@ -46,6 +47,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -72,6 +74,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -179,6 +182,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private boolean fIsValid= true;
 
 	private TestMethodsCache fTestMethodsCache= new TestMethodsCache();
+	/** The projects whose packages have been read: looking for a type in them is fast. */
+	private final Set<IJavaProject> fProjectsWithTypes= new HashSet<>();
 
 	/**
 	 * Creates a JUnit launch configuration tab.
@@ -494,6 +499,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		ITestKind testKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(config);
 		if (testKind.isNull()) {
 			if (fContainerElement != null) {
+				readTypes(fContainerElement.getJavaProject());
 				testKind= TestKindRegistry.getContainerTestKind(fContainerElement);
 			}
 			if (testKind.isNull()) {
@@ -718,6 +724,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private void handleTestMethodSearchButtonSelected() {
 		try (var _= fTestMethodsCache.runNestedCancelable()) {
 			IJavaProject javaProject= getJavaProject();
+			if (javaProject == null) {
+				return;
+			}
+			readTypes(javaProject);
 			IType testType= javaProject.findType(fTestText.getText());
 			Set<String> methodNames= getMethodsForType(javaProject, testType, getSelectedTestKind());
 
@@ -768,6 +778,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		try {
 			IJavaProject javaProject= getJavaProject();
 
+			if (javaProject != null) {
+				readTypes(javaProject);
+			}
 			if (javaProject == null || !javaProject.isOpen()) {
 				// can't find methods if the project
 				return;
@@ -806,6 +819,38 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			// the user probably canceled the operation. Sadly there is no way to know it for sure since ModalContext::run
 			// doesn't throw the original OperationCanceledException, it throws a new InterruptedException.
 			fTestMethodsCache.setCanceled(true);
+		}
+	}
+
+	/**
+	 * Reads the packages of the libraries of the given project out of the UI thread, unless it has
+	 * been done: the first lookup of a type in a project reads them, which takes seconds in a large
+	 * project, the next lookups are fast. The reading cannot be canceled: Java model does not check
+	 * the progress monitor while it reads the packages.
+	 *
+	 * @param javaProject the project, or <code>null</code>
+	 */
+	private void readTypes(IJavaProject javaProject) {
+		// added first: the dialog handles the events of the UI while the packages are read
+		if (javaProject == null || !javaProject.getProject().isOpen() || !fProjectsWithTypes.add(javaProject)) {
+			return;
+		}
+		IRunnableWithProgress read= monitor -> {
+			try {
+				javaProject.findType(Object.class.getName(), monitor);
+			} catch (JavaModelException e) {
+				throw new InvocationTargetException(e);
+			}
+		};
+		try {
+			ILaunchConfigurationDialog dialog= getLaunchConfigurationDialog();
+			if (dialog == null) {
+				read.run(new NullProgressMonitor());
+			} else {
+				dialog.run(true, false, read);
+			}
+		} catch (InvocationTargetException | InterruptedException e) {
+			// e.g. not a Java project: the lookups in the UI thread tell it, as before
 		}
 	}
 
@@ -947,7 +992,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_noContainer);
 				return;
 			}
-			validateJavaProject(fContainerElement.getJavaProject());
+			IJavaProject javaProject= fContainerElement.getJavaProject();
+			readTypes(javaProject);
+			validateJavaProject(javaProject);
 
 		} else {
 			String projectName= fProjText.getText().trim();
@@ -973,6 +1020,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			}
 
 			IJavaProject javaProject= JavaCore.create(project);
+			readTypes(javaProject);
 			validateJavaProject(javaProject);
 
 			try {
@@ -1114,6 +1162,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			// we only do a search for compilation units or class files or
 			// or source references
 			if (javaElement instanceof ISourceReference) {
+				readTypes(javaElement.getJavaProject());
 				ITestKind testKind= TestKindRegistry.getContainerTestKind(javaElement);
 				testKindId= testKind.getId();
 
