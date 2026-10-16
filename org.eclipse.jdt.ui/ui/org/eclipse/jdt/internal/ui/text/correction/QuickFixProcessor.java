@@ -949,7 +949,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				}
 				break;
 			case IProblem.ConflictingPackageFromModules:
-				ModuleCorrectionsSubProcessor.getIgnoreUnnamedModuleForSplitPackageProposals(context, proposals);
+				ModuleCorrectionsSubProcessor.getIgnoreUnnamedModuleForSplitPackageProposals(context, problem, proposals);
 				break;
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 				ModuleCorrectionsSubProcessor.getPackageDoesNotExistProposals(context, problem, proposals);
