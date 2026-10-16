@@ -64,6 +64,24 @@ input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent .typeParamsRefer
 /* End of dynamic type parameters references styling section (do not edit this line) */
 
 
+/* Java syntax highlighting in fenced code blocks */
+code .jc-keyword       { color: jc_keyword_color; font-weight: bold; }
+code .jc-string        { color: jc_string_color; }
+code .jc-comment       { color: jc_comment_color; }
+code .jc-annotation    { color: jc_annotation_color; }
+code .jc-type          { color: jc_type_color; }
+code .jc-method-decl   { color: jc_method_decl_color; }
+code .jc-method        { color: jc_method_color; }
+code .jc-param         { color: jc_param_color; }
+code .jc-local-var-decl { color: jc_local_var_decl_color; }
+code .jc-local-var     { color: jc_local_var_color; }
+code .jc-number        { color: jc_number_color; }
+code .jc-type-arg      { color: jc_type_arg_color; }
+code .jc-field         { color: jc_field_color; }
+code .jc-static-field  { color: jc_static_field_color; }
+code .jc-static-final-field { color: jc_static_final_field_color; }
+code .jc-enum          { color: jc_enum_color; }
+
 /* Workarounds for new Javadoc stylesheet (1.7) */ 
 ul.blockList li.blockList, ul.blockListLast li.blockList {
     list-style:none;
