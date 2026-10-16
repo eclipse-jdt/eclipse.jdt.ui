@@ -90,6 +90,7 @@ import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -340,6 +341,16 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		apply(document, (char) 0, getReplacementOffset() + getReplacementLength());
 	}
 
+	private int getPosition() {
+		CompletionContext cContext = fInvocationContext.getCoreContext();
+		if (cContext != null) {
+			IJavaElement enclosingElement = cContext.getEnclosingElement();
+			if (enclosingElement.getElementType() == IJavaElement.TYPE) return 2;
+			if (enclosingElement.getElementType() == IJavaElement.METHOD) return 3;
+		}
+		return 1;
+	}
+
 	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 
@@ -382,8 +393,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					replacement= replacement + ";"; //$NON-NLS-1$
 					setReplacementString(replacement);
 				} else if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
-					replacement = replacement + " "; //$NON-NLS-1$
-					setCursorPosition(getCursorPosition() + 1);
+					if (getPosition() == 3) {
+						replacement = replacement + " "; //$NON-NLS-1$
+						setCursorPosition(getCursorPosition() + 1);
+					}
 				}
 			} else {
 				StringBuilder buffer= new StringBuilder(getReplacementString());

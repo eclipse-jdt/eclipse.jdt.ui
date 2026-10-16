@@ -3079,7 +3079,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 
 	@Test
-	public void testAnnotationCompletionTrailingSpace() throws Exception {
+	public void testAnnotationCompletionNoTrailingSpace() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
@@ -3111,8 +3111,48 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		String expected= """
 			package test1;
 
-			@Deprecated //here
+			@Deprecated//here
 			public class A {
+			}
+			""";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
+	public void testAnnotationCompletionTrailingSpace() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			public class A {
+			    public foo(@Dep//here){}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+		String completeBehind= "@Dep";
+		int offset= contents.indexOf(completeBehind) + completeBehind.length();
+
+		JavaCompletionProposalComputer computer= new JavaTypeCompletionProposalComputer();
+		List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(offset, cu), null);
+
+		ICompletionProposal deprecatedProposal= null;
+		for (ICompletionProposal p : proposals) {
+			if (p.getDisplayString().startsWith("Deprecated")) {
+				deprecatedProposal= p;
+				break;
+			}
+		}
+		assertNotNull("no proposal for Deprecated", deprecatedProposal);
+
+		IDocument doc= new Document(contents);
+		deprecatedProposal.apply(doc);
+
+		String expected= """
+			package test1;
+
+			public class A {
+			    public foo(@Deprecated //here){}
 			}
 			""";
 		assertEquals(expected, doc.get());
