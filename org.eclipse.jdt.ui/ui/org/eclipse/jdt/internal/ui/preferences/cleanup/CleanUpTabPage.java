@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2022 IBM Corporation and others.
+ * Copyright (c) 2005, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -205,7 +205,10 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 			}
 		}
 
+		// a disabled master is not counted, matching the initial count below
 		master.addObserver((_, _) -> {
+			if (!master.getEnabled())
+				return;
 			boolean masterChecked= master.getChecked();
 			for (int i= 0; i < slaves.length; i++) {
 				if (slaves[i].getChecked()) {
@@ -223,7 +226,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 		for (CheckboxPreference slave : slaves) {
 			slave.addObserver((_, _) -> {
-				if (master.getChecked()) {
+				if (master.getChecked() && master.getEnabled()) {
 					setSelectedCleanUpCount(fSelectedCount + (slave.getChecked() ? 1 : -1));
 				}
 			});

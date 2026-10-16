@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class CleanUpModifyDialog extends ModifyDialog {
 
@@ -69,7 +72,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	};
 
 	private Label fCountLabel;
-	private ICleanUpConfigurationUI[] fPages;
+	private CleanUpTabPage[] fPages;
 
 	public CleanUpModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile, String dialogPreferencesKey, String lastSavePathKey) {
 	    super(parentShell, profile, profileManager, profileStore, newProfile, dialogPreferencesKey, lastSavePathKey);
@@ -121,7 +124,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	private void addPages(final Map<String, String> values) {
 		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 
-		fPages= new ICleanUpConfigurationUI[descriptors.length];
+		fPages= new CleanUpTabPage[descriptors.length];
 
 		for (int i= 0; i < descriptors.length; i++) {
 			String name= descriptors[i].getName();
@@ -150,12 +153,32 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite control= (Composite)super.createDialogArea(parent);
 
-		fCountLabel= new Label(control, SWT.NONE);
-		fCountLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		Composite footer= new Composite(control, SWT.NONE);
+		footer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		footer.setLayout(layout);
+
+		fCountLabel= new Label(footer, SWT.NONE);
+		fCountLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		fCountLabel.setFont(parent.getFont());
 		updateCountLabel();
 
+		Button deselectAll= new Button(footer, SWT.PUSH);
+		deselectAll.setText(CleanUpMessages.CleanUpDialog_DeselectAllTabs_Button);
+		deselectAll.setFont(parent.getFont());
+		deselectAll.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		SWTUtil.setButtonDimensionHint(deselectAll);
+		deselectAll.addSelectionListener(SelectionListener.widgetSelectedAdapter(_ -> deselectAllTabs()));
+
 		return control;
+	}
+
+	private void deselectAllTabs() {
+		for (CleanUpTabPage page : fPages) {
+			page.doSetAll(false);
+		}
 	}
 
 	@Override
