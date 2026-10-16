@@ -345,10 +345,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		CompletionContext cContext = fInvocationContext.getCoreContext();
 		if (cContext != null) {
 			IJavaElement enclosingElement = cContext.getEnclosingElement();
-			if (enclosingElement.getElementType() == IJavaElement.TYPE) return 2;
-			if (enclosingElement.getElementType() == IJavaElement.METHOD) return 3;
+			if (enclosingElement.getElementType() == IJavaElement.TYPE) return 1;
+			if (enclosingElement.getElementType() == IJavaElement.METHOD) return 2;
 		}
-		return 1;
+		return 0;
 	}
 
 	@Override
@@ -393,7 +393,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					replacement= replacement + ";"; //$NON-NLS-1$
 					setReplacementString(replacement);
 				} else if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
-					if (getPosition() == 3) {
+					if (getPosition() == 2) {
 						replacement = replacement + " "; //$NON-NLS-1$
 						setCursorPosition(getCursorPosition() + 1);
 					}
