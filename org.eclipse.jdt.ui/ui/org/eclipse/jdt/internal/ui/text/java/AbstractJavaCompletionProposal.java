@@ -90,6 +90,7 @@ import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -126,7 +127,6 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
  */
 public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
 	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6, ICompletionProposalExtension7 {
-
 
 	/**
 	 * The key modifier that toggles whether to insert or overwrite.
@@ -341,6 +341,16 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		apply(document, (char) 0, getReplacementOffset() + getReplacementLength());
 	}
 
+	private int getPosition() {
+		CompletionContext cContext = fInvocationContext.getCoreContext();
+		if (cContext != null) {
+			IJavaElement enclosingElement = cContext.getEnclosingElement();
+			if (enclosingElement.getElementType() == IJavaElement.TYPE) return 1;
+			if (enclosingElement.getElementType() == IJavaElement.METHOD) return 2;
+		}
+		return 0;
+	}
+
 	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 
@@ -377,10 +387,16 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			if (isSmartTrigger || trigger == (char) 0) {
 				int referenceOffset= getReplacementOffset() + getReplacementLength();
 				replacement= getReplacementString();
+				int replOffset = getReplacementOffset();
 				//add ; to the replacement string if replacement string do not end with a semicolon and the document do not already have a ; at the reference offset.
 				if (trigger == ';' && replacement.charAt(replacement.length() - 1) != ';' && (referenceOffset >= document.getLength() || document.getChar(referenceOffset) != ';')) {
 					replacement= replacement + ";"; //$NON-NLS-1$
 					setReplacementString(replacement);
+				} else if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
+					if (getPosition() == 2) {
+						replacement = replacement + " "; //$NON-NLS-1$
+						setCursorPosition(getCursorPosition() + 1);
+					}
 				}
 			} else {
 				StringBuilder buffer= new StringBuilder(getReplacementString());
