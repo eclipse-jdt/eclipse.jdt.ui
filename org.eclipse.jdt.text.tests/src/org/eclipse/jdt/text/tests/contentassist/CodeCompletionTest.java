@@ -3038,4 +3038,83 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			""";
 		assertEquals(expected, doc.get());
 	}
+
+	@Test
+	public void testKeywordCompletionTrailingSpace() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			class A {
+			    //here
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+		String str= "//here";
+		int offset= contents.indexOf(str);
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setIgnored(CompletionProposal.KEYWORD, false);
+
+		CompletionProposal coreProposal= CompletionProposal.create(CompletionProposal.KEYWORD, offset);
+		coreProposal.setCompletion("public".toCharArray());
+		coreProposal.setReplaceRange(offset, offset);
+		collector.accept(coreProposal);
+
+		IJavaCompletionProposal[] proposals= collector.getKeywordCompletionProposals();
+		assertEquals(1, proposals.length);
+
+		IDocument doc= new Document(contents);
+		proposals[0].apply(doc);
+
+		String expected= """
+			package test1;
+
+			class A {
+			    public //here
+			}
+			""";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
+	public void testAnnotationCompletionTrailingSpace() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			@Dep//here
+			public class A {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+		String completeBehind= "@Dep";
+		int offset= contents.indexOf(completeBehind) + completeBehind.length();
+
+		JavaCompletionProposalComputer computer= new JavaTypeCompletionProposalComputer();
+		List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(offset, cu), null);
+
+		ICompletionProposal deprecatedProposal= null;
+		for (ICompletionProposal p : proposals) {
+			if (p.getDisplayString().startsWith("Deprecated")) {
+				deprecatedProposal= p;
+				break;
+			}
+		}
+		assertNotNull("no proposal for Deprecated", deprecatedProposal);
+
+		IDocument doc= new Document(contents);
+		deprecatedProposal.apply(doc);
+
+		String expected= """
+			package test1;
+
+			@Deprecated //here
+			public class A {
+			}
+			""";
+		assertEquals(expected, doc.get());
+	}
 }
