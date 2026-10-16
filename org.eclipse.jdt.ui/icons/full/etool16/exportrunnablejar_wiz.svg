@@ -210,16 +210,6 @@
            style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.10910547;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
       </g>
     </mask>
-    <filter
-       id="filter14087"
-       x="-0.50009697"
-       width="2.0001903"
-       y="-0.54289605"
-       height="2.0857921">
-      <feGaussianBlur
-         stdDeviation="0.82521381"
-         id="feGaussianBlur14089" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -272,7 +262,7 @@
       <g
          transform="matrix(0.60464179,0,0,0.79501942,5.8711347,216.07999)"
          id="layer1-1-5"
-         style="stroke:#ffffff;stroke-width:2.88464283000000021;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;fill:#ffffff;opacity:0.75000000000000000;filter:url(#filter14087)">
+         style="stroke:#ffffff;stroke-width:2.88464283000000021;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;fill:#ffffff;opacity:0.75000000000000000">
         <g
            transform="matrix(0.27903303,0,0,0.27903303,-100.53208,912.07901)"
            style="stroke:#ffffff;stroke-width:10.33799770999999978;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;fill:#ffffff"

@@ -150,17 +150,6 @@
         </g>
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter8251-1"
-       x="-0.48122203"
-       width="1.9624349"
-       y="-0.24458531"
-       height="1.4891704">
-      <feGaussianBlur
-         stdDeviation="0.5196021"
-         id="feGaussianBlur8253-5" />
-    </filter>
     <mask
        maskUnits="userSpaceOnUse"
        id="mask8461">
@@ -205,16 +194,6 @@
         </g>
       </g>
     </mask>
-    <filter
-       id="filter8477"
-       x="-0.24234274"
-       width="1.4846855"
-       y="-0.24234274"
-       height="1.4846855">
-      <feGaussianBlur
-         stdDeviation="0.88425947"
-         id="feGaussianBlur8479" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -304,7 +283,7 @@
           <g
              transform="matrix(0.68024549,0,0,0.68024549,1.267815,328.57022)"
              id="g7309-4"
-             style="font-size:13.58917427000000089px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:#ffffff;display:inline;font-family:Sans;filter:url(#filter8477);opacity:0.75">
+             style="font-size:13.58917427000000089px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:#ffffff;display:inline;font-family:Sans;opacity:0.75">
             <path
                style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2.64956640999999982;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
                id="path10796-2-6-2-2"
@@ -337,7 +316,7 @@
           <path
              id="path8083-3"
              d="m -9.959076,1015.2691 4.669456,4.5679 -4.669456,4.6187 z"
-             style="font-size:13.58917427000000089px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.75000000000000000;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;filter:url(#filter8251-1);font-family:Sans" />
+             style="font-size:13.58917427000000089px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.75000000000000000;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Sans" />
         </g>
         <path
            style="fill:#323232;fill-opacity:1;stroke:#323232;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
