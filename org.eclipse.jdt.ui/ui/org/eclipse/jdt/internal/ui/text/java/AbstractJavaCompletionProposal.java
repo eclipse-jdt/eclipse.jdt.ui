@@ -127,7 +127,6 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
 	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6, ICompletionProposalExtension7 {
 
-
 	/**
 	 * The key modifier that toggles whether to insert or overwrite.
 	 */
@@ -384,6 +383,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					setReplacementString(replacement);
 				} else if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
 					replacement = replacement + " "; //$NON-NLS-1$
+					setCursorPosition(getCursorPosition() + 1);
 				}
 			} else {
 				StringBuilder buffer= new StringBuilder(getReplacementString());
