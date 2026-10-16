@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
 import org.eclipse.jdt.internal.ui.callhierarchy.FiltersDialogTest;
 import org.eclipse.jdt.internal.ui.compare.JavaIgnoreWhitespaceContributorTest;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparatorTest;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpPreviewTest;
 
 @Suite
 @SelectClasses({
@@ -66,7 +67,8 @@ ASTProviderTest.class,
 JDTFlagsTest18.class,
 JavaTokenComparatorTest.class,
 JavaIgnoreWhitespaceContributorTest.class,
-FiltersDialogTest.class
+FiltersDialogTest.class,
+CleanUpPreviewTest.class
 })
 public class CoreTestSuite {
 }

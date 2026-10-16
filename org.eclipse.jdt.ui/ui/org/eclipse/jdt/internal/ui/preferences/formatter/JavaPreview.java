@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -219,9 +219,16 @@ public class JavaPreview {
 
 		final int top1= topPixelRange0 > 0 ? (int)(topPixelRange1 * top0 / (double)topPixelRange0) : 0;
 		widget.setTopPixel(top1);
+		doAfterUpdate();
 		widget.setRedraw(true);
 
 		widget.setCursor(widget.getDisplay().getSystemCursor(fEditorMode ? SWT.CURSOR_IBEAM : SWT.CURSOR_ARROW));
+	}
+
+	/**
+	 * Called after the preview text has been replaced and the scroll position restored.
+	 */
+	protected void doAfterUpdate() {
 	}
 
 	private int getHeightOfAllLines(StyledText styledText) {
