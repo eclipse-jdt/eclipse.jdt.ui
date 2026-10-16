@@ -34,16 +34,6 @@
          offset="1"
          id="stop4943-0" />
     </linearGradient>
-    <filter
-       id="filter3902"
-       x="-0.20707168"
-       width="1.4141434"
-       y="-0.36324534"
-       height="1.7264906">
-      <feGaussianBlur
-         stdDeviation="0.75345228"
-         id="feGaussianBlur3904" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient4939-7"
        id="linearGradient4945-1-0"
@@ -74,7 +64,7 @@
        d="m -0.51339286,1050.2193 6.49553576,0.134 1.1160714,-0.9375 c 0,0 1.0044643,-1.9866 0.9375,-2.0982 -0.066964,-0.1116 0.022321,-2.8795 0.022321,-2.8795 l -3.0357143,-0.022 0,0.9152 -1.0267856,0.023 3e-7,-1.0055 -3.9955357,0 -0.53571429,2.9241 z"
        id="path3383" />
     <g
-       style="display:inline;fill:#ffffff;stroke:#ffffff;filter:url(#filter3902)"
+       style="display:inline;fill:#ffffff;stroke:#ffffff"
        id="g4106-4"
        transform="matrix(0.47527908,0,0,0.47527908,-3.5591513,544.74663)">
       <path

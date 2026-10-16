@@ -14,17 +14,6 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter8047"
-       x="-0.082734725"
-       y="-0.047066555"
-       width="1.1654695"
-       height="1.0941331">
-      <feGaussianBlur
-         stdDeviation="0.13789128"
-         id="feGaussianBlur8049" />
-    </filter>
     <linearGradient
        id="linearGradient10798-1-9-3-7-6-8-9-0-9-1-2">
       <stop
@@ -72,28 +61,6 @@
          offset="1"
          id="stop5795-4" />
     </linearGradient>
-    <filter
-       color-interpolation-filters="sRGB"
-       height="1.4108484"
-       y="-0.20542419"
-       width="1.4108484"
-       x="-0.20542419"
-       id="filter5785-0">
-      <feGaussianBlur
-         id="feGaussianBlur5787-9"
-         stdDeviation="0.19985704" />
-    </filter>
-    <filter
-       color-interpolation-filters="sRGB"
-       height="1.24"
-       y="-0.12"
-       width="1.24"
-       x="-0.12"
-       id="filter5785-4">
-      <feGaussianBlur
-         id="feGaussianBlur5787-6"
-         stdDeviation="0.19985704" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -115,7 +82,7 @@
        d="m 5.5130017,1041.3622 0,1.0313 1.0000019,0 0,4.9687 -1.0000019,0 0,1.0313 4.0000022,0 0,-1.0313 -1,0 0,-4.9687 1,0 0,-1.0313 -4.0000022,0 z"
        id="rect7222" />
     <path
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.5;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;filter:url(#filter8047);font-family:Sans"
+       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.5;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
        d="m 5.7005017,1041.5497 0,1.0313 1.000002,0 0,4.9687 -1.000002,0 0,1.0313 4.000002,0 0,-1.0313 -1,0 0,-4.9687 1,0 0,-1.0313 -4.000002,0 z"
        id="rect7222-9" />
     <g
@@ -167,7 +134,7 @@
              height="3.9971409"
              width="3.9971409"
              id="rect6724-4-4"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;filter:url(#filter5785-4);font-family:Sans" />
+             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
         </g>
       </g>
     </g>
@@ -208,7 +175,7 @@
              height="3.9971409"
              width="3.9971409"
              id="rect6724-4"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;filter:url(#filter5785-0);font-family:Sans" />
+             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans" />
         </g>
       </g>
     </g>

@@ -117,17 +117,6 @@
        y1="398.98798"
        x2="548.45923"
        y2="373.77069" />
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter4929-6"
-       x="-0.33426729"
-       width="1.6685346"
-       y="-0.42999801"
-       height="1.859996">
-      <feGaussianBlur
-         stdDeviation="3.5620748"
-         id="feGaussianBlur4931-9" />
-    </filter>
     <mask
        maskUnits="userSpaceOnUse"
        id="mask5153">
@@ -347,16 +336,6 @@
            transform="matrix(1,0,-0.70828042,0.7059312,0,0)" />
       </g>
     </mask>
-    <filter
-       id="filter6387"
-       x="-0.23474692"
-       width="1.5399034"
-       y="-0.24543951"
-       height="1.4528567">
-      <feGaussianBlur
-         stdDeviation="1.340743"
-         id="feGaussianBlur6389" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -435,7 +414,7 @@
            id="g4914"
            transform="translate(3.058339,-2.9193236)">
           <rect
-             style="opacity:0.5;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.38039374;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;filter:url(#filter4929-6)"
+             style="opacity:0.5;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.38039374;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
              id="rect13693-2-2"
              width="29.135895"
              height="22.649353"
@@ -478,7 +457,7 @@
          mask="url(#mask6373)">
         <g
            id="g6056-8"
-           style="fill:#ffffff;stroke:#ffffff;stroke-width:5.37570763000000000;stroke-miterlimit:4;stroke-dasharray:none;display:inline;filter:url(#filter6387)">
+           style="fill:#ffffff;stroke:#ffffff;stroke-width:5.37570763000000000;stroke-miterlimit:4;stroke-dasharray:none;display:inline">
           <g
              style="fill:#ffffff;stroke:#ffffff;stroke-width:1.5;stroke-miterlimit:4;stroke-dasharray:none;display:inline"
              id="layer1-6-7-4"

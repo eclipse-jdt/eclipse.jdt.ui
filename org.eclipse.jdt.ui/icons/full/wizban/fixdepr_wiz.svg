@@ -360,17 +360,6 @@
          id="feGaussianBlur5963" />
     </filter>
     <filter
-       height="1.0954513"
-       y="-0.047725668"
-       width="1.0967932"
-       x="-0.048396592"
-       id="filter4285-9-8-5"
-       style="color-interpolation-filters:sRGB">
-      <feGaussianBlur
-         id="feGaussianBlur4287-9-5-9"
-         stdDeviation="0.10000000000000001" />
-    </filter>
-    <filter
        style="color-interpolation-filters:sRGB"
        id="filter7334"
        x="-0.20073826"
@@ -644,7 +633,7 @@
          style="fill:none;fill-rule:evenodd;stroke:#ac7404;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
     <path
-       style="display:inline;opacity:0.9;fill:#fefdd7;fill-opacity:0.87537991;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;filter:url(#filter4285-9-8-5)"
+       style="display:inline;opacity:0.9;fill:#fefdd7;fill-opacity:0.87537991;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none"
        id="path4252-6-0-8"
        d="m 2.2999628,1043.3702 1.2678863,-2.2671 -0.9589021,-2.3795 2.34832,1.2825 2.3017227,-0.9043 -1.2596655,2.2746 0.9632718,2.3759 -2.3064219,-1.2826 z"
        transform="matrix(0.07472589,0.48703815,-0.54811936,-0.00135053,609.09342,1033.898)" />

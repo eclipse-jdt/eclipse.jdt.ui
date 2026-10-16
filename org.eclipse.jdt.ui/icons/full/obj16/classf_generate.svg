@@ -170,17 +170,6 @@
         </g>
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter22841"
-       x="-0.22587638"
-       width="1.4517528"
-       y="-0.58466368"
-       height="2.0859515">
-      <feGaussianBlur
-         stdDeviation="0.57066146"
-         id="feGaussianBlur22843" />
-    </filter>
     <linearGradient
        y2="1051.8378"
        x2="9.8946028"
@@ -279,7 +268,7 @@
        style="opacity:0.75;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;display:inline"
        mask="url(#mask22825)">
       <g
-         style="fill:#ffffff;stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;filter:url(#filter22841)"
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none"
          id="g22814">
         <path
            id="path21763-9"
