@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Red Hat, Inc. and others.
+ * Copyright (c) 2026 Red Hat, Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Red Hat, Inc. - Initial API and implementation
+ *     Red Hat, Inc. - Initial API and implementation (using Claude AI)
  *******************************************************************************/
 package org.eclipse.jdt.core.manipulation.internal.javadoc;
 
@@ -51,22 +51,22 @@ import java.util.Set;
  */
 public class JavaCodeTokenizer {
 
-	public static final String CSS_CLASS_KEYWORD= "jc-keyword"; //$NON-NLS-1$
-	public static final String CSS_CLASS_STRING= "jc-string"; //$NON-NLS-1$
-	public static final String CSS_CLASS_COMMENT= "jc-comment"; //$NON-NLS-1$
-	public static final String CSS_CLASS_ANNOTATION= "jc-annotation"; //$NON-NLS-1$
-	public static final String CSS_CLASS_TYPE= "jc-type"; //$NON-NLS-1$
-	public static final String CSS_CLASS_METHOD_DECL= "jc-method-decl"; //$NON-NLS-1$
-	public static final String CSS_CLASS_METHOD= "jc-method"; //$NON-NLS-1$
-	public static final String CSS_CLASS_PARAM= "jc-param"; //$NON-NLS-1$
-	public static final String CSS_CLASS_LOCAL_VAR_DECL= "jc-local-var-decl"; //$NON-NLS-1$
-	public static final String CSS_CLASS_LOCAL_VAR= "jc-local-var"; //$NON-NLS-1$
-	public static final String CSS_CLASS_NUMBER= "jc-number"; //$NON-NLS-1$
-	public static final String CSS_CLASS_TYPE_ARG= "jc-type-arg"; //$NON-NLS-1$
-	public static final String CSS_CLASS_FIELD= "jc-field"; //$NON-NLS-1$
-	public static final String CSS_CLASS_STATIC_FIELD= "jc-static-field"; //$NON-NLS-1$
-	public static final String CSS_CLASS_STATIC_FINAL_FIELD= "jc-static-final-field"; //$NON-NLS-1$
-	public static final String CSS_CLASS_ENUM= "jc-enum"; //$NON-NLS-1$
+	private static final String CSS_CLASS_KEYWORD= "jc-keyword"; //$NON-NLS-1$
+	private static final String CSS_CLASS_STRING= "jc-string"; //$NON-NLS-1$
+	private static final String CSS_CLASS_COMMENT= "jc-comment"; //$NON-NLS-1$
+	private static final String CSS_CLASS_ANNOTATION= "jc-annotation"; //$NON-NLS-1$
+	private static final String CSS_CLASS_TYPE= "jc-type"; //$NON-NLS-1$
+	private static final String CSS_CLASS_METHOD_DECL= "jc-method-decl"; //$NON-NLS-1$
+	private static final String CSS_CLASS_METHOD= "jc-method"; //$NON-NLS-1$
+	private static final String CSS_CLASS_PARAM= "jc-param"; //$NON-NLS-1$
+	private static final String CSS_CLASS_LOCAL_VAR_DECL= "jc-local-var-decl"; //$NON-NLS-1$
+	private static final String CSS_CLASS_LOCAL_VAR= "jc-local-var"; //$NON-NLS-1$
+	private static final String CSS_CLASS_NUMBER= "jc-number"; //$NON-NLS-1$
+	private static final String CSS_CLASS_TYPE_ARG= "jc-type-arg"; //$NON-NLS-1$
+	private static final String CSS_CLASS_FIELD= "jc-field"; //$NON-NLS-1$
+	private static final String CSS_CLASS_STATIC_FIELD= "jc-static-field"; //$NON-NLS-1$
+	private static final String CSS_CLASS_STATIC_FINAL_FIELD= "jc-static-final-field"; //$NON-NLS-1$
+	private static final String CSS_CLASS_ENUM= "jc-enum"; //$NON-NLS-1$
 
 	private static final Set<String> KEYWORDS= Set.of(
 			"abstract", "assert", //$NON-NLS-1$ //$NON-NLS-2$
@@ -490,7 +490,6 @@ public class JavaCodeTokenizer {
 		if (probe >= len || code.charAt(probe) != '.') {
 			return;
 		}
-		int dotPos= probe;
 		probe++;
 		while (probe < len && (code.charAt(probe) == ' ' || code.charAt(probe) == '\t')) {
 			probe++;

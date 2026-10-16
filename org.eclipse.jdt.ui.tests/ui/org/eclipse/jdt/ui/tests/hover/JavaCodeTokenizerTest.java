@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Red Hat, Inc. and others.
+ * Copyright (c) 2026 Red Hat, Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     Red Hat, Inc. - Initial API and implementation
+ *     Red Hat, Inc. - Initial API and implementation (using Claude AI)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.hover;
 
