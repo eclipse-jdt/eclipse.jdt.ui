@@ -15,15 +15,22 @@ package org.eclipse.jdt.core.manipulation.internal.javadoc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.Document;
+import org.commonmark.node.FencedCodeBlock;
 import org.commonmark.node.Node;
 import org.commonmark.node.Paragraph;
 import org.commonmark.parser.Parser;
+import org.commonmark.renderer.NodeRenderer;
+import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.commonmark.renderer.html.HtmlWriter;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -49,7 +56,51 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 	private void init() {
 		List<Extension> extensions= List.of(TablesExtension.create());
 		fParser= Parser.builder().extensions(extensions).build();
-		fRenderer= HtmlRenderer.builder().extensions(extensions).build();
+		fRenderer= HtmlRenderer.builder()
+				.extensions(extensions)
+				.nodeRendererFactory(JavaSyntaxHighlightingRenderer::new)
+				.build();
+	}
+
+	private static final Set<String> JAVA_LANGUAGES= Set.of("java", "jav"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	static class JavaSyntaxHighlightingRenderer implements NodeRenderer {
+		private final HtmlNodeRendererContext context;
+
+		JavaSyntaxHighlightingRenderer(HtmlNodeRendererContext context) {
+			this.context= context;
+		}
+
+		@Override
+		public Set<Class<? extends Node>> getNodeTypes() {
+			return Collections.singleton(FencedCodeBlock.class);
+		}
+
+		@Override
+		public void render(Node node) {
+			FencedCodeBlock codeBlock= (FencedCodeBlock) node;
+			String info= codeBlock.getInfo();
+			String literal= codeBlock.getLiteral();
+			boolean isJava= info != null && JAVA_LANGUAGES.contains(info.trim().toLowerCase());
+
+			HtmlWriter html= context.getWriter();
+			html.line();
+			if (isJava) {
+				html.tag("pre"); //$NON-NLS-1$
+				html.tag("code", Map.of("class", "language-java")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				html.raw(JavaCodeTokenizer.tokenize(literal));
+			} else {
+				html.tag("pre"); //$NON-NLS-1$
+				Map<String, String> attrs= info != null && !info.isEmpty()
+						? Map.of("class", "language-" + info.trim()) //$NON-NLS-1$ //$NON-NLS-2$
+						: Collections.emptyMap();
+				html.tag("code", attrs); //$NON-NLS-1$
+				html.text(literal);
+			}
+			html.tag("/code"); //$NON-NLS-1$
+			html.tag("/pre"); //$NON-NLS-1$
+			html.line();
+		}
 	}
 
 	@Override
