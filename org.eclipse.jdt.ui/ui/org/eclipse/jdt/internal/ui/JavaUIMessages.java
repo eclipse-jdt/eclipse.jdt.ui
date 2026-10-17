@@ -49,6 +49,7 @@ public final class JavaUIMessages extends NLS {
 	public static String OpenTypeAction_dialogTitle;
 	public static String OpenTypeAction_dialogMessage;
 	public static String OpenTypeSelectionDialog_open;
+	public static String OpenTypeSelectionDialog_preview_no_source;
 
 
 	public static String JavaUI_defaultDialogMessage;

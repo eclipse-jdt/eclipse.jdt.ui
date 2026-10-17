@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Patrick Ziegler others.
+ * Copyright (c) 2025, 2026 Patrick Ziegler and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,26 +10,34 @@
  *
  * Contributors:
  *     Patrick Ziegler - initial API and implementation
+ *     IBM Corporation - Added tests for preview section for open type.
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -46,6 +54,7 @@ import org.eclipse.jdt.internal.core.search.JavaSearchTypeNameMatch;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
@@ -114,6 +123,100 @@ public class FilteredTypesSelectionDialogTests {
 
 		JavaSearchTypeNameMatch firstMatch = displayHelper.getFirstMatch();
 		assertEquals(expectedType, firstMatch.getFullyQualifiedName());
+	}
+
+	@Test
+	public void testOpenTypeSelectionDialogPreview() {
+		OpenTypeSelectionDialog openTypeDialog = new OpenTypeSelectionDialog(shell, false, null, null, IJavaSearchConstants.TYPE);
+		openTypeDialog.setBlockOnOpen(false);
+		SelectionDisplayHelper helper = new SelectionDisplayHelper(openTypeDialog);
+
+		openTypeDialog.setInitialPattern("Test");
+		openTypeDialog.setTitle("Open Type");
+		openTypeDialog.open();
+		helper.waitForCondition(Display.getCurrent(), 5000);
+
+		Table table = helper.getTable();
+		assertNotNull(table);
+		assertTrue(table.getItemCount() > 0);
+
+		table.setSelection(0);
+		table.notifyListeners(SWT.Selection, new Event());
+
+		DisplayHelper.driveEventQueue(Display.getCurrent());
+
+		StyledText styledText = findStyledText(openTypeDialog.getShell());
+		assertNotNull(styledText, "Preview StyledText should be created in OpenTypeSelectionDialog");
+		assertTrue(styledText.getText().contains("public class Test"), "Preview should display source of Test class");
+
+		Text text = findText(openTypeDialog.getShell());
+		assertNotNull(text);
+		text.setText("");
+		DisplayHelper.driveEventQueue(Display.getCurrent());
+		assertTrue(styledText.getText().isEmpty(), "Preview should be cleared when search text is removed");
+
+		openTypeDialog.close();
+	}
+
+	@Test
+	public void testOpenTypeSelectionDialogPreviewMultiSelection() {
+		OpenTypeSelectionDialog openTypeDialog = new OpenTypeSelectionDialog(shell, true, null, null, IJavaSearchConstants.TYPE);
+		openTypeDialog.setBlockOnOpen(false);
+		SelectionDisplayHelper helper = new SelectionDisplayHelper(openTypeDialog);
+
+		openTypeDialog.setInitialPattern("T*");
+		openTypeDialog.setTitle("Open Type");
+		openTypeDialog.open();
+		helper.waitForCondition(Display.getCurrent(), 5000);
+
+		Table table = helper.getTable();
+		assertNotNull(table);
+		assertTrue(table.getItemCount() > 1, "Two matches are required to test multi-selection");
+
+		StyledText styledText = findStyledText(openTypeDialog.getShell());
+		assertNotNull(styledText, "Preview StyledText should be created in OpenTypeSelectionDialog");
+
+		table.setSelection(0);
+		table.notifyListeners(SWT.Selection, new Event());
+		DisplayHelper.driveEventQueue(Display.getCurrent());
+		assertTrue(!styledText.getText().isEmpty(), "Single selection should populate the preview");
+
+		table.setSelection(new int[] { 0, 1 });
+		table.notifyListeners(SWT.Selection, new Event());
+		DisplayHelper.driveEventQueue(Display.getCurrent());
+		assertTrue(styledText.getText().isEmpty(), "Preview should be cleared when multiple items are selected");
+
+		openTypeDialog.close();
+	}
+
+	private static Text findText(Control control) {
+		if (control instanceof Text t) {
+			return t;
+		}
+		if (control instanceof Composite composite) {
+			for (Control child : composite.getChildren()) {
+				Text t = findText(child);
+				if (t != null) {
+					return t;
+				}
+			}
+		}
+		return null;
+	}
+
+	private static StyledText findStyledText(Control control) {
+		if (control instanceof StyledText st) {
+			return st;
+		}
+		if (control instanceof Composite composite) {
+			for (Control child : composite.getChildren()) {
+				StyledText st = findStyledText(child);
+				if (st != null) {
+					return st;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
