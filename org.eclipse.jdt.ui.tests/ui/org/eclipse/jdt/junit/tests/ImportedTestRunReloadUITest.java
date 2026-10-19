@@ -54,12 +54,16 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import org.eclipse.core.commands.Command;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
 
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -73,6 +77,7 @@ import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
+@SuppressWarnings("restriction") // org.eclipse.debug.internal.ui
 public class ImportedTestRunReloadUITest extends AbstractTestRunListenerTest {
 
 	private static final String RELOAD_COMMAND= "org.eclipse.jdt.junit.reloadImportedTestRun"; //$NON-NLS-1$
@@ -88,10 +93,20 @@ public class ImportedTestRunReloadUITest extends AbstractTestRunListenerTest {
 	private TestRunSession fPreviousSession;
 	private boolean fViewWasOpen;
 	private Command fReloadCommand;
+	private IPreferenceStore fDebugPreferences;
+	private boolean fOpenConsoleOnOut;
+	private boolean fOpenConsoleOnErr;
 
 	@Override
 	@Before
 	public void setUp() throws Exception {
+		// A launch shows and activates the Console view when the process writes output, possibly late,
+		// which takes the focus from the JUnit view the test relies on.
+		fDebugPreferences= DebugUIPlugin.getDefault().getPreferenceStore();
+		fOpenConsoleOnOut= fDebugPreferences.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_OUT);
+		fOpenConsoleOnErr= fDebugPreferences.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_ERR);
+		fDebugPreferences.setValue(IDebugPreferenceConstants.CONSOLE_OPEN_ON_OUT, false);
+		fDebugPreferences.setValue(IDebugPreferenceConstants.CONSOLE_OPEN_ON_ERR, false);
 		fProject= JavaProjectHelper.createJavaProject("ImportedTestRunReloadUITest", "bin"); //$NON-NLS-1$ //$NON-NLS-2$
 		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
 		JavaProjectHelper.addRTJar15(fProject);
@@ -134,6 +149,10 @@ public class ImportedTestRunReloadUITest extends AbstractTestRunListenerTest {
 				fPage.activate(fPreviousPart);
 			}
 			DisplayHelper.driveEventQueue(Display.getCurrent());
+			if (fDebugPreferences != null) {
+				fDebugPreferences.setValue(IDebugPreferenceConstants.CONSOLE_OPEN_ON_OUT, fOpenConsoleOnOut);
+				fDebugPreferences.setValue(IDebugPreferenceConstants.CONSOLE_OPEN_ON_ERR, fOpenConsoleOnErr);
+			}
 		}
 	}
 
