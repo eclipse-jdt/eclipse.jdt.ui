@@ -133,6 +133,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	public static final int MODIFIER_TOGGLE_COMPLETION_MODE= SWT.CTRL;
 
+	private static final int POSITION_FIELD_LEVEL = 1;
+	private static final int POSITION_PARAMETER_LEVEL = 2;
+	private static final int POSITION_UNSPECIFIED = 0;
+
 	/**
 	 * A class to simplify tracking a reference position in a document.
 	 */
@@ -345,10 +349,18 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		CompletionContext cContext = fInvocationContext.getCoreContext();
 		if (cContext != null) {
 			IJavaElement enclosingElement = cContext.getEnclosingElement();
-			if (enclosingElement.getElementType() == IJavaElement.TYPE) return 1;
-			if (enclosingElement.getElementType() == IJavaElement.METHOD) return 2;
+			if (enclosingElement.getElementType() == IJavaElement.TYPE) return POSITION_FIELD_LEVEL;
+			if (enclosingElement.getElementType() == IJavaElement.METHOD) return POSITION_PARAMETER_LEVEL;
 		}
-		return 0;
+		return POSITION_UNSPECIFIED;
+	}
+
+	private boolean shouldAddSpace(IDocument document, int replOffset) throws BadLocationException {
+		if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
+			if (getPosition() == POSITION_PARAMETER_LEVEL)
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -392,8 +404,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				if (trigger == ';' && replacement.charAt(replacement.length() - 1) != ';' && (referenceOffset >= document.getLength() || document.getChar(referenceOffset) != ';')) {
 					replacement= replacement + ";"; //$NON-NLS-1$
 					setReplacementString(replacement);
-				} else if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
-					if (getPosition() == 2) {
+				} else if (shouldAddSpace(document, replOffset)) {
+					if (getPosition() == POSITION_PARAMETER_LEVEL) {
 						replacement = replacement + " "; //$NON-NLS-1$
 						setCursorPosition(getCursorPosition() + 1);
 					}
