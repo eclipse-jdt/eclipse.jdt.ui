@@ -356,9 +356,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	private boolean shouldAddSpace(IDocument document, int replOffset) throws BadLocationException {
-		if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
-			if (getPosition() == POSITION_PARAMETER_LEVEL)
-			return true;
+		if(fInvocationContext != null) {
+			if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
+				if (getPosition() == POSITION_PARAMETER_LEVEL)
+					return true;
+			}
 		}
 		return false;
 	}
