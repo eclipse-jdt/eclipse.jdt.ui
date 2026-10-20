@@ -47,6 +47,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	SmartSemicolonAutoEditStrategyTest.class,
 	JavaPartitionerTest.class,
 	JavaPasteTest.class,
+	JavaPasteWithImportsTest.class,
 	PropertiesFilePartitionerTest.class,
 	PropertiesFileAutoEditStrategyTest.class,
 //	PartitionTokenScannerTest.class,
