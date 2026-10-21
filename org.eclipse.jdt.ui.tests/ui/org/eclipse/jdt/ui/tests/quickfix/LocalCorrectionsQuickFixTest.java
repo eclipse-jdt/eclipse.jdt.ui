@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13601,5 +13601,33 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testMapOfToOfEntriesNotAvailable() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.of("k1", "v1",
+				        "k2", "v2",
+				        "k3", "v3",
+				        "k4", "v4",
+				        "k5", "v5",
+				        "k6", "v6",
+				        "k7", "v7",
+				        "k8", "v8",
+				        "k9", "v9",
+				        "k10", "v10",
+				        "k11", "v11");
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 0); // Map.of is only available in JDK 9+
+		assertCorrectLabels(proposals);
 	}
 }

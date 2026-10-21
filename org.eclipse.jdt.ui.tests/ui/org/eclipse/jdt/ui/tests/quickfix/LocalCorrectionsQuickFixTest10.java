@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -157,5 +157,198 @@ public class LocalCorrectionsQuickFixTest10 extends QuickFixTest {
     		assertProposalExists(proposals, "Configure problem severity");
     		assertProposalExists(proposals, "Add @SuppressWarnings 'rawtypes' to 'f()'");
     }
+
+	@Test
+	public void testMapOfToOfEntries() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.Map;
+			public class A {
+			    Map<String, String> myMap = Map.of("k1", "v1",
+			        "k2", "v2",
+			        "k3", "v3",
+			        "k4", "v4",
+			        "k5", "v5",
+			        "k6", "v6",
+			        "k7", "v7",
+			        "k8", "v8",
+			        "k9", "v9",
+			        "k10", "v10",
+			        "k11", "v11");
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+
+		expected[0]= """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.of();
+				}
+				""";
+
+		expected[1] = """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.ofEntries(Map.entry("k1", "v1"),
+				        Map.entry("k2", "v2"),
+				        Map.entry("k3", "v3"),
+				        Map.entry("k4", "v4"),
+				        Map.entry("k5", "v5"),
+				        Map.entry("k6", "v6"),
+				        Map.entry("k7", "v7"),
+				        Map.entry("k8", "v8"),
+				        Map.entry("k9", "v9"),
+				        Map.entry("k10", "v10"),
+				        Map.entry("k11", "v11"));
+				}
+				""";
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testMapOfToOfEntriesWithMethodCall() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.of(id("k1"), "v1",
+				        "k2", id("v2"),
+				        "k3", "v3",
+				        "k4", "v4",
+				        "k5", "v5",
+				        "k6", "v6",
+				        "k7", "v7",
+				        "k8", "v8",
+				        "k9", "v9",
+				        "k10", "v10",
+				        "k11", "v11");
+				    static String id(String s) {
+				        return s;
+				    }
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[2];
+
+		expected[0]= """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.of();
+				    static String id(String s) {
+				        return s;
+				    }
+				}
+				""";
+
+		expected[1] = """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.ofEntries(Map.entry(id("k1"), "v1"),
+				        Map.entry("k2", id("v2")),
+				        Map.entry("k3", "v3"),
+				        Map.entry("k4", "v4"),
+				        Map.entry("k5", "v5"),
+				        Map.entry("k6", "v6"),
+				        Map.entry("k7", "v7"),
+				        Map.entry("k8", "v8"),
+				        Map.entry("k9", "v9"),
+				        Map.entry("k10", "v10"),
+				        Map.entry("k11", "v11"));
+				    static String id(String s) {
+				        return s;
+				    }
+				}
+				""";
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testMapOfToOfEntriesSkippedWithOddNumberOfParameters() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.of("k1", "v1",
+				        "k2", "v2",
+				        "k3", "v3",
+				        "k4", "v4",
+				        "k5", "v5",
+				        "k6", "v6",
+				        "k7", "v7",
+				        "k8", "v8",
+				        "k9", "v9",
+				        "k10", "v10",
+				        "k11", "v11",
+				        "k12");
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+
+		expected[0]= """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.of();
+				}
+				""";
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testMapOfToOfEntriesSkippedWithWrongMethodCall() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+				import java.util.Map;
+				public class A {
+				    Map<String, String> myMap = Map.entry("k1", "v1",
+				        "k2", "v2",
+				        "k3", "v3",
+				        "k4", "v4",
+				        "k5", "v5",
+				        "k6", "v6",
+				        "k7", "v7",
+				        "k8", "v8",
+				        "k9", "v9",
+				        "k10", "v10",
+				        "k11", "v11");
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 0);
+	}
 
 }

@@ -253,6 +253,7 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_addparams_description;
 	public static String UnresolvedElementsSubProcessor_addparam_constr_description;
 	public static String UnresolvedElementsSubProcessor_addparams_constr_description;
+	public static String UnresolvedElementsSubProcessor_changeMethodCallMapOfToOfEntries_description;
 	public static String UnresolvedElementsSubProcessor_importexplicit_description;
 	public static String UnresolvedElementsSubProcessor_missingcastbrackets_description;
 	public static String UnresolvedElementsSubProcessor_methodtargetcast2_description;
