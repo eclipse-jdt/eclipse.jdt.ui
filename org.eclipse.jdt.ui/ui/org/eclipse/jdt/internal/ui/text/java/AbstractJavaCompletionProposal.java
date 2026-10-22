@@ -90,6 +90,7 @@ import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -127,11 +128,14 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
 	ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6, ICompletionProposalExtension7 {
 
-
 	/**
 	 * The key modifier that toggles whether to insert or overwrite.
 	 */
 	public static final int MODIFIER_TOGGLE_COMPLETION_MODE= SWT.CTRL;
+
+	private static final int POSITION_FIELD_LEVEL = 1;
+	private static final int POSITION_PARAMETER_LEVEL = 2;
+	private static final int POSITION_UNSPECIFIED = 0;
 
 	/**
 	 * A class to simplify tracking a reference position in a document.
@@ -341,6 +345,26 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		apply(document, (char) 0, getReplacementOffset() + getReplacementLength());
 	}
 
+	private int getPosition() {
+		CompletionContext cContext = fInvocationContext.getCoreContext();
+		if (cContext != null) {
+			IJavaElement enclosingElement = cContext.getEnclosingElement();
+			if (enclosingElement.getElementType() == IJavaElement.TYPE) return POSITION_FIELD_LEVEL;
+			if (enclosingElement.getElementType() == IJavaElement.METHOD) return POSITION_PARAMETER_LEVEL;
+		}
+		return POSITION_UNSPECIFIED;
+	}
+
+	private boolean shouldAddSpace(IDocument document, int replOffset) throws BadLocationException {
+		if(fInvocationContext != null) {
+			if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
+				if (getPosition() == POSITION_PARAMETER_LEVEL)
+					return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 
@@ -377,10 +401,16 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			if (isSmartTrigger || trigger == (char) 0) {
 				int referenceOffset= getReplacementOffset() + getReplacementLength();
 				replacement= getReplacementString();
+				int replOffset = getReplacementOffset();
 				//add ; to the replacement string if replacement string do not end with a semicolon and the document do not already have a ; at the reference offset.
 				if (trigger == ';' && replacement.charAt(replacement.length() - 1) != ';' && (referenceOffset >= document.getLength() || document.getChar(referenceOffset) != ';')) {
 					replacement= replacement + ";"; //$NON-NLS-1$
 					setReplacementString(replacement);
+				} else if (shouldAddSpace(document, replOffset)) {
+					if (getPosition() == POSITION_PARAMETER_LEVEL) {
+						replacement = replacement + " "; //$NON-NLS-1$
+						setCursorPosition(getCursorPosition() + 1);
+					}
 				}
 			} else {
 				StringBuilder buffer= new StringBuilder(getReplacementString());
