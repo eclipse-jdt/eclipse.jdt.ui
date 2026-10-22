@@ -50,6 +50,7 @@ ImportedTestRunReloadUITest.class,
 
 JUnit3TestFinderTest.class,
 JUnitTestFinderTest.class,
+JUnitCodeMiningTest.class,
 JUnit4TestFinderTest16.class,
 JUnit5TestFinderJupiterTest.class,
 JUnit6TestFinderJupiterTest.class,
