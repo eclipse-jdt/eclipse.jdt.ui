@@ -1793,7 +1793,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 	private void doChangeMethodCall(IInvocationContext context, ASTNode invocationNode, List<Expression> arguments, Collection<T> proposals) {
 		String label= CorrectionMessages.UnresolvedElementsSubProcessor_changeMethodCallMapOfToOfEntries_description;
-		MapOfToOfEntriesProposalCore proposal= new MapOfToOfEntriesProposalCore(label, context.getCompilationUnit(), invocationNode, arguments, IProposalRelevance.CREATE_LOCAL);
+		MapOfToOfEntriesProposalCore proposal= new MapOfToOfEntriesProposalCore(label, context.getCompilationUnit(), invocationNode, arguments, IProposalRelevance.REMOVE_ARGUMENTS);
 		if (proposal.hasProposal()) {
 			proposals.add(linkedProposalToT(proposal, ChangeMethodCall1));
 		}
