@@ -113,38 +113,160 @@ public class TestSearchEngine extends CoreTestSearchEngine {
 	}
 
 	private static void collectDeclaredMethodNames(IType type, IJavaProject javaProject, String testKindId, Set<String> methodNames) throws JavaModelException {
-		boolean isJUnit3= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKindId);
-		boolean isJUnitJupiter= !isJUnit3 && !TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId);
-
-		IMethod[] methods= type.getMethods();
-		for (IMethod method : methods) {
-			int flags= method.getFlags();
-			if (Flags.isStatic(flags) || Flags.isPrivate(flags) || Flags.isAbstract(flags)) continue;
-			String methodName= method.getElementName();
-			// Only include public, no-arg methods that start with "test" and have void return type:
-			if (Flags.isPublic(flags) &&
-					method.getNumberOfParameters() == 0 &&
-					methodName.startsWith("test") && //$NON-NLS-1$
-					Signature.SIG_VOID.equals(method.getReturnType())) {
-				methodNames.add(methodName);
+		for (IMethod method : type.getMethods()) {
+			if (!isCandidate(method)) {
+				continue;
 			}
-			if (!isJUnit3) {
-				IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
-				if (annotation.exists()) {
-					methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
-				} else if (isJUnitJupiter) {
-					boolean hasAnyTestAnnotation=
-							method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
-							|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
-							|| method.getAnnotation("TestTemplate").exists() //$NON-NLS-1$
-							|| method.getAnnotation("ParameterizedTest").exists() //$NON-NLS-1$
-							|| method.getAnnotation("RepeatedTest").exists(); //$NON-NLS-1$
-					if (hasAnyTestAnnotation || isAnnotatedWithTestable(method, type, javaProject)) {
-						methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
-					}
-				}
+			// Only include public, no-arg methods that start with "test" and have void return type:
+			if (isJUnit3StyleTestMethod(method)) {
+				methodNames.add(method.getElementName());
+			}
+			if (isAnnotatedTestMethod(method, javaProject, testKindId)) {
+				methodNames.add(method.getElementName() + JUnitStubUtility.getParameterTypes(method, false));
 			}
 		}
+	}
+
+	/** Returns the <code>@Test</code> annotation of the method, qualified or not, or <code>null</code>. */
+	private static IAnnotation findTestAnnotation(IMethod method) throws JavaModelException {
+		for (IAnnotation annotation : method.getAnnotations()) {
+			String name= annotation.getElementName();
+			// a qualified name must be the one of a JUnit annotation, not of another framework such as TestNG
+			if ("Test".equals(name) || JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(name) //$NON-NLS-1$
+					|| JUnitCorePlugin.JUNIT5_JUPITER_TEST_ANNOTATION_NAME.equals(name)) {
+				return annotation;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Tells whether the project has JUnit (any version) on its classpath.
+	 *
+	 * @param project the project
+	 * @return <code>true</code> if it has
+	 */
+	public static boolean hasJUnit(IJavaProject project) {
+		return hasTestCaseType(project) || hasJUnit4TestAnnotation(project) || hasJUnit5TestAnnotation(project)
+				|| hasJUnit6TestAnnotation(project);
+	}
+
+	private static boolean isCandidate(IMethod method) throws JavaModelException {
+		int flags= method.getFlags();
+		return !(Flags.isStatic(flags) || Flags.isPrivate(flags) || Flags.isAbstract(flags));
+	}
+
+	/**
+	 * Tells whether the method is public, has no argument, returns void and is named like a test of
+	 * JUnit 3.
+	 *
+	 * @param method the method
+	 * @return <code>true</code> if it is
+	 * @throws JavaModelException if the method cannot be inspected
+	 */
+	public static boolean isJUnit3StyleTestMethod(IMethod method) throws JavaModelException {
+		return Flags.isPublic(method.getFlags())
+				&& method.getNumberOfParameters() == 0
+				&& method.getElementName().startsWith("test") //$NON-NLS-1$
+				&& Signature.SIG_VOID.equals(method.getReturnType());
+	}
+
+	private static boolean isAnnotatedTestMethod(IMethod method, IJavaProject javaProject, String testKindId) throws JavaModelException {
+		if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKindId)) {
+			return false;
+		}
+		if (findTestAnnotation(method) != null) {
+			return true;
+		}
+		if (TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId)) {
+			return false;
+		}
+		// JUnit Jupiter
+		boolean hasAnyTestAnnotation=
+				method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
+				|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
+				|| method.getAnnotation("TestTemplate").exists() //$NON-NLS-1$
+				|| method.getAnnotation("ParameterizedTest").exists() //$NON-NLS-1$
+				|| method.getAnnotation("RepeatedTest").exists(); //$NON-NLS-1$
+		return hasAnyTestAnnotation || isAnnotatedWithTestable(method, method.getDeclaringType(), javaProject);
+	}
+
+	/**
+	 * Tells whether the given method is a test method that the test runner of the given JUnit test
+	 * kind runs: a method annotated with a test annotation (JUnit 4 and later, with the signature
+	 * that the runner of the annotation needs), or a public no-arg
+	 * void method whose name starts with <code>test</code> in a concrete class implementing
+	 * <code>junit.framework.Test</code>. The test finders of all the kinds accept such a class, and
+	 * the runners of all the kinds run its methods. Static, private and abstract methods are never
+	 * tests.
+	 * <p>
+	 * The declaring class is not checked to be an instantiable test class, use
+	 * {@link ITestFinder#isTest(IType)} for this.
+	 * </p>
+	 *
+	 * @param method the method to check
+	 * @param javaProject the project used to resolve annotation types
+	 * @param testKindId the id of the test kind, see {@link TestKindRegistry}, or <code>null</code>
+	 *            if the project has no test kind
+	 * @param isConcreteTestImplementor whether the declaring class is a concrete implementor of
+	 *            <code>junit.framework.Test</code>, see {@link #isConcreteTestImplementor(IType)}:
+	 *            a caller which checks many methods of a class finds it out once, and only if
+	 *            {@link #isJUnit3StyleTestMethod(IMethod)} is true for one of them
+	 * @return <code>true</code> if the method is a test method
+	 * @throws JavaModelException if the method cannot be inspected
+	 */
+	public static boolean isTestMethod(IMethod method, IJavaProject javaProject, String testKindId, boolean isConcreteTestImplementor) throws JavaModelException {
+		if (testKindId == null || !isCandidate(method)) {
+			return false;
+		}
+		return (isAnnotatedTestMethod(method, javaProject, testKindId) && isRunnableTestAnnotation(method))
+				|| (isConcreteTestImplementor && isJUnit3StyleTestMethod(method));
+	}
+
+	/**
+	 * Checks that a method annotated with <code>@Test</code> is one that the runner of this
+	 * annotation runs: <code>org.junit.Test</code> needs a public, void, no-arg method,
+	 * <code>org.junit.jupiter.api.Test</code> a void method (the other modifiers are checked
+	 * elsewhere). Another annotation named <code>Test</code> does not make a test. The methods with
+	 * other Jupiter annotations are not checked.
+	 */
+	private static boolean isRunnableTestAnnotation(IMethod method) throws JavaModelException {
+		IAnnotation annotation= findTestAnnotation(method);
+		if (annotation == null) {
+			return true;
+		}
+		boolean isVoid= Signature.SIG_VOID.equals(method.getReturnType());
+		String written= annotation.getElementName();
+		// a qualified name needs no resolution
+		String[][] resolved= written.indexOf('.') > 0 ? new String[][] { { "", written } } : method.getDeclaringType().resolveType(written); //$NON-NLS-1$
+		if (resolved == null) {
+			// not resolved, for example while editing the imports: accept it if JUnit is available
+			// (the method is neither private, static nor abstract)
+			IJavaProject project= method.getJavaProject();
+			boolean isJupiter= hasJUnit5TestAnnotation(project) || hasJUnit6TestAnnotation(project);
+			boolean isJUnit4Method= Flags.isPublic(method.getFlags()) && method.getNumberOfParameters() == 0;
+			return isVoid && hasJUnit(project) && (isJupiter || isJUnit4Method);
+		}
+		for (String[] candidate : resolved) { // several with imports on demand
+			String name= candidate[0].isEmpty() ? candidate[1] : candidate[0] + '.' + candidate[1];
+			if (JUnitCorePlugin.JUNIT4_ANNOTATION_NAME.equals(name)) {
+				return isVoid && Flags.isPublic(method.getFlags()) && method.getNumberOfParameters() == 0;
+			} else if (JUnitCorePlugin.JUNIT5_JUPITER_TEST_ANNOTATION_NAME.equals(name)) {
+				return isVoid;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Tells whether the given class is concrete and implements <code>junit.framework.Test</code>.
+	 *
+	 * @param type the class
+	 * @return <code>true</code> if it is
+	 * @throws JavaModelException if the class cannot be inspected
+	 */
+	public static boolean isConcreteTestImplementor(IType type) throws JavaModelException {
+		return !Flags.isAbstract(type.getFlags()) && isTestImplementor(type);
 	}
 
 	// See JUnit5TestFinder.Annotation#annotates also.

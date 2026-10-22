@@ -88,6 +88,15 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	private static final Key PREF_SHOW_ONE_PARAMETER= getJDTUIKey(
 			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG);
 
+	private static final Key PREF_SHOW_JUNIT_STATUS= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_JUNIT_STATUS);
+
+	private static final Key PREF_SHOW_JUNIT_RUN= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_JUNIT_RUN);
+
+	private static final Key PREF_SHOW_JUNIT_DEBUG= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_JUNIT_DEBUG);
+
 	private static final String SETTINGS_SECTION_NAME= "JavaEditorCodeMiningConfigurationBlock"; //$NON-NLS-1$
 
 	private static final String[] TRUE_FALSE= new String[] { "true", "false" }; //$NON-NLS-1$ //$NON-NLS-2$
@@ -106,6 +115,9 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 
 	private List<PreferenceStoreEntry> generalCodeMiningOptions= new ArrayList<>();
 
+	// opt-in options: "Deselect All" clears them, "Select All" does not enable them
+	private List<PreferenceStoreEntry> optInCodeMiningOptions= new ArrayList<>();
+
 	public JavaEditorCodeMiningConfigurationBlock(IStatusChangeListener context,
 			IWorkbenchPreferenceContainer container) {
 		super(context, null, getAllKeys(), container);
@@ -114,7 +126,8 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	public static Key[] getAllKeys() {
 		return new Key[] { PREF_CODEMINING_ENABLED, PREF_SHOW_CODEMINING_AT_LEAST_ONE, PREF_SHOW_REFERENCES, PREF_SHOW_REFERENCES_ON_TYPES, PREF_SHOW_REFERENCES_ON_FIELDS,
 				PREF_SHOW_REFERENCES_ON_METHODS,
-				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES, PREF_IGNORE_INEXACT_MATCHES, PREF_FILTER_IMPLIED_PARAMETER_NAMES, PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES, PREF_SHOW_ONE_PARAMETER };
+				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES, PREF_IGNORE_INEXACT_MATCHES, PREF_FILTER_IMPLIED_PARAMETER_NAMES, PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES, PREF_SHOW_ONE_PARAMETER,
+				PREF_SHOW_JUNIT_STATUS, PREF_SHOW_JUNIT_RUN, PREF_SHOW_JUNIT_DEBUG };
 	}
 
 	@Override
@@ -222,6 +235,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		generalGroup.setLayoutData(groupData);
 		generalGroup.setFont(parent.getFont());
 		generalCodeMiningOptions.clear();
+		optInCodeMiningOptions.clear();
 
 		// - Show references
 		PreferenceTreeNode<Button> showReferences= fFilteredPrefTree.addCheckBox(generalGroup,
@@ -274,6 +288,24 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 				PREF_SHOW_ONE_PARAMETER, TRUE_FALSE, extraIndent, section);
 		generalCodeMiningOptions.add(new PreferenceStoreEntry(oneParam, PREF_SHOW_ONE_PARAMETER));
 
+		// - Show JUnit test status (opt-in, see optInCodeMiningOptions)
+		PreferenceTreeNode<Button> junitStatus= fFilteredPrefTree.addCheckBox(generalGroup,
+				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showJUnitStatus_label,
+				PREF_SHOW_JUNIT_STATUS, TRUE_FALSE, defaultIndent, section);
+		optInCodeMiningOptions.add(new PreferenceStoreEntry(junitStatus, PREF_SHOW_JUNIT_STATUS));
+
+		// - Show JUnit Run
+		PreferenceTreeNode<Button> junitRun= fFilteredPrefTree.addCheckBox(generalGroup,
+				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showJUnitRun_label,
+				PREF_SHOW_JUNIT_RUN, TRUE_FALSE, defaultIndent, section);
+		optInCodeMiningOptions.add(new PreferenceStoreEntry(junitRun, PREF_SHOW_JUNIT_RUN));
+
+		// - Show JUnit Debug
+		PreferenceTreeNode<Button> junitDebug= fFilteredPrefTree.addCheckBox(generalGroup,
+				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showJUnitDebug_label,
+				PREF_SHOW_JUNIT_DEBUG, TRUE_FALSE, defaultIndent, section);
+		optInCodeMiningOptions.add(new PreferenceStoreEntry(junitDebug, PREF_SHOW_JUNIT_DEBUG));
+
 		Composite compositeForButtons= new Composite(generalGroup, SWT.NONE);
 		GridLayout buttonLayout= new GridLayout(2, false);
 		compositeForButtons.setLayout(buttonLayout);
@@ -306,7 +338,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		deselectAllInGeneral.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for (PreferenceStoreEntry entry : generalCodeMiningOptions) {
+				for (PreferenceStoreEntry entry : deselectable()) {
 					Button button= entry.node.getControl();
 					setValue(entry.key, false);
 					button.setSelection(false);
@@ -314,6 +346,12 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 				updateEnableStates();
 			}
 		});
+	}
+
+	private List<PreferenceStoreEntry> deselectable() {
+		List<PreferenceStoreEntry> entries= new ArrayList<>(generalCodeMiningOptions);
+		entries.addAll(optInCodeMiningOptions);
+		return entries;
 	}
 
 	private void updateEnableStates() {
