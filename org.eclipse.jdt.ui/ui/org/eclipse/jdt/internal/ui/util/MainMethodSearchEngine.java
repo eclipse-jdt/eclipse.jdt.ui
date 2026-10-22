@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,8 +17,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
@@ -27,6 +32,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -68,7 +74,11 @@ public class MainMethodSearchEngine{
 				if (enclosingElement instanceof IMethod) { // defensive code
 					try {
 						IMethod curr= (IMethod) enclosingElement;
-						if (curr.isMainMethod()) {
+						// Java 25 main method forms only apply to projects with source compliance 25 or higher
+						boolean isMain= JavaModelUtil.is25OrHigher(curr.getJavaProject())
+								? curr.isMainMethodCandidate()
+								: curr.isMainMethod();
+						if (isMain) {
 							if (!considerExternalJars()) {
 								IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(curr);
 								if (root == null || root.isArchive()) {
@@ -78,7 +88,10 @@ public class MainMethodSearchEngine{
 							if (!considerBinaries() && curr.isBinary()) {
 								return;
 							}
-							fResult.add(curr.getDeclaringType());
+							IType declaringType= curr.getDeclaringType();
+							if (declaringType != null) {
+								fResult.add(declaringType);
+							}
 						}
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e.getStatus());
@@ -99,15 +112,25 @@ public class MainMethodSearchEngine{
 	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws CoreException {
 		List<IType> typesFound= new ArrayList<>(200);
 
-		SearchPattern pattern= SearchPattern.createPattern("main(String[]) void", //$NON-NLS-1$
+		// Since Java 25 a main method may also be an instance method or have no parameters, so search all
+		// methods named 'main'. Otherwise keep the old pattern. The collector filters per project compliance.
+		String signature= hasJava25OrHigherProject(scope) ? "main" : "main(String[]) void"; //$NON-NLS-1$ //$NON-NLS-2$
+		SearchPattern pattern= SearchPattern.createPattern(signature,
 				IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
 		SearchRequestor requestor= new MethodCollector(typesFound, style);
 		new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, pm);
-
 		return typesFound.toArray(new IType[typesFound.size()]);
 	}
 
-
+	private static boolean hasJava25OrHigherProject(IJavaSearchScope scope) {
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		for (IPath path : scope.enclosingProjectsAndJars()) {
+			if (root.findMember(path) instanceof IProject project && JavaModelUtil.is25OrHigher(JavaCore.create(project))) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Searches for all main methods in the given scope.
