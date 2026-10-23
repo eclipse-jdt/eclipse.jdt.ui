@@ -13,12 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -39,6 +42,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -60,6 +64,7 @@ import org.eclipse.text.edits.UndoEdit;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -71,6 +76,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -84,6 +90,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IBufferChangedListener;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -325,6 +333,9 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 			ICleanUp[] cleanUps= getCleanUps(unit.getJavaProject().getProject());
 
+			// Closing the editor while calculating closes this buffer
+			IBuffer unitBuffer= unit.getBuffer();
+
 			long oldFileValue= unit.getResource().getModificationStamp();
 			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), Progress.subMonitor(monitor, 2));
 
@@ -333,6 +344,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 			HashSet<ICleanUp> slowCleanUps= new HashSet<>();
 			IUndoManager manager= RefactoringCore.getUndoManager();
+			CleanUpSaveUndo undo= null;
 
 			boolean success= false;
 			try {
@@ -360,58 +372,114 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					}
     				}
 
-    				CompilationUnit ast= null;
-    				if (requiresAST(cleanUps)) {
-    					ast= createAst(unit, options, Progress.subMonitor(monitor, 10));
-    				}
+					ArrayList<ICleanUp> undoneCleanUps= new ArrayList<>();
+					ICleanUp[] cleanUpsCopy= new ICleanUp[cleanUps.length];
+					System.arraycopy(cleanUps, 0, cleanUpsCopy, 0, cleanUps.length);
 
-    				CleanUpContext context;
-    				if (changedRegions == null) {
-    					context= new CleanUpContext(unit, ast);
-    				} else {
-    					context= new MultiLineCleanUpContext(unit, ast, changedRegions);
-    				}
+					final IRegion[] regions= changedRegions;
+					CleanUpChange change;
+					// When saving from the UI thread, the user input is blocked while calculating, but the UI thread still runs events
+					// (e.g. a syncExec() of another thread) that may edit or close the buffer. The result is then outdated and dropped.
+					// This is only a safety net, editing while the save actions run is not supported.
+					AtomicBoolean bufferChanged= new AtomicBoolean();
+					IBufferChangedListener bufferListener= event -> bufferChanged.set(true);
+					unitBuffer.addBufferChangedListener(bufferListener);
+					try {
+						try {
+							AtomicReference<CleanUpChange> changeRef= new AtomicReference<>();
+							runUsingProgressService(m -> {
+								CompilationUnit ast= null;
+								if (requiresAST(cleanUpsCopy)) {
+									m.beginTask(FixMessages.CleanUpPostSaveListener_CreatingAST_taskName, IProgressMonitor.UNKNOWN);
+									ast= createAst(unit, options, withoutProgressReporting(m));
+									m.setTaskName(FixMessages.CleanUpPostSaveListener_CalculatingChanges_taskName);
+								} else {
+									m.beginTask(FixMessages.CleanUpPostSaveListener_CalculatingChanges_taskName, IProgressMonitor.UNKNOWN);
+								}
 
-    				ArrayList<ICleanUp> undoneCleanUps= new ArrayList<>();
-					CleanUpChange change= CleanUpRefactoring.calculateChange(context, cleanUps, undoneCleanUps, slowCleanUps);
+								CleanUpContext context;
+								if (regions == null) {
+									context= new CleanUpContext(unit, ast);
+								} else {
+									context= new MultiLineCleanUpContext(unit, ast, regions);
+								}
 
-    				RefactoringStatus postCondition= new RefactoringStatus();
-					for (ICleanUp cleanUp : cleanUps) {
-						RefactoringStatus conditions= cleanUp.checkPostConditions(Progress.subMonitor(monitor, 1));
-						postCondition.merge(conditions);
-					}
-    				if (showStatus(postCondition) != Window.OK)
-    					return;
-
-    				cleanUps= undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
-    				if (change != null) {
-    					result.add(change);
-
-    					change.setSaveMode(TextFileChange.LEAVE_DIRTY);
-    					change.initializeValidationData(new NullProgressMonitor());
-
-    					PerformChangeOperation performChangeOperation= new PerformChangeOperation(change);
-    					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
-
-    					if (changedRegions != null && changedRegions.length > 0 && requiresChangedRegions(cleanUps)) {
-							changedRegions= performWithChangedRegionUpdate(performChangeOperation, changedRegions, unit, Progress.subMonitor(monitor, 5));
-						} else {
-							performChangeOperation.run(Progress.subMonitor(monitor, 5));
+								try {
+									changeRef.set(CleanUpRefactoring.calculateChange(context, cleanUpsCopy, undoneCleanUps, slowCleanUps));
+								} catch (CoreException e) {
+									// "e" will be unpacked and rethrown
+									throw new InvocationTargetException(e);
+								}
+							}, Progress.subMonitor(monitor, 20));
+							change= changeRef.get();
+						} catch (CoreException | RuntimeException e) {
+							if (e instanceof OperationCanceledException || !(bufferChanged.get() || unitBuffer.isClosed())) {
+								throw e;
+							}
+							// The clean ups read the buffer while it was being edited or closed. Don't propagate the failure,
+							// since the caller would then revert the buffer and discard that edit.
+							JavaPlugin.log(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, "Skipped the clean ups since the document was edited or closed while calculating them", e)); //$NON-NLS-1$
+							break;
 						}
 
-    					performChangeOperation.getUndoChange();
-    					undoEdits.addFirst(change.getUndoEdit());
-    				}
-    			} while (cleanUps.length > 0);
+						RefactoringStatus postCondition= new RefactoringStatus();
+						for (ICleanUp cleanUp : cleanUps) {
+							RefactoringStatus conditions= cleanUp.checkPostConditions(Progress.subMonitor(monitor, 1));
+							postCondition.merge(conditions);
+						}
+						if (showStatus(postCondition) != Window.OK)
+							return;
+
+						if (bufferChanged.get() || unitBuffer.isClosed()) {
+							// The clean ups were calculated for an outdated buffer: applying their change would corrupt the source,
+							// and the clean ups deferred to the next pass would use outdated changed regions. Keep the changes
+							// of the previous passes, they have already been applied.
+							break;
+						}
+
+						cleanUps= undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
+						if (change != null) {
+							change.setSaveMode(TextFileChange.LEAVE_DIRTY);
+							change.initializeValidationData(new NullProgressMonitor());
+							result.add(change);
+
+							PerformChangeOperation performChangeOperation= new PerformChangeOperation(change);
+							performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
+
+							if (changedRegions != null && changedRegions.length > 0 && requiresChangedRegions(cleanUps)) {
+								changedRegions= performWithChangedRegionUpdate(performChangeOperation, changedRegions, unit, Progress.subMonitor(monitor, 5));
+							} else {
+								performChangeOperation.run(Progress.subMonitor(monitor, 5));
+							}
+
+							performChangeOperation.getUndoChange();
+							undoEdits.addFirst(change.getUndoEdit());
+
+							// Initialize the validation data before the document can be edited while calculating the next pass,
+							// so undoing is rejected instead of applying the undo edits at outdated offsets
+							if (undo != null) {
+								undo.dispose();
+							}
+							UndoEdit[] undoEditArray= undoEdits.toArray(new UndoEdit[undoEdits.size()]);
+							undo= new CleanUpSaveUndo(result.getName(), (IFile) unit.getResource(), undoEditArray, oldDocValue, oldFileValue);
+							undo.initializeValidationData(new NullProgressMonitor());
+						}
+					} finally {
+						unitBuffer.removeBufferChangedListener(bufferListener);
+					}
+				} while (cleanUps.length > 0 && !unitBuffer.isClosed());
     			success= true;
 			} finally {
 				manager.changePerformed(result, success);
 			}
 
-			if (undoEdits.size() > 0) {
-    			UndoEdit[] undoEditArray= undoEdits.toArray(new UndoEdit[undoEdits.size()]);
-    			CleanUpSaveUndo undo= new CleanUpSaveUndo(result.getName(), (IFile)unit.getResource(), undoEditArray, oldDocValue, oldFileValue);
-    			undo.initializeValidationData(new NullProgressMonitor());
+			if (undo != null && unitBuffer.isClosed()) {
+				// The editor was closed without saving the changes of the previous passes
+				undo.dispose();
+				undo= null;
+			}
+
+			if (undo != null) {
     			manager.addUndo(result.getName(), undo);
 			}
 
@@ -568,6 +636,60 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Runs the given runnable using the workbench progress service when called from the UI thread,
+	 * which blocks the user input until it is done, otherwise runs it directly in the current thread
+	 * using the given monitor.
+	 * <p>
+	 * The progress dialog can't be used to cancel the runnable, since the clean ups can't be
+	 * interrupted halfway.
+	 * </p>
+	 *
+	 * @throws CoreException if the runnable fails
+	 * @throws OperationCanceledException if the runnable was canceled or the thread was interrupted
+	 */
+	private static void runUsingProgressService(IRunnableWithProgress runnable, IProgressMonitor monitor) throws CoreException {
+		try {
+			if (Display.getCurrent() == null) {
+				// The progress service must only be used from the UI thread
+				runnable.run(monitor);
+			} else {
+				// Unlike IProgressService.run(...), this disables the user input right away instead of after a delay
+				PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable, false);
+			}
+		} catch (InvocationTargetException e) {
+			Throwable cause= e.getCause();
+			if (cause instanceof CoreException ce) {
+				throw ce;
+			}
+			if (cause instanceof RuntimeException rte) {
+				throw rte;
+			}
+			if (cause instanceof Error error) {
+				throw error;
+			}
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, e.getMessage(), cause));
+		} catch (InterruptedException e) {
+			// The thread was interrupted while waiting
+			OperationCanceledException canceled= new OperationCanceledException(e.getMessage());
+			canceled.initCause(e);
+			throw canceled;
+		}
+	}
+
+	/**
+	 * Returns a monitor that doesn't report any progress but delegates the cancellation to the given
+	 * monitor, e.g. to keep a progress of unknown duration when passing it to {@link ASTParser}.
+	 */
+	private static IProgressMonitor withoutProgressReporting(IProgressMonitor monitor) {
+		return new NullProgressMonitor() {
+			@Override
+			public boolean isCanceled() {
+				return monitor.isCanceled();
+			}
+		};
 	}
 
 	private CompilationUnit createAst(ICompilationUnit unit, Map<String, String> cleanUpOptions, IProgressMonitor monitor) {
