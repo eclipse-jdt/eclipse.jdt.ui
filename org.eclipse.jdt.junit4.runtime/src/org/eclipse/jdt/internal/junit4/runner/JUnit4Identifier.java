@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2021 IBM Corporation and others.
+ * Copyright (c) 2006, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,14 +21,20 @@ import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 
 public class JUnit4Identifier implements ITestIdentifier {
 	private final Description fPlan;
+	private final String fName;
 
 	public JUnit4Identifier(Description plan) {
+		this(plan, null);
+	}
+
+	public JUnit4Identifier(Description plan, String name) {
 		this.fPlan= plan;
+		fName= name;
 	}
 
 	@Override
 	public String getName() {
-		return fPlan.getDisplayName();
+		return fName != null ? fName : fPlan.getDisplayName();
 	}
 
 	@Override
@@ -47,7 +53,7 @@ public class JUnit4Identifier implements ITestIdentifier {
 
 	@Override
 	public String getDisplayName() {
-		return getName();
+		return fPlan.getDisplayName();
 	}
 
 	@Override
