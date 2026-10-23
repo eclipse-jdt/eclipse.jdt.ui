@@ -31,6 +31,7 @@ JUnitLaunchConfigurationTabTest.class,
 TestExecutionTiming.class,
 TestExecutionTimingProtocol.class,
 
+RemoteTestRunnerClientTest.class,
 TestRunListenerTest3.class,
 TestRunListenerTest4.class,
 TestRunListenerTest5.class,
