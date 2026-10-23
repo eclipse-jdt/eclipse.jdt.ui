@@ -29,6 +29,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.BreadcrumbViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -87,7 +89,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.filters.EmptyLibraryContainerFilter;
 import org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter;
-import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.packageview.LibraryContainer;
@@ -96,6 +97,7 @@ import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper;
 
 
@@ -231,6 +233,46 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					| JavaElementLabels.ALL_CATEGORY2 | JavaElementLabels.P_COMPRESSED, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 			return new DecoratingJavaLabelProvider(result);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.BreadcrumbViewer#isElementOpenable(java.lang.Object)
+		 */
+		@Override
+		protected boolean isElementOpenable(Object element) {
+		    if (element instanceof IJavaElement javaElement) {
+		        int elementType = javaElement.getElementType();
+
+		        return elementType != IJavaElement.JAVA_PROJECT
+		                && elementType != IJavaElement.PACKAGE_FRAGMENT
+		                && elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT;
+		    }
+
+		    if (element instanceof IFile) {
+		        return true;
+		    }
+
+		    if (element instanceof IJarEntryResource jarEntryResource) {
+		        return jarEntryResource.isFile();
+		    }
+
+		    return false;
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.BreadcrumbViewer#createDropDownViewer(org.eclipse.swt.widgets.Composite, int)
+		 */
+		@Override
+		protected TreeViewer createDropDownViewer(Composite parent, int style) {
+		    return new ProblemTreeViewer(parent, style);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.BreadcrumbViewer#getDialogSettings()
+		 */
+		@Override
+		protected IDialogSettings getDialogSettings() {
+		    return JavaPlugin.getDefault().getDialogSettings();
 		}
 	}
 
