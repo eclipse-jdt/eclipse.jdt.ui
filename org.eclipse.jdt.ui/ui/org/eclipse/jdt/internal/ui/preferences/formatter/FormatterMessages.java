@@ -273,6 +273,9 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_newLines_tree_keep_braced_code_on_one_line;
 	public static String FormatterModifyDialog_newLines_tree_new_lines;
 	public static String FormatterModifyDialog_newLines_tree_simple_loops;
+	public static String FormatterModifyDialog_newLines_val_do_not_insert;
+	public static String FormatterModifyDialog_newLines_val_insert;
+	public static String FormatterModifyDialog_newLines_val_insert_on_wrap;
 	public static String FormatterModifyDialog_newLines_val_one_line_always;
 	public static String FormatterModifyDialog_newLines_val_one_line_if_empty;
 	public static String FormatterModifyDialog_newLines_val_one_line_if_single_item;
