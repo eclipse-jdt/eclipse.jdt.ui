@@ -50,7 +50,7 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 	private final TemplateEngine fJavadocTemplateEngine;
 
 	public TemplateCompletionProposalComputer() {
-		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
+		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistryCore();
 		fJavaTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_ALL);
 		fJavaMembersTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_MEMBERS);
 		fJavaStatementsTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_STATEMENTS);
