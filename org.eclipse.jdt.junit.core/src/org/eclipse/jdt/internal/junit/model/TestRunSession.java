@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+import org.eclipse.jdt.internal.junit.launcher.SeparateVMsLaunch;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 
@@ -96,6 +97,22 @@ public class TestRunSession implements ITestRunSession {
 	private List<IncompleteTestSuite> fIncompleteTestSuites;
 
 	private List<IncompleteTestSuite> fFactoryTestSuites;
+
+	/**
+	 * The index of the VM that runs the tests, if the test classes are run in separate VMs.
+	 */
+	private int fVMIndex;
+
+	/**
+	 * The offset of the times of the running VM in the session: the times sent by a VM are relative
+	 * to its start, the ones of a VM follow the ones of the previous VMs.
+	 */
+	private long fVMTimeOffsetNanos;
+
+	/**
+	 * The end of the last test that has run, in the times of the session, or <code>-1</code>.
+	 */
+	private long fLastEndTimeNanos= -1;
 
 	/**
 	 * Suite for unrooted test case elements, or <code>null</code>.
@@ -202,8 +219,9 @@ public class TestRunSession implements ITestRunSession {
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap<>();
 
+		String vmCount= launch.getAttribute(JUnitLaunchConfigurationConstants.ATTR_VM_COUNT);
 		fTestRunnerClient= new RemoteTestRunnerClient(fTestRunnerKind);
-		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() }, port);
+		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() }, port, vmCount == null ? 1 : Integer.parseInt(vmCount));
 
 		final ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.addLaunchListener(new ILaunchesListener2() {
@@ -462,6 +480,8 @@ public class TestRunSession implements ITestRunSession {
 	public void stopTestRun() {
 		if (isRunning() || ! isKeptAlive())
 			fIsStopped= true;
+		if (fLaunch instanceof SeparateVMsLaunch separateVMsLaunch)
+			separateVMsLaunch.cancelPendingVMs();
 		if (fTestRunnerClient != null)
 			fTestRunnerClient.stopTest();
 	}
@@ -473,6 +493,8 @@ public class TestRunSession implements ITestRunSession {
 		if (fTestRunnerClient != null
 				&& fLaunch != null
 				&& fTestRunnerClient.isRunning()
+				// separate VMs are never kept alive, see JUnitLaunchConfigurationDelegate
+				&& fLaunch.getAttribute(JUnitLaunchConfigurationConstants.ATTR_VM_COUNT) == null
 				&& ILaunchManager.DEBUG_MODE.equals(fLaunch.getLaunchMode())) {
 			ILaunchConfiguration config= fLaunch.getLaunchConfiguration();
 			try {
@@ -520,10 +542,21 @@ public class TestRunSession implements ITestRunSession {
 		return fIdToTest.get(id);
 	}
 
+	/**
+	 * Returns the ID in this session of a test of the running VM. The IDs sent by a VM are only
+	 * unique in this VM.
+	 *
+	 * @param testId the ID of the test in the running VM
+	 * @return the ID of the test in this session
+	 */
+	private String getSessionTestId(String testId) {
+		return fVMIndex == 0 ? testId : fVMIndex + ":" + testId; //$NON-NLS-1$
+	}
+
 	private TestElement addTreeEntry(String treeEntry) {
 		// format: testId","testName","isSuite","testcount","isDynamicTest","parentId","displayName","parameterTypes","uniqueId
 		int index0= treeEntry.indexOf(',');
-		String id= treeEntry.substring(0, index0);
+		String id= getSessionTestId(treeEntry.substring(0, index0));
 
 		StringBuilder testNameBuffer= new StringBuilder(100);
 		int index1= scanTestName(treeEntry, index0 + 1, testNameBuffer);
@@ -559,6 +592,8 @@ public class TestRunSession implements ITestRunSession {
 			parentId= treeEntry.substring(index4 + 1, index5);
 			if ("-1".equals(parentId)) { //$NON-NLS-1$
 				parentId= null;
+			} else {
+				parentId= getSessionTestId(parentId);
 			}
 
 			int index6= scanTestName(treeEntry, index5 + 1, displayNameBuffer);
@@ -673,6 +708,17 @@ public class TestRunSession implements ITestRunSession {
 			fIncompleteTestSuites= new ArrayList<>();
 			fFactoryTestSuites= new ArrayList<>();
 
+			if (fIsRunning) {
+				// the test run continues in the next VM
+				endInterruptedTests();
+				fVMIndex++;
+				if (fLastEndTimeNanos >= 0) {
+					fVMTimeOffsetNanos= fLastEndTimeNanos;
+				}
+				fTotalCount+= testCount;
+				return;
+			}
+
 			fStartedCount= 0;
 			fIgnoredCount= 0;
 			fFailureCount= 0;
@@ -739,6 +785,7 @@ public class TestRunSession implements ITestRunSession {
 
 		@Override
 		public void testStarted(String testId, String testName) {
+			testId= getSessionTestId(testId);
 			boolean isIgnored= testName.startsWith(MessageIds.IGNORED_TEST_PREFIX);
 
 			if (fStartedCount == 0) {
@@ -776,10 +823,14 @@ public class TestRunSession implements ITestRunSession {
 
 		@Override
 		public void testTiming(String testId, long startTimeNanos, long elapsedTimeNanos, long cpuTimeNanos, long userTimeNanos) {
+			testId= getSessionTestId(testId);
 			TestElement testElement= getTestElement(testId);
 			if (testElement instanceof TestCaseElement) {
 				if (testElement.getStatus().isRunning()) {
-					testElement.setExecutionTiming(startTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
+					// the client gives only valid times, whose end does not overflow
+					long sessionStartTimeNanos= startTimeNanos + fVMTimeOffsetNanos;
+					fLastEndTimeNanos= Math.max(fLastEndTimeNanos, sessionStartTimeNanos + elapsedTimeNanos);
+					testElement.setExecutionTiming(sessionStartTimeNanos, elapsedTimeNanos, cpuTimeNanos, userTimeNanos);
 				} else {
 					// Rerun timing arrives after TEST_RERAN. Its start offset belongs to a new
 					// measurement origin and must not extend the original suite interval.
@@ -790,6 +841,7 @@ public class TestRunSession implements ITestRunSession {
 
 		@Override
 		public void testEnded(String testId, String testName) {
+			testId= getSessionTestId(testId);
 			boolean isIgnored= testName.startsWith(MessageIds.IGNORED_TEST_PREFIX);
 
 			TestElement testElement= getTestElement(testId);
@@ -826,6 +878,7 @@ public class TestRunSession implements ITestRunSession {
 
 		@Override
 		public void testFailed(int statusCode, String testId, String testName, String trace, String expected, String actual) {
+			testId= getSessionTestId(testId);
 			TestElement testElement= getTestElement(testId);
 			if (testElement == null) {
 				testElement= createUnrootedTestElement(testId, testName);
@@ -849,6 +902,7 @@ public class TestRunSession implements ITestRunSession {
 
 		@Override
 		public void testReran(String testId, String className, String testName, int statusCode, String trace, String expectedResult, String actualResult) {
+			testId= getSessionTestId(testId);
 			TestElement testElement= getTestElement(testId);
 			if (testElement == null) {
 				testElement= createUnrootedTestElement(testId, testName);
@@ -869,6 +923,59 @@ public class TestRunSession implements ITestRunSession {
 			for (ITestSessionListener listener : fSessionListeners) {
 				//TODO: post old & new status?
 				listener.testReran(testCaseElement, status, trace, expectedResult, actualResult);
+			}
+		}
+
+		@Override
+		public void testRunInterrupted() {
+			if (!fIsRunning) {
+				// the VM exited before it started the test run
+				testRunStarted(0);
+			}
+			if (!endInterruptedTests()) {
+				// no test was running: the VM exited in a fixture method
+				TestElement testElement= createUnrootedTestElement("-3:" + fIdToTest.size(), JUnitMessages.TestRunSession_vmExited); //$NON-NLS-1$
+				setStatus(testElement, Status.RUNNING);
+				fTotalCount++;
+				fStartedCount++;
+				failInterruptedTest(testElement, JUnitMessages.TestRunSession_vmExited);
+			}
+		}
+
+		/**
+		 * Ends the tests of the previous VM that it has not ended: it exited during these tests, e.g.
+		 * with System.exit().
+		 *
+		 * @return whether there was such a test
+		 */
+		private boolean endInterruptedTests() {
+			List<TestElement> interruptedTests= new ArrayList<>();
+			for (TestElement testElement : fIdToTest.values()) {
+				if (testElement instanceof TestCaseElement && testElement.getStatus().isRunning()) {
+					interruptedTests.add(testElement);
+				}
+			}
+			for (TestElement testElement : interruptedTests) {
+				if (testElement.getStatus() == Status.RUNNING) {
+					failInterruptedTest(testElement, JUnitMessages.TestRunSession_vmExitedDuringTest);
+				} else {
+					// it has already failed
+					setStatus(testElement, testElement.getStatus() == Status.RUNNING_FAILURE ? Status.FAILURE : Status.ERROR);
+					for (ITestSessionListener listener : fSessionListeners) {
+						listener.testEnded((TestCaseElement) testElement);
+					}
+				}
+			}
+			return !interruptedTests.isEmpty();
+		}
+
+		private void failInterruptedTest(TestElement testElement, String trace) {
+			registerTestFailureStatus(testElement, Status.ERROR, trace, null, null);
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.testFailed(testElement, Status.ERROR, trace, null, null);
+			}
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.testEnded((TestCaseElement) testElement);
 			}
 		}
 
