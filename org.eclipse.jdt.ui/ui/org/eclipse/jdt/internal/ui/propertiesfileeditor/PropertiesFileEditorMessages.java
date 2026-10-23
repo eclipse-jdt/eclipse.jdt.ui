@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -61,6 +61,9 @@ public final class PropertiesFileEditorMessages extends NLS {
 	public static String OpenAction_SelectionDialog_message;
 	public static String OpenAction_SelectionDialog_elementLabel;
 	public static String OpenAction_SelectionDialog_elementLabelWithMatchCount;
+	public static String OpenAction_SelectionDialog_preview_no_source;
+	public static String OpenAction_SelectionDialog_preview_job_name;
+	public static String OpenAction_SelectionDialog_preview_accessible_name;
 
 	public static String PropertiesCorrectionProcessor_create_field_in_accessor_label;
 	public static String PropertiesCorrectionProcessor_create_fields_in_accessor_label;
