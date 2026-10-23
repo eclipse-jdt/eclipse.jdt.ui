@@ -38,16 +38,6 @@
        y1="1031.0349"
        x2="-16.11462"
        y2="1033.6671" />
-    <filter
-       id="filter5785"
-       x="-0.20542419"
-       width="1.4108484"
-       y="-0.20542419"
-       height="1.4108484">
-      <feGaussianBlur
-         stdDeviation="0.19985704"
-         id="feGaussianBlur5787" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -93,7 +83,7 @@
            x="-10.606487"
            y="1034.8657" />
         <rect
-           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;filter:url(#filter5785);font-family:Sans"
+           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
            id="rect6724-4"
            width="3.9971409"
            height="3.9971409"

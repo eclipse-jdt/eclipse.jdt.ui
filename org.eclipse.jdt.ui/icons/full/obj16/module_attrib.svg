@@ -58,16 +58,6 @@
         </g>
       </g>
     </mask>
-    <filter
-       id="filter26906"
-       x="-0.29749974"
-       width="1.626241"
-       y="-0.45074902"
-       height="1.901498">
-      <feGaussianBlur
-         stdDeviation="0.96093657"
-         id="feGaussianBlur26908" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient5281-0"
        id="linearGradient3114"
@@ -151,7 +141,7 @@
          transform="translate(19.5,0.3125)">
         <g
            id="g26748-8"
-           style="fill:#ffffff;stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;display:inline;filter:url(#filter26906)">
+           style="fill:#ffffff;stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;display:inline">
           <rect
              y="1048.8534"
              x="-18.289976"

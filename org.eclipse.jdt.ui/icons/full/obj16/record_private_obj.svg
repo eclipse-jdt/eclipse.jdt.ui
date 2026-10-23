@@ -61,17 +61,6 @@
        gradientUnits="userSpaceOnUse"
        id="linearGradient5742"
        xlink:href="#linearGradient5789" />
-    <filter
-       style="color-interpolation-filters:sRGB"
-       height="1.4108484"
-       y="-0.20542419"
-       width="1.4108484"
-       x="-0.20542419"
-       id="filter5785">
-      <feGaussianBlur
-         id="feGaussianBlur5787"
-         stdDeviation="0.19985704" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -159,7 +148,7 @@
              height="3.9971409"
              width="3.9971409"
              id="rect6724-4"
-             style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter5785)" />
+             style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
         </g>
       </g>
     </g>

@@ -322,16 +322,6 @@
            style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.0003444;stroke-linejoin:round;stroke-miterlimit:3;stroke-opacity:1;stroke-dasharray:none;display:inline" />
       </g>
     </mask>
-    <filter
-       id="filter5520"
-       x="-0.26029567"
-       width="1.5209087"
-       y="-0.21420261"
-       height="1.4284052">
-      <feGaussianBlur
-         stdDeviation="0.72762114"
-         id="feGaussianBlur5522" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -390,7 +380,7 @@
            style="opacity:0.75">
           <g
              id="g5487"
-             style="filter:url(#filter5520)">
+            >
             <g
                id="g5480"
                style="fill:#ffffff;stroke:#ffffff;stroke-width:1.06988704000000000;stroke-miterlimit:4;stroke-dasharray:none"

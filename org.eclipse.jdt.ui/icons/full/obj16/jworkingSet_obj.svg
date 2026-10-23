@@ -91,17 +91,6 @@
            style="fill:#ffffff;stroke:#ffffff;stroke-width:1.24123943;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter27875"
-       x="-0.29695044"
-       width="1.5939009"
-       y="-0.3268813"
-       height="1.6537626">
-      <feGaussianBlur
-         stdDeviation="0.70956165"
-         id="feGaussianBlur27877" />
-    </filter>
     <linearGradient
        id="linearGradient3967">
       <stop
@@ -304,7 +293,7 @@
        id="g27855"
        mask="url(#mask27861)">
       <g
-         style="opacity:0.75;fill:#ffffff;stroke:#ffffff;stroke-width:2.48247886;stroke-miterlimit:4;stroke-dasharray:none;display:inline;filter:url(#filter27875)"
+         style="opacity:0.75;fill:#ffffff;stroke:#ffffff;stroke-width:2.48247886;stroke-miterlimit:4;stroke-dasharray:none;display:inline"
          transform="matrix(0.80564634,0,0,0.80564634,0.02727398,204.27398)"
          id="g18690-04">
         <path

@@ -261,16 +261,6 @@
            transform="matrix(3.8207473,0,0,3.8207473,458.21948,344.55655)" />
       </g>
     </mask>
-    <filter
-       id="filter7688"
-       x="-0.34675294"
-       width="1.6935059"
-       y="-0.34675294"
-       height="1.6935059">
-      <feGaussianBlur
-         stdDeviation="0.42187504"
-         id="feGaussianBlur7690" />
-    </filter>
     <mask
        maskUnits="userSpaceOnUse"
        id="mask7820">
@@ -297,16 +287,6 @@
            id="path7828" />
       </g>
     </mask>
-    <filter
-       id="filter7830"
-       x="-0.34675294"
-       width="1.6935059"
-       y="-0.34675294"
-       height="1.6935059">
-      <feGaussianBlur
-         stdDeviation="0.42187504"
-         id="feGaussianBlur7832" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -353,7 +333,7 @@
          id="g7817"
          mask="url(#mask7820)">
         <path
-           style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.87597075999999996;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;filter:url(#filter7830);opacity:0.5"
+           style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.87597075999999996;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;opacity:0.5"
            id="path4035-4-5-9-6"
            d="m 11.343751,4.499999 c 0,1.553301 -1.259199,2.8125003 -2.8125,2.8125003 -1.553301,0 -2.8125003,-1.2591993 -2.8125003,-2.8125003 0,-1.5533009 1.2591993,-2.8125002 2.8125003,-2.8125002 1.553301,0 2.8125,1.2591993 2.8125,2.8125002 z"
            transform="matrix(3.8207473,0,0,3.8207473,458.21948,344.55655)" />
@@ -367,7 +347,7 @@
          id="g7659"
          mask="url(#mask7662)">
         <path
-           style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.87597075999999996;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;filter:url(#filter7688);opacity:0.5"
+           style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.87597075999999996;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;opacity:0.5"
            id="path4035-4-5-9-5-8"
            d="m 11.343751,4.499999 c 0,1.553301 -1.259199,2.8125003 -2.8125,2.8125003 -1.553301,0 -2.8125003,-1.2591993 -2.8125003,-2.8125003 0,-1.5533009 1.2591993,-2.8125002 2.8125003,-2.8125002 1.553301,0 2.8125,1.2591993 2.8125,2.8125002 z"
            transform="matrix(3.8207473,0,0,3.8207473,476.39625,351.72416)" />

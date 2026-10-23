@@ -45,16 +45,6 @@
        y2="1042.3622"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(0.99999532,0.00305796,-0.00305796,0.99999532,23.191166,0.04157548)" />
-    <filter
-       id="filter3896"
-       x="-0.18952716"
-       width="1.3790544"
-       y="-0.37891674"
-       height="1.757838">
-      <feGaussianBlur
-         stdDeviation="0.51595886"
-         id="feGaussianBlur3898" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient3848"
        id="linearGradient3855"
@@ -86,7 +76,7 @@
          d="m 14.224627,1046.6872 -6.180724,-6.6769 -6.2197766,6.7771 z"
          id="path3836-2" />
       <path
-         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-linejoin:round;stroke-opacity:1;filter:url(#filter3896)"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-linejoin:round;stroke-opacity:1"
          d="m 12.578511,1045.8614 -4.55569,-4.5836 -4.615713,4.5875 z"
          id="path3836-8" />
       <path

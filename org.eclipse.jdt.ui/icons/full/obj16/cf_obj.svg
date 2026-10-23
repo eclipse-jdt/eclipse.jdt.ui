@@ -106,17 +106,6 @@
        y1="398.98798"
        x2="548.45923"
        y2="373.77069" />
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter4929-6"
-       x="-0.33426729"
-       width="1.6685346"
-       y="-0.42999801"
-       height="1.859996">
-      <feGaussianBlur
-         stdDeviation="3.5620748"
-         id="feGaussianBlur4931-9" />
-    </filter>
     <linearGradient
        id="linearGradient3973-7-8">
       <stop
@@ -197,16 +186,6 @@
            id="path5377" />
       </g>
     </mask>
-    <filter
-       id="filter6147"
-       x="-0.19534237"
-       width="1.3906847"
-       y="-0.47530892"
-       height="1.8672435">
-      <feGaussianBlur
-         stdDeviation="1.2732579"
-         id="feGaussianBlur6149" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -254,7 +233,7 @@
          mask="url(#mask5369)">
         <g
            id="g5356"
-           style="stroke-width:7.16761023000000020;stroke-miterlimit:4;stroke-dasharray:none;filter:url(#filter6147);opacity:0.75">
+           style="stroke-width:7.16761023000000020;stroke-miterlimit:4;stroke-dasharray:none;opacity:0.75">
           <g
              style="fill:#ffffff;stroke:#ffffff;display:inline;stroke-width:6.05585974999999980;stroke-miterlimit:4;stroke-dasharray:none"
              id="g5170-1"
@@ -284,7 +263,7 @@
            id="g4914"
            transform="translate(3.058339,-2.9193236)">
           <rect
-             style="opacity:0.5;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.38039374;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;filter:url(#filter4929-6)"
+             style="opacity:0.5;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.38039374;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
              id="rect13693-2-2"
              width="29.135895"
              height="22.649353"
