@@ -525,7 +525,7 @@ public class JavaCodeTokenizer {
 			return true;
 		}
 		char ch= code.charAt(probe);
-		return ch == ',' || ch == ';' || ch == '(' || ch == '{' || ch == '}';
+		return ch == ',' || ch == ';' || ch == '(' || ch == '{' || ch == '}' || ch == '\r' || ch == '\n';
 	}
 
 	private boolean looksLikeTypeUsage() {
