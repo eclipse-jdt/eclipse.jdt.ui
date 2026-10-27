@@ -372,6 +372,16 @@ public class JavaCodeTokenizerTest {
 	}
 
 	@Test
+	public void testEnumMultipleConstants2() {
+		String code= "enum Color {\n    RED,\n    GREEN,\n    BLUE\n}";
+		String result= JavaCodeTokenizer.tokenize(code);
+		assertTrue(result.contains(enumType("Color"))); //$NON-NLS-1$
+		assertTrue(result.contains(staticFinalField("RED"))); //$NON-NLS-1$
+		assertTrue(result.contains(staticFinalField("GREEN"))); //$NON-NLS-1$
+		assertTrue(result.contains(staticFinalField("BLUE"))); //$NON-NLS-1$
+	}
+
+	@Test
 	public void testEnumConstantsWithArguments() {
 		String code= "enum Planet {\n    EARTH(1.0),\n    MARS(0.38);\n    private double gravity;\n}";
 		String result= JavaCodeTokenizer.tokenize(code);
