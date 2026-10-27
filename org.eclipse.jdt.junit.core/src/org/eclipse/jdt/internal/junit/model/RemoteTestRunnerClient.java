@@ -332,8 +332,15 @@ public class RemoteTestRunnerClient {
 						throw e;
 					}
 					String message;
-					while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
-						receiveMessage(message);
+					try {
+						while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
+							receiveMessage(message);
+					} catch (SocketException e) {
+						if (!isConnectionResetBeforeLastVM()) {
+							throw e;
+						}
+						// the VM exited abnormally and reset its connection: the next VM is still read
+					}
 				} while (prepareNextTestRun());
 			} catch (SocketException e) {
 				notifyTestRunTerminated();
@@ -359,6 +366,12 @@ public class RemoteTestRunnerClient {
 				if (fStopRequested) {
 					stopTest();
 				}
+			}
+		}
+
+		private boolean isConnectionResetBeforeLastVM() {
+			synchronized (RemoteTestRunnerClient.this) {
+				return fServerSocket != null && !fServerSocket.isClosed() && fRemainingTestRuns > 1;
 			}
 		}
 

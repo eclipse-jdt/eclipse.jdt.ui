@@ -22,7 +22,10 @@ import java.io.PrintWriter;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,6 +48,7 @@ import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
+import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 
 /**
@@ -61,6 +65,8 @@ public class TestSeparateVMsSession {
 
 	private TestRunSession fSession;
 
+	private final List<String> fEvents= Collections.synchronizedList(new ArrayList<>());
+
 	@Before
 	public void setUp() {
 		fPort= SocketUtil.findFreePort();
@@ -72,6 +78,7 @@ public class TestSeparateVMsSession {
 		fSession.addTestSessionListener((ITestSessionListener) Proxy.newProxyInstance(getClass().getClassLoader(),
 				new Class<?>[] { ITestSessionListener.class }, (proxy, method, args) -> switch (method.getName()) {
 					case "acceptsSwapToDisk" -> Boolean.FALSE; //$NON-NLS-1$
+					case "sessionStarted", "runningBegins", "testStarted", "testEnded" -> fEvents.add(method.getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					case "equals" -> proxy == args[0]; //$NON-NLS-1$
 					case "hashCode" -> System.identityHashCode(proxy); //$NON-NLS-1$
 					default -> null;
@@ -93,6 +100,18 @@ public class TestSeparateVMsSession {
 			for (String message : messages) {
 				writer.println(message);
 			}
+		}
+	}
+
+	/**
+	 * Runs a VM that exits abnormally: its connection is reset.
+	 */
+	private void runVMThatResetsItsConnection(String... messages) throws Exception {
+		try (Socket socket= connect(); PrintWriter writer= new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true)) {
+			for (String message : messages) {
+				writer.println(message);
+			}
+			socket.setSoLinger(true, 0); // closing sends a reset instead of a normal end of stream
 		}
 	}
 
@@ -205,6 +224,51 @@ public class TestSeparateVMsSession {
 		runVM(oneTest("BTest", 0, SECOND, true)); //$NON-NLS-1$
 		awaitEnd();
 		assertVMExitedOutsideOfTheTests();
+	}
+
+	/**
+	 * The session of a first VM that exits in a fixture method is started for the listeners, before
+	 * the failure of its synthetic test.
+	 */
+	@Test
+	public void testListenersAreToldTheStartWhenTheFirstVMExitsInAFixture() throws Exception {
+		runVM(MessageIds.TEST_RUN_START + "1 v2", MessageIds.TEST_TREE + "1,test(pack.SetupTest),false,1"); //$NON-NLS-1$ //$NON-NLS-2$
+		runVM(oneTest("BTest", 0, SECOND, true)); //$NON-NLS-1$
+		awaitEnd();
+		assertEquals(List.of("sessionStarted", "runningBegins", "testStarted", "testEnded", "testStarted", "testEnded"), fEvents); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+	}
+
+	/**
+	 * A VM that exits abnormally resets its connection: the next VMs are still read.
+	 */
+	@Test
+	public void testVMThatResetsItsConnection() throws Exception {
+		runVMThatResetsItsConnection(oneTest("ExitingTest", 0, 0, false)); //$NON-NLS-1$
+		runVM(oneTest("BTest", 0, SECOND, true)); //$NON-NLS-1$
+		awaitEnd();
+
+		assertEquals(Status.OK, test("BTest").getStatus()); //$NON-NLS-1$
+		assertEquals(ProgressState.COMPLETED, fSession.getProgressState());
+		assertEquals(Result.ERROR, fSession.getTestResult(true));
+	}
+
+	/**
+	 * The tests that a VM did not start because it exited are not run: their suite is not running
+	 * any more.
+	 */
+	@Test
+	public void testSuiteOfAnInterruptedTestIsNotRunningAnymore() throws Exception {
+		runVM(MessageIds.TEST_RUN_START + "2 v2", MessageIds.TEST_TREE + "1,pack.ATest,true,2", //$NON-NLS-1$ //$NON-NLS-2$
+				MessageIds.TEST_TREE + "2,first(pack.ATest),false,1", MessageIds.TEST_TREE + "3,second(pack.ATest),false,1", //$NON-NLS-1$ //$NON-NLS-2$
+				MessageIds.TEST_START + "2,first(pack.ATest)"); //$NON-NLS-1$
+		runVM(oneTest("BTest", 0, SECOND, true)); //$NON-NLS-1$
+		awaitEnd();
+
+		ITestElement suite= fSession.getTestRoot().getChildren()[0];
+		assertEquals(Status.ERROR, ((TestSuiteElement) suite).getStatus());
+		assertEquals(Status.NOT_RUN, ((TestSuiteElement) suite).getChildren()[1] instanceof TestElement t ? t.getStatus() : null);
+		assertEquals(ProgressState.COMPLETED, fSession.getProgressState());
+		assertEquals(ProgressState.COMPLETED, fSession.getTestRoot().getProgressState());
 	}
 
 	private void assertVMExitedOutsideOfTheTests() {

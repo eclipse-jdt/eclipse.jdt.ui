@@ -935,9 +935,17 @@ public class TestRunSession implements ITestRunSession {
 			if (!endInterruptedTests()) {
 				// no test was running: the VM exited in a fixture method
 				TestElement testElement= createUnrootedTestElement("-3:" + fIdToTest.size(), JUnitMessages.TestRunSession_vmExited); //$NON-NLS-1$
+				if (fStartedCount == 0) {
+					for (ITestSessionListener listener : fSessionListeners) {
+						listener.runningBegins();
+					}
+				}
 				setStatus(testElement, Status.RUNNING);
 				fTotalCount++;
 				fStartedCount++;
+				for (ITestSessionListener listener : fSessionListeners) {
+					listener.testStarted((TestCaseElement) testElement);
+				}
 				failInterruptedTest(testElement, JUnitMessages.TestRunSession_vmExited);
 			}
 		}
@@ -964,6 +972,12 @@ public class TestRunSession implements ITestRunSession {
 					for (ITestSessionListener listener : fSessionListeners) {
 						listener.testEnded((TestCaseElement) testElement);
 					}
+				}
+			}
+			// the tests of the suites that the VM did not start are not run, so the suites are over
+			for (TestElement testElement : interruptedTests) {
+				for (TestSuiteElement suite= testElement.getParent(); suite != null; suite= suite.getParent()) {
+					suite.interruptedChildren();
 				}
 			}
 			return !interruptedTests.isEmpty();
