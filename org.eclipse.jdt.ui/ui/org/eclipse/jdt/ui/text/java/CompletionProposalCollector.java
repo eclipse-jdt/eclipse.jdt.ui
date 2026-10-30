@@ -115,7 +115,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	private static final Set<String> KEYWORDS_NEEDING_TRAILING_SPACE = Set.of("public", "private", "protected", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			"static", "void", "class",  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			"interface", "extends", "implements", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			"return", "new", "import"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"return", "new", "import", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			" abstract"); //$NON-NLS-1$
 
 	private final CompletionProposalLabelProvider fLabelProvider= new CompletionProposalLabelProvider();
 	private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
