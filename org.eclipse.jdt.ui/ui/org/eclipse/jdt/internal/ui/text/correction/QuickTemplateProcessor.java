@@ -174,7 +174,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	}
 
 	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection<IJavaCompletionProposal> result, String contextId) throws BadLocationException, CoreException {
-		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextId);
+		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistryCore().getContextType(contextId);
 		CompilationUnitContext context= (CompilationUnitContext) contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
 		context.setForceEvaluation(true);
@@ -225,7 +225,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 					|| template.matches("", JavaContextType.ID_EMPTY)) //$NON-NLS-1$
 				return false;
 		}
-		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistryCore().getContextType(template.getContextTypeId());
 		return contextType instanceof CompilationUnitContextType;
 	}
 
