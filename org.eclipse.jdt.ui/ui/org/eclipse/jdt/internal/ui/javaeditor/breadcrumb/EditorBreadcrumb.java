@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.viewers.BreadcrumbViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -238,13 +239,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			if (element == null)
 				return;
 
-			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbViewer.doFindItem(element);
-			if (item == null)
-				return;
-
-			int index= fBreadcrumbViewer.getIndexOfItem(item);
-			BreadcrumbItem parentItem= fBreadcrumbViewer.getItem(index - 1);
-			parentItem.openDropDownMenu();
+			fBreadcrumbViewer.openParentDropDown(element);
 		});
 
 		fBreadcrumbViewer.addOpenListener(event -> doRevealOrOpen(event.getSelection()));
