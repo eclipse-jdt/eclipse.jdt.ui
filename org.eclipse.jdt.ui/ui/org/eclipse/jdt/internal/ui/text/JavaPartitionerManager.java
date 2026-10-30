@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 IBM Corporation and others.
+ * Copyright (c) 2019, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,8 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.text.IJavaPartitionerManager;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -50,7 +52,22 @@ public class JavaPartitionerManager implements IJavaPartitionerManager {
 	 */
 	@Override
 	public IDocumentPartitioner createDocumentPartitioner() {
-		return new FastJavaPartitioner(getPartitionScanner(), LEGAL_CONTENT_TYPES);
+		return createDocumentPartitioner(EditorUtility.getJavaProject(fEditor));
+	}
+
+	/**
+	 * Creates a Java document partitioner bound to the given project, independent of the active
+	 * editor. The project determines, for example, whether text blocks are recognized.
+	 * <p>
+	 * May be called from any thread.
+	 * </p>
+	 *
+	 * @param javaProject the project of the document, or <code>null</code> to use the workspace
+	 *            settings
+	 * @return a newly created Java document partitioner, not yet connected to a document
+	 */
+	public static IDocumentPartitioner createDocumentPartitioner(IJavaProject javaProject) {
+		return new FastJavaPartitioner(new FastJavaPartitionScanner(javaProject), LEGAL_CONTENT_TYPES);
 	}
 
 	public void clearEditorInfo(ITextEditor editor) {
