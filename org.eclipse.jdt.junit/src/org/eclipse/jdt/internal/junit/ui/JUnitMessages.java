@@ -150,6 +150,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationTab_label_keeprunning;
 
+	public static String JUnitLaunchConfigurationTab_label_separate_vm_per_test_class;
+
 	public static String JUnitLaunchConfigurationTab_label_method;
 
 	public static String JUnitLaunchConfigurationTab_label_oneTest;
