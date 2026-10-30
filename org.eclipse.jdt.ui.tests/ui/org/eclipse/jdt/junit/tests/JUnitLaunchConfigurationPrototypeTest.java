@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,6 +80,18 @@ public class JUnitLaunchConfigurationPrototypeTest {
 		ILaunchConfiguration prototype= createPrototype();
 		assertTrue(prototype.isPrototype());
 		assertTrue(Arrays.asList(fType.getPrototypes()).contains(prototype));
+	}
+
+	@Test
+	public void testPrototypeAttributeVisibility() throws CoreException {
+		ILaunchConfiguration prototype= createPrototype();
+		Set<String> visibleAttributes= prototype.getPrototypeVisibleAttributes();
+		assertTrue(visibleAttributes.contains(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS));
+		assertTrue(visibleAttributes.contains(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES));
+		assertFalse(visibleAttributes.contains(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME));
+		assertFalse(visibleAttributes.contains(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME));
+		assertFalse(visibleAttributes.contains(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME));
+		assertFalse(visibleAttributes.contains(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND));
 	}
 
 	@Test
@@ -209,6 +222,8 @@ public class JUnitLaunchConfigurationPrototypeTest {
 		prototype.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "example.PrototypeTest");
 		prototype.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, "prototypeMethod");
 		prototype.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, TestKindRegistry.JUNIT3_TEST_KIND_ID);
+		// Initialize the lazily populated visibility set before changing individual entries.
+		prototype.getPrototypeVisibleAttributes();
 		prototype.setPrototypeAttributeVisibility(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, true);
 		prototype.setPrototypeAttributeVisibility(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, true);
 		prototype.setPrototypeAttributeVisibility(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, false);
