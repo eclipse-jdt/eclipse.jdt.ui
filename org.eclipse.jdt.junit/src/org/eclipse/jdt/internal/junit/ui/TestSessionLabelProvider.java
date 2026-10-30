@@ -24,10 +24,14 @@ import org.eclipse.jdt.junit.model.ITestRunSession;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.IToolTipProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
@@ -36,7 +40,7 @@ import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
-public class TestSessionLabelProvider extends LabelProvider implements IStyledLabelProvider {
+public class TestSessionLabelProvider extends LabelProvider implements IStyledLabelProvider, IToolTipProvider {
 
 	private final TestRunnerViewPart fTestRunnerPart;
 	private final int fLayoutMode;
@@ -148,6 +152,28 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			TestSuiteElement testSuiteElement= (TestSuiteElement) element;
 			String displayName= testSuiteElement.getDisplayName();
 			return BasicElementLabels.getJavaElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
+		}
+		return null;
+	}
+
+	@Override
+	public String getToolTipText(Object element) {
+		if (!(element instanceof TestElement testElement) || fTestRunnerPart == null) {
+			return null;
+		}
+		String className= testElement.getClassName();
+		if (BasicElementLabels.getJavaElementName(className).equals(getSimpleLabel(element))) {
+			return null;
+		}
+		IJavaProject project= fTestRunnerPart.getLaunchedProject();
+		try {
+			// Synthetic groups need not have a Java source. Do not present their
+			// arbitrary names as fully qualified class names.
+			if (project != null && project.findType(className) != null) {
+				return BasicElementLabels.getJavaElementName(className);
+			}
+		} catch (JavaModelException e) {
+			// The project's source may no longer be available, e.g. for an old run.
 		}
 		return null;
 	}
