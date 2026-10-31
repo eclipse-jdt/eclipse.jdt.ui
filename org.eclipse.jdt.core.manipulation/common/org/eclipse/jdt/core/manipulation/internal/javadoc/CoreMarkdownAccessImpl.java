@@ -38,6 +38,8 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+
 public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 
 	private Parser fParser;
@@ -63,6 +65,37 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 	}
 
 	private static final Set<String> JAVA_LANGUAGES= Set.of("java", "jav"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	private static volatile FencedCodeTokenizer fFencedCodeTokenizer;
+	private static volatile boolean fTokenizerInitialized;
+	private static volatile boolean fTokenizerFailed;
+
+	public static void setFencedCodeTokenizer(FencedCodeTokenizer tokenizer) {
+		fFencedCodeTokenizer= tokenizer;
+		fTokenizerInitialized= true;
+	}
+
+	public static FencedCodeTokenizer getFencedCodeTokenizer() {
+		if (!fTokenizerInitialized) {
+			initTokenizer();
+		}
+		return fFencedCodeTokenizer;
+	}
+
+	private static synchronized void initTokenizer() {
+		if (fTokenizerInitialized) {
+			return;
+		}
+		try {
+			org.osgi.framework.Bundle bundle= org.eclipse.core.runtime.Platform.getBundle("org.eclipse.jdt.ui.tm4e"); //$NON-NLS-1$
+			if (bundle != null) {
+				bundle.start();
+			}
+		} catch (Exception e) {
+			// tm4e bundle not available or failed to start — fall back to plain text
+		}
+		fTokenizerInitialized= true;
+	}
 
 	static class JavaSyntaxHighlightingRenderer implements NodeRenderer {
 		private final HtmlNodeRendererContext context;
@@ -98,7 +131,27 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 						? Map.of("class", "language-" + info.trim()) //$NON-NLS-1$ //$NON-NLS-2$
 						: Collections.emptyMap();
 				html.tag("code", attrs); //$NON-NLS-1$
-				html.text(literal);
+				String tokenized= null;
+				if (info != null && !info.isEmpty()) {
+					try {
+						FencedCodeTokenizer tokenizer= getFencedCodeTokenizer();
+						if (tokenizer != null) {
+							tokenized= tokenizer.tokenize(info.trim().toLowerCase(), literal);
+						}
+					} catch (Exception | LinkageError e) {
+						if (!fTokenizerFailed) {
+							fTokenizerFailed= true;
+							JavaManipulationPlugin.logErrorMessage("Fenced code tokenizer failed with: " + e.getMessage()); //$NON-NLS-1$
+						}
+						fFencedCodeTokenizer= null;
+						fTokenizerInitialized= false;
+					}
+				}
+				if (tokenized != null) {
+					html.raw(tokenized);
+				} else {
+					html.text(literal);
+				}
 			}
 			html.tag("/code"); //$NON-NLS-1$
 			html.tag("/pre"); //$NON-NLS-1$
