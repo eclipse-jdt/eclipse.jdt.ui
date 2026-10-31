@@ -312,6 +312,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NullityMismatchTypeArgument:
 			case IProblem.ContradictoryNullAnnotations:
 			case IProblem.UndefinedModule:
+			case IProblem.ConflictingPackageFromModules:
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 			case IProblem.NotAccessibleType:
 			case IProblem.AbstractServiceImplementation:
@@ -946,6 +947,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 						UnresolvedElementsSubProcessor.addRequiresModuleProposals(context.getCompilationUnit(), (Name) node, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
 					}
 				}
+				break;
+			case IProblem.ConflictingPackageFromModules:
+				ModuleCorrectionsSubProcessor.getIgnoreUnnamedModuleForSplitPackageProposals(context, problem, proposals);
 				break;
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 				ModuleCorrectionsSubProcessor.getPackageDoesNotExistProposals(context, problem, proposals);

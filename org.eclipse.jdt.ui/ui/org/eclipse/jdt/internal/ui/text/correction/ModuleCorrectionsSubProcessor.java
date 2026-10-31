@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
@@ -74,9 +75,42 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathFixSelectionDialog;
 
 public class ModuleCorrectionsSubProcessor {
+
+	public static void getIgnoreUnnamedModuleForSplitPackageProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		// only offer the fix if the unnamed module takes part in the conflict and ignoring it leaves at most one module
+		String[] arguments= problem.getProblemArguments();
+		if (arguments == null || arguments.length < 2) {
+			return;
+		}
+		String[] modules= arguments[1].split(",\\s*"); //$NON-NLS-1$
+		if (!Arrays.asList(modules).contains("<unnamed>") || modules.length > 2) { //$NON-NLS-1$
+			return;
+		}
+		IJavaProject javaProject= context.getCompilationUnit().getJavaProject();
+		if (javaProject == null || JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_IGNORE_UNNAMED_MODULE_FOR_SPLIT_PACKAGE, true))) {
+			return;
+		}
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.ModuleCorrectionsSubProcessor_ignoreUnnamedModuleForSplitPackage_description, null,
+				IProposalRelevance.IGNORE_UNNAMED_MODULE_FOR_SPLIT_PACKAGE, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+			@Override
+			public void apply(IDocument document) {
+				Map<String, String> options= javaProject.getOptions(false);
+				options.put(JavaCore.COMPILER_IGNORE_UNNAMED_MODULE_FOR_SPLIT_PACKAGE, JavaCore.ENABLED);
+				javaProject.setOptions(options);
+				CoreUtility.getBuildJob(javaProject.getProject()).schedule();
+			}
+
+			@Override
+			public String getAdditionalProposalInfo(IProgressMonitor monitor) {
+				return CorrectionMessages.ModuleCorrectionsSubProcessor_ignoreUnnamedModuleForSplitPackage_info;
+			}
+		};
+		proposals.add(proposal);
+	}
 
 	private static class ModulepathFixProposal extends ChangeCorrectionProposal {
 
