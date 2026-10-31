@@ -151,16 +151,6 @@
          d="m 462.77563,373.22885 29.11636,0 c 1.45425,0 2.625,1.17075 2.625,2.625 l 0,18.76896 c 0,1.45425 -1.17412,2.52598 -2.625,2.625 l -29.11636,1.98708 c -1.45088,0.099 -2.625,-1.17075 -2.625,-2.625 l 0,-20.75604 c 0,-1.45425 1.17075,-2.625 2.625,-2.625 z"
          id="path4919" />
     </mask>
-    <filter
-       id="filter4929"
-       x="-0.31518737"
-       width="1.6303747"
-       y="-0.42999801"
-       height="1.859996">
-      <feGaussianBlur
-         stdDeviation="3.5620748"
-         id="feGaussianBlur4931" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient4762"
        id="linearGradient4933"
@@ -231,16 +221,6 @@
            transform="matrix(1,0,-0.70828042,0.70593119,0,0)" />
       </g>
     </mask>
-    <filter
-       id="filter8723"
-       x="-0.67342326"
-       width="2.3439866"
-       y="-0.21065778"
-       height="1.4461389">
-      <feGaussianBlur
-         stdDeviation="0.91677301"
-         id="feGaussianBlur8725" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -301,7 +281,7 @@
              height="22.649353"
              width="30.899641"
              id="rect13693-2-2"
-             style="opacity:0.5;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.38039374;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;filter:url(#filter4929)" />
+             style="opacity:0.5;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.38039374;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline" />
         </g>
         <path
            style="fill:none;stroke:url(#linearGradient4795);stroke-width:3.02792978;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
@@ -323,7 +303,7 @@
          mask="url(#mask8715)">
         <g
            id="layer1-7-5"
-           style="fill:#ffffff;stroke:#ffffff;display:inline;filter:url(#filter8723)"
+           style="fill:#ffffff;stroke:#ffffff;display:inline"
            transform="matrix(3.5838051,0,0,3.5838051,376.76565,-3435.2683)">
           <g
              style="fill:#ffffff;stroke:#ffffff;display:inline"

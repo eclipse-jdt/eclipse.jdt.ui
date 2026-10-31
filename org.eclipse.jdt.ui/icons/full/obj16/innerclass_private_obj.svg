@@ -29,17 +29,6 @@
          offset="1"
          id="stop10802-1-5-3-0-4-8-4-2-9-2-1" />
     </linearGradient>
-    <filter
-       color-interpolation-filters="sRGB"
-       height="1.24"
-       y="-0.12"
-       width="1.24"
-       x="-0.12"
-       id="filter5785-4">
-      <feGaussianBlur
-         id="feGaussianBlur5787-6"
-         stdDeviation="0.19985704" />
-    </filter>
     <linearGradient
        y2="1033.6671"
        x2="-16.11462"
@@ -64,17 +53,6 @@
          offset="1"
          id="stop5795-7" />
     </linearGradient>
-    <filter
-       color-interpolation-filters="sRGB"
-       height="1.4108484"
-       y="-0.20542419"
-       width="1.4108484"
-       x="-0.20542419"
-       id="filter5785-2">
-      <feGaussianBlur
-         id="feGaussianBlur5787-3"
-         stdDeviation="0.19985704" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient10798-1-9-3-7-6-8-9-0-9-1-8"
        id="linearGradient4293"
@@ -167,7 +145,7 @@
                x="-10.606487"
                y="1034.8657" />
             <rect
-               style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;filter:url(#filter5785-4);font-family:Sans"
+               style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
                id="rect6724-4-4"
                width="3.9971409"
                height="3.9971409"
@@ -208,7 +186,7 @@
                x="-10.606487"
                y="1034.8657" />
             <rect
-               style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;filter:url(#filter5785-2);font-family:Sans"
+               style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
                id="rect6724-4"
                width="3.9971409"
                height="3.9971409"

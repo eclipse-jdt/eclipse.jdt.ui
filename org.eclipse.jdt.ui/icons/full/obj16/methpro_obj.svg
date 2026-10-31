@@ -25,16 +25,6 @@
          offset="1"
          id="stop9804" />
     </linearGradient>
-    <filter
-       height="1.4108484"
-       y="-0.20542419"
-       width="1.4108484"
-       x="-0.20542419"
-       id="filter5785-5">
-      <feGaussianBlur
-         id="feGaussianBlur5787-1"
-         stdDeviation="0.19985704" />
-    </filter>
     <linearGradient
        y2="1033.6897"
        x2="-14.570764"
@@ -143,7 +133,7 @@
                  height="3.9971409"
                  width="3.9971409"
                  id="rect6724-4"
-                 style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;filter:url(#filter5785-5);font-family:Sans" />
+                 style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans" />
             </g>
           </g>
         </g>
