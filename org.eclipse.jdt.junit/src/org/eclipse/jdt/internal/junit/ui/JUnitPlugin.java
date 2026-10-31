@@ -56,6 +56,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.junit.ui.codemining.JUnitStatusRegistry;
+
 /**
  * The plug-in runtime class for the JUnit plug-in.
  */
@@ -78,6 +80,8 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	private BundleContext fBundleContext;
 
+	private volatile JUnitStatusRegistry fStatusRegistry;
+
 
 	public JUnitPlugin() {
 		fgPlugin= this;
@@ -85,6 +89,15 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	public static JUnitPlugin getDefault() {
 		return fgPlugin;
+	}
+
+	/**
+	 * Returns the registry of the results of the test runs, used by the code minings.
+	 *
+	 * @return the registry, or <code>null</code> if the plug-in is not started
+	 */
+	public JUnitStatusRegistry getStatusRegistry() {
+		return fStatusRegistry;
 	}
 
 	public static Shell getActiveWorkbenchShell() {
@@ -195,6 +208,19 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		super.start(context);
 		fBundleContext= context;
 		setCodeassistFavoriteStaticMembers();
+		startStatusRegistry();
+	}
+
+	private void startStatusRegistry() {
+		JUnitStatusRegistry registry= new JUnitStatusRegistry();
+		try {
+			registry.start();
+			fStatusRegistry= registry;
+		} catch (RuntimeException e) {
+			// the code minings go without test results, the plug-in still works
+			log(e);
+			registry.dispose();
+		}
 	}
 
 	/**
@@ -226,8 +252,16 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		super.stop(context);
-		fBundleContext= null;
+		JUnitStatusRegistry registry= fStatusRegistry;
+		fStatusRegistry= null;
+		try {
+			if (registry != null) {
+				registry.dispose();
+			}
+		} finally {
+			super.stop(context);
+			fBundleContext= null;
+		}
 	}
 
 	/**
