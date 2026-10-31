@@ -38,6 +38,8 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+
 public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 
 	private Parser fParser;
@@ -139,8 +141,7 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 					} catch (Exception | LinkageError e) {
 						if (!fTokenizerFailed) {
 							fTokenizerFailed= true;
-							org.eclipse.core.runtime.ILog.get(CoreMarkdownAccessImpl.class)
-									.error("Fenced code tokenizer failed, falling back to plain text", e); //$NON-NLS-1$
+							JavaManipulationPlugin.logErrorMessage("Fenced code tokenizer failed with: " + e.getMessage()); //$NON-NLS-1$
 						}
 						fFencedCodeTokenizer= null;
 						fTokenizerInitialized= false;
