@@ -113,6 +113,20 @@ public final class CoreASTProvider {
 	public static final WAIT_FLAG WAIT_NO= new WAIT_FLAG("don't wait"); //$NON-NLS-1$
 
 	/**
+	 * Wait flag indicating that a client requesting an AST does not want to wait for the
+	 * reconciler of the active editor, e.g. in the UI thread.
+	 * <p>
+	 * While the active editor is being reconciled, <code>null</code> is returned for its Java
+	 * element. Otherwise the AST is the one of {@link #WAIT_YES}: the shared AST if it is
+	 * available, or an AST created by this AST provider, and kept as the shared AST for the active
+	 * editor.
+	 * </p>
+	 *
+	 * @since 1.26
+	 */
+	public static final WAIT_FLAG WAIT_NOT_FOR_RECONCILER= new WAIT_FLAG("don't wait for the reconciler"); //$NON-NLS-1$
+
+	/**
 	 * Returns a shared compilation unit AST for the given Java element.
 	 * <p>
 	 * Clients are not allowed to modify the AST and must synchronize all access to its nodes.
@@ -120,10 +134,12 @@ public final class CoreASTProvider {
 	 *
 	 * @param input the Java element, must not be <code>null</code>
 	 * @param waitFlag org.eclipse.jdt.ui.SharedASTProvider#WAIT_YES,
-	 * org.eclipse.jdt.ui.SharedASTProvider#WAIT_NO or
-	 * org.eclipse.jdt.ui.SharedASTProvider#WAIT_ACTIVE_ONLY
+	 * org.eclipse.jdt.ui.SharedASTProvider#WAIT_NO,
+	 * org.eclipse.jdt.ui.SharedASTProvider#WAIT_ACTIVE_ONLY or
+	 * {@link #WAIT_NOT_FOR_RECONCILER}
 	 * @param progressMonitor the progress monitor or <code>null</code>
-	 * @return the AST or <code>null</code> if the AST is not available
+	 * @return the AST or <code>null</code> if the AST is not available, e.g. with
+	 *         {@link #WAIT_NOT_FOR_RECONCILER} while the given element is being reconciled
 	 */
 	public CompilationUnit getAST(final ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
 		if (input == null || waitFlag == null)
@@ -165,7 +181,9 @@ public final class CoreASTProvider {
 		} else
 			activeElement= null;
 
-		if (isReconciling) {
+		if (isReconciling && waitFlag == CoreASTProvider.WAIT_NOT_FOR_RECONCILER) {
+			return null;
+		} else if (isReconciling) {
 			try {
 				notifyReconciler();
 				// Wait for AST

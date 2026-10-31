@@ -424,6 +424,10 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 				status.addFatalError(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_error_cannot_resolve_type);
 			return status;
 		}
+		if (resolveBinding.isCanonicalConstructor()) {
+			status.addFatalError(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_error_canonical_constructor);
+			return status;
+		}
 
 		ITypeBinding declaringClass= resolveBinding.getDeclaringClass();
 		if (fParameterObjectFactory.getPackage() == null)
