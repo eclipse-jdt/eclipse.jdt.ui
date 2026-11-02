@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2026 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -89,7 +89,9 @@ public class RedundantComparatorFixCore extends CompilationUnitRewriteOperations
 						&& ASTNodes.hasType(methodBinding.getDeclaringClass(), List.class.getCanonicalName())
 						&& ASTNodes.hasType(methodBinding.getParameterTypes()[0], Comparator.class.getCanonicalName())) {
 					List<Expression> args= visited.arguments();
-					return maybeRefactorCode(visited, visited.getExpression(), args.get(0));
+					if (!(args.get(0) instanceof NullLiteral)) {
+						return maybeRefactorCode(visited, visited.getExpression(), args.get(0));
+					}
 				}
 			}
 

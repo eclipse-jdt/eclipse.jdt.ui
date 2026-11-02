@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,11 +15,16 @@
 package org.eclipse.jdt.text.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Iterator;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,16 +44,23 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.text.tests.Accessor;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ISelectionValidator;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
@@ -56,12 +68,17 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -120,17 +137,7 @@ public class MarkOccurrenceTest {
 
 			private void countOccurrences() {
 				synchronized (MarkOccurrenceTest.this) {
-					int occurrences= 0;
-					Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
-					while (iter.hasNext()) {
-						Annotation annotation= iter.next();
-						if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
-							occurrences++;
-						if (OCCURRENCE_WRITE_ANNOTATION.equals(annotation.getType()))
-							occurrences++;
-
-					}
-					fOccurrences= occurrences;
+					fOccurrences= countOccurrenceAnnotations();
 				}
 			}
 		};
@@ -201,6 +208,160 @@ public class MarkOccurrenceTest {
 		} finally {
 			store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", false);
 			store.setValue("REUSE_OPEN_EDITORS", reuseOpenEditors);
+		}
+	}
+
+	@Test
+	public void markOccurrencesAfterCanceledUpdate() throws Exception {
+		assertOccurrencesAfterCanceledUpdate(false);
+	}
+
+	@Test
+	public void markOccurrencesAfterCanceledUpdateWithExistingAnnotations() throws Exception {
+		assertOccurrencesAfterCanceledUpdate(true);
+	}
+
+	private void assertOccurrencesAfterCanceledUpdate(boolean withExistingAnnotations) throws Exception {
+		Accessor editorAccessor= new Accessor(fEditor, JavaEditor.class);
+		ISelectionListenerWithAST occurrencesListener= (ISelectionListenerWithAST) editorAccessor.get("fPostSelectionListenerWithAST");
+		SelectionListenerWithASTManager manager= SelectionListenerWithASTManager.getDefault();
+		manager.removeListener(fEditor, occurrencesListener);
+		try {
+			// Let any earlier callbacks finish, then drive the update and selection
+			// validation explicitly so no background update can mask the regression.
+			EditorTestHelper.joinBackgroundActivities(fEditor);
+			ICompilationUnit unit= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
+			assertNotNull(unit);
+			ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
+			parser.setSource(unit);
+			parser.setResolveBindings(true);
+			CompilationUnit ast= (CompilationUnit) parser.createAST(null);
+			editorAccessor.invoke("removeOccurrenceAnnotations", new Object[0]);
+
+			ISelectionChangedListener selectionListener= (ISelectionChangedListener) new Accessor(fEditor, AbstractTextEditor.class).get("fSelectionListener");
+			ISelectionValidator validator= (ISelectionValidator) fEditor.getSelectionProvider();
+			Class<?>[] parameterTypes= { ITextSelection.class, CompilationUnit.class };
+
+			if (withExistingAnnotations) {
+				IRegion match= fFindReplaceDocumentAdapter.find(0, "fName", true, true, true, false);
+				assertNotNull(match);
+				ITextSelection selection= new TextSelection(fDocument, match.getOffset(), match.getLength());
+				selectionListener.selectionChanged(new SelectionChangedEvent(fEditor.getSelectionProvider(), selection));
+				assertTrue(validator.isValid(selection));
+				editorAccessor.invoke("updateOccurrenceAnnotations", parameterTypes, new Object[] { selection, ast });
+				assertEquals(9, countOccurrenceAnnotations());
+			}
+
+			IRegion match= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
+			assertNotNull(match);
+			ITextSelection selection= new TextSelection(fDocument, match.getOffset(), match.getLength());
+			Object previousAnnotations= editorAccessor.get("fOccurrenceAnnotations");
+			Object previousTargetRegion= editorAccessor.get("fMarkOccurrenceTargetRegion");
+			Object previousModificationStamp= editorAccessor.get("fMarkOccurrenceModificationStamp");
+			// The AST callback arrives before the selection validator has seen this
+			// selection object. The finder must discard this update without caching it.
+			assertFalse(validator.isValid(selection));
+			editorAccessor.invoke("updateOccurrenceAnnotations", parameterTypes, new Object[] { selection, ast });
+			assertEquals(withExistingAnnotations ? 9 : 0, countOccurrenceAnnotations());
+			assertSame(previousAnnotations, editorAccessor.get("fOccurrenceAnnotations"), "Cancellation must preserve the installed annotations");
+			assertSame(previousTargetRegion, editorAccessor.get("fMarkOccurrenceTargetRegion"), "Cancellation must preserve the last successful target region");
+			assertEquals(previousModificationStamp, editorAccessor.get("fMarkOccurrenceModificationStamp"), "Cancellation must preserve the last successful modification stamp");
+
+			selectionListener.selectionChanged(new SelectionChangedEvent(fEditor.getSelectionProvider(), selection));
+			assertTrue(validator.isValid(selection));
+			editorAccessor.invoke("updateOccurrenceAnnotations", parameterTypes, new Object[] { selection, ast });
+			assertEquals(8, countOccurrenceAnnotations(), "A canceled update must allow a valid retry in the same word");
+
+			Object annotations= editorAccessor.get("fOccurrenceAnnotations");
+			editorAccessor.invoke("updateOccurrenceAnnotations", parameterTypes, new Object[] { selection, ast });
+			assertSame(annotations, editorAccessor.get("fOccurrenceAnnotations"), "A successful update should still be cached");
+		} finally {
+			manager.addListener(fEditor, occurrencesListener);
+		}
+	}
+
+	@Test
+	public void markOccurrencesAfterConcurrentRemoval() throws Exception {
+		assertOccurrencesAfterConcurrentRemoval(false);
+	}
+
+	@Test
+	public void markOccurrencesAfterConcurrentRemovalWithExistingAnnotations() throws Exception {
+		assertOccurrencesAfterConcurrentRemoval(true);
+	}
+
+	private void assertOccurrencesAfterConcurrentRemoval(boolean withExistingAnnotations) throws Exception {
+		Accessor editorAccessor= new Accessor(fEditor, JavaEditor.class);
+		ISelectionListenerWithAST occurrencesListener= (ISelectionListenerWithAST) editorAccessor.get("fPostSelectionListenerWithAST");
+		SelectionListenerWithASTManager manager= SelectionListenerWithASTManager.getDefault();
+		manager.removeListener(fEditor, occurrencesListener);
+		try {
+			// Drive updates explicitly so background callbacks cannot restore the
+			// annotations and hide a stale cache left behind by removal.
+			EditorTestHelper.joinBackgroundActivities(fEditor);
+			ICompilationUnit unit= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
+			assertNotNull(unit);
+			ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
+			parser.setSource(unit);
+			parser.setResolveBindings(true);
+			CompilationUnit ast= (CompilationUnit) parser.createAST(null);
+			editorAccessor.invoke("removeOccurrenceAnnotations", new Object[0]);
+
+			ISelectionChangedListener selectionListener= (ISelectionChangedListener) new Accessor(fEditor, AbstractTextEditor.class).get("fSelectionListener");
+			ISelectionValidator validator= (ISelectionValidator) fEditor.getSelectionProvider();
+			Class<?>[] parameterTypes= { ITextSelection.class, CompilationUnit.class };
+
+			if (withExistingAnnotations) {
+				IRegion match= fFindReplaceDocumentAdapter.find(0, "fName", true, true, true, false);
+				assertNotNull(match);
+				ITextSelection selection= new TextSelection(fDocument, match.getOffset(), match.getLength());
+				selectionListener.selectionChanged(new SelectionChangedEvent(fEditor.getSelectionProvider(), selection));
+				assertTrue(validator.isValid(selection));
+				editorAccessor.invoke("updateOccurrenceAnnotations", parameterTypes, new Object[] { selection, ast });
+				assertEquals(9, countOccurrenceAnnotations());
+			}
+
+			IRegion match= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
+			assertNotNull(match);
+			ITextSelection selection= new TextSelection(fDocument, match.getOffset(), match.getLength());
+			selectionListener.selectionChanged(new SelectionChangedEvent(fEditor.getSelectionProvider(), selection));
+			assertTrue(validator.isValid(selection));
+
+			Object lock= editorAccessor.invoke("getLockObject", new Class<?>[] { IAnnotationModel.class }, new Object[] { fAnnotationModel });
+			FutureTask<Void> removal= new FutureTask<>(() -> {
+				editorAccessor.invoke("removeOccurrenceAnnotations", new Object[0]);
+				return null;
+			});
+			Thread removalThread= new Thread(removal, "Remove occurrence annotations");
+			removalThread.setDaemon(true);
+			try {
+				synchronized (lock) {
+					removalThread.start();
+					// Wait for actual lock contention, not an assumed scheduling delay.
+					// Do not dispatch UI events while holding the annotation-model lock.
+					long deadline= System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+					while (removalThread.isAlive() && removalThread.getState() != Thread.State.BLOCKED && System.nanoTime() < deadline)
+						Thread.sleep(1);
+					assertEquals(Thread.State.BLOCKED, removalThread.getState(), "Removal must wait for an in-flight annotation update");
+
+					editorAccessor.invoke("updateOccurrenceAnnotations", parameterTypes, new Object[] { selection, ast });
+					assertEquals(8, countOccurrenceAnnotations());
+				}
+				removal.get(10, TimeUnit.SECONDS);
+			} finally {
+				removalThread.join(10000);
+				assertFalse(removalThread.isAlive(), "The annotation removal thread must finish before editor teardown");
+			}
+
+			assertEquals(0, countOccurrenceAnnotations());
+			assertNull(editorAccessor.get("fOccurrenceAnnotations"));
+			assertNull(editorAccessor.get("fMarkOccurrenceTargetRegion"), "Removal must invalidate the cache published by the in-flight update");
+			assertEquals(Long.valueOf(IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP), editorAccessor.get("fMarkOccurrenceModificationStamp"));
+
+			editorAccessor.invoke("updateOccurrenceAnnotations", parameterTypes, new Object[] { selection, ast });
+			assertEquals(8, countOccurrenceAnnotations(), "A selection in the same word must restore annotations after removal");
+		} finally {
+			manager.addListener(fEditor, occurrencesListener);
 		}
 	}
 
@@ -358,19 +519,31 @@ public class MarkOccurrenceTest {
 		return null;
 	}
 
+	private int countOccurrenceAnnotations() {
+		int occurrences= 0;
+		Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
+		while (iter.hasNext()) {
+			Annotation annotation= iter.next();
+			if (OCCURRENCE_ANNOTATION.equals(annotation.getType()) || OCCURRENCE_WRITE_ANNOTATION.equals(annotation.getType()))
+				occurrences++;
+		}
+		return occurrences;
+	}
+
 	private void assertOccurrences(final int expected) {
 		DisplayHelper helper= new DisplayHelper() {
 			@Override
 			protected boolean condition() {
 				synchronized (MarkOccurrenceTest.this) {
-					if (fOccurrences != -1) {
-						assertEquals(expected, fOccurrences);
-						return true;
-					}
-					return false;
+					// Even when expecting no annotations, first wait for a matching AST callback.
+					if (fOccurrences == -1)
+						return false;
+					fOccurrences= countOccurrenceAnnotations();
+					return fOccurrences == expected;
 				}
 			}
 		};
-		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 80000));
+		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 80000),
+				() -> "Expected " + expected + " occurrence annotations, last count: " + fOccurrences);
 	}
 }

@@ -1102,7 +1102,7 @@ public class JavadocView extends AbstractInfoView {
 		if (buffer.length() == 0)
 			return null;
 
-		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, JavaElementLinks.modifyCssStyleSheet(fgStyleSheet, buffer));
+		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, JavadocHover.substituteJavaSyntaxColors(JavaElementLinks.modifyCssStyleSheet(fgStyleSheet, buffer)));
 		if (base != null) {
 			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 			buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$

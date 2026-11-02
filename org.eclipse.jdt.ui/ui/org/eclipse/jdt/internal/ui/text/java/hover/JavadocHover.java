@@ -50,6 +50,8 @@ import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -123,6 +125,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -130,6 +133,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
@@ -1091,8 +1095,57 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			css= HTMLPrinter.convertTopLevelFont(css, fontData);
 		}
 		css= JavaElementLinks.modifyCssStyleSheet(css, content);
+		css= substituteJavaSyntaxColors(css);
 
 		return css;
+	}
+
+	private static final String CSS_PLACEHOLDER_JC_KEYWORD= "jc_keyword_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_STRING= "jc_string_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_COMMENT= "jc_comment_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_ANNOTATION= "jc_annotation_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_TYPE= "jc_type_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_METHOD_DECL= "jc_method_decl_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_METHOD= "jc_method_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_PARAM= "jc_param_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_LOCAL_VAR_DECL= "jc_local_var_decl_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_LOCAL_VAR= "jc_local_var_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_NUMBER= "jc_number_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_TYPE_ARG= "jc_type_arg_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_FIELD= "jc_field_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_STATIC_FIELD= "jc_static_field_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_STATIC_FINAL_FIELD= "jc_static_final_field_color"; //$NON-NLS-1$
+	private static final String CSS_PLACEHOLDER_JC_ENUM= "jc_enum_color"; //$NON-NLS-1$
+
+	private static String semanticColorKey(String highlightingKey) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX
+				+ highlightingKey
+				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_COLOR_SUFFIX;
+	}
+
+	public static String substituteJavaSyntaxColors(String css) {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		css= css.replace(CSS_PLACEHOLDER_JC_KEYWORD, getCssColor(PreferenceConverter.getColor(store, IJavaColorConstants.JAVA_KEYWORD)));
+		css= css.replace(CSS_PLACEHOLDER_JC_STRING, getCssColor(PreferenceConverter.getColor(store, IJavaColorConstants.JAVA_STRING)));
+		css= css.replace(CSS_PLACEHOLDER_JC_COMMENT, getCssColor(PreferenceConverter.getColor(store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT)));
+		css= css.replace(CSS_PLACEHOLDER_JC_ANNOTATION, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.ANNOTATION))));
+		css= css.replace(CSS_PLACEHOLDER_JC_TYPE, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.CLASS))));
+		css= css.replace(CSS_PLACEHOLDER_JC_METHOD_DECL, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.METHOD_DECLARATION))));
+		css= css.replace(CSS_PLACEHOLDER_JC_METHOD, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.METHOD))));
+		css= css.replace(CSS_PLACEHOLDER_JC_PARAM, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.PARAMETER_VARIABLE))));
+		css= css.replace(CSS_PLACEHOLDER_JC_LOCAL_VAR_DECL, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.LOCAL_VARIABLE_DECLARATION))));
+		css= css.replace(CSS_PLACEHOLDER_JC_LOCAL_VAR, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.LOCAL_VARIABLE))));
+		css= css.replace(CSS_PLACEHOLDER_JC_NUMBER, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.NUMBER))));
+		css= css.replace(CSS_PLACEHOLDER_JC_TYPE_ARG, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.TYPE_ARGUMENT))));
+		css= css.replace(CSS_PLACEHOLDER_JC_STATIC_FINAL_FIELD, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.STATIC_FINAL_FIELD))));
+		css= css.replace(CSS_PLACEHOLDER_JC_STATIC_FIELD, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.STATIC_FIELD))));
+		css= css.replace(CSS_PLACEHOLDER_JC_FIELD, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.FIELD))));
+		css= css.replace(CSS_PLACEHOLDER_JC_ENUM, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.ENUM))));
+		return css;
+	}
+
+	private static String getCssColor(RGB color) {
+		return "rgb(" + color.red + ", " + color.green + ", " + color.blue + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	/**

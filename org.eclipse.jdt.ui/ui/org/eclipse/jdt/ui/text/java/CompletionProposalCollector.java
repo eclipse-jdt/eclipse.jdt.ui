@@ -112,6 +112,11 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	/** Triggers for variables. Do not modify. */
 	protected final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';', '.' };
 
+	private static final Set<String> KEYWORDS_NEEDING_TRAILING_SPACE = Set.of("public", "private", "protected", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"static", "void", "class",  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"interface", "extends", "implements", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"return", "new", "import"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
 	private final CompletionProposalLabelProvider fLabelProvider= new CompletionProposalLabelProvider();
 	private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 
@@ -443,6 +448,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	protected IJavaCompletionProposal createJavaCompletionProposal(CompletionProposal proposal) {
 		switch (proposal.getKind()) {
 			case CompletionProposal.KEYWORD:
+
 				return createKeywordProposal(proposal);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposal(proposal);
@@ -807,6 +813,9 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
+		if(KEYWORDS_NEEDING_TRAILING_SPACE.contains(completion)) {
+			completion = completion + " "; //$NON-NLS-1$
+		}
 		StyledString label= fLabelProvider.createSimpleLabel(proposal);
 		int relevance= computeRelevance(proposal);
 		return new JavaCompletionProposal(completion, start, length, null, label, relevance);

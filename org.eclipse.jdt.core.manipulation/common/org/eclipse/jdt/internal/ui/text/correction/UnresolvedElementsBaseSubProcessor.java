@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024, 2025 IBM Corporation and others.
+ * Copyright (c) 2024, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -155,6 +155,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.SwapDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.MapOfToOfEntriesProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAbstractMethodCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAnnotationMemberProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposalCore;
@@ -209,6 +210,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	protected static final int ArrayAccessProposal2= 2301;
 	protected static final int AnnotationMemberProposal1= 2400;
 	protected static final int AnnotationMemberProposal2= 2401;
+	protected static final int ChangeMethodCall1= 2500;
 
 	protected UnresolvedElementsBaseSubProcessor() {
 	}
@@ -1785,6 +1787,15 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			} else {
 				doMoreArguments(context, invocationNode, arguments, argTypes, elem, proposals);
 			}
+		}
+		doChangeMethodCall(context, invocationNode, arguments, proposals);
+	}
+
+	private void doChangeMethodCall(IInvocationContext context, ASTNode invocationNode, List<Expression> arguments, Collection<T> proposals) {
+		String label= CorrectionMessages.UnresolvedElementsSubProcessor_changeMethodCallMapOfToOfEntries_description;
+		MapOfToOfEntriesProposalCore proposal= new MapOfToOfEntriesProposalCore(label, context.getCompilationUnit(), invocationNode, arguments, IProposalRelevance.REMOVE_ARGUMENTS);
+		if (proposal.hasProposal()) {
+			proposals.add(linkedProposalToT(proposal, ChangeMethodCall1));
 		}
 	}
 

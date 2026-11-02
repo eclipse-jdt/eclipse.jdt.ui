@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.FileTransfer;
@@ -355,6 +356,8 @@ public class PasteAction extends SelectionDispatchAction{
 	}
 
 	private static class TextPaster extends Paster {
+
+		private static final String VOID_MAIN_CHECK= "\\bvoid\\s+main\\s*\\(\\s*\\)"; //$NON-NLS-1$
 
 		private static class ParsedCu {
 			private final String fText;
@@ -815,7 +818,7 @@ public class PasteAction extends SelectionDispatchAction{
 							return cu;
 
 						} else if (kind == ASTParser.K_CLASS_BODY_DECLARATIONS || kind == ASTParser.K_STATEMENTS) {
-							return pasteBodyDeclsOrStatements(destinationPack, parsedText, kind, Progress.subMonitor(pm, 2));
+							return pasteBodyDeclsOrStatements(destinationPack, parsedText, kind, Progress.subMonitor(pm, 2),implicitType);
 						} else {
 							throw new IllegalStateException("Unexpected kind: " + kind); //$NON-NLS-1$
 						}
@@ -824,7 +827,8 @@ public class PasteAction extends SelectionDispatchAction{
 					}
 				}
 
-				private ICompilationUnit pasteBodyDeclsOrStatements(IPackageFragment destinationPack, String parsedText, int kind, IProgressMonitor pm) throws CoreException, JavaModelException {
+				private ICompilationUnit pasteBodyDeclsOrStatements(IPackageFragment destinationPack, String parsedText, int kind, IProgressMonitor pm, boolean isImplicit)
+						throws CoreException, JavaModelException {
 					ICompilationUnit cu;
 					IType type;
 					String typeName;
@@ -852,7 +856,7 @@ public class PasteAction extends SelectionDispatchAction{
 							AbstractTypeDeclaration typeDecl= type.exists() ? ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, cuNode) : null;
 							MethodDeclaration methodDecl= fDestinationMethod != null ? ASTNodeSearchUtil.getMethodDeclarationNode(fDestinationMethod, cuNode) : null;
 
-							ITrackedNodePosition textPosition= createOrFillTypeDeclaration(cuNode, document, cu, typeDecl, typeName, methodDecl, kind, parsedText);
+							ITrackedNodePosition textPosition= createOrFillTypeDeclaration(cuNode, document, cu, typeDecl, typeName, methodDecl, kind, parsedText, isImplicit);
 							EditorUtility.revealInEditor(editorPart[0], textPosition.getStartPosition() + textPosition.getLength(), 0);
 							// leave unsaved
 						} finally {
@@ -876,7 +880,7 @@ public class PasteAction extends SelectionDispatchAction{
 						parser.setStatementsRecovery(true);
 						CompilationUnit cuNode= (CompilationUnit) parser.createAST(pm);
 
-						ITrackedNodePosition textPosition= createOrFillTypeDeclaration(cuNode, document, cu, null, typeName, null, kind, parsedText);
+						ITrackedNodePosition textPosition= createOrFillTypeDeclaration(cuNode, document, cu, null, typeName, null, kind, parsedText, isImplicit);
 						destinationPack.createCompilationUnit(cu.getElementName(), document.get(), false, null);
 						editorPart[0]= openCu(cu);
 						EditorUtility.revealInEditor(editorPart[0], textPosition.getStartPosition() + textPosition.getLength(), 0);
@@ -892,21 +896,30 @@ public class PasteAction extends SelectionDispatchAction{
 						String typeName,
 						MethodDeclaration methodDecl,
 						int kind,
-						String parsedText) throws CoreException {
+						String parsedText, boolean isImplicit) throws CoreException {
 
 					AST ast= cuNode.getAST();
 					ASTRewrite rewrite= ASTRewrite.create(ast);
 					String delim= StubUtility.getLineDelimiterUsed(cu);
 
 					if (typeDecl == null) {
-						typeDecl= ast.newTypeDeclaration();
-						typeDecl.getName().setIdentifier(typeName);
+						if (isImplicit && hasInstanceMainMethod(parsedText) && JavaModelUtil.is25OrHigher(cu.getJavaProject())) {
+							typeDecl= ast.newImplicitTypeDeclaration();
+							PackageDeclaration packageDecl= cuNode.getPackage();
+							if (packageDecl != null) {
+								rewrite.remove(packageDecl, null);
+							}
+						} else {
+							typeDecl= ast.newTypeDeclaration();
+							typeDecl.getName().setIdentifier(typeName);
+							typeDecl.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
+						}
+
 						if (StubUtility.doAddComments(cu.getJavaProject())) {
 							String typeComment= CodeGeneration.getTypeComment(cu, typeName, delim);
 							if (typeComment != null)
 								typeDecl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(typeComment, ASTNode.JAVADOC));
 						}
-						typeDecl.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 
 						String typeBody= CodeGeneration.getTypeBody(CodeGeneration.CLASS_BODY_TEMPLATE_ID, cu, typeName, delim);
 						if (typeBody != null) {
@@ -967,6 +980,11 @@ public class PasteAction extends SelectionDispatchAction{
 							((IDocumentExtension4) document).stopRewriteSession(rewriteSession);
 					}
 					return null;
+				}
+
+				private boolean hasInstanceMainMethod(String sourceCode) {
+					Pattern pattern= Pattern.compile(VOID_MAIN_CHECK);
+					return pattern.matcher(sourceCode).find();
 				}
 
 				private IPackageFragmentRoot createNewProject(IProgressMonitor pm) throws CoreException {

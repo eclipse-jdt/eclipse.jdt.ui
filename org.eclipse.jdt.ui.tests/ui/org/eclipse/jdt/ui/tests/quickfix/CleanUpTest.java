@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15969,6 +15969,13 @@ public class CleanUpTest extends CleanUpTestCase {
 
 			        return listToSort;
 			    }
+
+			    public List<Date> doNotRefactoreListWithNullComparator(List<Date> listToSort) {
+			        // Keep this comment
+			        listToSort.sort(null).reversed();
+
+			        return listToSort;
+			    }
 			}
 			""";
 
@@ -16087,6 +16094,13 @@ public class CleanUpTest extends CleanUpTestCase {
 			    public List<Date> refactoreSortedList(List<Date> listToSort) {
 			        // Keep this comment
 			        Collections.sort(listToSort);
+
+			        return listToSort;
+			    }
+
+			    public List<Date> doNotRefactoreListWithNullComparator(List<Date> listToSort) {
+			        // Keep this comment
+			        listToSort.sort(null).reversed();
 
 			        return listToSort;
 			    }

@@ -37,6 +37,7 @@ import org.eclipse.jdt.ui.tests.dialogs.FilteredTypesSelectionDialogTests;
 import org.eclipse.jdt.ui.tests.editor.ClassFileEditorTests;
 import org.eclipse.jdt.ui.tests.editor.ClassFileInputTests;
 import org.eclipse.jdt.ui.tests.editor.MarkdownTypingTest;
+import org.eclipse.jdt.ui.tests.hover.JavaCodeTokenizerTest;
 import org.eclipse.jdt.ui.tests.hover.JavadocHoverTests;
 import org.eclipse.jdt.ui.tests.hover.MarkdownCommentTests;
 import org.eclipse.jdt.ui.tests.hover.PackageJavadocTests;
@@ -91,6 +92,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	PackageJavadocTests.class,
 	JavadocHoverTests.class,
 	MarkdownCommentTests.class,
+	JavaCodeTokenizerTest.class,
 	SmokeViewsTest.class,
 	ClassFileInputTests.class,
 	ClassFileEditorTests.class,

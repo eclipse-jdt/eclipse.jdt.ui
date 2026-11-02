@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -572,7 +572,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				}
 				try {
 					fOperationTarget.doOperation(fOperationCode);
-					if (!targetIsInString()) {
+					if (importsAllowed()) {
 						addImports((ICompilationUnit)inputElement, importsData);
 					}
 				} catch (CoreException e) {
@@ -590,23 +590,32 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 	}
 
-	private boolean targetIsInString() {
+	private boolean importsAllowed() {
 		ITextEditor editor= getTextEditor();
 		IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 		if (document != null) {
-			int offset= ((ITextSelection)editor.getSelectionProvider().getSelection()).getOffset();
+			int offset= ((ITextSelection) editor.getSelectionProvider().getSelection()).getOffset();
 			try {
 				IDocumentExtension3 extension= (IDocumentExtension3) document;
-			    ITypedRegion region= extension.getPartition(IJavaPartitions.JAVA_PARTITIONING, offset, false);
+				ITypedRegion region= extension.getPartition(IJavaPartitions.JAVA_PARTITIONING, offset, false);
 				String partitionType= region.getType();
-				if (partitionType.equals(IJavaPartitions.JAVA_STRING) ||
-						partitionType.equals(IJavaPartitions.JAVA_MULTI_LINE_STRING)) {
-					return true;
-				}
+				return !isString(partitionType) && !isComment(partitionType);
 			} catch (BadLocationException | BadPartitioningException e) {
 			}
 		}
 		return false;
+	}
+
+	private boolean isString(String partitionType) {
+		return partitionType.equals(IJavaPartitions.JAVA_STRING) ||
+				partitionType.equals(IJavaPartitions.JAVA_MULTI_LINE_STRING);
+	}
+
+	private boolean isComment(String partitionType) {
+		return partitionType.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT) ||
+				partitionType.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) ||
+				partitionType.equals(IJavaPartitions.JAVA_DOC) ||
+				partitionType.equals(IJavaPartitions.JAVA_MARKDOWN_COMMENT);
 	}
 
 	private void addImports(final ICompilationUnit unit, ClipboardData data) throws CoreException {

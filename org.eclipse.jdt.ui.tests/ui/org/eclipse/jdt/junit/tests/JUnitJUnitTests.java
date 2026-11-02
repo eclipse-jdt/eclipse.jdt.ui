@@ -27,6 +27,7 @@ import org.junit.platform.suite.api.Suite;
 TestEnableAssertions.class,
 TestPriorization.class,
 TestTestSearchEngine.class,
+JUnitLaunchConfigurationTabTest.class,
 TestExecutionTiming.class,
 TestExecutionTimingProtocol.class,
 
@@ -53,6 +54,7 @@ JUnit4TestFinderTest16.class,
 JUnit5TestFinderJupiterTest.class,
 JUnit6TestFinderJupiterTest.class,
 JUnitStandaloneDetectionTest.class,
+JUnitRenameParticipantTest.class,
 
 JUnitQuickAssistTest.class,
 EnumSourceFilterTest.class,

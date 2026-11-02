@@ -169,7 +169,18 @@ public class TypeMismatchSubProcessor extends TypeMismatchBaseSubProcessor<IComm
 	@Override
 	protected ICommandAccess createChangeMethodSignatureProposal(String label, ICompilationUnit cu, CompilationUnit astRoot, IMethodBinding methodDeclBinding, ChangeDescription[] paramChanges,
 			ChangeDescription[] changes, int relevance) {
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
+		Image image;
+		switch (relevance) {
+		case IProposalRelevance.ADD_EXCEPTIONS:
+			image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+			break;
+		case IProposalRelevance.REMOVE_EXCEPTIONS:
+			image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
+			break;
+		default:
+			image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			break;
+		}
 		return new ChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, relevance, image);
 	}
 

@@ -90,5 +90,6 @@ Import-Package: org.commonmark;version="0.24.0",
  org.commonmark.ext.gfm.tables;version="0.24.0",
  org.commonmark.node;version="0.24.0",
  org.commonmark.parser;version="0.24.0",
+ org.commonmark.renderer;version="0.24.0",
  org.commonmark.renderer.html;version="0.24.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-25
