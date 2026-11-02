@@ -442,6 +442,13 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, enablePreviews, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
 		} else {
 			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
+			if(!JavaCore.isVersionLTS(requiredVersion)) {
+				String nextLTS = JavaCore.getNextLTS(requiredVersion);
+				if(nextLTS != null) {
+					String label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description_lts, nextLTS);
+					proposals.add(new ChangeToRequiredCompilerCompliance(label2, project, false, nextLTS, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
+				}
+			}
 		}
 
 
