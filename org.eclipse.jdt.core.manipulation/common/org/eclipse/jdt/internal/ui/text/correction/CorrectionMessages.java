@@ -105,6 +105,7 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_move_cpentry_mpentry_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_classfolder_description;
 	public static String ReorgCorrectionsSubProcessor_change_project_compliance_description;
+	public static String ReorgCorrectionsSubProcessor_change_project_compliance_description_lts;
 	public static String ReorgCorrectionsSubProcessor_change_workspace_compliance_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_variable_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_library_description;
