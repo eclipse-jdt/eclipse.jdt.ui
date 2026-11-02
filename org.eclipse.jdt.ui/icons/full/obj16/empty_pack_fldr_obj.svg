@@ -122,16 +122,6 @@
          d="m 15.220116,1051.2669 0,1 -5,0 0,5 -0.9999997,0 0,1 0.9999997,0 0,5 5,0 0,1 1,0 0,-1 5,0 0,-5 1,0 0,-1 -1,0 0,-5 -5,0 0,-1 -1,0 z"
          id="path5104" />
     </mask>
-    <filter
-       id="filter5106"
-       x="-0.24353145"
-       width="1.4870432"
-       y="-0.40887116"
-       height="1.8232974">
-      <feGaussianBlur
-         stdDeviation="0.59880184"
-         id="feGaussianBlur5108" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -233,7 +223,7 @@
          mask="url(#mask5102)">
         <g
            id="g4987"
-           style="filter:url(#filter5106);stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none">
+           style="stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none">
           <path
              style="fill:#ffffff;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;display:inline;stroke-miterlimit:4;stroke-dasharray:none"
              d="m 14.738757,1061.753 0,-2.9835 c 0,-0.723 0.30837,-1.0403 0.822507,-1.0403 0.430028,0 0.520145,-0.9365 0.841842,-0.9365 l 1.452911,0 c 0.641386,0 0.423649,0.9888 0.832594,0.9888 l 3.032826,0 c 0.515862,0 1.024752,0.4466 1.024752,1.0248 l 0,2.9693 c 0,0.5312 -0.334077,0.9764 -0.976415,0.9764 l -6.058745,0 c -0.471088,0 -0.972272,-0.4831 -0.972272,-0.999 z"

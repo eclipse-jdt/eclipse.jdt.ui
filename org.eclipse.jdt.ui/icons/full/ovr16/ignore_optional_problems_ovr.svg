@@ -13,16 +13,6 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
-    <filter
-       id="filter3844"
-       x="-0.24374368"
-       width="1.4874874"
-       y="-0.24374368"
-       height="1.4874874">
-      <feGaussianBlur
-         stdDeviation="0.30304577"
-         id="feGaussianBlur3846" />
-    </filter>
     <mask
        maskUnits="userSpaceOnUse"
        id="mask3871">
@@ -57,7 +47,7 @@
        id="g3866"
        mask="url(#mask3871)">
       <g
-         style="stroke:#b9d6e6;stroke-width:1.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter3844)"
+         style="stroke:#b9d6e6;stroke-width:1.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
          id="g3812-4"
          transform="translate(-4,0)">
         <path

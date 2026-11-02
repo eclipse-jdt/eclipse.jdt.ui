@@ -55,28 +55,6 @@
         </g>
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter23785"
-       x="-0.17257659"
-       width="1.3451532"
-       y="-0.54425376"
-       height="2.0885014">
-      <feGaussianBlur
-         stdDeviation="0.29994222"
-         id="feGaussianBlur23787" />
-    </filter>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter23789"
-       x="-0.16951745"
-       y="-0.19988162"
-       width="1.3667096"
-       height="1.3997632">
-      <feGaussianBlur
-         stdDeviation="0.36307185"
-         id="feGaussianBlur23791" />
-    </filter>
     <linearGradient
        gradientUnits="userSpaceOnUse"
        y2="1051.8378"
@@ -193,9 +171,9 @@
          transform="translate(0,1036.3622)"
          id="path22855"
          d="M 15.46796,6.5203501 14.517785,8.5311849 12.462756,5.4375929 10.451922,8.5753791 8.485281,5.5259813 6.5407374,8.5974762 5.5021744,6.5424472"
-         style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter23785)" />
+         style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
       <g
-         style="fill:#ffffff;stroke:#ffffff;stroke-width:2.42094517;stroke-miterlimit:4;stroke-dasharray:none;display:inline;filter:url(#filter23789)"
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:2.42094517;stroke-miterlimit:4;stroke-dasharray:none;display:inline"
          id="layer1-4-3"
          transform="matrix(0.8261236,0,0,0.8261236,-0.70848051,186.15135)">
         <g

@@ -174,26 +174,6 @@
          style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dashoffset:0;display:inline"
          mask="none" />
     </mask>
-    <filter
-       id="filter7162"
-       x="-0.4635984"
-       width="1.9271743"
-       y="-0.27061479"
-       height="1.5412469">
-      <feGaussianBlur
-         stdDeviation="0.46365488"
-         id="feGaussianBlur7164" />
-    </filter>
-    <filter
-       id="filter7166"
-       x="-0.24062459"
-       width="1.4812492"
-       y="-0.54541574"
-       height="2.0908315">
-      <feGaussianBlur
-         stdDeviation="0.48724077"
-         id="feGaussianBlur7168" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -251,7 +231,7 @@
              height="3.9774756"
              width="9.0156116"
              id="rect7002-6"
-             style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;filter:url(#filter7166);opacity:0.75000000000000000" />
+             style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;opacity:0.75000000000000000" />
         </g>
         <rect
            style="fill:url(#linearGradient7010);fill-opacity:1;stroke:url(#linearGradient7018);stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
@@ -264,7 +244,7 @@
            id="g7152"
            mask="url(#mask7158)">
           <path
-             style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;display:inline;filter:url(#filter7162);stroke-miterlimit:4;stroke-dasharray:none;opacity:0.75"
+             style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;display:inline;stroke-miterlimit:4;stroke-dasharray:none;opacity:0.75"
              d="m 5.402947,1046.1289 4.55733,4.3963 -1.749278,0.3912 1.234948,2.3294 -0.340753,0.6749 -0.852566,0.015 -1.308734,-2.451 -1.517929,1.1082 z"
              id="path7154" />
         </g>

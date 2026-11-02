@@ -199,16 +199,6 @@
            id="path5167" />
       </g>
     </mask>
-    <filter
-       id="filter5173"
-       x="-0.21382331"
-       width="1.4528989"
-       y="-0.2632788"
-       height="1.5266017">
-      <feGaussianBlur
-         stdDeviation="0.75686893"
-         id="feGaussianBlur5175" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -257,7 +247,7 @@
          mask="url(#mask5159)">
         <g
            id="g5148"
-           style="filter:url(#filter5173)">
+          >
           <g
              transform="matrix(1.1300143,0,0,-1.1300143,-15.696637,2241.9533)"
              id="layer1-7-1-9"

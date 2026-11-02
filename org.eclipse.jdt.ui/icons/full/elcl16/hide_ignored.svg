@@ -260,16 +260,6 @@
          d="m 25.51938,1037.8597 6.947169,0 3.062057,3.0066 0,9.9546 -10.009226,0 z"
          style="fill:#ffffff;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dashoffset:0;display:inline" />
     </mask>
-    <filter
-       id="filter10686"
-       x="-0.18"
-       width="1.36"
-       y="-0.18"
-       height="1.36">
-      <feGaussianBlur
-         stdDeviation="0.675"
-         id="feGaussianBlur10688" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -376,7 +366,7 @@
         <g
            transform="translate(9.000002,1.7087)"
            id="g9721-1"
-           style="opacity:0.5;fill:#000000;display:inline;filter:url(#filter10686)">
+           style="opacity:0.5;fill:#000000;display:inline">
           <path
              id="rect3997-9-1-1-2-0"
              d="m 14.968749,1038.7998 7.227343,0 0.02265,7.2188 -7.227343,0 z"

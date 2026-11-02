@@ -199,17 +199,6 @@
         </g>
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter8947"
-       x="-0.4391544"
-       width="1.8783088"
-       y="-0.26583327"
-       height="1.5309078">
-      <feGaussianBlur
-         stdDeviation="0.98049407"
-         id="feGaussianBlur8949" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient5965"
        id="linearGradient5897"
@@ -484,17 +473,6 @@
         </g>
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter27416"
-       x="-0.26556283"
-       width="1.5588003"
-       y="-0.30057582"
-       height="1.6011516">
-      <feGaussianBlur
-         stdDeviation="0.66094775"
-         id="feGaussianBlur27418" />
-    </filter>
   </defs>
   <metadata
      id="metadata3151">
@@ -600,7 +578,7 @@
        transform="translate(0.9722718,1.0164655)">
       <g
          id="g8919"
-         style="opacity:0.75;filter:url(#filter8947)">
+         style="opacity:0.75">
         <path
            d="m 11.643464,1039.4096 c 0,0 0.990421,-0.074 0.990421,0.6682 l 0,2.9207 -5.268116,-0.011 0,-2.1262 0,-1.0528 c 0,-0.6447 0.297209,-1.0949 1.10178,-1.0813 l 0.45225,0 c 1.074957,0 1.827518,-0.1549 1.827518,0.6733 z"
            style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
@@ -768,7 +746,7 @@
        transform="translate(0,-3.4524892e-5)"
        id="g27333"
        mask="url(#mask27340)"
-       style="stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;display:inline;filter:url(#filter27416)">
+       style="stroke:#ffffff;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;display:inline">
       <g
          transform="matrix(0.8261236,0,0,0.8261236,-0.575898,186.9468)"
          id="layer1-4-6"

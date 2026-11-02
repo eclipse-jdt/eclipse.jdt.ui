@@ -141,16 +141,6 @@
            transform="scale(1,-1)" />
       </g>
     </mask>
-    <filter
-       id="filter4003"
-       x="-0.22124156"
-       width="1.4689365"
-       y="-0.2552503"
-       height="1.5105009">
-      <feGaussianBlur
-         stdDeviation="0.65774696"
-         id="feGaussianBlur4005" />
-    </filter>
   </defs>
   <metadata
      id="metadata4228">
@@ -207,7 +197,7 @@
        id="g3986"
        mask="url(#mask3991)">
       <g
-         style="fill:#ffffff;stroke:#ffffff;filter:url(#filter4003);opacity:0.75"
+         style="fill:#ffffff;stroke:#ffffff;opacity:0.75"
          id="g3866-5">
         <path
            style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;display:inline"

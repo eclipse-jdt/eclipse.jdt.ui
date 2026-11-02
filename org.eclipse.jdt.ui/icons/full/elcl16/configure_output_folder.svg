@@ -55,17 +55,6 @@
            style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter19457"
-       x="-0.3241778"
-       width="1.6760303"
-       y="-0.36202789"
-       height="1.7240558">
-      <feGaussianBlur
-         stdDeviation="1.0667455"
-         id="feGaussianBlur19459" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient51104"
        id="linearGradient50313"
@@ -179,17 +168,6 @@
            style="fill:#ffffff;stroke:#ffffff;stroke-width:0.86318785;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter51442"
-       x="-0.25315592"
-       width="1.5063078"
-       y="-0.33135284"
-       height="1.6627057">
-      <feGaussianBlur
-         stdDeviation="0.70077937"
-         id="feGaussianBlur51444" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient51096"
        id="linearGradient51102"
@@ -259,17 +237,6 @@
            style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;display:inline" />
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter51287"
-       x="-0.34528467"
-       width="1.6905985"
-       y="-0.36202789"
-       height="1.7240558">
-      <feGaussianBlur
-         stdDeviation="1.0667455"
-         id="feGaussianBlur51289" />
-    </filter>
   </defs>
   <metadata
      id="metadata7">
@@ -294,7 +261,7 @@
       <g
          transform="matrix(0.8261236,0,0,0.8261236,-0.575898,186.9468)"
          id="layer1-4-8"
-         style="fill:#ffffff;stroke:#ffffff;stroke-width:2.42094517;stroke-miterlimit:4;stroke-dasharray:none;display:inline;filter:url(#filter19457)">
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:2.42094517;stroke-miterlimit:4;stroke-dasharray:none;display:inline">
         <g
            style="fill:#ffffff;stroke:#ffffff;stroke-width:2.00652146;stroke-miterlimit:4;stroke-dasharray:none"
            id="g17594-9"
@@ -340,7 +307,7 @@
       <path
          id="path50315-7"
          d="m 10.5625,1043.831 -0.0625,2.0312 -5.5,0 0,3.9688 5.5,0 0.0625,2.0937 0.875,0 4.15625,-4.0312 -4.0625,-4.0625 z"
-         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;filter:url(#filter51442)" />
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
     </g>
     <path
        style="fill:url(#linearGradient51102);fill-opacity:1;stroke:url(#linearGradient51094);stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;display:inline"
@@ -354,7 +321,7 @@
       <g
          transform="matrix(0.8261236,0,0,0.8261236,-0.575898,186.9468)"
          id="layer1-4-1"
-         style="fill:#ffffff;stroke:#ffffff;stroke-width:2.42094517;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;display:inline;filter:url(#filter51287)">
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:2.42094517;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;display:inline">
         <g
            style="fill:#ffffff;stroke:#ffffff;stroke-width:2.00652146;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
            id="g17594-4"

@@ -14,17 +14,6 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter8104"
-       x="-0.068571429"
-       y="-0.053333333"
-       width="1.1371429"
-       height="1.1066667">
-      <feGaussianBlur
-         stdDeviation="0.15625"
-         id="feGaussianBlur8106" />
-    </filter>
     <linearGradient
        id="linearGradient10798-1-9-3-7-6-8-9-0-9-1">
       <stop
@@ -127,7 +116,7 @@
          style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
     </g>
     <g
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.5;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;filter:url(#filter8104);font-family:Sans"
+       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.5;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
        id="g8046-4"
        transform="translate(-4.7454053,8.139093)">
       <rect

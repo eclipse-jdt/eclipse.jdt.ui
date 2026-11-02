@@ -271,17 +271,6 @@
        y1="1285.8445"
        x2="37.947941"
        y2="1285.8445" />
-    <filter
-       height="1.0954513"
-       y="-0.047725668"
-       width="1.0967932"
-       x="-0.048396592"
-       id="filter4285-9-8"
-       style="color-interpolation-filters:sRGB">
-      <feGaussianBlur
-         id="feGaussianBlur4287-9-5"
-         stdDeviation="0.10000000000000001" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient5517"
        id="linearGradient4314"
@@ -445,7 +434,7 @@
          id="path4569" />
     </g>
     <path
-       style="display:inline;opacity:0.9;fill:#ffffff;fill-opacity:0.81584156;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;filter:url(#filter4285-9-8)"
+       style="display:inline;opacity:0.9;fill:#ffffff;fill-opacity:0.81584156;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none"
        id="path4252-6-0"
        d="m 2.2999628,1043.3702 1.9823895,-2.1047 -1.6734053,-2.5419 2.1987064,2.0209 2.4513363,-1.6427 -2.0383649,2.1623 1.7419712,2.4882 -2.2030799,-2.0431 z"
        transform="matrix(-0.82539295,1.4154894,-1.2829533,-1.0100615,1351.1431,2086.0361)" />

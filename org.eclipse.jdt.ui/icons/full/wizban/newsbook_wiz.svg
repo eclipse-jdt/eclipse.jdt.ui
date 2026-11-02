@@ -195,28 +195,6 @@
          offset="1"
          id="stop4262" />
     </linearGradient>
-    <filter
-       height="1.0954513"
-       y="-0.047725668"
-       width="1.0967932"
-       x="-0.048396592"
-       id="filter4285-9"
-       style="color-interpolation-filters:sRGB">
-      <feGaussianBlur
-         id="feGaussianBlur4287-9"
-         stdDeviation="0.10000000000000001" />
-    </filter>
-    <filter
-       style="color-interpolation-filters:sRGB"
-       id="filter5097"
-       x="-0.053063725"
-       width="1.1061275"
-       y="-0.16582764"
-       height="1.3316553">
-      <feGaussianBlur
-         stdDeviation="1.1055176"
-         id="feGaussianBlur5099" />
-    </filter>
     <linearGradient
        xlink:href="#linearGradient4540"
        id="linearGradient4577"
@@ -392,7 +370,7 @@
     <path
        id="rect4001-3-4-5"
        d="m 61.725004,1022.8099 21.27431,-0.1009 1.654984,3.7793 -20.678174,12.1198 -29.322882,0.1009 z"
-       style="display:inline;opacity:0.28999999;fill:#ffffff;fill-opacity:0.25227966;stroke:none;filter:url(#filter5097)"
+       style="display:inline;opacity:0.28999999;fill:#ffffff;fill-opacity:0.25227966;stroke:none"
        transform="matrix(0.81385308,0,0,0.61823795,-10.043298,397.55254)" />
     <g
        transform="matrix(0.92787456,0,0,0.92766861,-334.80763,585.97703)"
@@ -451,7 +429,7 @@
        d="m 28.420599,1039.3966 c 1.750208,-2.287 3.860773,-5.2127 2.296472,-10.2113 3.599609,1.953 7.329267,0.9171 7.329267,0.9171 0,4.6667 -5.906544,9.5142 -9.625739,9.2942 z"
        style="display:inline;fill:url(#linearGradient4264);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     <path
-       style="display:inline;opacity:0.9;fill:#ffffff;fill-opacity:0.81584156;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;filter:url(#filter4285-9)"
+       style="display:inline;opacity:0.9;fill:#ffffff;fill-opacity:0.81584156;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none"
        id="path4252-6"
        d="m 2.2999628,1043.3702 1.9823895,-2.1047 -1.6734053,-2.5419 2.1987064,2.0209 2.4513363,-1.6427 -2.0383649,2.1623 1.7419712,2.4882 -2.2030799,-2.0431 z"
        transform="matrix(0,-0.85317585,-0.89941999,0,970.43988,1039.4339)" />

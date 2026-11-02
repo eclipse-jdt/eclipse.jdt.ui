@@ -289,17 +289,6 @@
            style="fill:#ffffff;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dashoffset:0;display:inline" />
       </g>
     </mask>
-    <filter
-       color-interpolation-filters="sRGB"
-       id="filter5153"
-       x="-0.3364474"
-       width="1.6728948"
-       y="-0.24770335"
-       height="1.4954067">
-      <feGaussianBlur
-         stdDeviation="0.78970329"
-         id="feGaussianBlur5155" />
-    </filter>
     <radialGradient
        xlink:href="#linearGradient4847-8"
        id="radialGradient4089-3"
@@ -462,7 +451,7 @@
       <g
          transform="matrix(0.90162747,0,0,0.90162747,-1.6143748,103.301)"
          id="g4083-0"
-         style="opacity:0.75;stroke-width:2.21821094;stroke-miterlimit:4;stroke-dasharray:none;display:inline;filter:url(#filter5153)">
+         style="opacity:0.75;stroke-width:2.21821094;stroke-miterlimit:4;stroke-dasharray:none;display:inline">
         <path
            style="fill:url(#radialGradient4089-3);fill-opacity:1;stroke:none"
            d="m 6.2167313,1040.1881 3.4054849,0 c 0.4530438,1.6907 2.7621358,2.5911 2.7621358,5.1157 l 0,2.8379 c 0,1.5302 -1.231912,2.7621 -2.7621358,2.7621 l -3.4054849,0 c -1.530224,0 -2.762136,-1.2319 -2.762136,-2.7621 l 0,-2.8379 c 0,-2.5909 2.334749,-3.5207 2.762136,-5.1157 z"

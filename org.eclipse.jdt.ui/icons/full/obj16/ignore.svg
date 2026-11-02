@@ -164,16 +164,6 @@
          stdDeviation="0.76289063"
          id="feGaussianBlur4222" />
     </filter>
-    <filter
-       id="filter4224"
-       x="-0.20414634"
-       width="1.4082927"
-       y="-0.20414634"
-       height="1.4082927">
-      <feGaussianBlur
-         stdDeviation="0.76289063"
-         id="feGaussianBlur4226" />
-    </filter>
     <mask
        maskUnits="userSpaceOnUse"
        id="mask4228">
@@ -301,7 +291,7 @@
              transform="translate(0,1036.3622)"
              id="path4208" />
           <path
-             style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans;opacity:0.5;filter:url(#filter4224)"
+             style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans;opacity:0.5"
              d="M 3.65625 4.625 L 3.6875 13.59375 L 12.625 13.59375 L 12.59375 4.625 L 3.65625 4.625 z "
              transform="translate(0,1036.3622)"
              id="path4203" />

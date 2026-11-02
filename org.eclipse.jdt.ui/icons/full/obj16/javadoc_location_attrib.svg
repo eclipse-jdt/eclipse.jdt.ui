@@ -74,16 +74,6 @@
        id="linearGradient4101"
        xlink:href="#linearGradient4994-6"
        gradientTransform="translate(-1.977903,-1.044194)" />
-    <filter
-       id="filter4875"
-       x="-0.25732348"
-       width="1.514647"
-       y="-0.26033033"
-       height="1.5206607">
-      <feGaussianBlur
-         stdDeviation="0.71366792"
-         id="feGaussianBlur4877" />
-    </filter>
     <mask
        maskUnits="userSpaceOnUse"
        id="mask4917">
@@ -127,7 +117,7 @@
       <g
          transform="translate(17.171238,-0.006311)"
          id="text3909-7-7-1-1"
-         style="font-size:11.05178356000000100px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.50000000000000000;stroke-miterlimit:4;stroke-opacity:1;display:inline;font-family:AustralianFlyingCorpsStencil;stroke-dasharray:none;filter:url(#filter4875);opacity:0.75">
+         style="font-size:11.05178356000000100px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.50000000000000000;stroke-miterlimit:4;stroke-opacity:1;display:inline;font-family:AustralianFlyingCorpsStencil;stroke-dasharray:none;opacity:0.75">
         <path
            style="fill:#ffffff;stroke:#ffffff;stroke-width:1.50000000000000000;stroke-miterlimit:4;stroke-dasharray:none"
            id="path4719-7"
