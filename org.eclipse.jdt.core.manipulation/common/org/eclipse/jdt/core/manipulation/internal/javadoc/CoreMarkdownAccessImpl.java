@@ -136,15 +136,13 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 					try {
 						FencedCodeTokenizer tokenizer= getFencedCodeTokenizer();
 						if (tokenizer != null) {
-							tokenized= tokenizer.tokenize(info.trim().toLowerCase(), literal);
+							tokenized= tokenizer.tokenize(info.trim().toLowerCase(java.util.Locale.ROOT), literal);
 						}
 					} catch (Exception | LinkageError e) {
 						if (!fTokenizerFailed) {
 							fTokenizerFailed= true;
 							JavaManipulationPlugin.logErrorMessage("Fenced code tokenizer failed with: " + e.getMessage()); //$NON-NLS-1$
 						}
-						fFencedCodeTokenizer= null;
-						fTokenizerInitialized= false;
 					}
 				}
 				if (tokenized != null) {
