@@ -117,7 +117,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			"static", "void", "class",  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			"interface", "extends", "implements", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			"return", "new", "import", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			" abstract"); //$NON-NLS-1$
+			"abstract"); //$NON-NLS-1$
 
 	private final CompletionProposalLabelProvider fLabelProvider= new CompletionProposalLabelProvider();
 	private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
