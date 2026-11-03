@@ -60,7 +60,7 @@
        id="path3002"
        transform="translate(0,1036.3622)" />
     <path
-       style="font-size:11.05178356px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#236298;fill-opacity:1;stroke:#236298;stroke-width:0.28257138;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:AustralianFlyingCorpsStencil;-inkscape-font-specification:AustralianFlyingCorpsStencil"
+       style="fill:#236298;fill-opacity:1;stroke:#236298;stroke-width:0.28257138;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        d="m 12.406458,1039.6083 c -0.09375,-0.4062 -0.177236,-0.9957 -0.552237,-1.4333 -0.374998,-0.4374 -0.614324,-0.6074 -1.022557,-0.8388 -0.408233,-0.2315 -1.6921373,-0.7906 -2.8906248,-0.8594 -0.3994958,-0.023 -0.8168984,0.026 -1.1875,0.125 -1.8098211,0.485 -2.6365843,1.3182 -3.59375,2.8125 -0.991819,1.5427 -1.1888371,3.5663 -0.65625,5.3437 0.5272319,1.7597 1.555815,2.9532 3.09375,3.5938 1.4108866,0.5774 2.6810837,0.706 4.4999998,0.2187 1.67339,-0.4485 2.016965,-0.7866 3.21875,-1.8437 l -0.4375,-0.3438 c -1.553801,1.2177 -1.622762,1.2332 -2.9687498,1.5938 -1.5005895,0.4027 -3.1035995,0.1736 -4.25,-0.4063 -1.1463954,-0.5798 -1.9388113,-1.5073 -2.4375,-3.0937 -0.4986887,-1.5864 -0.022863,-3.521 0.5625,-4.5313 0.5853631,-1.0103 1.2965074,-2.1937 2.90625,-2.625 1.282323,-0.3436 2.8157521,0.1597 3.7881818,0.7279 0.97243,0.5683 1.292239,1.6526 1.258042,2.5824 -0.0342,0.9299 -0.664674,1.9657 -1.133042,2.3681 -0.468369,0.4027 -1.4756818,0.4154 -1.4756818,0.4154 0,0 0.1240658,-0.6579 0.125,-1.4688 0.030258,-0.6627 -0.1295408,-1.6952 -0.59375,-2.125 -0.4642092,-0.431 -1.2172197,-0.4006 -1.6875,-0.3746 -0.5523523,0.031 -1.1221546,0.5699 -1.5331536,1.3459 -0.4594324,0.8674 -0.6585197,2.0975 -0.5006345,2.8058 0.1578852,0.7083 0.2457352,0.8708 0.65625,1.2813 0.4105148,0.4103 1.4233638,0.419 1.96875,0.094 0.8226727,-0.5067 0.8493478,-0.6806 1.4712881,-0.7146 0,0 1.2730868,-0.2595 2.0678618,-0.8125 0.815373,-0.5226 1.093629,-1.2093 1.265854,-1.9428 0.172226,-0.7336 0.131703,-1.4881 0.03795,-1.8944 z m -5.3091688,0.5872 c 0.1214058,0 0.264899,0.01 0.40625,0.031 0.5654037,0.1018 0.65625,1.125 0.65625,1.125 0,0 0.075363,0.6861 0.03125,1.5937 -0.044113,0.9079 -0.2558881,0.8525 -0.5962881,1.1209 -0.3403969,0.2684 -1.2509038,0.4277 -1.6875,-0.2813 -0.4365972,-0.7089 -0.2538026,-2.1397 0.1256345,-2.7746 0.238137,-0.3999 0.7001861,-0.8012 1.0644036,-0.815 z"
        id="path4719-2" />
     <g
@@ -81,11 +81,11 @@
          transform="matrix(-1,0,0,1,16.12959,8.0140628)">
         <g
            id="text6430"
-           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+           style="fill:#ffffff;fill-opacity:1;stroke:none"
            transform="scale(-1,1)" />
         <g
            id="g6438"
-           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+           style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
            transform="scale(-1,1)">
           <rect
              y="1034.8657"
@@ -100,7 +100,7 @@
              height="3.9971409"
              width="3.9971409"
              id="rect6724-4"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans" />
+             style="opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline" />
         </g>
       </g>
     </g>

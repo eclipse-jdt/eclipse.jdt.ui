@@ -69,11 +69,11 @@
        id="g6124-3">
       <g
          transform="scale(-1,1)"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
          id="text6430" />
       <g
          transform="scale(-1,1)"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
          id="g6438">
         <rect
            style="fill:url(#linearGradient5742);fill-opacity:1;stroke:#cb2e39;stroke-width:1.01823986;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
@@ -83,7 +83,7 @@
            x="-10.606487"
            y="1034.8657" />
         <rect
-           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
+           style="opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
            id="rect6724-4"
            width="3.9971409"
            height="3.9971409"

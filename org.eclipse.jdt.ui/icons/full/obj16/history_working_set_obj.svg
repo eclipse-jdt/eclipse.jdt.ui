@@ -54,7 +54,7 @@
     <linearGradient
        id="linearGradient13831">
       <stop
-         style="stop-color:#055797;stop-opacity:1;"
+         style="stop-color:#055797;stop-opacity:1"
          offset="0"
          id="stop13833" />
       <stop
@@ -106,7 +106,7 @@
       <stop
          id="stop4998-5-0"
          offset="1"
-         style="stop-color:#ffffff;stop-opacity:0;" />
+         style="stop-color:#ffffff;stop-opacity:0" />
     </linearGradient>
     <linearGradient
        id="linearGradient4910-4-0">
@@ -253,7 +253,7 @@
            id="rect3997-9-9" />
       </g>
       <path
-         style="font-size:4.9253788px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#2b568d;fill-opacity:1;stroke:#2b568d;stroke-width:0.44447169;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Arial;-inkscape-font-specification:Arial"
+         style="fill:#2b568d;fill-opacity:1;stroke:#2b568d;stroke-width:0.44447169;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
          d="M 3.4375 9.25 C 3.3621428 9.4023182 3.2124231 9.5568186 3.03125 9.71875 C 2.8500746 9.8806876 2.6483495 10.011168 2.40625 10.125 L 2.40625 10.53125 C 2.5409277 10.48155 2.7058496 10.411908 2.875 10.3125 C 3.0441484 10.213097 3.1770333 10.130658 3.28125 10.03125 L 3.28125 12.78125 L 3.71875 12.78125 L 3.71875 9.25 L 3.4375 9.25 z M 6 9.25 C 5.6649065 9.2500035 5.3863101 9.3260439 5.1875 9.5 C 4.9886888 9.6739626 4.8742127 9.918117 4.84375 10.25 L 5.28125 10.3125 C 5.2828526 10.091245 5.3436908 9.9063113 5.46875 9.78125 C 5.5938075 9.6561947 5.7603181 9.5937532 5.96875 9.59375 C 6.165956 9.5937532 6.3460948 9.6634096 6.46875 9.78125 C 6.5914015 9.8990964 6.656248 10.047198 6.65625 10.21875 C 6.656248 10.38229 6.5721764 10.535173 6.4375 10.71875 C 6.30282 10.902331 6.0394405 11.154502 5.65625 11.46875 C 5.4093389 11.670769 5.2244194 11.846083 5.09375 12 C 4.9630796 12.153919 4.8718223 12.310022 4.8125 12.46875 C 4.7756236 12.564949 4.7467932 12.677035 4.75 12.78125 L 7.09375 12.78125 L 7.09375 12.375 L 5.375 12.375 C 5.4230986 12.296438 5.4887467 12.202761 5.5625 12.125 C 5.6362514 12.04724 5.8027621 11.905552 6.0625 11.6875 C 6.3735411 11.424558 6.5848714 11.213213 6.71875 11.0625 C 6.8526244 10.91179 6.9422784 10.761284 7 10.625 C 7.0577168 10.488721 7.0937475 10.359844 7.09375 10.21875 C 7.0937475 9.9413796 6.9784552 9.7188407 6.78125 9.53125 C 6.5840405 9.3436658 6.3382974 9.2500035 6 9.25 z "
          transform="translate(8.2201163,1049.2669)"
          id="text9604-8-2-9" />

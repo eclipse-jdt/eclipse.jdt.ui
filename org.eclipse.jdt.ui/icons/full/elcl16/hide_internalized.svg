@@ -17,7 +17,7 @@
     <linearGradient
        id="linearGradient4895">
       <stop
-         style="stop-color:#6f8db9;stop-opacity:1;"
+         style="stop-color:#6f8db9;stop-opacity:1"
          offset="0"
          id="stop4897" />
       <stop
@@ -28,7 +28,7 @@
     <linearGradient
        id="linearGradient4886">
       <stop
-         style="stop-color:#f9fafc;stop-opacity:1;"
+         style="stop-color:#f9fafc;stop-opacity:1"
          offset="0"
          id="stop4888" />
       <stop
@@ -52,7 +52,7 @@
       <stop
          id="stop5137-4"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop5139-0"
          offset="1"
@@ -63,7 +63,7 @@
       <stop
          id="stop5143-8"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop5145-8"
          offset="1"
@@ -74,7 +74,7 @@
       <stop
          id="stop5149-5"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop5151-5"
          offset="1"
@@ -83,7 +83,7 @@
     <linearGradient
        id="linearGradient4861-1">
       <stop
-         style="stop-color:#91a5c7;stop-opacity:1;"
+         style="stop-color:#91a5c7;stop-opacity:1"
          offset="0"
          id="stop4863-1" />
       <stop
@@ -105,7 +105,7 @@
     <linearGradient
        id="linearGradient4994-6">
       <stop
-         style="stop-color:#f9fafc;stop-opacity:1;"
+         style="stop-color:#f9fafc;stop-opacity:1"
          offset="0"
          id="stop4996-1" />
       <stop
@@ -355,18 +355,18 @@
              id="g6124-3">
             <g
                transform="scale(-1,1)"
-               style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+               style="fill:#ffffff;fill-opacity:1;stroke:none"
                id="text6430" />
             <g
                transform="scale(-1,1)"
-               style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+               style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
                id="g6438">
               <g
                  transform="translate(20,0)"
-                 style="font-size:7.60321283px;font-variant:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;font-family:Arial;-inkscape-font-specification:Arial"
+                 style="fill:#ff0000"
                  id="text4739">
                 <path
-                   style="font-size:7.60321283px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000f6f;fill-opacity:1;stroke:#6f99c7;stroke-width:1px;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Arial;-inkscape-font-specification:Arial"
+                   style="fill:#000f6f;fill-opacity:1;stroke:#6f99c7;stroke-width:1px;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;display:inline"
                    d="m -54.44209,1029.3481 14,14"
                    id="path4792-9" />
                 <path

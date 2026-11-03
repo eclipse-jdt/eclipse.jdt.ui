@@ -275,7 +275,7 @@
     <ellipse
        cy="1037.3622"
        cx="39"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#bfc1d7;fill-opacity:0.57647059;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4419)"
+       style="display:inline;fill:#bfc1d7;fill-opacity:0.57647059;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4419)"
        id="path10796-2-6-2-26"
        rx="12"
        ry="1.9999784" />
@@ -293,11 +293,11 @@
     </g>
     <g
        id="text6430-2"
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
        transform="matrix(3.3253216,0,0,3.3245835,127.65406,-2424.2109)" />
     <g
        transform="matrix(3.1391206,0,0,3.5217855,127.65406,-2424.2109)"
-       style="font-style:normal;font-weight:normal;font-size:15.56941891px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
        id="text3782-3" />
     <g
        transform="matrix(0.92787456,0,0,0.92766861,-300.80763,645.97701)"
@@ -309,11 +309,11 @@
     </g>
     <g
        id="text6430-2-0"
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
        transform="matrix(3.3253216,0,0,3.3245835,83.654055,-2366.2109)" />
     <g
        transform="matrix(3.1391206,0,0,3.5217855,83.654055,-2366.2109)"
-       style="font-style:normal;font-weight:normal;font-size:15.56941891px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
        id="text3782-3-1" />
     <path
        style="fill:#fefdef;fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient15938);stroke-width:2;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -334,7 +334,7 @@
          ry="6.3425517"
          rx="6.1402373"
          id="path10796-2-6-2"
-         style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#linearGradient5379);fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         style="display:inline;fill:url(#linearGradient5379);fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          cx="125.24371"
          cy="1033.3856" />
       <path
@@ -356,7 +356,7 @@
          ry="6.3425517"
          rx="6.1402373"
          id="path10796-2-6-2-2"
-         style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:none;fill-opacity:1;stroke:#379860;stroke-width:0.87935215;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         style="display:inline;fill:none;fill-opacity:1;stroke:#379860;stroke-width:0.87935215;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          cx="125.24371"
          cy="1033.3856" />
     </g>

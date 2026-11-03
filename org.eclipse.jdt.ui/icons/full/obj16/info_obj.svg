@@ -46,11 +46,11 @@
     <linearGradient
        id="linearGradient4996-8">
       <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
+         style="stop-color:#ffffff;stop-opacity:1"
          offset="0"
          id="stop4998-51" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:0;"
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
          id="stop5000-6" />
     </linearGradient>
@@ -85,7 +85,7 @@
        id="g8159"
        transform="translate(-8.2201163,-12.904699)">
       <g
-         style="font-size:15.07241726px;font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:url(#linearGradient5002);fill-opacity:1;stroke:none;display:inline;font-family:Kozuka Mincho Pr6N H;-inkscape-font-specification:Kozuka Mincho Pr6N H Heavy"
+         style="fill:url(#linearGradient5002);fill-opacity:1;stroke:none;display:inline"
          id="text4140-1-8">
         <path
            d="m 16.168743,1050.9177 c -0.347298,0.01 -0.635687,0.1291 -0.86517,0.3674 -0.229485,0.2383 -0.348523,0.5529 -0.357112,0.9439 0.0086,0.3981 0.127627,0.7172 0.357113,0.9571 0.229482,0.2399 0.517871,0.363 0.865169,0.3692 0.354348,-0.01 0.647032,-0.1293 0.878054,-0.3692 0.231015,-0.2399 0.350665,-0.559 0.358954,-0.9571 -0.0056,-0.3778 -0.119655,-0.6886 -0.342387,-0.9326 -0.222739,-0.244 -0.520945,-0.3702 -0.894621,-0.3787 z m 0.927756,3.3912 c -1.016117,0.4346 -1.973323,0.6808 -2.871626,0.7386 l 0,0.6029 c 0.425835,-0.02 0.693362,0.039 0.802582,0.1771 0.109219,0.1381 0.155852,0.476 0.139901,1.0136 l 0,3.4515 c 0.01504,0.5401 -0.03345,0.888 -0.145422,1.0438 -0.111982,0.1557 -0.377669,0.2248 -0.797061,0.2072 l 0,0.633 3.990823,0 0,-0.633 c -0.377672,0.017 -0.620042,-0.051 -0.727111,-0.2054 -0.107076,-0.1541 -0.154322,-0.4977 -0.141739,-1.0305 l 0,-5.8631 z"
@@ -93,7 +93,7 @@
            id="path5058" />
         <path
            d="m 16.168743,1050.9177 c -0.347298,0.01 -0.635687,0.1291 -0.86517,0.3674 -0.229485,0.2383 -0.348523,0.5529 -0.357112,0.9439 0.0086,0.3981 0.127627,0.7172 0.357113,0.9571 0.229482,0.2399 0.517871,0.363 0.865169,0.3692 0.354348,-0.01 0.647032,-0.1293 0.878054,-0.3692 0.231015,-0.2399 0.350665,-0.559 0.358954,-0.9571 -0.0056,-0.3778 -0.119655,-0.6886 -0.342387,-0.9326 -0.222739,-0.244 -0.520945,-0.3702 -0.894621,-0.3787 z m 0.927756,3.3912 c -1.016117,0.4346 -1.973323,0.6808 -2.871626,0.7386 l 0,0.6029 c 0.425835,-0.02 0.693362,0.039 0.802582,0.1771 0.109219,0.1381 0.155852,0.476 0.139901,1.0136 l 0,3.4515 c 0.01504,0.5401 -0.03345,0.888 -0.145422,1.0438 -0.111982,0.1557 -0.377669,0.2248 -0.797061,0.2072 l 0,0.633 3.990823,0 0,-0.633 c -0.377672,0.017 -0.620042,-0.051 -0.727111,-0.2054 -0.107076,-0.1541 -0.154322,-0.4977 -0.141739,-1.0305 l 0,-5.8631 z"
-           style="font-size:15.07241725999999993px;font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:url(#linearGradient3798);fill-opacity:1;stroke:none;display:inline;font-family:Kozuka Mincho Pr6N H;-inkscape-font-specification:Kozuka Mincho Pr6N H Heavy"
+           style="fill:url(#linearGradient3798);fill-opacity:1;stroke:none;display:inline"
            id="path5058-7" />
       </g>
     </g>

@@ -85,7 +85,7 @@
        id="linearGradient4902"><stop
          id="stop4904"
          offset="0"
-         style="stop-color:#c7b571;stop-opacity:1;" /><stop
+         style="stop-color:#c7b571;stop-opacity:1" /><stop
          id="stop4906"
          offset="1"
          style="stop-color:#9a9a8f;stop-opacity:1" /></linearGradient><linearGradient
@@ -113,7 +113,7 @@
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(1.1922461,0,0,1.2728781,-10.09864,-290.57342)" /><linearGradient
        id="linearGradient4258"><stop
-         style="stop-color:#f4ae5f;stop-opacity:1;"
+         style="stop-color:#f4ae5f;stop-opacity:1"
          offset="0"
          id="stop4260" /><stop
          id="stop4266"
@@ -319,7 +319,7 @@
        style="display:inline;opacity:1;fill:url(#linearGradient5081);fill-opacity:1;stroke:none;stroke-width:3;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter14595-9)" /><ellipse
        cy="1013.9438"
        cx="14.305147"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#linearGradient5379-1-6);fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:url(#linearGradient5379-1-6);fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path10796-2-6-2-5-5"
        rx="12.070574"
        ry="11.925551" /><path
@@ -345,7 +345,7 @@
        transform="matrix(0.605795,0,0,0.59637217,-57.434325,423.02119)" /><ellipse
        cy="1013.9438"
        cx="14.305147"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:none;fill-opacity:1;stroke:#657a32;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:none;fill-opacity:1;stroke:#657a32;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path10796-2-6-2-2-7-1"
        rx="12.070574"
        ry="11.925551" /><path
@@ -355,7 +355,7 @@
        transform="matrix(0.605795,0,0,0.59637217,-59.73314,420.27312)" /><ellipse
        cy="1019.9438"
        cx="20.305147"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#linearGradient5379-1);fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:url(#linearGradient5379-1);fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path10796-2-6-2-5"
        rx="12.070574"
        ry="11.925551" /><path
@@ -377,7 +377,7 @@
        transform="matrix(-0.4871928,-0.35444244,0.36004272,-0.47961477,-335.62293,1535.7119)" /><ellipse
        cy="1019.9438"
        cx="20.305147"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:none;fill-opacity:1;stroke:#657a32;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:none;fill-opacity:1;stroke:#657a32;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path10796-2-6-2-2-7"
        rx="12.070574"
        ry="11.925551" /><path

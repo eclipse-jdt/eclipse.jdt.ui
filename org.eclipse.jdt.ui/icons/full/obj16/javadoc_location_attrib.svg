@@ -57,7 +57,7 @@
     <linearGradient
        id="linearGradient4994-6">
       <stop
-         style="stop-color:#f9fafc;stop-opacity:1;"
+         style="stop-color:#f9fafc;stop-opacity:1"
          offset="0"
          id="stop4996-1" />
       <stop
@@ -117,7 +117,7 @@
       <g
          transform="translate(17.171238,-0.006311)"
          id="text3909-7-7-1-1"
-         style="font-size:11.05178356000000100px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.50000000000000000;stroke-miterlimit:4;stroke-opacity:1;display:inline;font-family:AustralianFlyingCorpsStencil;stroke-dasharray:none;opacity:0.75">
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.50000000000000000;stroke-miterlimit:4;stroke-opacity:1;display:inline;stroke-dasharray:none;opacity:0.75">
         <path
            style="fill:#ffffff;stroke:#ffffff;stroke-width:1.50000000000000000;stroke-miterlimit:4;stroke-dasharray:none"
            id="path4719-7"
@@ -129,7 +129,7 @@
        d="m 9.0072318,1048.5889 0,-2.05 0.6911577,-2.0245 -0.2047875,-2.3576 -0.8703466,-1.025 -1.6894965,-0.8969 -1.9966776,-0.3588 -2.4830477,0.7944 c 0,0 -2.02227604,2.4857 -2.02227604,2.6395 0,0.1537 -0.20478745,3.9208 -0.0767951,3.972 0.12799215,0.051 0.89594513,1.1019 0.89594513,1.1019 l 1.075134,0.6919 1.3567169,0.6151 1.6127011,0.2818 1.5871027,-0.3843 c 0,0 1.0495356,-0.4101 1.2031263,-0.4101 0.1535906,0 0.9215434,-0.5894 0.9215434,-0.5894 z"
        id="path3007" />
     <g
-       style="font-size:11.05178356px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#005597;fill-opacity:1;stroke:none;stroke-width:0.1;stroke-miterlimit:4;stroke-opacity:1;display:inline;font-family:AustralianFlyingCorpsStencil;-inkscape-font-specification:AustralianFlyingCorpsStencil"
+       style="fill:#005597;fill-opacity:1;stroke:none;stroke-width:0.1;stroke-miterlimit:4;stroke-opacity:1;display:inline"
        id="text3909-7-7-1"
        transform="translate(17.171238,-0.00631064)">
       <path

@@ -17,11 +17,11 @@
     <linearGradient
        id="linearGradient3918">
       <stop
-         style="stop-color:#b4903d;stop-opacity:1;"
+         style="stop-color:#b4903d;stop-opacity:1"
          offset="0"
          id="stop3920" />
       <stop
-         style="stop-color:#a28137;stop-opacity:1;"
+         style="stop-color:#a28137;stop-opacity:1"
          offset="1"
          id="stop3922" />
     </linearGradient>
@@ -50,7 +50,7 @@
     <linearGradient
        id="linearGradient5428">
       <stop
-         style="stop-color:#f0a53b;stop-opacity:1;"
+         style="stop-color:#f0a53b;stop-opacity:1"
          offset="0"
          id="stop5430" />
       <stop
@@ -88,7 +88,7 @@
     <linearGradient
        id="linearGradient5351">
       <stop
-         style="stop-color:#e4a239;stop-opacity:1;"
+         style="stop-color:#e4a239;stop-opacity:1"
          offset="0"
          id="stop5353" />
       <stop
@@ -257,7 +257,7 @@
           <path
              id="path5028"
              d="m 29.411544,1042.9075 c -0.368467,0.01 -0.72715,0.043 -1.069887,0.1003 l 0,2.4073 c 0.342737,-0.057 0.70142,-0.09 1.069887,-0.1003 z"
-             style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#496da1;fill-opacity:1;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+             style="color:#000000;fill:#496da1;fill-opacity:1;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
           <path
              id="rect4221-7-1"
              d="m 29.645582,1053.51 c -1.546954,0 -3.096933,0.3554 -3.778039,1.0365 l 0,0.5683 c 1.362214,1.3622 6.178977,1.3438 7.522644,0 l 0,-0.5683 c -0.671834,-0.6719 -2.197651,-1.0342 -3.744605,-1.0365 z"
@@ -274,7 +274,7 @@
         <path
            id="rect3997-9-1-7"
            d="m 7.8599979e-4,1034.9573 0.0332657502,11.7512 9.54286335,0 -0.033266,-11.7512 z m 1.06463030021,1.0699 7.4136029,0 0.033266,9.6114 -7.4136028,0 z"
-           style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;opacity:0.75" />
+           style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;opacity:0.75" />
         <g
            transform="matrix(1.0698871,0,0,1.0698871,31.053515,-39.399823)"
            style="display:inline"
@@ -291,7 +291,7 @@
           <path
              id="rect3997-9-1"
              d="m -28.935919,1004.1559 0.03125,10.0555 7.72611,0 -0.03125,-10.0555 z m 1,1 5.72611,0 0.03125,8.0555 -5.72611,0 z"
-             style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:url(#linearGradient3924);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+             style="color:#000000;fill:url(#linearGradient3924);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
         </g>
         <g
            transform="matrix(1.0937493,0,0,0.77138998,-2.2721165,237.64434)"

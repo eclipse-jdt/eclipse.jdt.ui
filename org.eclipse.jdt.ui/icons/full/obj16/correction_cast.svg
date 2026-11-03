@@ -72,11 +72,11 @@
      style="display:inline"
      transform="translate(0,-1036.3622)">
     <path
-       style="font-size:10.29760742000000000px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#286296;fill-opacity:1;stroke:#286296;stroke-opacity:1;font-family:Sans"
+       style="fill:#286296;fill-opacity:1;stroke:#286296;stroke-opacity:1"
        d="m 3.8803616,1038.3622 c -2.96874996,2 -2.96874996,7 0,9 l 0.03125,0 c -2,-2 -2,-7 0,-9 z"
        id="path4020" />
     <path
-       style="font-size:10.29760742000000000px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#286296;fill-opacity:1;stroke:#286296;stroke-opacity:1;display:inline;font-family:Sans"
+       style="fill:#286296;fill-opacity:1;stroke:#286296;stroke-opacity:1;display:inline"
        d="m 8.2595737,1038.3622 c 2.9687483,2 2.9687483,7 0,9 l -0.03125,0 c 1.9999993,-2 1.9999993,-7 0,-9 z"
        id="path4020-4" />
     <path

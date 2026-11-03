@@ -220,7 +220,7 @@
        id="g13862">
       <g
          transform="matrix(3.5838051,0,0,3.5838051,511.21484,-3419.8264)"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
          id="layer1-9">
         <g
            id="g11260-4-2"
@@ -249,7 +249,7 @@
              d="m 375.0458,449.75837 17.96522,0 0,18.13262 -17.96522,0 z"
              style="fill:url(#radialGradient10501);fill-opacity:1;stroke:#8c8c6d;stroke-width:3.58380507999999990;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline" />
           <path
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:none;stroke:url(#linearGradient10579);stroke-width:3.58380508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
+             style="fill:none;stroke:url(#linearGradient10579);stroke-width:3.58380508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
              d="m 357.27589,432.15148 0,17.71804 0,17.85756 17.71805,0 17.85755,0 0,-17.85756 0,-0.13951 0,-17.57853 -17.85755,0 -17.71805,0 z"
              id="rect10961-8-3-6" />
           <path
@@ -259,7 +259,7 @@
           <path
              id="path11108-6-7-5-6"
              d="m 398.30108,449.88328 -46.58947,0"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#915323;fill-opacity:1;stroke:url(#linearGradient10544);stroke-width:3.58380508;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Sans" />
+             style="fill:#915323;fill-opacity:1;stroke:url(#linearGradient10544);stroke-width:3.58380508;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
         </g>
         <g
            id="g11331-3"

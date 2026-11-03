@@ -74,7 +74,7 @@
       <stop
          id="stop9802-8"
          offset="0"
-         style="stop-color:#be9c28;stop-opacity:1;" />
+         style="stop-color:#be9c28;stop-opacity:1" />
       <stop
          id="stop9804-3"
          offset="1"
@@ -97,19 +97,19 @@
      id="layer1"
      transform="translate(0,-1036.3622)">
     <path
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient3027);fill-opacity:1;stroke:#55429f;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
+       style="fill:url(#linearGradient3027);fill-opacity:1;stroke:#55429f;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
        id="path10796-2-6-2"
        d="m 398.75,468.23718 a 10.625,10.625 0 1 1 -21.25,0 10.625,10.625 0 1 1 21.25,0 z"
        transform="matrix(0.55482947,0,0,0.55482947,-207.83019,783.15705)" />
     <path
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        d="m 5.0513789,1039.3735 0,1.0313 0.8880662,0 0,4.9687 -0.9322604,0 0,1.0313 4.789695,0 0,-1.0313 -1.2858115,0 0,-4.9687 1.2858115,0 0,-1.0313 z"
        id="rect7222-4" />
     <rect
        transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
        ry="0.82358801"
        rx="0.82358801"
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        id="rect6724-2-6"
        width="3.367322"
        height="8.412034"
@@ -117,7 +117,7 @@
        y="727.85205" />
     <rect
        transform="matrix(0.84707588,0.84707588,-0.84707588,0.84707588,897.60135,173.71993)"
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       style="opacity:0.25;fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        id="rect6724-4-1-2"
        width="3.9971409"
        height="3.9971409"
@@ -141,11 +141,11 @@
          transform="matrix(-1,0,0,1,16.12959,8.0140628)">
         <g
            id="text6430-5"
-           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+           style="fill:#ffffff;fill-opacity:1;stroke:none"
            transform="scale(-1,1)" />
         <g
            id="g6438-3"
-           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+           style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
            transform="scale(-1,1)">
           <g
              id="layer1-8"
@@ -165,11 +165,11 @@
                id="g6124-3-9">
               <g
                  transform="scale(-1,1)"
-                 style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+                 style="fill:#ffffff;fill-opacity:1;stroke:none"
                  id="text6430-8" />
               <g
                  transform="scale(-1,1)"
-                 style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+                 style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
                  id="g6438-1">
                 <rect
                    ry="0.6875"
@@ -181,7 +181,7 @@
                    x="-10.606487"
                    y="1034.8657" />
                 <rect
-                   style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
+                   style="opacity:0.25;fill:none;stroke:#ffffff;stroke-width:0.68290508;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
                    id="rect6724-4-1"
                    width="3.9971409"
                    height="3.9971409"

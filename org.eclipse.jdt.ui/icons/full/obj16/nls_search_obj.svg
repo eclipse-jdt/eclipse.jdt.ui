@@ -50,7 +50,7 @@
     <linearGradient
        id="linearGradient5428">
       <stop
-         style="stop-color:#f0a53b;stop-opacity:1;"
+         style="stop-color:#f0a53b;stop-opacity:1"
          offset="0"
          id="stop5430" />
       <stop
@@ -88,7 +88,7 @@
     <linearGradient
        id="linearGradient5351">
       <stop
-         style="stop-color:#e4a239;stop-opacity:1;"
+         style="stop-color:#e4a239;stop-opacity:1"
          offset="0"
          id="stop5353" />
       <stop
@@ -263,11 +263,11 @@
     <linearGradient
        id="linearGradient8349">
       <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
+         style="stop-color:#ffffff;stop-opacity:1"
          offset="0"
          id="stop8351" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:0;"
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
          id="stop8353" />
     </linearGradient>
@@ -307,7 +307,7 @@
         <path
            id="path5512"
            d="m 29.411544,1042.9075 c -0.368467,0.01 -0.72715,0.043 -1.069887,0.1003 l 0,2.4073 c 0.342737,-0.057 0.70142,-0.09 1.069887,-0.1003 z"
-           style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+           style="color:#000000;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
         <path
            id="path5514"
            d="m 29.645582,1053.51 c -1.546954,0 -3.096933,0.3554 -3.778039,1.0365 l 0,0.5683 c 1.362214,1.3622 6.178977,1.3438 7.522644,0 l 0,-0.5683 c -0.671834,-0.6719 -2.197651,-1.0342 -3.744605,-1.0365 z"
@@ -360,7 +360,7 @@
           <path
              id="path5028"
              d="m 29.411544,1042.9075 c -0.368467,0.01 -0.72715,0.043 -1.069887,0.1003 l 0,2.4073 c 0.342737,-0.057 0.70142,-0.09 1.069887,-0.1003 z"
-             style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#496da1;fill-opacity:1;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+             style="color:#000000;fill:#496da1;fill-opacity:1;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
           <path
              id="rect4221-7-1"
              d="m 29.645582,1053.51 c -1.546954,0 -3.096933,0.3554 -3.778039,1.0365 l 0,0.5683 c 1.362214,1.3622 6.178977,1.3438 7.522644,0 l 0,-0.5683 c -0.671834,-0.6719 -2.197651,-1.0342 -3.744605,-1.0365 z"
@@ -389,7 +389,7 @@
                  id="path5477"
                  transform="matrix(1.0698871,0,0,1.0698871,-0.01035104,1034.9207)"
                  d="m -14.46875,1 c -0.652835,-5.842e-5 -1.315972,0.253499 -1.8125,0.75 -0.993056,0.9930955 -0.993055,2.600748 0,3.59375 0.993055,0.9930955 2.600694,0.9930955 3.59375,0 0.993055,-0.993002 0.993055,-2.600748 0,-3.59375 C -13.184028,1.2534523 -13.815915,1.0000584 -14.46875,1 z"
-                 style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.99999994000000003;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+                 style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:0.99999994000000003;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
               <rect
                  y="1043.4797"
                  x="-16.058657"
@@ -407,7 +407,7 @@
               <path
                  id="path4245-1-8"
                  d="m -19.029837,1035.1471 c -1.964435,1.9644 -2.022368,5.1613 -0.05793,7.1257 1.964435,1.9645 5.219254,1.9645 7.183689,0 a 0.52274034,0.52274034 0 0 0 0.05793,-0.1738 0.52274034,0.52274034 0 0 0 0.05793,-0.058 0.52274034,0.52274034 0 0 0 0,-0.1159 0.52274034,0.52274034 0 0 0 0,-0.1158 0.52274034,0.52274034 0 0 0 -0.115866,-0.2318 0.52274034,0.52274034 0 0 0 -0.05793,-0.058 l -3.186313,-3.1863 -3.186314,-3.1863 a 0.52274034,0.52274034 0 0 0 -0.05793,-0.058 0.52274034,0.52274034 0 0 0 -0.05793,-0.058 0.52274034,0.52274034 0 0 0 -0.173799,-0.058 0.52274034,0.52274034 0 0 0 -0.115866,0 0.52274034,0.52274034 0 0 0 -0.231732,0.1158 0.52274034,0.52274034 0 0 0 -0.05793,0.058 z m 0.463464,1.2745 2.664917,2.6649 2.664917,2.6649 c -1.563043,1.1228 -3.691193,1.1752 -5.098102,-0.2317 -1.408451,-1.4084 -1.358493,-3.5347 -0.231732,-5.0981 z"
-                 style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.06988704000000000;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+                 style="color:#000000;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:1.06988704000000000;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
               <path
                  id="rect4243-6-9"
                  d="m -18.198431,1044.5497 c -0.592701,0 -1.069887,0.4771 -1.069887,1.0698 l 7.489209,0 c 0,-0.5927 -0.477185,-1.0698 -1.069887,-1.0698 l -5.349435,0 z"

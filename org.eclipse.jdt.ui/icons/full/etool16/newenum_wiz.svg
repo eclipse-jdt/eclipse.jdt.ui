@@ -50,7 +50,7 @@
     <linearGradient
        id="linearGradient4528-9-5-7-9-7-3">
       <stop
-         style="stop-color:#e0c576;stop-opacity:1;"
+         style="stop-color:#e0c576;stop-opacity:1"
          offset="0"
          id="stop4530-0-5-0-5-8-4" />
       <stop
@@ -101,7 +101,7 @@
        id="g6124-3">
       <g
          transform="scale(-1,1)"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+         style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
          id="g6438">
         <path
            style="fill:url(#linearGradient3929-5);fill-opacity:1;stroke:#905e27;stroke-width:2.16621374999999983;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
@@ -124,21 +124,21 @@
              height="1.03125"
              width="5.46875"
              id="rect7222-7"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
+             style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
           <rect
              y="1037.3481"
              x="9.87041"
              height="1.03125"
              width="5.46875"
              id="rect7222-7-2"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
+             style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
           <rect
              y="1034.3481"
              x="9.87041"
              height="1.03125"
              width="4.96875"
              id="rect7222-7-2-5"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
+             style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline" />
         </g>
         <g
            style="display:inline"

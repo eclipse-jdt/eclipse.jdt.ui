@@ -26,11 +26,11 @@
     <linearGradient
        id="linearGradient4918-5">
       <stop
-         style="stop-color:#d48a4b;stop-opacity:1;"
+         style="stop-color:#d48a4b;stop-opacity:1"
          offset="0"
          id="stop4920-9" />
       <stop
-         style="stop-color:#b1623a;stop-opacity:1;"
+         style="stop-color:#b1623a;stop-opacity:1"
          offset="1"
          id="stop4922-9" />
     </linearGradient>
@@ -46,11 +46,11 @@
     <linearGradient
        id="linearGradient4907-9">
       <stop
-         style="stop-color:#b86c44;stop-opacity:1;"
+         style="stop-color:#b86c44;stop-opacity:1"
          offset="0"
          id="stop4909-5" />
       <stop
-         style="stop-color:#8f4017;stop-opacity:1;"
+         style="stop-color:#8f4017;stop-opacity:1"
          offset="1"
          id="stop4911-0" />
     </linearGradient>
@@ -66,33 +66,33 @@
     <linearGradient
        id="linearGradient4928-4">
       <stop
-         style="stop-color:#4dac81;stop-opacity:1;"
+         style="stop-color:#4dac81;stop-opacity:1"
          offset="0"
          id="stop4930-9" />
       <stop
-         style="stop-color:#058048;stop-opacity:1;"
+         style="stop-color:#058048;stop-opacity:1"
          offset="1"
          id="stop4932-8" />
     </linearGradient>
     <linearGradient
        id="linearGradient4938-8">
       <stop
-         style="stop-color:#8bc7d7;stop-opacity:1;"
+         style="stop-color:#8bc7d7;stop-opacity:1"
          offset="0"
          id="stop4940-4" />
       <stop
-         style="stop-color:#17477c;stop-opacity:1;"
+         style="stop-color:#17477c;stop-opacity:1"
          offset="1"
          id="stop4942-8" />
     </linearGradient>
     <linearGradient
        id="linearGradient4961-6">
       <stop
-         style="stop-color:#df9a39;stop-opacity:1;"
+         style="stop-color:#df9a39;stop-opacity:1"
          offset="0"
          id="stop4963-0" />
       <stop
-         style="stop-color:#b55829;stop-opacity:1;"
+         style="stop-color:#b55829;stop-opacity:1"
          offset="1"
          id="stop4965-3" />
     </linearGradient>
@@ -115,7 +115,7 @@
        id="linearGradient5020-3"
        xlink:href="#linearGradient4961-6" />
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4161"
        x="-0.055555556"
        y="-0.16666667"
@@ -166,7 +166,7 @@
          id="feComposite4175" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4177"
        x="-0.071428571"
        y="-0.25"
@@ -217,7 +217,7 @@
          id="feComposite4191" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4193"
        x="0"
        y="0"
@@ -268,7 +268,7 @@
          id="feComposite4207" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4209"
        x="0"
        y="0"
@@ -319,7 +319,7 @@
          id="feComposite4223" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4225"
        x="-0.1119216"
        y="-0.066723293"
