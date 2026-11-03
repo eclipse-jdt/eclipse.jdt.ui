@@ -121,10 +121,6 @@ public class TM4EFencedCodeTokenizer implements FencedCodeTokenizer {
 				result.append('\n');
 			}
 			String line= lines[i];
-			if (line.isEmpty()) {
-				continue;
-			}
-
 			ITokenizeLineResult<IToken[]> lineResult= grammar.tokenizeLine(line, ruleStack, null);
 			ruleStack= lineResult.getRuleStack();
 
