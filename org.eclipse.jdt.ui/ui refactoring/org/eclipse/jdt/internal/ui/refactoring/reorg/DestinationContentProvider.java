@@ -60,8 +60,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 		if (!fValidator.canChildrenBeDestinations(destination))
 				return false;
 
-		if (element instanceof IJavaElement){
-			IJavaElement javaElement= (IJavaElement) element;
+		if (element instanceof IJavaElement javaElement){
 			if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
 				if (root.isArchive() || root.isExternal())

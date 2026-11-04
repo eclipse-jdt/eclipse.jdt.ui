@@ -939,9 +939,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			if (editor.getControl() == null && !table.isDisposed())
 				editor.create(table);
 			final ISelection sel= event.getSelection();
-			if (!(sel instanceof IStructuredSelection))
+			if (!(sel instanceof final IStructuredSelection structured))
 				return;
-			final IStructuredSelection structured= (IStructuredSelection) sel;
 			if (structured.size() != 1)
 				return;
 			final MemberActionInfo info= (MemberActionInfo) structured.getFirstElement();

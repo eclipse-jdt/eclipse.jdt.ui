@@ -104,8 +104,7 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 			return;
 		}
 		for (IJavaElement child : children) {
-			if (child instanceof IPackageFragment) {
-				IPackageFragment packageFragment = (IPackageFragment) child;
+			if (child instanceof IPackageFragment packageFragment) {
 				String packageName = packageFragment.getElementName();
 				if ((entered != null) && (entered.containsKey(packageName)) == true) {
 					continue;

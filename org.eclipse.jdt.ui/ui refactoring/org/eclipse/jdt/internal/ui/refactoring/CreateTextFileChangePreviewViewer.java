@@ -214,8 +214,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 		Change change= input.getChange();
 		if (change != null) {
 			Object element= change.getModifiedElement();
-			if (element instanceof IAdaptable) {
-				IAdaptable adaptable= (IAdaptable) element;
+			if (element instanceof IAdaptable adaptable) {
 				IWorkbenchAdapter workbenchAdapter= adaptable.getAdapter(IWorkbenchAdapter.class);
 				if (workbenchAdapter != null) {
 					fPane.setImageDescriptor(workbenchAdapter.getImageDescriptor(element));
@@ -226,12 +225,11 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 				fPane.setImageDescriptor(null);
 			}
 		}
-		if (!(change instanceof CreateTextFileChange)) {
+		if (!(change instanceof CreateTextFileChange textFileChange)) {
 			fSourceViewer.setInput(null);
 			fPane.setText(""); //$NON-NLS-1$
 			return;
 		}
-		CreateTextFileChange textFileChange= (CreateTextFileChange) change;
 		fPane.setText(textFileChange.getName());
 		IDocument document= new Document(textFileChange.getPreview());
 		// This is a temporary work around until we get the
