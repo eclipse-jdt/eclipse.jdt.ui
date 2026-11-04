@@ -78,9 +78,8 @@ public class RenameSelectionState {
 		if (selectionProvider == null)
 			return;
 		ISelection s= selectionProvider.getSelection();
-		if (!(s instanceof IStructuredSelection))
+		if (!(s instanceof IStructuredSelection selection))
 			return;
-		IStructuredSelection selection= (IStructuredSelection)s;
 		if (!selection.toList().contains(fElement))
 			return;
 		fParts.add(part);
@@ -96,8 +95,7 @@ public class RenameSelectionState {
 			final ISetSelectionTarget target= (ISetSelectionTarget)fParts.get(i);
 			final IStructuredSelection[] newSelection= new IStructuredSelection[1];
 			newSelection[0]= currentSelection;
-			if (currentSelection instanceof TreeSelection) {
-				TreeSelection treeSelection= (TreeSelection)currentSelection;
+			if (currentSelection instanceof TreeSelection treeSelection) {
 				TreePath[] paths= treeSelection.getPaths();
 				for (int p= 0; p < paths.length; p++) {
 					TreePath path= paths[p];

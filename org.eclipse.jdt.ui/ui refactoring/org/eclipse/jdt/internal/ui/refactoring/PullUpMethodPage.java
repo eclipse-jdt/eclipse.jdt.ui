@@ -207,9 +207,8 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 		@Override
 		public boolean hasChildren(final Object element) {
-			if (!(element instanceof IType))
+			if (!(element instanceof final IType type))
 				return false;
-			final IType type= (IType) element;
 			return (fHierarchy.getAllSubtypes(type).length > 0) || fTypeToMemberArray.containsKey(type);
 		}
 
@@ -426,9 +425,8 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private ISourceReference getFirstSelectedSourceReference(final SelectionChangedEvent event) {
 		final ISelection s= event.getSelection();
-		if (!(s instanceof IStructuredSelection))
+		if (!(s instanceof final IStructuredSelection ss))
 			return null;
-		final IStructuredSelection ss= (IStructuredSelection) s;
 		if (ss.size() != 1)
 			return null;
 		final Object first= ss.getFirstElement();

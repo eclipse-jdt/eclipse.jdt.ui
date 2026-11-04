@@ -63,9 +63,9 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 
 	@Override
 	protected void javaToNative(Object data, TransferData transferData) {
-		if (! (data instanceof TypedSource[]))
+		if (! (data instanceof TypedSource[] sources))
 			return;
-		TypedSource[] sources = (TypedSource[]) data;
+		
 
 		/*
 		 * The serialization format is:

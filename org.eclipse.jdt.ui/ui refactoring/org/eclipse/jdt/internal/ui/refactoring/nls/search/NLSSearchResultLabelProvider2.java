@@ -55,12 +55,10 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 		String description;
 		StyledString elementLabel;
 
-		if (element instanceof FileEntry) {
-			FileEntry fileEntry= (FileEntry) element;
+		if (element instanceof FileEntry fileEntry) {
 			description= fileEntry.getMessage();
 			elementLabel= getPropertiesName(fileEntry.getPropertiesFile());
-		} else if (element instanceof CompilationUnitEntry) {
-			CompilationUnitEntry cuEntry= (CompilationUnitEntry) element;
+		} else if (element instanceof CompilationUnitEntry cuEntry) {
 			description= cuEntry.getMessage();
 			elementLabel= JavaElementLabels.getStyledTextLabel(cuEntry.getCompilationUnit(), (JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.COLORIZE));
 		} else {

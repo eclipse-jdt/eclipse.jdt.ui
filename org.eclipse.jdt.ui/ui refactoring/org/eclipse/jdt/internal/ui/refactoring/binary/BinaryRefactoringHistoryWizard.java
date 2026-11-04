@@ -484,8 +484,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 
 		createNecessarySourceCode(monitor);
 
-		if (descriptor instanceof JavaRefactoringDescriptor) {
-			JavaRefactoringDescriptor javaDescriptor= (JavaRefactoringDescriptor) descriptor;
+		if (descriptor instanceof JavaRefactoringDescriptor javaDescriptor) {
 			RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
 
 			Map<String, String> map= contribution.retrieveArgumentMap(descriptor);
@@ -607,8 +606,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	private String getTransformedHandle(final String project, final String handle) {
 		if (fSourceFolder != null) {
 			final IJavaElement target= JavaCore.create(fSourceFolder);
-			if (target instanceof IPackageFragmentRoot) {
-				final IPackageFragmentRoot extended= (IPackageFragmentRoot) target;
+			if (target instanceof final IPackageFragmentRoot extended) {
 				String sourceIdentifier= null;
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(project, handle, false);
 				if (element != null) {
@@ -686,8 +684,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		if (fSourceFolder != null) {
 			final IPath source= fSourceFolder.getFullPath();
 			final Object element= change.getModifiedElement();
-			if (element instanceof IAdaptable) {
-				final IAdaptable adaptable= (IAdaptable) element;
+			if (element instanceof final IAdaptable adaptable) {
 				final IResource resource= adaptable.getAdapter(IResource.class);
 				if (resource != null && source.isPrefixOf(resource.getFullPath()))
 					return false;
@@ -701,8 +698,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		if (fSourceFolder != null) {
 			final IPath source= fSourceFolder.getFullPath();
 			final RefactoringStatusContext context= entry.getContext();
-			if (context instanceof JavaStatusContext) {
-				final JavaStatusContext extended= (JavaStatusContext) context;
+			if (context instanceof final JavaStatusContext extended) {
 				final ICompilationUnit unit= extended.getCompilationUnit();
 				if (unit != null) {
 					final IResource resource= unit.getResource();

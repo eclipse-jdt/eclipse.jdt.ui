@@ -286,9 +286,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	}
 
 	private static boolean isPropertyFile(Object o) {
-		if (!(o instanceof IFile))
+		if (!(o instanceof IFile file))
 			return false;
-		IFile file= (IFile) o;
 		return (NLSRefactoring.PROPERTY_FILE_EXT.equals('.' + file.getFileExtension()));
 	}
 

@@ -161,8 +161,7 @@ public class DeleteAction extends SelectionDispatchAction {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null) {
 			IWorkbenchPart activePart= page.getActivePart();
-			if (activePart instanceof PackageExplorerPart) {
-				PackageExplorerPart packagePart= (PackageExplorerPart) activePart;
+			if (activePart instanceof PackageExplorerPart packagePart) {
 				WorkingSetModel model= packagePart.getWorkingSetModel();
 				List<IWorkingSet> activeWorkingSets= new ArrayList<>(Arrays.asList(model.getActiveWorkingSets()));
 				activeWorkingSets.removeAll(selection);

@@ -246,8 +246,7 @@ public class RenameLinkedMode {
 
 			if (viewer instanceof ITextViewerExtension6) {
 				IUndoManager undoManager= ((ITextViewerExtension6)viewer).getUndoManager();
-				if (undoManager instanceof IUndoManagerExtension) {
-					IUndoManagerExtension undoManagerExtension= (IUndoManagerExtension)undoManager;
+				if (undoManager instanceof IUndoManagerExtension undoManagerExtension) {
 					IUndoContext undoContext= undoManagerExtension.getUndoContext();
 					IOperationHistory operationHistory= OperationHistoryFactory.getOperationHistory();
 					fStartingUndoOperation= operationHistory.getUndoOperation(undoContext);
@@ -322,8 +321,7 @@ public class RenameLinkedMode {
 
 			viewer.setSelectedRange(fOriginalSelection.x, fOriginalSelection.y); // by default, full word is selected; restore original selection
 
-			if (viewer instanceof IEditingSupportRegistry) {
-				IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
+			if (viewer instanceof IEditingSupportRegistry registry) {
 				registry.register(fFocusEditingSupport);
 			}
 
@@ -371,11 +369,9 @@ public class RenameLinkedMode {
 		fShowPreview|= showPreview;
 		try {
 			ISourceViewer viewer= fEditor.getViewer();
-			if (viewer instanceof SourceViewer) {
-				SourceViewer sourceViewer= (SourceViewer) viewer;
+			if (viewer instanceof SourceViewer sourceViewer) {
 				Control viewerControl= sourceViewer.getControl();
-				if (viewerControl instanceof Composite) {
-					Composite composite= (Composite) viewerControl;
+				if (viewerControl instanceof Composite composite) {
 					Display display= composite.getDisplay();
 
 					// Flush pending redraw requests:
@@ -462,8 +458,7 @@ public class RenameLinkedMode {
 				fEditor.getSite().getWorkbenchWindow().run(false, true, _ -> {
 					if (viewer instanceof ITextViewerExtension6) {
 						IUndoManager undoManager= ((ITextViewerExtension6)viewer).getUndoManager();
-						if (undoManager instanceof IUndoManagerExtension) {
-							IUndoManagerExtension undoManagerExtension= (IUndoManagerExtension)undoManager;
+						if (undoManager instanceof IUndoManagerExtension undoManagerExtension) {
 							IUndoContext undoContext= undoManagerExtension.getUndoContext();
 							IOperationHistory operationHistory= OperationHistoryFactory.getOperationHistory();
 							while (undoManager.undoable()) {
@@ -634,8 +629,7 @@ public class RenameLinkedMode {
 		}
 
 		ISourceViewer viewer= fEditor.getViewer();
-		if (viewer instanceof IEditingSupportRegistry) {
-			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
+		if (viewer instanceof IEditingSupportRegistry registry) {
 			registry.unregister(fFocusEditingSupport);
 		}
 	}
