@@ -19,11 +19,11 @@
       <stop
          id="stop4121"
          offset="0"
-         style="stop-color:#2b2b2b;stop-opacity:1;" />
+         style="stop-color:#2b2b2b;stop-opacity:1" />
       <stop
          id="stop4123"
          offset="1"
-         style="stop-color:#686861;stop-opacity:1;" />
+         style="stop-color:#686861;stop-opacity:1" />
     </linearGradient>
     <linearGradient
        id="linearGradient4113">
@@ -50,11 +50,11 @@
     <linearGradient
        id="linearGradient4844-4">
       <stop
-         style="stop-color:#313131;stop-opacity:1;"
+         style="stop-color:#313131;stop-opacity:1"
          offset="0"
          id="stop4846-8" />
       <stop
-         style="stop-color:#696969;stop-opacity:1;"
+         style="stop-color:#696969;stop-opacity:1"
          offset="1"
          id="stop4848-8" />
     </linearGradient>

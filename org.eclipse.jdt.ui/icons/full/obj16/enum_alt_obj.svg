@@ -51,12 +51,12 @@
      id="layer1"
      transform="translate(0,-1036.3622)">
     <path
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#radialGradient3791);fill-opacity:1;stroke:#696969;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
+       style="fill:url(#radialGradient3791);fill-opacity:1;stroke:#696969;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
        id="path10796-2-6-2"
        d="m 398.75,468.23718 a 10.625,10.625 0 1 1 -21.25,0 10.625,10.625 0 1 1 21.25,0 z"
        transform="matrix(0.55482947,0,0,0.55482947,-207.83019,783.09311)" />
     <g
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#959595;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       style="fill:#959595;fill-opacity:1;stroke:none;display:inline"
        id="g8046"
        transform="translate(-4.8704053,8.0498073)">
       <rect
@@ -72,21 +72,21 @@
          height="1.03125"
          width="5.46875"
          id="rect7222-7"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#959595;fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
+         style="fill:#959595;fill-opacity:1;stroke:none;display:inline" />
       <rect
          y="1037.3481"
          x="9.87041"
          height="1.03125"
          width="5.46875"
          id="rect7222-7-2"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#959595;fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
+         style="fill:#959595;fill-opacity:1;stroke:none;display:inline" />
       <rect
          y="1034.3481"
          x="9.87041"
          height="1.03125"
          width="4.96875"
          id="rect7222-7-2-5"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#959595;fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
+         style="fill:#959595;fill-opacity:1;stroke:none;display:inline" />
     </g>
   </g>
 </svg>

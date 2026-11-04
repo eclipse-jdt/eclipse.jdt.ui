@@ -130,7 +130,7 @@
       <stop
          id="stop4904"
          offset="0"
-         style="stop-color:#c7b571;stop-opacity:1;" />
+         style="stop-color:#c7b571;stop-opacity:1" />
       <stop
          id="stop4906"
          offset="1"
@@ -168,7 +168,7 @@
     <linearGradient
        id="linearGradient4258">
       <stop
-         style="stop-color:#f4ae5f;stop-opacity:1;"
+         style="stop-color:#f4ae5f;stop-opacity:1"
          offset="0"
          id="stop4260" />
       <stop
@@ -391,11 +391,11 @@
     </g>
     <g
        id="text6430-2"
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
        transform="matrix(3.3253216,0,0,3.3245835,49.654056,-2426.2108)" />
     <g
        transform="matrix(3.1391206,0,0,3.5217855,49.654056,-2426.2108)"
-       style="font-style:normal;font-weight:normal;font-size:15.56941891px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
        id="text3782-3" />
     <g
        id="g11331-3-1-1-00"
@@ -503,15 +503,15 @@
        style="display:inline;fill:url(#linearGradient8641);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     <path
        id="path4320"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:medium;line-height:125%;font-family:Arial;letter-spacing:0px;word-spacing:0px;fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 14.240099,1014.3623 q 1.449876,0 2.266707,1.0153 0.973392,1.2024 0.973392,3.988 0,2.7789 -0.980198,3.9946 -0.810025,1.002 -2.259901,1.002 -1.456684,0 -2.348391,-1.0955 Q 11,1022.1645 11,1019.3456 q 0,-2.7656 0.980198,-3.9814 0.810025,-1.0019 2.259901,-1.0019 z m 0,1.5564 q -0.347154,0 -0.619431,0.2204 -0.272277,0.2138 -0.42203,0.7749 -0.197401,0.7282 -0.197401,2.4516 0,1.7234 0.176981,2.3714 0.176979,0.6413 0.44245,0.855 0.272277,0.2137 0.619431,0.2137 0.347153,0 0.61943,-0.2137 0.272278,-0.2204 0.422029,-0.7815 0.197401,-0.7215 0.197401,-2.4449 0,-1.7234 -0.176979,-2.3648 -0.176981,-0.6479 -0.449258,-0.8617 -0.26547,-0.2204 -0.612623,-0.2204 z" />
     <path
        id="path4322"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:medium;line-height:125%;font-family:Arial;letter-spacing:0px;word-spacing:0px;fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 23,1024.3622 -1.912747,0 0,-7.1943 q -1.048267,0.9782 -2.470916,1.447 l 0,-1.7324 q 0.748762,-0.2446 1.626857,-0.9239 0.878093,-0.6862 1.204827,-1.5964 l 1.551979,0 0,10 z" />
     <path
        id="path4324"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:medium;line-height:125%;font-family:Arial;letter-spacing:0px;word-spacing:0px;fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 28.240098,1014.3623 q 1.449876,0 2.266708,1.0153 0.973391,1.2024 0.973391,3.988 0,2.7789 -0.980198,3.9946 -0.810025,1.002 -2.259901,1.002 -1.456682,0 -2.34839,-1.0955 Q 25,1022.1645 25,1019.3456 q 0,-2.7656 0.980197,-3.9814 0.810025,-1.0019 2.259901,-1.0019 z m 0,1.5564 q -0.347153,0 -0.61943,0.2204 -0.272278,0.2138 -0.42203,0.7749 -0.197401,0.7282 -0.197401,2.4516 0,1.7234 0.17698,2.3714 0.17698,0.6413 0.442451,0.855 0.272277,0.2137 0.61943,0.2137 0.347154,0 0.619431,-0.2137 0.272277,-0.2204 0.42203,-0.7815 0.197401,-0.7215 0.197401,-2.4449 0,-1.7234 -0.176981,-2.3648 -0.176979,-0.6479 -0.449257,-0.8617 -0.26547,-0.2204 -0.612624,-0.2204 z" />
     <g
        id="g8662"

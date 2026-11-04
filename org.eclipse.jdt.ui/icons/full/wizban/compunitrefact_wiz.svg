@@ -108,7 +108,7 @@
       <stop
          id="stop4904"
          offset="0"
-         style="stop-color:#c7b571;stop-opacity:1;" />
+         style="stop-color:#c7b571;stop-opacity:1" />
       <stop
          id="stop4906"
          offset="1"
@@ -146,7 +146,7 @@
     <linearGradient
        id="linearGradient4258">
       <stop
-         style="stop-color:#f4ae5f;stop-opacity:1;"
+         style="stop-color:#f4ae5f;stop-opacity:1"
          offset="0"
          id="stop4260" />
       <stop
@@ -394,11 +394,11 @@
     </g>
     <g
        id="text6430-2"
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
        transform="matrix(3.3253216,0,0,3.3245835,49.654056,-2426.2108)" />
     <g
        transform="matrix(3.1391206,0,0,3.5217855,49.654056,-2426.2108)"
-       style="font-style:normal;font-weight:normal;font-size:15.56941891px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
        id="text3782-3" />
     <g
        id="g11331-3-1-1-00"
@@ -511,11 +511,11 @@
     </g>
     <path
        id="path9934"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:medium;line-height:125%;font-family:Arial;letter-spacing:0px;word-spacing:0px;fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 10.923704,1017.4663 0,-2.123 q 0.401001,-0.036 0.604248,-0.1945 0.203247,-0.1594 0.351562,-0.5307 0.148316,-0.3803 0.203247,-0.9465 0.04395,-0.4244 0.04395,-1.4771 0,-1.716 0.09888,-2.3883 0.09888,-0.6811 0.357055,-1.0879 0.258179,-0.4156 0.752564,-0.6545 0.335083,-0.1594 1.054687,-0.1594 l 0.291138,0 0,2.114 q -0.609741,0 -0.785522,0.1141 -0.170289,0.1063 -0.252686,0.3361 -0.0824,0.221 -0.0824,0.7695 0,0.5574 -0.04944,2.1141 -0.02747,0.8756 -0.142822,1.4241 -0.115357,0.5396 -0.296631,0.8933 -0.175781,0.3538 -0.543823,0.7342 0.324096,0.3007 0.527343,0.7077 0.208741,0.398 0.318604,0.9728 0.109863,0.5751 0.142822,1.5391 0.03845,1.4683 0.03845,1.8753 0,0.5837 0.08789,0.8136 0.08789,0.2301 0.263672,0.345 0.181274,0.1243 0.774536,0.1243 l 0,2.1228 -0.291138,0 q -0.741577,0 -1.137085,-0.1945 -0.395507,-0.1858 -0.670166,-0.628 -0.269165,-0.4424 -0.362549,-1.0969 -0.09338,-0.6457 -0.09338,-2.0432 0,-1.6275 -0.08789,-2.114 -0.12085,-0.7076 -0.368042,-1.0084 -0.241699,-0.3095 -0.74707,-0.3537 z" />
     <path
        id="path9936"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:medium;line-height:125%;font-family:Arial;letter-spacing:0px;word-spacing:0px;fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#41587c;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 16,1015.3622 0,-2 8,0 0,2 z m 0,4 0,-2 8,0 0,2 z" />
     <g
        id="g8662"

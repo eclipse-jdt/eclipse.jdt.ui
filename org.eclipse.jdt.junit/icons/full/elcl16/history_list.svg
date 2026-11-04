@@ -36,7 +36,7 @@
     <linearGradient
        id="linearGradient5105">
       <stop
-         style="stop-color:#bfb688;stop-opacity:1;"
+         style="stop-color:#bfb688;stop-opacity:1"
          offset="0"
          id="stop5107" />
       <stop
@@ -60,7 +60,7 @@
       <stop
          id="stop5243-0-2"
          offset="0"
-         style="stop-color:#879cc0;stop-opacity:1;" />
+         style="stop-color:#879cc0;stop-opacity:1" />
       <stop
          id="stop5245-9-4"
          offset="1"
@@ -80,7 +80,7 @@
       <stop
          id="stop5243-0-2-7"
          offset="0"
-         style="stop-color:#879cc0;stop-opacity:1;" />
+         style="stop-color:#879cc0;stop-opacity:1" />
       <stop
          id="stop5245-9-4-1"
          offset="1"
@@ -118,7 +118,7 @@
       <stop
          id="stop5243-0-2-4"
          offset="0"
-         style="stop-color:#879cc0;stop-opacity:1;" />
+         style="stop-color:#879cc0;stop-opacity:1" />
       <stop
          id="stop5245-9-4-0"
          offset="1"
@@ -234,11 +234,11 @@
            transform="matrix(-1,0,0,1,16.12959,8.0140628)">
           <g
              id="text6430"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;font-family:Sans"
+             style="fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
              transform="scale(-1,1)" />
           <g
              id="g6438"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Sans"
+             style="fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
              transform="scale(-1,1)">
             <path
                transform="matrix(0.32984735,0,0,0.32984735,-136.12701,882.92787)"
@@ -266,11 +266,11 @@
            transform="matrix(-1,0,0,1,16.12959,8.0140628)">
           <g
              id="text6430-8"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;font-family:Sans"
+             style="fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
              transform="scale(-1,1)" />
           <g
              id="g6438-3"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Sans"
+             style="fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
              transform="scale(-1,1)">
             <path
                transform="matrix(0.32984735,0,0,0.32984735,-136.12701,882.92787)"
@@ -298,11 +298,11 @@
            transform="matrix(-1,0,0,1,16.12959,8.0140628)">
           <g
              id="text6430-8-0"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;font-family:Sans"
+             style="fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
              transform="scale(-1,1)" />
           <g
              id="g6438-3-1"
-             style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Sans"
+             style="fill:#7cb87d;fill-opacity:1;stroke:#379860;stroke-width:3.41299248;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
              transform="scale(-1,1)">
             <path
                transform="matrix(0.32984735,0,0,0.32984735,-136.12701,882.92787)"

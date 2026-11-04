@@ -108,7 +108,7 @@
       <stop
          id="stop4904"
          offset="0"
-         style="stop-color:#c7b571;stop-opacity:1;" />
+         style="stop-color:#c7b571;stop-opacity:1" />
       <stop
          id="stop4906"
          offset="1"
@@ -146,7 +146,7 @@
     <linearGradient
        id="linearGradient4258">
       <stop
-         style="stop-color:#f4ae5f;stop-opacity:1;"
+         style="stop-color:#f4ae5f;stop-opacity:1"
          offset="0"
          id="stop4260" />
       <stop
@@ -439,7 +439,7 @@
          height="22.000017"
          width="22"
          id="rect10961-8-3-0-0-9"
-         style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#radialGradient10505-4-1);fill-opacity:1;stroke:none;stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="display:inline;fill:url(#radialGradient10505-4-1);fill-opacity:1;stroke:none;stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <ellipse
          transform="matrix(0.53796919,0,0,0.58547941,26.888566,998.758)"
          ry="4.5"
@@ -451,13 +451,13 @@
       <path
          id="rect10961-8-3-6-7-3-4"
          d="m 34.500006,997.8618 0,11.4551 0,11.5453 11.454898,0 11.545096,0 0,-11.5453 0,-0.09 0,-11.3647 -11.545096,0 -11.454898,0 z"
-         style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:none;fill-opacity:1;stroke:url(#linearGradient6321);stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="display:inline;fill:none;fill-opacity:1;stroke:url(#linearGradient6321);stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <path
-         style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient6323);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient6323);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 57.000005,1009.3622 -22.999999,0"
          id="path11108-6-7-5-8-7-1" />
       <path
-         style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient6325);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient6325);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 46.000006,997.3622 0,23"
          id="path11108-6-7-5-5-32-0" />
     </g>
@@ -479,7 +479,7 @@
          height="22.000017"
          width="22"
          id="rect10961-8-3-0-0"
-         style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#radialGradient10505-4);fill-opacity:1;stroke:none;stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="display:inline;fill:url(#radialGradient10505-4);fill-opacity:1;stroke:none;stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <ellipse
          transform="matrix(0.53796919,0,0,0.58547941,26.888566,998.758)"
          ry="4.5"
@@ -491,13 +491,13 @@
       <path
          id="rect10961-8-3-6-7-3"
          d="m 34.500006,997.8618 0,11.4551 0,11.5453 11.454898,0 11.545096,0 0,-11.5453 0,-0.09 0,-11.3647 -11.545096,0 -11.454898,0 z"
-         style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:none;fill-opacity:1;stroke:url(#linearGradient10579-0-2);stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="display:inline;fill:none;fill-opacity:1;stroke:url(#linearGradient10579-0-2);stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <path
-         style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient4895-6-8);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient4895-6-8);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 57.000005,1009.3622 -22.999999,0"
          id="path11108-6-7-5-8-7" />
       <path
-         style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient4895-8-9);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient4895-8-9);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 46.000006,997.3622 0,23"
          id="path11108-6-7-5-5-32" />
     </g>
@@ -516,11 +516,11 @@
     </g>
     <g
        id="text6430-2"
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
        transform="matrix(3.3253216,0,0,3.3245835,49.654056,-2426.2108)" />
     <g
        transform="matrix(3.1391206,0,0,3.5217855,49.654056,-2426.2108)"
-       style="font-style:normal;font-weight:normal;font-size:15.56941891px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
        id="text3782-3" />
     <g
        id="g11331-3-1-1-00"

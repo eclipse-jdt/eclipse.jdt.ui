@@ -70,7 +70,7 @@
       <stop
          id="blue_gradient_top_stop_1"
          offset="1"
-         style="stop-color:#ffffff;stop-opacity:0;" />
+         style="stop-color:#ffffff;stop-opacity:0" />
     </linearGradient>
     <linearGradient
        y2="1043.3622"
@@ -84,15 +84,15 @@
     <linearGradient
        id="minus_shadow_gradient">
       <stop
-         style="stop-color:#c3e9ff;stop-opacity:0.49019608;"
+         style="stop-color:#c3e9ff;stop-opacity:0.49019608"
          offset="0"
          id="minus_shadow_gradient_stop_0" />
       <stop
          id="minus_shadow_gradient_stop_1"
          offset="0.5"
-         style="stop-color:#c3e9ff;stop-opacity:1;" />
+         style="stop-color:#c3e9ff;stop-opacity:1" />
       <stop
-         style="stop-color:#c3e9ff;stop-opacity:0.49019608;"
+         style="stop-color:#c3e9ff;stop-opacity:0.49019608"
          offset="1"
          id="minus_shadow_gradient_stop_2" />
     </linearGradient>
@@ -114,11 +114,11 @@
      style="display:inline"
      transform="translate(0,-1036.3622)">
     <path
-       style="color:#ffffff;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:Sans;-inkscape-font-specification:Sans;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;enable-background:accumulate"
+       style="color:#ffffff;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;enable-background:accumulate"
        d="m 3,1039.2997 8.971875,0 0.02812,9.1563 -8.971875,0 z"
        id="front_background-5" />
     <path
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#a6afc4;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       style="color:#000000;fill:#a6afc4;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        d="m 2,1038.3622 0,11 11,0 0,-11 z m 1,1 9,0 0,9 -9,0 z"
        id="back_rect" />
     <path
@@ -130,11 +130,11 @@
        d="m 5,1041.3622 7,0 0,-2 -9,0 z"
        id="back_top_shadow" />
     <path
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#8b96ab;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       style="color:#000000;fill:#8b96ab;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        d="m 4,1040.3622 0,11 11,0 0,-11 z m 1,1 9,0 0,9 -9,0 z"
        id="front_rect" />
     <path
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        d="m 5,1041.3622 8.971875,0 0.02812,9 -8.971875,0 z"
        id="front_background" />
     <path

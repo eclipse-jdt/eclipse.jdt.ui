@@ -19,7 +19,7 @@
       <stop
          id="stop5149"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop5151"
          offset="1"
@@ -30,7 +30,7 @@
       <stop
          id="stop5143"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop5145"
          offset="1"
@@ -41,7 +41,7 @@
       <stop
          id="stop5137"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop5139"
          offset="1"
@@ -50,7 +50,7 @@
     <linearGradient
        id="linearGradient4994">
       <stop
-         style="stop-color:#f9fafc;stop-opacity:1;"
+         style="stop-color:#f9fafc;stop-opacity:1"
          offset="0"
          id="stop4996" />
       <stop
@@ -61,7 +61,7 @@
     <linearGradient
        id="linearGradient4902">
       <stop
-         style="stop-color:#c7b571;stop-opacity:1;"
+         style="stop-color:#c7b571;stop-opacity:1"
          offset="0"
          id="stop4904" />
       <stop
@@ -85,7 +85,7 @@
       <stop
          id="stop4879"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop4881"
          offset="1"
@@ -94,7 +94,7 @@
     <linearGradient
        id="linearGradient4861">
       <stop
-         style="stop-color:#91a5c7;stop-opacity:1;"
+         style="stop-color:#91a5c7;stop-opacity:1"
          offset="0"
          id="stop4863" />
       <stop
@@ -190,11 +190,11 @@
       <stop
          id="stop4846-8-4"
          offset="0"
-         style="stop-color:#3f3f3f;stop-opacity:1;" />
+         style="stop-color:#3f3f3f;stop-opacity:1" />
       <stop
          id="stop4848-8-9"
          offset="1"
-         style="stop-color:#303030;stop-opacity:1;" />
+         style="stop-color:#303030;stop-opacity:1" />
     </linearGradient>
     <linearGradient
        y2="1038.5814"
@@ -218,7 +218,7 @@
        maskUnits="userSpaceOnUse"
        id="mask6204">
       <path
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+         style="color:#000000;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
          d="m 1,1036.3935 0,0.5 0,12.9687 0,0.5 0.5,0 10.0625,0 0.5,0 0,-0.5 0,-9.9687 0,-0.2188 -0.15625,-0.125 -3.0625,-3 -0.125,-0.1562 -0.21875,0 -7,0 -0.5,0 z"
          id="path6206" />
     </mask>

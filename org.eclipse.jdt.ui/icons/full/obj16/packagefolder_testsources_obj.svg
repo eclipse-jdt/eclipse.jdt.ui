@@ -28,7 +28,7 @@
       <stop
          id="stop3969"
          offset="0"
-         style="stop-color:#c48a4e;stop-opacity:1;" />
+         style="stop-color:#c48a4e;stop-opacity:1" />
       <stop
          id="stop3971"
          offset="1"
@@ -245,7 +245,7 @@
        fy="442.57816"
        r="6.1875" />
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4203"
        x="0"
        y="0"
@@ -296,7 +296,7 @@
          id="feComposite4217" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4211"
        x="-0.059127244"
        y="-0.084289349"
@@ -347,7 +347,7 @@
          id="feComposite4226" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4228"
        x="-0.045429609"
        y="-0.049925321"

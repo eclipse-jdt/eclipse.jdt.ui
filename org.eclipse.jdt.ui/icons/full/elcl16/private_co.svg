@@ -17,11 +17,11 @@
     <linearGradient
        id="linearGradient6642">
       <stop
-         style="stop-color:#e83038;stop-opacity:1;"
+         style="stop-color:#e83038;stop-opacity:1"
          offset="0"
          id="stop6644" />
       <stop
-         style="stop-color:#af131a;stop-opacity:1;"
+         style="stop-color:#af131a;stop-opacity:1"
          offset="1"
          id="stop6646" />
     </linearGradient>
@@ -67,14 +67,14 @@
          height="9.9879284"
          width="9.9436893"
          id="rect6562"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;color:#000000;fill:url(#linearGradient8842);fill-opacity:1;fill-rule:nonzero;stroke:#a81d24;stroke-width:0.60000002;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans" />
+         style="color:#000000;fill:url(#linearGradient8842);fill-opacity:1;fill-rule:nonzero;stroke:#a81d24;stroke-width:0.60000002;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
       <rect
          y="1040.8018"
          x="4.2540312"
          height="7.1817212"
          width="7.2160501"
          id="rect6562-9"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;color:#000000;fill:#ffffff;fill-opacity:0.18691592;stroke:#ffffff;stroke-width:0.84461385;stroke-miterlimit:4;stroke-opacity:0.56542059;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans" />
+         style="color:#000000;fill:#ffffff;fill-opacity:0.18691592;stroke:#ffffff;stroke-width:0.84461385;stroke-miterlimit:4;stroke-opacity:0.56542059;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
     </g>
   </g>
 </svg>

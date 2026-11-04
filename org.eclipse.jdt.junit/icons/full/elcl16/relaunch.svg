@@ -32,11 +32,11 @@
     <linearGradient
        id="linearGradient9321">
       <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
+         style="stop-color:#ffffff;stop-opacity:1"
          offset="0"
          id="stop9323" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:0;"
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
          id="stop9325" />
     </linearGradient>
@@ -78,13 +78,13 @@
          offset="0"
          style="stop-color:#4f9e55;stop-opacity:1" />
       <stop
-         style="stop-color:#3c8d49;stop-opacity:1;"
+         style="stop-color:#3c8d49;stop-opacity:1"
          offset="0.5"
          id="stop10806-6-8-5-3-2-95-0-5-4-8" />
       <stop
          id="stop10802-1-5-3-0-2-0-9-8-4-3"
          offset="1"
-         style="stop-color:#a4e173;stop-opacity:1;" />
+         style="stop-color:#a4e173;stop-opacity:1" />
     </linearGradient>
     <linearGradient
        y2="457.95499"

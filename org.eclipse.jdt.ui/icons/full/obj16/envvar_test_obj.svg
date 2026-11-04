@@ -65,7 +65,7 @@
        x2="12.51806"
        y2="1044.4806" />
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4173"
        x="-0.050969735"
        y="-0.050969735"
@@ -140,7 +140,7 @@
          transform="matrix(0.29708622,0,0,0.29708622,-106.92943,901.89947)"
          d="m 398.75,468.23718 a 10.625,10.625 0 0 1 -10.625,10.625 10.625,10.625 0 0 1 -10.625,-10.625 10.625,10.625 0 0 1 10.625,-10.625 10.625,10.625 0 0 1 10.625,10.625 z"
          id="path10796-2-6-2-7"
-         style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient8234);fill-opacity:1;stroke:url(#linearGradient8236);stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans" />
+         style="fill:url(#linearGradient8234);fill-opacity:1;stroke:url(#linearGradient8236);stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline" />
     </g>
   </g>
 </svg>

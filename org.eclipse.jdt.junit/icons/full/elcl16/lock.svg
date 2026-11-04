@@ -19,7 +19,7 @@
       <stop
          id="stop18857"
          offset="0"
-         style="stop-color:#a4b1c7;stop-opacity:1;" />
+         style="stop-color:#a4b1c7;stop-opacity:1" />
       <stop
          style="stop-color:#e1e9f8;stop-opacity:0"
          offset="0.50000364"
@@ -32,7 +32,7 @@
     <linearGradient
        id="linearGradient18808">
       <stop
-         style="stop-color:#a4b1c7;stop-opacity:1;"
+         style="stop-color:#a4b1c7;stop-opacity:1"
          offset="0"
          id="stop18810" />
       <stop
@@ -47,7 +47,7 @@
     <linearGradient
        id="linearGradient18543">
       <stop
-         style="stop-color:#a79c68;stop-opacity:1;"
+         style="stop-color:#a79c68;stop-opacity:1"
          offset="0"
          id="stop18545" />
       <stop
@@ -70,11 +70,11 @@
     <linearGradient
        id="linearGradient4862">
       <stop
-         style="stop-color:#937323;stop-opacity:1;"
+         style="stop-color:#937323;stop-opacity:1"
          offset="0"
          id="stop4864" />
       <stop
-         style="stop-color:#79601d;stop-opacity:1;"
+         style="stop-color:#79601d;stop-opacity:1"
          offset="1"
          id="stop4866" />
     </linearGradient>
@@ -92,7 +92,7 @@
     <linearGradient
        id="linearGradient5156">
       <stop
-         style="stop-color:#fdf3cb;stop-opacity:1;"
+         style="stop-color:#fdf3cb;stop-opacity:1"
          offset="0"
          id="stop5158" />
       <stop
@@ -189,7 +189,7 @@
          offset="0"
          id="stop4996-5" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:0;"
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
          id="stop4998-5" />
     </linearGradient>
@@ -240,7 +240,7 @@
          offset="0"
          id="stop4996-5-4" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:0;"
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
          id="stop4998-5-4" />
     </linearGradient>
@@ -280,7 +280,7 @@
          offset="0"
          id="stop4996-5-4-2" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:0;"
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
          id="stop4998-5-4-4" />
     </linearGradient>
@@ -320,7 +320,7 @@
          offset="0"
          id="stop4996-5-4-2-4" />
       <stop
-         style="stop-color:#ffffff;stop-opacity:0;"
+         style="stop-color:#ffffff;stop-opacity:0"
          offset="1"
          id="stop4998-5-4-4-0" />
     </linearGradient>
@@ -483,7 +483,7 @@
       <path
          id="path8589"
          d="m 3.96875,1043.3622 c -1.839313,0 -3.34375,1.4732 -3.34375,3.3125 l 0,0.3125 c -0.347633,0.1472 -0.59375,0.4741 -0.59375,0.875 l 0,3.5 c 0,0.5346 0.434192,0.9688 0.96875,0.9688 l 5.9375,0 c 0.534558,0 1,-0.4342 1,-0.9688 l 0,-3.5 c 0,-0.3852 -0.258682,-0.6877 -0.59375,-0.8437 l 0,-0.3438 c 0,-1.8416 -1.535687,-3.3125 -3.375,-3.3125 z m 0,1.8125 c 0.865247,0 1.53125,0.6385 1.53125,1.5 l 0,0.2188 -3.03125,0 0,-0.2188 c 0,-0.8653 0.634753,-1.5 1.5,-1.5 z"
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.60714811;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+         style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.60714811;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
     </g>
     <g
        id="g8451"
@@ -491,7 +491,7 @@
       <path
          id="rect4838-1"
          d="m -10.059546,1045.0618 0,-2.9375 c 0,-2.7586 -1.253608,-5 -4.012192,-5 -2.758584,0 -4.162918,2.2414 -4.162918,5 l 0,2.9375"
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:none;stroke:url(#linearGradient8465);stroke-width:2.47056686;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+         style="color:#000000;fill:none;stroke:url(#linearGradient8465);stroke-width:2.47056686;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
       <rect
          ry="1.1048543"
          rx="1.1048543"
