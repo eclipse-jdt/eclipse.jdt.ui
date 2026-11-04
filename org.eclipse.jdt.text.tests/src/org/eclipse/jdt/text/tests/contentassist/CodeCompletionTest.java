@@ -3079,6 +3079,84 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 
 	@Test
+	public void testKeywordCompletionTrailingSpaceNotAdded() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			class A {
+			    public st void
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+		String str= " void";
+		int offset= contents.indexOf(str);
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setIgnored(CompletionProposal.KEYWORD, false);
+
+		CompletionProposal coreProposal= CompletionProposal.create(CompletionProposal.KEYWORD, offset-1);
+		coreProposal.setCompletion("static".toCharArray());
+		coreProposal.setReplaceRange(offset-2 /* start of the replacement*/, offset);
+		collector.accept(coreProposal);
+
+		IJavaCompletionProposal[] proposals= collector.getKeywordCompletionProposals();
+		assertEquals(1, proposals.length);
+
+		IDocument doc= new Document(contents);
+		proposals[0].apply(doc);
+
+		String expected= """
+			package test1;
+
+			class A {
+			    public static void
+			}
+			""";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
+	public void testKeywordCompletionTrailingSpaceAdded() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			package test1;
+
+			class A {
+			    public stvoid
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+		String str= "void";
+		int offset= contents.indexOf(str);
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setIgnored(CompletionProposal.KEYWORD, false);
+
+		CompletionProposal coreProposal= CompletionProposal.create(CompletionProposal.KEYWORD, offset-1);
+		coreProposal.setCompletion("static".toCharArray());
+		coreProposal.setReplaceRange(offset-2 /* start of the replacement*/, offset);
+		collector.accept(coreProposal);
+
+		IJavaCompletionProposal[] proposals= collector.getKeywordCompletionProposals();
+		assertEquals(1, proposals.length);
+
+		IDocument doc= new Document(contents);
+		proposals[0].apply(doc);
+
+		String expected= """
+			package test1;
+
+			class A {
+			    public static void
+			}
+			""";
+		assertEquals(expected, doc.get());
+	}
+
+	@Test
 	public void testAnnotationCompletionNoTrailingSpace() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);

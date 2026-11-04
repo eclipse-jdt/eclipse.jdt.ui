@@ -34,6 +34,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -448,7 +449,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	protected IJavaCompletionProposal createJavaCompletionProposal(CompletionProposal proposal) {
 		switch (proposal.getKind()) {
 			case CompletionProposal.KEYWORD:
-
 				return createKeywordProposal(proposal);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposal(proposal);
@@ -809,11 +809,24 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		return proposal;
 	}
 
+	private boolean canAppendSpace(CompletionProposal proposal) {
+		try {
+			IBuffer buffer = getCompilationUnit().getBuffer();
+			int end = proposal.getCompletionLocation()+1;
+			if (buffer.getChar(end) == ' ' || buffer.getChar(end) == '\t') {
+				return false;
+			}
+			return true;
+		} catch (JavaModelException e) {
+			return false;
+		}
+	}
+
 	private IJavaCompletionProposal createKeywordProposal(CompletionProposal proposal) {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
-		if(KEYWORDS_NEEDING_TRAILING_SPACE.contains(completion)) {
+		if(KEYWORDS_NEEDING_TRAILING_SPACE.contains(completion) && canAppendSpace(proposal)) {
 			completion = completion + " "; //$NON-NLS-1$
 		}
 		StyledString label= fLabelProvider.createSimpleLabel(proposal);
