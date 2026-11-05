@@ -128,6 +128,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
+import org.eclipse.jdt.core.manipulation.internal.javadoc.HighlightJsSupport;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -561,7 +562,7 @@ public class JavadocView extends AbstractInfoView {
 	protected void internalCreatePartControl(Composite parent) {
 		try {
 			fBrowser= new Browser(parent, SWT.NONE);
-			fBrowser.setJavascriptEnabled(false);
+			fBrowser.setJavascriptEnabled(true);
 			fIsUsingBrowserWidget= true;
 			addLinkListener(fBrowser);
 			fBrowser.addOpenWindowListener(event -> event.required= true);
@@ -1102,7 +1103,17 @@ public class JavadocView extends AbstractInfoView {
 		if (buffer.length() == 0)
 			return null;
 
+		String sanitized= HighlightJsSupport.sanitizeScripts(buffer.toString());
+		buffer.setLength(0);
+		buffer.append(sanitized);
 		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, JavadocHover.substituteJavaSyntaxColors(JavaElementLinks.modifyCssStyleSheet(fgStyleSheet, buffer)));
+		String hlHeader= HighlightJsSupport.getHighlightJsHeader();
+		if (!hlHeader.isEmpty()) {
+			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+			if (endHeadIdx > 0) {
+				buffer.insert(endHeadIdx, "\n" + hlHeader); //$NON-NLS-1$
+			}
+		}
 		if (base != null) {
 			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 			buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$

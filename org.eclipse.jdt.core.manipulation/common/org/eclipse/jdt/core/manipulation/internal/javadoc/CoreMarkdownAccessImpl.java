@@ -90,7 +90,7 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 			html.line();
 			if (isJava) {
 				html.tag("pre"); //$NON-NLS-1$
-				html.tag("code", Map.of("class", "language-java")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				html.tag("code", Map.of("class", "nohighlight")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				html.raw(JavaCodeTokenizer.tokenize(literal));
 			} else {
 				html.tag("pre"); //$NON-NLS-1$

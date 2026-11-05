@@ -27,6 +27,7 @@ import java.net.URL;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Drawable;
@@ -34,6 +35,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -112,6 +114,7 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
+import org.eclipse.jdt.core.manipulation.internal.javadoc.HighlightJsSupport;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -341,7 +344,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tbm);
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tbm) {
+					// Enable JavaScript for highlight.js syntax highlighting of fenced code blocks.
+					// Same pattern as lsp4e's FocusableBrowserInformationControl.
+					@Override
+					protected void createContent(Composite parent1) {
+						super.createContent(parent1);
+						((Browser) parent1.getChildren()[0]).setJavascriptEnabled(true);
+					}
+				};
 				iControl.setDisposeTimeout(getDisposeHoverTimeout());
 				final BackAction backAction= new BackAction(iControl);
 				backAction.setEnabled(false);
@@ -461,6 +472,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
 				iControl= new BrowserInformationControl(parent, font, tooltipAffordanceString) {
+					// Enable JavaScript for highlight.js syntax highlighting of fenced code blocks.
+					// Same pattern as lsp4e's FocusableBrowserInformationControl.
+					@Override
+					protected void createContent(Composite parent1) {
+						super.createContent(parent1);
+						((Browser) parent1.getChildren()[0]).setJavascriptEnabled(true);
+					}
 
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
@@ -838,7 +856,17 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$
 			RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
 
+			String sanitized= HighlightJsSupport.sanitizeScripts(buffer.toString());
+			buffer.setLength(0);
+			buffer.append(sanitized);
 			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, JavadocHover.getStyleSheet(buffer));
+			String hlHeader= HighlightJsSupport.getHighlightJsHeader();
+			if (!hlHeader.isEmpty()) {
+				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+				if (endHeadIdx > 0) {
+					buffer.insert(endHeadIdx, "\n" + hlHeader); //$NON-NLS-1$
+				}
+			}
 			if (base != null) {
 				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
