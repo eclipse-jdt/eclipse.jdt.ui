@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -29,6 +30,8 @@ import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -38,6 +41,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
@@ -47,9 +51,13 @@ import org.eclipse.jdt.ui.tests.core.rules.Java9ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.ModuleCorrectionsSubProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 public class QuickFixTest9 extends QuickFixTest {
 
@@ -231,6 +239,56 @@ public class QuickFixTest9 extends QuickFixTest {
 		assertProposalExists(proposals, proposalStr);
 		proposalStr= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewenum_inpackage_description, args);
 		assertProposalExists(proposals, proposalStr);
+	}
+
+	private List<ICommandAccess> collectSplitPackageProposals(ICompilationUnit cu, String modules) {
+		ProblemLocation problem= new ProblemLocation(0, 1, IProblem.ConflictingPackageFromModules, new String[] { "test", modules }, true, "org.eclipse.jdt.core.problem"); //$NON-NLS-1$ //$NON-NLS-2$
+		List<ICommandAccess> proposals= new ArrayList<>();
+		ModuleCorrectionsSubProcessor.getIgnoreUnnamedModuleForSplitPackageProposals(new AssistContext(cu, 0, 0), problem, proposals);
+		return proposals;
+	}
+
+	private ICompilationUnit createSplitPackageCu() throws CoreException {
+		IPackageFragment pack= fSourceFolder3.createPackageFragment("test", false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", "package test;\npublic class Cls {\n}\n", false, null);
+		fCus.add(cu);
+		return cu;
+	}
+
+	@Test
+	public void testIgnoreUnnamedModuleForSplitPackage() throws Exception {
+		ICompilationUnit cu= createSplitPackageCu();
+		String compliance= fJProject3.getOption(JavaCore.COMPILER_COMPLIANCE, false);
+		String workspaceValue= JavaCore.getOption(JavaCore.COMPILER_IGNORE_UNNAMED_MODULE_FOR_SPLIT_PACKAGE);
+		fJProject3.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+
+		List<ICommandAccess> proposals= collectSplitPackageProposals(cu, "test.module, <unnamed>");
+		assertEquals(1, proposals.size());
+		IJavaCompletionProposal proposal= (IJavaCompletionProposal) proposals.get(0);
+		assertEquals(CorrectionMessages.ModuleCorrectionsSubProcessor_ignoreUnnamedModuleForSplitPackage_description, proposal.getDisplayString());
+
+		proposal.apply(new Document());
+
+		assertEquals(JavaCore.ENABLED, fJProject3.getOption(JavaCore.COMPILER_IGNORE_UNNAMED_MODULE_FOR_SPLIT_PACKAGE, false));
+		assertEquals(JavaCore.ERROR, fJProject3.getOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, false));
+		assertEquals(compliance, fJProject3.getOption(JavaCore.COMPILER_COMPLIANCE, false));
+		assertEquals(workspaceValue, JavaCore.getOption(JavaCore.COMPILER_IGNORE_UNNAMED_MODULE_FOR_SPLIT_PACKAGE));
+		assertTrue(collectSplitPackageProposals(cu, "test.module, <unnamed>").isEmpty());
+	}
+
+	@Test
+	public void testNoIgnoreUnnamedModuleProposalForNamedOnlyConflicts() throws Exception {
+		ICompilationUnit cu= createSplitPackageCu();
+		assertTrue(collectSplitPackageProposals(cu, "test.module").isEmpty());
+		assertTrue(collectSplitPackageProposals(cu, "module.one, module.two").isEmpty());
+		assertTrue(collectSplitPackageProposals(cu, "module.one, module.two, <unnamed>").isEmpty());
+	}
+
+	@Test
+	public void testNoIgnoreUnnamedModuleProposalIfOptionEnabled() throws Exception {
+		ICompilationUnit cu= createSplitPackageCu();
+		fJProject3.setOption(JavaCore.COMPILER_IGNORE_UNNAMED_MODULE_FOR_SPLIT_PACKAGE, JavaCore.ENABLED);
+		assertTrue(collectSplitPackageProposals(cu, "test.module, <unnamed>").isEmpty());
 	}
 
 	@Test
