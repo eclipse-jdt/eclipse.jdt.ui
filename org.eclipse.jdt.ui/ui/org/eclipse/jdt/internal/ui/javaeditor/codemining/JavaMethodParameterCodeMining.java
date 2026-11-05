@@ -28,7 +28,7 @@ public class JavaMethodParameterCodeMining extends LineContentCodeMining {
 		if (isVarargs && parameterIndex == parameterNames.length - 1) {
 			text.append('…');
 		}
-		text.append(": "); //$NON-NLS-1$
+		text.append(":"); //$NON-NLS-1$
 		setLabel(text.toString());
 	}
 
