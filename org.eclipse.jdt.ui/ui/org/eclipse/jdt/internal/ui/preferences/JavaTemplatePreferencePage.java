@@ -156,7 +156,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage {
 			TemplatePersistenceData data= (TemplatePersistenceData) selection.getFirstElement();
 			Template template= data.getTemplate();
 			String contextId= template.getContextTypeId();
-			TemplateContextType type= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextId);
+			TemplateContextType type= JavaPlugin.getDefault().getTemplateContextRegistryCore().getContextType(contextId);
 			fTemplateProcessor.setContextType(type);
 
 			IDocument doc= viewer.getDocument();
