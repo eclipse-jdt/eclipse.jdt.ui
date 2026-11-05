@@ -253,7 +253,7 @@ public class JUnit4SuiteSourceTest {
 
 	private static List<TreeEntry> treeEntries(ITestReference test) {
 		List<TreeEntry> entries= new ArrayList<>();
-		test.sendTree((identifier, suite, count, dynamic, parentId) -> entries.add(new TreeEntry(identifier, suite, count)));
+		test.sendTree((identifier, suite, count, _, _) -> entries.add(new TreeEntry(identifier, suite, count)));
 		return entries;
 	}
 
