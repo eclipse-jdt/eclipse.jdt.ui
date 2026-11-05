@@ -66,6 +66,10 @@ public final class PackagesMessages extends NLS {
 	public static String ClassPathContainer_unknown_label;
 	public static String PackageExplorerPart_workspace;
 	public static String PackageExplorerPart_workingSetModel;
+	public static String HighlightAction_label;
+	public static String HighlightAction_tooltip;
+	public static String RemoveHighlightAction_label;
+	public static String RemoveHighlightAction_tooltip;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, PackagesMessages.class);
