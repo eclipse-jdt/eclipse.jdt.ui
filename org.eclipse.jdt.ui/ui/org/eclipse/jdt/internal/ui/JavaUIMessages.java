@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -49,6 +49,9 @@ public final class JavaUIMessages extends NLS {
 	public static String OpenTypeAction_dialogTitle;
 	public static String OpenTypeAction_dialogMessage;
 	public static String OpenTypeSelectionDialog_open;
+	public static String OpenTypeSelectionDialog_preview_no_source;
+	public static String OpenTypeSelectionDialog_preview_job_name;
+	public static String OpenTypeSelectionDialog_preview_accessible_name;
 
 
 	public static String JavaUI_defaultDialogMessage;
