@@ -407,6 +407,64 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	}
 
 	/**
+	 * Returns true if the version string passed is an LTS, false otherwise
+	 *
+	 * @param version The java version number
+	 * @return true if version is an LTS, false otherwise
+	 * @since 3.48
+	 */
+	public static boolean isVersionLTS(String version) {
+		if (version != null) {
+			if (version.equals(JavaCore.VERSION_1_8)) return true;
+			try {
+				double numericVersion = Double.parseDouble(version);
+				int latestVersion = Integer.parseInt(JavaCore.latestSupportedJavaVersion());
+				return (numericVersion <= latestVersion) && numericVersion == 11 || (numericVersion >= 17 && (numericVersion - 17) % 4 == 0);
+			} catch (NumberFormatException ex) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the next LTS given a Java version. If none available it returns null.
+	 *
+	 * @param version java version number
+	 * @return next LTS java version if available.
+	 * @since 3.48
+	 */
+	public static String getNextLTS(String version) {
+		if (version != null) {
+			if(isVersionLTS(version)) {
+				return version; //is Already at latest LTS
+			}
+			try {
+				double numericVersion = Double.parseDouble(version);
+				if (numericVersion >= 2 && numericVersion < 8) return null;
+				else if (numericVersion<9) {
+					return JavaCore.VERSION_1_8;
+				}
+				if (numericVersion<=11) {
+					return JavaCore.VERSION_11;
+				}
+				if (numericVersion <= 17) {
+					return JavaCore.VERSION_17;
+				}
+				if (numericVersion > 17) {
+					int numberOfReleasesToAdd = ((int)numericVersion - 17)/4 + (((int)numericVersion - 17)%4==0? 0 : 1);
+					int nextTLS=17 + 4*numberOfReleasesToAdd;
+					if (nextTLS < Integer.parseInt(JavaCore.latestSupportedJavaVersion()))
+						return Integer.toString(nextTLS);
+				}
+			} catch (NumberFormatException ex) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Adds a proposal to increase the compiler compliance level
 	 * @param context the context
 	 * @param problem the current problem
@@ -442,8 +500,8 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, enablePreviews, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
 		} else {
 			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
-			if(!JavaCore.isVersionLTS(requiredVersion)) {
-				String nextLTS = JavaCore.getNextLTS(requiredVersion);
+			if(!isVersionLTS(requiredVersion)) {
+				String nextLTS = getNextLTS(requiredVersion);
 				if(nextLTS != null) {
 					String label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description_lts, nextLTS);
 					proposals.add(new ChangeToRequiredCompilerCompliance(label2, project, false, nextLTS, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
