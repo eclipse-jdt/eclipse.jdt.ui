@@ -42,11 +42,17 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 
+import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -129,7 +135,7 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 	}
 
 	@Test
-	public void testCreatingSuiteOpenActionDoesNotResolveTypes() throws Exception {
+	public void testSuiteOpenActionResolvesTypesOnlyOnceWhenRun() throws Exception {
 		AtomicInteger lookups= new AtomicInteger();
 		IJavaProject project= (IJavaProject) Proxy.newProxyInstance(IJavaProject.class.getClassLoader(), new Class<?>[] { IJavaProject.class }, (_, method, arguments) -> {
 			if (method.getName().equals("findType")) { //$NON-NLS-1$
@@ -149,6 +155,8 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 		lookups.set(0);
 		assertNotNull(factory.invoke(fView.getTestViewer(), suite));
 		assertEquals("Creating the menu action must not resolve source types", 0, lookups.get()); //$NON-NLS-1$
+		assertOpens(suite, fSuiteType);
+		assertEquals("Opening the suite must resolve its source only once", 1, lookups.get()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -266,7 +274,7 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 	public void testParameterizedGroupStillOpensItsChild() throws Exception {
 		TestSuiteElement group= suite("[0]", null); //$NON-NLS-1$
 		new TestCaseElement(group, "child", "testExample[0](pack.SampleTest)", null, false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
-		assertOpens(group, fTestType);
+		assertOpens(group, fTestType.getMethod("testExample", new String[0])); //$NON-NLS-1$
 	}
 
 	@Test
@@ -295,7 +303,7 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 		method.invoke(fView, session);
 	}
 
-	private void assertOpens(TestSuiteElement suite, IType expectedType) throws Exception {
+	private void assertOpens(TestSuiteElement suite, IMember expectedMember) throws Exception {
 		fView.setLayoutMode(TestRunnerViewPart.LAYOUT_HIERARCHICAL);
 		TestViewer viewer= fView.getTestViewer();
 		viewer.registerActiveSession(fSession);
@@ -307,7 +315,11 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 		IEditorPart editor= fPage.getActiveEditor();
 		assertNotNull(editor);
 		try {
-			assertEquals(expectedType.getCompilationUnit(), JavaUI.getEditorInputJavaElement(editor.getEditorInput()));
+			assertEquals(expectedMember.getCompilationUnit(), JavaUI.getEditorInputJavaElement(editor.getEditorInput()));
+			ITextSelection selection= (ITextSelection) ((ITextEditor) editor).getSelectionProvider().getSelection();
+			ISourceRange range= expectedMember.getNameRange();
+			assertEquals(range.getOffset(), selection.getOffset());
+			assertEquals(range.getLength(), selection.getLength());
 		} finally {
 			fPage.closeEditor(editor, false);
 		}
