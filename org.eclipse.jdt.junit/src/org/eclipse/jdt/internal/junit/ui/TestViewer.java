@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
@@ -516,8 +518,10 @@ public class TestViewer {
 
 	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
 		String testName= testSuite.getTestName();
-		if (testName.indexOf('(') < 0 && !(testName.startsWith("[") && testName.endsWith("]"))) { //$NON-NLS-1$ //$NON-NLS-2$
-			return new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName()) {
+		String suiteTypeName= testSuite.getSuiteTypeName();
+		if (testName.indexOf('(') < 0
+				&& JavaConventionsUtil.validateJavaTypeName(suiteTypeName, fTestRunnerPart.getLaunchedProject()).getSeverity() != IStatus.ERROR) {
+			return new OpenTestAction(fTestRunnerPart, suiteTypeName) {
 				private OpenTestAction fChildAction;
 
 				@Override
