@@ -17,33 +17,17 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.text.NumberFormat;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.viewers.IToolTipProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
-
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
@@ -52,16 +36,11 @@ import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
-public class TestSessionLabelProvider extends LabelProvider implements IStyledLabelProvider, IToolTipProvider {
+public class TestSessionLabelProvider extends LabelProvider implements IStyledLabelProvider {
 
 	private final TestRunnerViewPart fTestRunnerPart;
 	private final int fLayoutMode;
 	private final NumberFormat timeFormat;
-	private record TypeLookup(IJavaProject project, String className) {
-	}
-	private final Map<TypeLookup, CompletableFuture<IType>> fToolTipTypes= new ConcurrentHashMap<>();
-	private final IElementChangedListener fTypeCacheInvalidator= _ -> clearTypeCache();
-	private volatile boolean fDisposed;
 
 	private boolean fShowTime;
 	private boolean fShowTimeDetails;
@@ -77,9 +56,6 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		timeFormat.setMinimumFractionDigits(3);
 		timeFormat.setMaximumFractionDigits(3);
 		timeFormat.setMinimumIntegerDigits(1);
-		if (testRunnerPart != null) {
-			JavaCore.addElementChangedListener(fTypeCacheInvalidator);
-		}
 	}
 
 	@Override
@@ -174,83 +150,6 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			return BasicElementLabels.getJavaElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
 		}
 		return null;
-	}
-
-	@Override
-	public String getToolTipText(Object element) {
-		if (!(element instanceof TestElement testElement) || fTestRunnerPart == null || fDisposed) {
-			return null;
-		}
-		String className= testElement.getClassName();
-		if (BasicElementLabels.getJavaElementName(className).equals(getSimpleLabel(element))) {
-			return null;
-		}
-		IJavaProject project= fTestRunnerPart.getLaunchedProject();
-		try {
-			// Preserve the fast path for classes on the launched project's build path.
-			if (project != null && project.findType(className) != null) {
-				return BasicElementLabels.getJavaElementName(className);
-			}
-		} catch (JavaModelException e) {
-			// The project's source may no longer be available, e.g. for an old run.
-		}
-		IType type= toolTipType(new TypeLookup(project, className)).getNow(null);
-		return type != null && type.exists() ? BasicElementLabels.getJavaElementName(className) : null;
-	}
-
-	private synchronized CompletableFuture<IType> toolTipType(TypeLookup lookup) {
-		if (fDisposed) {
-			return CompletableFuture.completedFuture(null);
-		}
-		CompletableFuture<IType> cached= fToolTipTypes.get(lookup);
-		if (cached != null) {
-			return cached;
-		}
-		CompletableFuture<IType> result= new CompletableFuture<>();
-		fToolTipTypes.put(lookup, result);
-		Job job= new Job(JUnitMessages.TestRunnerViewPart_jobName) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					IType type= OpenEditorAction.findType(lookup.project(), lookup.className(), monitor);
-					if (!monitor.isCanceled()) {
-						result.complete(type);
-					}
-				} catch (JavaModelException e) {
-					// A later hover can retry if the source was temporarily unavailable.
-				}
-				return org.eclipse.core.runtime.Status.OK_STATUS;
-			}
-
-			@Override
-			public boolean belongsTo(Object family) {
-				return family == TestSessionLabelProvider.this;
-			}
-		};
-		job.addJobChangeListener(new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				if (!result.isDone()) {
-					fToolTipTypes.remove(lookup, result);
-				}
-			}
-		});
-		job.setSystem(true);
-		job.schedule();
-		return result;
-	}
-
-	synchronized void clearTypeCache() {
-		fToolTipTypes.clear();
-		Job.getJobManager().cancel(this);
-	}
-
-	@Override
-	public void dispose() {
-		fDisposed= true;
-		JavaCore.removeElementChangedListener(fTypeCacheInvalidator);
-		clearTypeCache();
-		super.dispose();
 	}
 
 	@Override

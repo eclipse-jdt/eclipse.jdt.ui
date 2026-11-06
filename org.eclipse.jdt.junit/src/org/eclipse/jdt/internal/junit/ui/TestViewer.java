@@ -49,7 +49,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -260,7 +259,6 @@ public class TestViewer {
 		fTreeViewer.setContentProvider(fTreeContentProvider);
 		fTreeLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
 		fTreeViewer.setLabelProvider(new ColoringLabelProvider(fTreeLabelProvider));
-		ColumnViewerToolTipSupport.enableFor(fTreeViewer);
 
 		fTableViewer= new TableViewer(fViewerbook, SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
 		fTableViewer.setUseHashlookup(true);
@@ -268,7 +266,6 @@ public class TestViewer {
 		fTableViewer.setContentProvider(fTableContentProvider);
 		fTableLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_FLAT);
 		fTableViewer.setLabelProvider(new ColoringLabelProvider(fTableLabelProvider));
-		ColumnViewerToolTipSupport.enableFor(fTableViewer);
 
 		fSelectionProvider= new SelectionProviderMediator(new StructuredViewer[] { fTreeViewer, fTableViewer }, fTreeViewer);
 		fSelectionProvider.addSelectionChangedListener(new TestSelectionListener());
@@ -485,8 +482,6 @@ public class TestViewer {
 	}
 
 	public synchronized void registerActiveSession(TestRunSession testRunSession) {
-		fTreeLabelProvider.clearTypeCache();
-		fTableLabelProvider.clearTypeCache();
 		fTestRunSession= testRunSession;
 		registerAutoScrollTarget(null);
 		registerViewersRefresh();
@@ -519,12 +514,19 @@ public class TestViewer {
 	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
 		String testName= testSuite.getTestName();
 		if (testName.indexOf('(') < 0) {
-			// Use the editor's required-project and workspace fallbacks before
-			// treating a suite as a parameterized group and opening its first child.
-			OpenTestAction action= new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName());
-			if (action.findType(fTestRunnerPart.getLaunchedProject(), testSuite.getSuiteTypeName()) != null) {
-				return action;
-			}
+			return new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName()) {
+				@Override
+				public void run() {
+					// Resolve sources only when Open executes, never while building a menu.
+					ITestElement[] children= testSuite.getChildren();
+					if (children.length > 0 && children[0] instanceof TestCaseElement tce
+							&& findType(getLaunchedProject(), getClassName()) == null) {
+						new OpenTestAction(fTestRunner, tce, tce.getParameterTypes()).run();
+					} else {
+						super.run();
+					}
+				}
+			};
 		}
 		ITestElement[] children= testSuite.getChildren();
 
