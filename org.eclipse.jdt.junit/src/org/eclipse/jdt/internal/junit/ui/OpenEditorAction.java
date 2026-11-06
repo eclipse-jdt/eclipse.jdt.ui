@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -112,32 +112,10 @@ public abstract class OpenEditorAction extends Action {
 
 	protected final IType findType(final IJavaProject project, String className) {
 		final IType[] result= { null };
-		final String dottedName= className.replace('$', '.'); // for nested classes...
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> {
 				try {
-					if (project != null) {
-						result[0]= internalFindType(project, dottedName, new HashSet<>(), monitor);
-					}
-					if (result[0] == null) {
-						int lastDot= dottedName.lastIndexOf('.');
-						TypeNameMatchRequestor nameMatchRequestor= new TypeNameMatchRequestor() {
-							@Override
-							public void acceptTypeNameMatch(TypeNameMatch match) {
-								result[0]= match.getType();
-							}
-						};
-						new SearchEngine().searchAllTypeNames(
-								lastDot >= 0 ? dottedName.substring(0, lastDot).toCharArray() : null,
-								SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
-								(lastDot >= 0 ? dottedName.substring(lastDot + 1) : dottedName).toCharArray(),
-								SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
-								IJavaSearchConstants.TYPE,
-								SearchEngine.createWorkspaceScope(),
-								nameMatchRequestor,
-								IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-								monitor);
-					}
+					result[0]= findType(project, className, monitor);
 				} catch (JavaModelException e) {
 					throw new InvocationTargetException(e);
 				}
@@ -150,7 +128,35 @@ public abstract class OpenEditorAction extends Action {
 		return result[0];
 	}
 
-	private IType internalFindType(IJavaProject project, String className, Set<IJavaProject> visitedProjects, IProgressMonitor monitor) throws JavaModelException {
+	static IType findType(IJavaProject project, String className, IProgressMonitor monitor) throws JavaModelException {
+		String dottedName= className.replace('$', '.'); // for nested classes...
+		if (project != null) {
+			IType type= internalFindType(project, dottedName, new HashSet<>(), monitor);
+			if (type != null)
+				return type;
+		}
+		IType[] result= { null };
+		int lastDot= dottedName.lastIndexOf('.');
+		TypeNameMatchRequestor nameMatchRequestor= new TypeNameMatchRequestor() {
+			@Override
+			public void acceptTypeNameMatch(TypeNameMatch match) {
+				result[0]= match.getType();
+			}
+		};
+		new SearchEngine().searchAllTypeNames(
+				lastDot >= 0 ? dottedName.substring(0, lastDot).toCharArray() : null,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
+				(lastDot >= 0 ? dottedName.substring(lastDot + 1) : dottedName).toCharArray(),
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
+				IJavaSearchConstants.TYPE,
+				SearchEngine.createWorkspaceScope(),
+				nameMatchRequestor,
+				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+				monitor);
+		return result[0];
+	}
+
+	private static IType internalFindType(IJavaProject project, String className, Set<IJavaProject> visitedProjects, IProgressMonitor monitor) throws JavaModelException {
 		try {
 			if (visitedProjects.contains(project))
 				return null;

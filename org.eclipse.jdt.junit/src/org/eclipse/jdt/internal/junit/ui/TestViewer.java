@@ -485,6 +485,8 @@ public class TestViewer {
 	}
 
 	public synchronized void registerActiveSession(TestRunSession testRunSession) {
+		fTreeLabelProvider.clearTypeCache();
+		fTableLabelProvider.clearTypeCache();
 		fTestRunSession= testRunSession;
 		registerAutoScrollTarget(null);
 		registerViewersRefresh();
@@ -517,16 +519,11 @@ public class TestViewer {
 	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
 		String testName= testSuite.getTestName();
 		if (testName.indexOf('(') < 0) {
-			IJavaProject project= fTestRunnerPart.getLaunchedProject();
-			try {
-				// A suite's source need not be its first child, even when its display
-				// name equals its class name. Prefer it before the group fallback.
-				String className= testSuite.getSuiteTypeName();
-				if (project != null && project.findType(className) != null) {
-					return new OpenTestAction(fTestRunnerPart, className);
-				}
-			} catch (JavaModelException e) {
-				// Fall back to the existing navigation for groups without a source.
+			// Use the editor's required-project and workspace fallbacks before
+			// treating a suite as a parameterized group and opening its first child.
+			OpenTestAction action= new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName());
+			if (action.findType(fTestRunnerPart.getLaunchedProject(), testSuite.getSuiteTypeName()) != null) {
+				return action;
 			}
 		}
 		ITestElement[] children= testSuite.getChildren();

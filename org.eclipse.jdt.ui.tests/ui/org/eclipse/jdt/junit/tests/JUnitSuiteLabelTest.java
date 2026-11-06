@@ -36,6 +36,8 @@ import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.core.runtime.jobs.Job;
+
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -44,6 +46,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -79,6 +82,7 @@ public class JUnitSuiteLabelTest extends AbstractTestRunListenerTest {
 	private IType fTestType;
 	private boolean fViewWasOpen;
 	private int fPreviousLayout;
+	private final List<IJavaProject> fAdditionalProjects= new ArrayList<>();
 
 	@Override
 	@Before
@@ -97,6 +101,13 @@ public class JUnitSuiteLabelTest extends AbstractTestRunListenerTest {
 				? TestRunnerViewPart.LAYOUT_HIERARCHICAL : TestRunnerViewPart.LAYOUT_FLAT;
 		fSession= new TestRunSession("Suite labels", fProject); //$NON-NLS-1$
 		activate(fSession);
+	}
+
+	@After
+	public void deleteAdditionalProjects() throws Exception {
+		for (IJavaProject project : fAdditionalProjects) {
+			JavaProjectHelper.delete(project);
+		}
 	}
 
 	@After
@@ -170,6 +181,134 @@ public class JUnitSuiteLabelTest extends AbstractTestRunListenerTest {
 		assertNull(suite.getDisplayName());
 		addTreeEntry("child,testExample(pack.SampleTest),false,1,false,-1,testExample(pack.SampleTest),,"); //$NON-NLS-1$
 		assertOpens(suite, fSuiteType);
+	}
+
+	@Test
+	public void testOpeningSuiteInNonExportedRequiredProject() throws Exception {
+		IType type= requiredProjectSuite();
+		assertOpens(suiteWithChild(type), type);
+	}
+
+	@Test
+	public void testRequiredProjectSuiteTooltipInBothLayouts() throws Exception {
+		assertSuiteTooltip(requiredProjectSuite());
+	}
+
+	@Test
+	public void testOpeningSuiteInAnotherWorkspaceProject() throws Exception {
+		IType type= workspaceSuite();
+		assertOpens(suiteWithChild(type), type);
+	}
+
+	@Test
+	public void testWorkspaceSuiteTooltipInBothLayouts() throws Exception {
+		assertSuiteTooltip(workspaceSuite());
+	}
+
+	@Test
+	public void testOpeningSuiteWithoutLaunchedProject() throws Exception {
+		IType type= workspaceSuite();
+		fSession= new TestRunSession("No launched project", null); //$NON-NLS-1$
+		activate(fSession);
+		assertOpens(suiteWithChild(type), type);
+	}
+
+	@Test
+	public void testSuiteTooltipWithoutLaunchedProject() throws Exception {
+		IType type= workspaceSuite();
+		fSession= new TestRunSession("No launched project", null); //$NON-NLS-1$
+		activate(fSession);
+		assertSuiteTooltip(type);
+	}
+
+	@Test
+	public void testMissingWorkspaceTooltipIsRetriedAfterSourceCreation() throws Exception {
+		IJavaProject other= additionalProject("SuiteWorkspace"); //$NON-NLS-1$
+		TestSuiteElement suite= suite("other.LaterSuite", "Readable suite"); //$NON-NLS-1$ //$NON-NLS-2$
+		TestSessionLabelProvider labels= new TestSessionLabelProvider(fView, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
+		try {
+			assertNull(labels.getToolTipText(suite));
+			Job.getJobManager().join(labels, null);
+			assertNull(labels.getToolTipText(suite));
+			IType type= createType(other, "package other; public class LaterSuite {}", "other", "LaterSuite.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			JavaProjectHelper.mustPerformDummySearch();
+			assertTrue(waitForCondition(() -> type.getFullyQualifiedName().equals(labels.getToolTipText(suite)), 5000, 20));
+		} finally {
+			labels.dispose();
+		}
+	}
+
+	@Test
+	public void testWorkspaceTooltipDisappearsAfterSourceDeletion() throws Exception {
+		IType type= workspaceSuite();
+		TestSuiteElement suite= suiteWithChild(type);
+		TestSessionLabelProvider labels= new TestSessionLabelProvider(fView, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
+		try {
+			assertTrue(waitForCondition(() -> type.getFullyQualifiedName().equals(labels.getToolTipText(suite)), 5000, 20));
+			type.getCompilationUnit().delete(true, null);
+			JavaProjectHelper.mustPerformDummySearch();
+			assertNull(labels.getToolTipText(suite));
+			Job.getJobManager().join(labels, null);
+			assertNull(labels.getToolTipText(suite));
+		} finally {
+			labels.dispose();
+		}
+	}
+
+	@Test
+	public void testDisposingLabelsReleasesTooltipLookup() throws Exception {
+		TestSuiteElement suite= suiteWithChild(workspaceSuite());
+		TestSessionLabelProvider labels= new TestSessionLabelProvider(fView, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
+		try {
+			labels.getToolTipText(suite);
+			labels.dispose();
+			Job.getJobManager().join(labels, null);
+			assertEquals(0, Job.getJobManager().find(labels).length);
+			assertNull(labels.getToolTipText(suite));
+		} finally {
+			labels.dispose();
+		}
+	}
+
+	private IJavaProject additionalProject(String name) throws Exception {
+		IJavaProject project= JavaProjectHelper.createJavaProject(name, "bin"); //$NON-NLS-1$
+		fAdditionalProjects.add(project);
+		JavaProjectHelper.addRTJar18(project);
+		return project;
+	}
+
+	private IType requiredProjectSuite() throws Exception {
+		IJavaProject intermediate= additionalProject("SuiteIntermediate"); //$NON-NLS-1$
+		IJavaProject required= additionalProject("SuiteRequired"); //$NON-NLS-1$
+		IType type= createType(required, "package other; public class RequiredSuite {}", "other", "RequiredSuite.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		JavaProjectHelper.addRequiredProject(intermediate, required);
+		JavaProjectHelper.addRequiredProject(fProject, intermediate);
+		assertNull(fProject.findType(type.getFullyQualifiedName()));
+		return type;
+	}
+
+	private IType workspaceSuite() throws Exception {
+		IJavaProject other= additionalProject("SuiteWorkspace"); //$NON-NLS-1$
+		IType type= createType(other, "package other; public class WorkspaceSuite {}", "other", "WorkspaceSuite.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertNull(fProject.findType(type.getFullyQualifiedName()));
+		JavaProjectHelper.mustPerformDummySearch();
+		return type;
+	}
+
+	private TestSuiteElement suiteWithChild(IType type) {
+		TestSuiteElement suite= suite(type.getFullyQualifiedName(), "Readable suite"); //$NON-NLS-1$
+		new TestCaseElement(suite, "child", "testExample(pack.SampleTest)", null, false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+		return suite;
+	}
+
+	private void assertSuiteTooltip(IType type) {
+		TestSuiteElement suite= suiteWithChild(type);
+		for (int layout : new int[] { TestRunnerViewPart.LAYOUT_HIERARCHICAL, TestRunnerViewPart.LAYOUT_FLAT }) {
+			fView.setLayoutMode(layout);
+			CellLabelProvider provider= (CellLabelProvider) fView.getTestViewer().getActiveViewer().getLabelProvider();
+			assertTrue("The suite source must also be available to its tooltip", //$NON-NLS-1$
+					waitForCondition(() -> type.getFullyQualifiedName().equals(provider.getToolTipText(suite)), 5000, 20));
+		}
 	}
 
 	@Test
