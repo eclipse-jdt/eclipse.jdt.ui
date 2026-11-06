@@ -26,9 +26,6 @@ import java.net.URL;
 
 import org.osgi.framework.Bundle;
 
-import org.eclipse.e4.ui.css.swt.theme.ITheme;
-import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -45,6 +42,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IFile;
 
@@ -883,14 +882,19 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
-	@SuppressWarnings("restriction")
 	static boolean isDarkTheme() {
+		boolean isDark= false;
 		if (!PlatformUI.isWorkbenchRunning()) {
 			return false;
 		}
-		IThemeEngine engine= PlatformUI.getWorkbench().getService(IThemeEngine.class);
-		ITheme theme= engine == null ? null : engine.getActiveTheme();
-		return theme != null && theme.isDark();
+		IEclipsePreferences themePreferences= InstanceScope.INSTANCE.getNode("org.eclipse.e4.ui.css.swt.theme"); //$NON-NLS-1$
+		if (themePreferences != null) {
+			String themeId= themePreferences.get("themeid", null); //$NON-NLS-1$
+			if (themeId != null) {
+				isDark= themePreferences.getBoolean("themeIsDark." + themeId, false); //$NON-NLS-1$
+			}
+		}
+		return isDark;
 	}
 
 	private static String getInfoText(IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion, boolean allowImage) {

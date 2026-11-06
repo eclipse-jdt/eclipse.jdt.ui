@@ -53,6 +53,7 @@ public class HighlightJsSupport {
 
 	static String fileUrlScript;
 	static String fileUrlCss;
+	static String fileUrlCssDark;
 	static boolean UrlsInitialized;
 	/**
 	 * Returns the HTML snippet to inject into &lt;head&gt; for highlight.js support,
@@ -67,8 +68,8 @@ public class HighlightJsSupport {
 			if (!UrlsInitialized) {
 				Class<?> pluginClass= JavaManipulationPlugin.getDefault().getClass();
 				URL urlScript= pluginClass.getResource(RESOURCE_SCRIPT);
-				String cssPath= isDark ? RESOURCE_CSS_DARK : RESOURCE_CSS_LIGHT;
-				URL urlCss= pluginClass.getResource(cssPath);
+				URL urlCss= pluginClass.getResource(RESOURCE_CSS_LIGHT);
+				URL urlCssDark= pluginClass.getResource(RESOURCE_CSS_DARK);
 
 				fileUrlScript= urlScript == null
 						? null
@@ -76,10 +77,14 @@ public class HighlightJsSupport {
 				fileUrlCss= urlCss == null
 						? null
 								: new File(FileLocator.toFileURL(urlCss).getPath()).toURI().toASCIIString().replace("'", "%27"); //$NON-NLS-1$ //$NON-NLS-2$
+				fileUrlCssDark= urlCssDark == null
+						? null
+								: new File(FileLocator.toFileURL(urlCssDark).getPath()).toURI().toASCIIString().replace("'", "%27"); //$NON-NLS-1$ //$NON-NLS-2$
 				UrlsInitialized= true;
 			}
-			if (fileUrlScript != null && fileUrlCss != null) {
-				return "<link rel='stylesheet' href='" + fileUrlCss + "'>" + //$NON-NLS-1$ //$NON-NLS-2$
+			String urlCss= isDark ? fileUrlCssDark : fileUrlCss;
+			if (fileUrlScript != null && urlCss != null) {
+				return "<link rel='stylesheet' href='" + urlCss + "'>" + //$NON-NLS-1$ //$NON-NLS-2$
 						"<style>.hljs{background:transparent;padding:0;}</style>" + //$NON-NLS-1$
 						"<script src='" + fileUrlScript + "'></script>" + //$NON-NLS-1$ //$NON-NLS-2$
 						"<script>hljs.configure({cssSelector: 'pre code[class*=\"language-\"]'})</script>" + //$NON-NLS-1$
