@@ -73,10 +73,11 @@ public class QuickFixTest15 extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, "15");
 		assertProposalExists(proposals, label);
+		String label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description_lts, "17");
+		assertProposalExists(proposals, label2);
 	}
-
 
 }
