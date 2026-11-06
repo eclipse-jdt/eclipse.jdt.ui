@@ -286,6 +286,13 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 	}
 
 	@Test
+	public void testSuiteWithoutSourceOpensItsChildMethod() throws Exception {
+		TestSuiteElement suite= suite("missing.NonexistentSuite", "Readable suite"); //$NON-NLS-1$ //$NON-NLS-2$
+		new TestCaseElement(suite, "child", "testExample(pack.SampleTest)", null, false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+		assertOpens(suite, fTestType.getMethod("testExample", new String[0])); //$NON-NLS-1$
+	}
+
+	@Test
 	public void testExportAndImportPreserveBothNames() throws Exception {
 		suite("pack.NamedSuite", "Readable suite (with punctuation)"); //$NON-NLS-1$ //$NON-NLS-2$
 		File file= fTemporaryFolder.newFile("suite.xml"); //$NON-NLS-1$
