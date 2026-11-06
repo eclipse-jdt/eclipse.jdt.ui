@@ -13,11 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.manipulation.internal.javadoc;
 
+import java.io.File;
 import java.net.URL;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
@@ -51,26 +51,38 @@ public class HighlightJsSupport {
 	private HighlightJsSupport() {
 	}
 
+	static String fileUrlScript;
+	static String fileUrlCss;
+	static boolean UrlsInitialized;
 	/**
 	 * Returns the HTML snippet to inject into &lt;head&gt; for highlight.js support,
 	 * including the CSS link, script tag, and highlightAll() invocation.
 	 *
+	 * @param isDark - true if the current theme is a dark theme
+	 *
 	 * @return the HTML snippet, or an empty string if resources cannot be resolved
 	 */
-	public static String getHighlightJsHeader() {
+	public static String getHighlightJsHeader(boolean isDark) {
 		try {
-			Class<?> pluginClass= JavaManipulationPlugin.getDefault().getClass();
-			URL urlScript= pluginClass.getResource(RESOURCE_SCRIPT);
-			String cssPath= isDarkTheme() ? RESOURCE_CSS_DARK : RESOURCE_CSS_LIGHT;
-			URL urlCss= pluginClass.getResource(cssPath);
+			if (!UrlsInitialized) {
+				Class<?> pluginClass= JavaManipulationPlugin.getDefault().getClass();
+				URL urlScript= pluginClass.getResource(RESOURCE_SCRIPT);
+				String cssPath= isDark ? RESOURCE_CSS_DARK : RESOURCE_CSS_LIGHT;
+				URL urlCss= pluginClass.getResource(cssPath);
 
-			URL fileUrlScript= urlScript == null ? null : FileLocator.toFileURL(urlScript);
-			URL fileUrlCss= urlCss == null ? null : FileLocator.toFileURL(urlCss);
-
+				fileUrlScript= urlScript == null
+						? null
+								: new File(FileLocator.toFileURL(urlScript).getPath()).toURI().toASCIIString().replace("'", "%27"); //$NON-NLS-1$ //$NON-NLS-2$
+				fileUrlCss= urlCss == null
+						? null
+								: new File(FileLocator.toFileURL(urlCss).getPath()).toURI().toASCIIString().replace("'", "%27"); //$NON-NLS-1$ //$NON-NLS-2$
+				UrlsInitialized= true;
+			}
 			if (fileUrlScript != null && fileUrlCss != null) {
 				return "<link rel='stylesheet' href='" + fileUrlCss + "'>" + //$NON-NLS-1$ //$NON-NLS-2$
-						"<style>.hljs{background:transparent;}</style>" + //$NON-NLS-1$
+						"<style>.hljs{background:transparent;padding:0;}</style>" + //$NON-NLS-1$
 						"<script src='" + fileUrlScript + "'></script>" + //$NON-NLS-1$ //$NON-NLS-2$
+						"<script>hljs.configure({cssSelector: 'pre code[class*=\"language-\"]'})</script>" + //$NON-NLS-1$
 						"<script>hljs.highlightAll();</script>"; //$NON-NLS-1$
 			}
 		} catch (Exception e) {
@@ -94,13 +106,4 @@ public class HighlightJsSupport {
 		return result;
 	}
 
-	private static boolean isDarkTheme() {
-		try {
-			String themeId= Platform.getPreferencesService().getString(
-					THEME_PLUGIN_ID, THEME_PREF_KEY, "", null); //$NON-NLS-1$
-			return themeId.toLowerCase().contains(DARK_THEME_TOKEN);
-		} catch (Exception e) {
-			return false;
-		}
-	}
 }

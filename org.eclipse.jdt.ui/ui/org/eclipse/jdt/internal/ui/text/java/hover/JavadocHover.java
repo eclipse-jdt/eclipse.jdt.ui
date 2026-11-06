@@ -26,6 +26,9 @@ import java.net.URL;
 
 import org.osgi.framework.Bundle;
 
+import org.eclipse.e4.ui.css.swt.theme.ITheme;
+import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
@@ -76,6 +79,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -860,7 +864,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			buffer.setLength(0);
 			buffer.append(sanitized);
 			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, JavadocHover.getStyleSheet(buffer));
-			String hlHeader= HighlightJsSupport.getHighlightJsHeader();
+			String hlHeader= HighlightJsSupport.getHighlightJsHeader(isDarkTheme());
 			if (!hlHeader.isEmpty()) {
 				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 				if (endHeadIdx > 0) {
@@ -869,13 +873,23 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 			if (base != null) {
 				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+ 				buffer.insert(endHeadIdx, "\n<base href='" + base.replace("&", "&amp;").replace("'", "&#39;") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+ 						.replace("<", "&lt;").replace(">", "&gt;") + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}
 			HTMLPrinter.addPageEpilog(buffer);
 			return new JavadocHoverInformationControlInput(previousInput, element, buffer.toString(), leadingImageWidth, editorInputElement, hoverRegion);
 		}
 
 		return null;
+	}
+
+	static boolean isDarkTheme() {
+		if (!PlatformUI.isWorkbenchRunning()) {
+			return false;
+		}
+		IThemeEngine engine= PlatformUI.getWorkbench().getService(IThemeEngine.class);
+		ITheme theme= engine == null ? null : engine.getActiveTheme();
+		return theme != null && theme.isDark();
 	}
 
 	private static String getInfoText(IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion, boolean allowImage) {

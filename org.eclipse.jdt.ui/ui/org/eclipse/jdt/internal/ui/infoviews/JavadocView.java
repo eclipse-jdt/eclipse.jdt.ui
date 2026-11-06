@@ -22,6 +22,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
 
+import org.eclipse.e4.ui.css.swt.theme.ITheme;
+import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
@@ -562,7 +565,9 @@ public class JavadocView extends AbstractInfoView {
 	protected void internalCreatePartControl(Composite parent) {
 		try {
 			fBrowser= new Browser(parent, SWT.NONE);
-			fBrowser.setJavascriptEnabled(true);
+			// JavaScript is only enabled while showing our own (sanitized) Javadoc HTML,
+			// see doSetInput(..); external pages are always loaded with JavaScript disabled.
+			fBrowser.setJavascriptEnabled(false);
 			fIsUsingBrowserWidget= true;
 			addLinkListener(fBrowser);
 			fBrowser.addOpenWindowListener(event -> event.required= true);
@@ -878,6 +883,7 @@ public class JavadocView extends AbstractInfoView {
 		if (inputElement instanceof IJavaElement javaElement) {
 			setInput(javaElement);
 		} else if (inputElement instanceof URL url) {
+			fBrowser.setJavascriptEnabled(false);
 			fBrowser.setUrl(url.toExternalForm());
 
 			if (fInputSelectionProvider != null)
@@ -924,6 +930,8 @@ public class JavadocView extends AbstractInfoView {
 					javadocHtml= buffer.toString();
 				}
 			}
+			// enable JavaScript for the highlight.js script injected into the generated HTML
+			fBrowser.setJavascriptEnabled(true);
 			fBrowser.setText(javadocHtml);
 		} else {
 			fPresentation.clear();
@@ -1107,7 +1115,7 @@ public class JavadocView extends AbstractInfoView {
 		buffer.setLength(0);
 		buffer.append(sanitized);
 		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, JavadocHover.substituteJavaSyntaxColors(JavaElementLinks.modifyCssStyleSheet(fgStyleSheet, buffer)));
-		String hlHeader= HighlightJsSupport.getHighlightJsHeader();
+		String hlHeader= HighlightJsSupport.getHighlightJsHeader(isDarkTheme());
 		if (!hlHeader.isEmpty()) {
 			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 			if (endHeadIdx > 0) {
@@ -1116,12 +1124,21 @@ public class JavadocView extends AbstractInfoView {
 		}
 		if (base != null) {
 			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-			buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.insert(endHeadIdx, "\n<base href='" + base.replace("&", "&amp;").replace("'", "&#39;") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+					.replace("<", "&lt;").replace(">", "&gt;") + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
 
+	static boolean isDarkTheme() {
+		if (!PlatformUI.isWorkbenchRunning()) {
+			return false;
+		}
+		IThemeEngine engine= PlatformUI.getWorkbench().getService(IThemeEngine.class);
+		ITheme theme= engine == null ? null : engine.getActiveTheme();
+		return theme != null && theme.isDark();
+	}
 
 	/**
 	 * Gets the label for the given member.
@@ -1419,7 +1436,8 @@ public class JavadocView extends AbstractInfoView {
 					if (fInputSelectionProvider != null)
 						fInputSelectionProvider.setSelection(new StructuredSelection(url));
 				}
-
+				// the browser navigates to the external page itself; do not let it run scripts
+				fBrowser.setJavascriptEnabled(false);
 				return false;
 			}
 
