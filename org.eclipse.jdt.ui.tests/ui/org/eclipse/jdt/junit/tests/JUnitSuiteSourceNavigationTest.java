@@ -276,13 +276,15 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 	}
 
 	@Test
-	public void testParameterizedGroupStillOpensItsChild() throws Exception {
-		AtomicInteger lookups= countTypeLookups();
-		TestSuiteElement group= suite("[0]", null); //$NON-NLS-1$
-		new TestCaseElement(group, "child", "testExample[0](pack.SampleTest)", null, false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
-		lookups.set(0);
-		assertOpens(group, fTestType.getMethod("testExample", new String[0])); //$NON-NLS-1$
-		assertEquals("A parameterized group must only look up its child", 1, lookups.get()); //$NON-NLS-1$
+	public void testGroupsWithoutTypeNamesOpenTheirChildDirectly() throws Exception {
+		for (String name : new String[] { "[0]", "Legacy group!" }) { //$NON-NLS-1$ //$NON-NLS-2$
+			AtomicInteger lookups= countTypeLookups();
+			TestSuiteElement group= suite(name, null);
+			new TestCaseElement(group, "child", "testExample[0](pack.SampleTest)", null, false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+			lookups.set(0);
+			assertOpens(group, fTestType.getMethod("testExample", new String[0])); //$NON-NLS-1$
+			assertEquals("A group without a type name must only look up its child", 1, lookups.get()); //$NON-NLS-1$
+		}
 	}
 
 	@Test
