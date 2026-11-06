@@ -516,7 +516,7 @@ public class TestViewer {
 
 	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
 		String testName= testSuite.getTestName();
-		if (testName.indexOf('(') < 0) {
+		if (testName.indexOf('(') < 0 && !(testName.startsWith("[") && testName.endsWith("]"))) { //$NON-NLS-1$ //$NON-NLS-2$
 			return new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName()) {
 				private OpenTestAction fChildAction;
 
