@@ -64,10 +64,13 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.views.WorkbenchViewerSetup;
 
+import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -515,16 +518,29 @@ public class TestViewer {
 		String testName= testSuite.getTestName();
 		if (testName.indexOf('(') < 0) {
 			return new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName()) {
+				private OpenTestAction fChildAction;
+
 				@Override
-				public void run() {
-					// Resolve sources only when Open executes, never while building a menu.
+				protected IJavaElement findElement(IJavaProject project, String className) throws JavaModelException {
+					fChildAction= null;
+					IJavaElement element= super.findElement(project, className);
+					if (element != null)
+						return element;
+
 					ITestElement[] children= testSuite.getChildren();
-					if (children.length > 0 && children[0] instanceof TestCaseElement tce
-							&& findType(getLaunchedProject(), getClassName()) == null) {
-						new OpenTestAction(fTestRunner, tce, tce.getParameterTypes()).run();
-					} else {
-						super.run();
+					if (children.length > 0 && children[0] instanceof TestCaseElement tce) {
+						fChildAction= new OpenTestAction(fTestRunner, tce, tce.getParameterTypes());
+						return fChildAction.findElement(project, tce.getClassName());
 					}
+					return null;
+				}
+
+				@Override
+				protected void reveal(ITextEditor editor) {
+					if (fChildAction != null)
+						fChildAction.reveal(editor);
+					else
+						super.reveal(editor);
 				}
 			};
 		}
