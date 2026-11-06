@@ -136,6 +136,18 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 
 	@Test
 	public void testSuiteOpenActionResolvesTypesOnlyOnceWhenRun() throws Exception {
+		AtomicInteger lookups= countTypeLookups();
+		TestSuiteElement suite= suiteWithChild(fSuiteType);
+		Method factory= TestViewer.class.getDeclaredMethod("getOpenTestAction", TestSuiteElement.class); //$NON-NLS-1$
+		factory.setAccessible(true);
+		lookups.set(0);
+		assertNotNull(factory.invoke(fView.getTestViewer(), suite));
+		assertEquals("Creating the menu action must not resolve source types", 0, lookups.get()); //$NON-NLS-1$
+		assertOpens(suite, fSuiteType);
+		assertEquals("Opening the suite must resolve its source only once", 1, lookups.get()); //$NON-NLS-1$
+	}
+
+	private AtomicInteger countTypeLookups() throws Exception {
 		AtomicInteger lookups= new AtomicInteger();
 		IJavaProject project= (IJavaProject) Proxy.newProxyInstance(IJavaProject.class.getClassLoader(), new Class<?>[] { IJavaProject.class }, (_, method, arguments) -> {
 			if (method.getName().equals("findType")) { //$NON-NLS-1$
@@ -147,16 +159,9 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 				throw e.getCause();
 			}
 		});
-		fSession= new TestRunSession("Suite menu", project); //$NON-NLS-1$
+		fSession= new TestRunSession("Suite source lookups", project); //$NON-NLS-1$
 		activate(fSession);
-		TestSuiteElement suite= suiteWithChild(fSuiteType);
-		Method factory= TestViewer.class.getDeclaredMethod("getOpenTestAction", TestSuiteElement.class); //$NON-NLS-1$
-		factory.setAccessible(true);
-		lookups.set(0);
-		assertNotNull(factory.invoke(fView.getTestViewer(), suite));
-		assertEquals("Creating the menu action must not resolve source types", 0, lookups.get()); //$NON-NLS-1$
-		assertOpens(suite, fSuiteType);
-		assertEquals("Opening the suite must resolve its source only once", 1, lookups.get()); //$NON-NLS-1$
+		return lookups;
 	}
 
 	@Test
@@ -272,9 +277,12 @@ public class JUnitSuiteSourceNavigationTest extends AbstractTestRunListenerTest 
 
 	@Test
 	public void testParameterizedGroupStillOpensItsChild() throws Exception {
+		AtomicInteger lookups= countTypeLookups();
 		TestSuiteElement group= suite("[0]", null); //$NON-NLS-1$
 		new TestCaseElement(group, "child", "testExample[0](pack.SampleTest)", null, false, null, null); //$NON-NLS-1$ //$NON-NLS-2$
+		lookups.set(0);
 		assertOpens(group, fTestType.getMethod("testExample", new String[0])); //$NON-NLS-1$
+		assertEquals("A parameterized group must only look up its child", 1, lookups.get()); //$NON-NLS-1$
 	}
 
 	@Test
