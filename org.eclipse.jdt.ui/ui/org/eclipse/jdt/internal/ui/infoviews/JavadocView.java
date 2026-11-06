@@ -1131,6 +1131,7 @@ public class JavadocView extends AbstractInfoView {
 		return buffer.toString();
 	}
 
+	@SuppressWarnings("restriction")
 	static boolean isDarkTheme() {
 		if (!PlatformUI.isWorkbenchRunning()) {
 			return false;

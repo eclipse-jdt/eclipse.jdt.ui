@@ -94,7 +94,7 @@ public class HighlightJsSupport {
 	/**
 	 * Sanitizes HTML content by removing script tags, event handler attributes,
 	 * and javascript: URIs. This ensures that only the highlight.js scripts
-	 * injected via {@link #getHighlightJsHeader()} can execute.
+	 * injected via {@link #getHighlightJsHeader(boolean)} can execute.
 	 *
 	 * @param html the HTML content to sanitize
 	 * @return the sanitized HTML

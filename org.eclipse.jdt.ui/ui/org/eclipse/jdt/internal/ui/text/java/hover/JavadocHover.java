@@ -883,6 +883,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
+	@SuppressWarnings("restriction")
 	static boolean isDarkTheme() {
 		if (!PlatformUI.isWorkbenchRunning()) {
 			return false;
