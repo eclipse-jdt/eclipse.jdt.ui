@@ -54,7 +54,7 @@ public class HighlightJsSupport {
 	 *
 	 * @return the HTML snippet, or an empty string if resources cannot be resolved
 	 */
-	public static String getHighlightJsHeader(boolean isDark) {
+	public static synchronized String getHighlightJsHeader(boolean isDark) {
 		try {
 			if (!UrlsInitialized) {
 				Class<?> pluginClass= JavaManipulationPlugin.getDefault().getClass();
@@ -89,7 +89,7 @@ public class HighlightJsSupport {
 		} catch (Exception e) {
 			JavaManipulationPlugin.log(e);
 		}
-		return ""; //$NON-NLS-1$
+		return "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'none'; style-src 'unsafe-inline' file:; img-src * data: file:; font-src file:\">"; //$NON-NLS-1$
 	}
 
 	private static String computeSha256(String text) {
