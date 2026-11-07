@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -50,6 +52,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCorrectionProposalCore;
 
 public class QuickFixTest9 extends QuickFixTest {
 
@@ -207,6 +210,56 @@ public class QuickFixTest9 extends QuickFixTest {
 		final String proposalStr= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
 
 		assertProposalExists(proposals, proposalStr);
+	}
+
+	@Test
+	public void testAddModuleRequiresProposalForSeveralModules() throws Exception {
+		String source= """
+			module test {
+			    requires static java.sql;
+			}
+			""";
+		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
+		ICompilationUnit moduleCu= def.createCompilationUnit("module-info.java", source, false, null);
+		String name= "Add missing module dependencies";
+		String description= "Add the dependencies used by the selected source files";
+		AddModuleRequiresCorrectionProposalCore proposal= new AddModuleRequiresCorrectionProposalCore(
+				List.of("java.xml", "java.logging", "java.sql", "java.logging"), name, description, moduleCu, 0);
+		CompilationUnitChange change= (CompilationUnitChange) proposal.getChange();
+		assertEquals(name, change.getName());
+		assertEquals(description, proposal.getAdditionalProposalInfo(null));
+		assertEquals(List.of("module test {", "requires static java.sql;", "requires java.logging;", "requires java.xml;", "}"),
+				change.getPreviewContent(null).lines().map(String::strip).toList());
+		assertEquals(source, moduleCu.getSource());
+	}
+
+	@Test
+	public void testAddModuleRequiresProposalWithExistingModules() throws Exception {
+		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
+		ICompilationUnit moduleCu= def.createCompilationUnit("module-info.java",
+				"module test { requires static java.sql; requires transitive java.logging; }", false, null);
+		AddModuleRequiresCorrectionProposalCore proposal= new AddModuleRequiresCorrectionProposalCore(
+				List.of("java.logging", "java.sql"), "Add dependencies", "Dependencies already declared", moduleCu, 0);
+		assertNull(proposal.getChange());
+	}
+
+	@Test
+	public void testAddModuleRequiresProposalWithNoModules() throws Exception {
+		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
+		ICompilationUnit moduleCu= def.createCompilationUnit("module-info.java", "module test {}", false, null);
+		AddModuleRequiresCorrectionProposalCore proposal= new AddModuleRequiresCorrectionProposalCore(
+				List.of(), "Add dependencies", "No missing dependencies", moduleCu, 0);
+		assertNull(proposal.getChange());
+	}
+
+	@Test
+	public void testAddModuleRequiresProposalWithNullModuleName() throws Exception {
+		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
+		ICompilationUnit moduleCu= def.createCompilationUnit("module-info.java", "module test {}", false, null);
+		String moduleName= null;
+		AddModuleRequiresCorrectionProposalCore proposal= new AddModuleRequiresCorrectionProposalCore(
+				moduleName, "Add dependency", "No module name", moduleCu, 0);
+		assertNull(proposal.getChange());
 	}
 
 	@Test

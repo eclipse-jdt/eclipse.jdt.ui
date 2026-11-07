@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation and others.
+ * Copyright (c) 2024, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,10 @@
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,7 +38,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ModuleDeclaration;
 import org.eclipse.jdt.core.dom.ModuleDirective;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.RequiresDirective;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -58,12 +60,16 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class AddModuleRequiresCorrectionProposalCore extends ChangeCorrectionProposalCore {
 
 	private final String fChangeDescription;
-	private final String fModuleName;
+	private final Collection<String> fModuleNames;
 	private final ICompilationUnit fModuleCu;
 
 	public AddModuleRequiresCorrectionProposalCore(String moduleName, String changeName, String changeDescription, ICompilationUnit moduleCu, int relevance) {
+		this(moduleName == null ? List.of() : List.of(moduleName), changeName, changeDescription, moduleCu, relevance);
+	}
+
+	public AddModuleRequiresCorrectionProposalCore(Collection<String> moduleNames, String changeName, String changeDescription, ICompilationUnit moduleCu, int relevance) {
 		super(changeName, null, relevance);
-		this.fModuleName= moduleName;
+		this.fModuleNames= Set.copyOf(moduleNames);
 		this.fChangeDescription= changeDescription;
 		this.fModuleCu= moduleCu;
 	}
@@ -80,7 +86,7 @@ public class AddModuleRequiresCorrectionProposalCore extends ChangeCorrectionPro
 	}
 
 	private CompilationUnitChange createAddRequiresChange() throws CoreException {
-		if (getModuleName() == null || getModuleCu() == null) {
+		if (getModuleNames().isEmpty() || getModuleCu() == null) {
 			return null;
 		}
 		CompilationUnit astRoot= SharedASTProviderCore.getAST(getModuleCu(), SharedASTProviderCore.WAIT_YES, null);
@@ -92,29 +98,28 @@ public class AddModuleRequiresCorrectionProposalCore extends ChangeCorrectionPro
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		CompilationUnitChange cuChange= null;
 		ListRewrite listRewrite= rewrite.getListRewrite(moduleDecl, ModuleDeclaration.MODULE_DIRECTIVES_PROPERTY);
-		boolean requiresAlreadyPresent= false;
+		Set<String> missingModules= new TreeSet<>(fModuleNames);
 		List<ModuleDirective> moduleStatements= moduleDecl.moduleStatements();
 		ModuleDirective lastModuleRequiresDirective= null;
 		if (moduleStatements != null) {
 			for (ModuleDirective directive : moduleStatements) {
-				if (directive instanceof RequiresDirective) {
-					Name name= ((RequiresDirective) directive).getName();
-					if (getModuleName().equals(name.getFullyQualifiedName())) {
-						requiresAlreadyPresent= true;
-						break;
-					}
+				if (directive instanceof RequiresDirective requires) {
+					missingModules.remove(requires.getName().getFullyQualifiedName());
 					lastModuleRequiresDirective= directive;
 				}
 			}
 		}
-		if (!requiresAlreadyPresent) {
+		for (String moduleName : missingModules) {
 			RequiresDirective exp= ast.newRequiresDirective();
-			exp.setName(ast.newName(getModuleName()));
+			exp.setName(ast.newName(moduleName));
 			if (lastModuleRequiresDirective != null) {
 				listRewrite.insertAfter(exp, lastModuleRequiresDirective, null);
 			} else {
 				listRewrite.insertLast(exp, null);
 			}
+			lastModuleRequiresDirective= exp;
+		}
+		if (!missingModules.isEmpty()) {
 			try {
 				cuChange= new CompilationUnitChange(getName(), getModuleCu());
 				TextEdit resultingEdits= rewrite.rewriteAST();
@@ -131,8 +136,8 @@ public class AddModuleRequiresCorrectionProposalCore extends ChangeCorrectionPro
 		return fModuleCu;
 	}
 
-	public String getModuleName() {
-		return fModuleName;
+	public Collection<String> getModuleNames() {
+		return fModuleNames;
 	}
 
 	public String getChangeDescription() {

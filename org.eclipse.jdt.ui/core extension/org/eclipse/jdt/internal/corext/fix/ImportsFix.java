@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,8 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.runtime.CoreException;
@@ -48,6 +50,11 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 public class ImportsFix extends TextEditFix {
 
 	public static ICleanUpFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status) throws CoreException {
+		return createCleanUp(cu, settings, organizeImports, status, null);
+	}
+
+	public static ICleanUpFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status,
+			Map<ICompilationUnit, Set<String>> requiredModules) throws CoreException {
 		if (!organizeImports)
 			return null;
 
@@ -60,7 +67,7 @@ public class ImportsFix extends TextEditFix {
 		final ICompilationUnit unit= (ICompilationUnit)cu.getJavaElement();
 		OrganizeImportsOperation op= new OrganizeImportsOperation(unit, cu, settings.importIgnoreLowercase, false, false, query);
 
-		TextEdit edit= runUsingProgressService(op);
+		TextEdit edit= runUsingProgressService(op, requiredModules);
 
 		if (hasAmbiguity[0]) {
 			status.addInfo(Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unresolvable, getLocationString(cu)));
@@ -77,7 +84,7 @@ public class ImportsFix extends TextEditFix {
 		return new ImportsFix(edit, unit, FixMessages.ImportsFix_OrganizeImports_Description);
     }
 
-	private static TextEdit runUsingProgressService(OrganizeImportsOperation op) throws CoreException {
+	private static TextEdit runUsingProgressService(OrganizeImportsOperation op, Map<ICompilationUnit, Set<String>> requiredModules) throws CoreException {
 
 		final AtomicReference<TextEdit> edit= new AtomicReference<>();
 		IWorkbenchSiteProgressService progressService= null;
@@ -86,7 +93,7 @@ public class ImportsFix extends TextEditFix {
 		} catch (NullPointerException npe) {
 			// Either this has been called from a non-UI thread or something is still missing (workbench window / active page / part / site)
 			// In any case, we need to retry the old way (may block the UI thread)
-			return op.createTextEdit(null);
+			return op.createTextEdit(null, requiredModules);
 		}
 
 		try {
@@ -94,7 +101,7 @@ public class ImportsFix extends TextEditFix {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						edit.set(op.createTextEdit(monitor));
+						edit.set(op.createTextEdit(monitor, requiredModules));
 					} catch (OperationCanceledException | CoreException e) {
 						throw new InvocationTargetException(e);
 					}
