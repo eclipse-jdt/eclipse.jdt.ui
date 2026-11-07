@@ -28,10 +28,6 @@ import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
  */
 public class HighlightJsSupport {
 
-	private static final String THEME_PLUGIN_ID= "org.eclipse.e4.ui.css.swt.theme"; //$NON-NLS-1$
-	private static final String THEME_PREF_KEY= "themeid"; //$NON-NLS-1$
-	private static final String DARK_THEME_TOKEN= "dark"; //$NON-NLS-1$
-
 	private static final String RESOURCE_SCRIPT= "/resources/highlight.min.js/highlight.min.js"; //$NON-NLS-1$
 	private static final String RESOURCE_CSS_LIGHT= "/resources/highlight.min.js/styles/intellij-light.min.css"; //$NON-NLS-1$
 	private static final String RESOURCE_CSS_DARK= "/resources/highlight.min.js/styles/vs2015.min.css"; //$NON-NLS-1$
