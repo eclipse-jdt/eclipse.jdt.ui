@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -90,6 +90,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
 import org.eclipse.jdt.internal.ui.util.Progress;
@@ -664,6 +665,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				if (result.hasFatalError())
 					return result;
 				Change[] changes= cleanUpProject(project, targets, cleanUps, pm);
+				addModuleChanges(change, changes, cleanUps, pm);
 				result.merge(checkPostConditions(Progress.subMonitor(pm, cleanUps.length)));
 				if (result.hasFatalError())
 					return result;
@@ -681,6 +683,36 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 
 		return result;
+	}
+
+	private void addModuleChanges(CompositeChange result, Change[] changes, ICleanUp[] cleanUps, IProgressMonitor monitor) throws CoreException {
+		for (ICleanUp cleanUp : cleanUps) {
+			if (cleanUp instanceof ImportsCleanUp importsCleanUp) {
+				for (CompilationUnitChange moduleChange : importsCleanUp.createModuleChanges(monitor)) {
+					CleanUpChange combined= new CleanUpChange(moduleChange.getName(), moduleChange.getCompilationUnit());
+					TextEdit edit= moduleChange.getEdit();
+					int existingIndex= -1;
+					for (int i= 0; i < changes.length; i++) {
+						if (changes[i] instanceof CompilationUnitChange current && current.getCompilationUnit().equals(moduleChange.getCompilationUnit())) {
+							edit= TextEditUtil.merge(current.getEdit(), edit);
+							existingIndex= i;
+							break;
+						}
+					}
+					combined.setEdit(edit);
+					if (existingIndex != -1) {
+						copyChangeGroups(combined, (CompilationUnitChange) changes[existingIndex]);
+					}
+					combined.setSaveMode(fLeaveFilesDirty ? TextFileChange.LEAVE_DIRTY : TextFileChange.KEEP_SAVE_STATE);
+					copyChangeGroups(combined, moduleChange);
+					if (existingIndex == -1) {
+						result.add(combined);
+					} else {
+						changes[existingIndex]= combined;
+					}
+				}
+			}
+		}
 	}
 
 	private void findFilesToBeModified(CompositeChange change, List<IResource> result) throws JavaModelException {
