@@ -1110,9 +1110,6 @@ public class JavadocView extends AbstractInfoView {
 		if (buffer.length() == 0)
 			return null;
 
-		String sanitized= HighlightJsSupport.sanitizeScripts(buffer.toString());
-		buffer.setLength(0);
-		buffer.append(sanitized);
 		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, JavadocHover.substituteJavaSyntaxColors(JavaElementLinks.modifyCssStyleSheet(fgStyleSheet, buffer)));
 		String hlHeader= HighlightJsSupport.getHighlightJsHeader(isDarkTheme());
 		if (!hlHeader.isEmpty()) {

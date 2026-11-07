@@ -859,9 +859,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$
 			RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
 
-			String sanitized= HighlightJsSupport.sanitizeScripts(buffer.toString());
-			buffer.setLength(0);
-			buffer.append(sanitized);
 			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, JavadocHover.getStyleSheet(buffer));
 			String hlHeader= HighlightJsSupport.getHighlightJsHeader(isDarkTheme());
 			if (!hlHeader.isEmpty()) {
