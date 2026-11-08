@@ -80,6 +80,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class AbstractTestRunListenerTest {
 
+	private static final int MAX_LAUNCH_ATTEMPTS = 3;
+
 	public static class TestRunLog {
 		private final ArrayList<String> fLog;
 		private boolean fIsDone;
@@ -152,19 +154,41 @@ public class AbstractTestRunListenerTest {
 	protected void launchJUnit(IJavaElement aTest, String testKindID, String testName) throws CoreException {
 		buildTestCase(aTest);
 
-		LaunchesListener listener = new LaunchesListener();
-		ILaunchConfigurationWorkingCopy configuration= createLaunchConfiguration(aTest, testKindID, testName, listener);
-		ILaunch launch = null;
-		try {
-			launch= configuration.launch(ILaunchManager.RUN_MODE, null);
-			waitForCondition(listener.fLaunchHasTerminated::get, 30 * 1000, 1000);
-		} finally {
-			if (launch != null && !listener.fLaunchHasTerminated.get()) {
-				logProcessesInfos(launch);
+		boolean retryTest = true;
+		for (int retry = 1; retryTest && retry <= MAX_LAUNCH_ATTEMPTS; ++retry) {
+			LaunchesListener listener = new LaunchesListener();
+			ILaunchConfigurationWorkingCopy configuration= createLaunchConfiguration(aTest, testKindID, testName, listener);
+			ILaunch launch = null;
+			try {
+				ILaunch l = configuration.launch(ILaunchManager.RUN_MODE, null);
+				launch = l;
+				/*
+				 * Retry the launch if the connection was refused due to an unavailable port.
+				 * Note that this depends on the '-debugging' flag we set in createLaunchConfiguration(),
+				 * as the flag ensures the "Connection refused" text is printed on the console on each connection attempt,
+				 * see: org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.connect()
+				 */
+				waitForCondition(() -> listener.fLaunchHasTerminated.get() || connectionRefused(l), 30 * 1000, 1000);
+				retryTest = connectionRefused(l) && !listener.fLaunchHasTerminated.get();
+				if (retryTest) {
+					// clean up the process we started, it won't do anything useful with an unavailable port
+					launch.terminate();
+					waitForCondition(listener.fLaunchHasTerminated::get, 30 * 1000, 1000);
+					assertTrue("Launch with refused connection could not be terminated", listener.fLaunchHasTerminated.get());
+					if (retry == MAX_LAUNCH_ATTEMPTS) {
+						fail("Launching failed, maximum retries reached, console contents:\n" + getConsoleText(l));
+					}
+					JavaPlugin.logErrorMessage("Launch failed, attempts so far: " + retry);
+					continue;
+				}
+				assertTrue("Launch has not terminated", listener.fLaunchHasTerminated.get());
+			} finally {
+				if (launch != null && !listener.fLaunchHasTerminated.get() && !retryTest) {
+					logProcessesInfos(launch);
+				}
+				cleanUp(configuration, listener);
 			}
-			cleanUp(configuration, listener);
 		}
-		assertTrue("Launch has not terminated", listener.fLaunchHasTerminated.get());
 	}
 
 	protected static ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement aTest, String testKindID, String testName, LaunchesListener launchesListener) throws CoreException {
@@ -371,7 +395,24 @@ public class AbstractTestRunListenerTest {
 		assertEquals("Finished test cases differ", expected, finished);
 	}
 
+	protected static String getConsoleText(ILaunch launch) {
+		IProcess[] processes= launch.getProcesses();
+		return processes.length > 0 ? getConsoleText(processes[0]) : "";
+	}
+
 	@SuppressWarnings("restriction")
+	protected static String getConsoleText(IProcess process) {
+		String output = "";
+		ProcessConsoleManager manager= DebugUIPlugin.getDefault().getProcessConsoleManager();
+		if (manager != null && manager.getConsole(process) instanceof ProcessConsole console) {
+			IDocument document= console.getDocument();
+			if (document != null) {
+				output = document.get();
+			}
+		}
+		return output;
+	}
+
 	private static void logProcessesInfos(ILaunch launch) {
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -393,16 +434,12 @@ public class AbstractTestRunListenerTest {
 					sb.append("Command line: " + cmd);
 					sb.append(System.lineSeparator());
 				}
-				ProcessConsoleManager manager= DebugUIPlugin.getDefault().getProcessConsoleManager();
-				if (manager != null && manager.getConsole(process) instanceof ProcessConsole console) {
-					IDocument document= console.getDocument();
-					String output= document != null ? document.get() : "";
-					if (output != null && !output.isEmpty()) {
-						sb.append("Process output:");
-						sb.append(System.lineSeparator());
-						sb.append(output);
-						sb.append(System.lineSeparator());
-					}
+				String output= getConsoleText(process);
+				if (output != null && !output.isEmpty()) {
+					sb.append("Process output:");
+					sb.append(System.lineSeparator());
+					sb.append(output);
+					sb.append(System.lineSeparator());
 				}
 				String id= process.getAttribute(IProcess.ATTR_PROCESS_ID);
 				if (id != null) {
@@ -422,6 +459,32 @@ public class AbstractTestRunListenerTest {
 		} catch (Throwable t) {
 			JavaPlugin.log(Status.error("Failed to log processes info for launch", t));
 		}
+	}
+
+	private static boolean connectionRefused(ILaunch l) {
+		String consoleText= getConsoleText(l);
+		String refusedText = "Connection refused";
+		/*
+		 * Check for several occurrences, to be sure the port we want to use is no longer available.
+		 * Otherwise we might react to the server socket not being open yet.
+		 */
+		return hasMinOccurrencesCount(consoleText, refusedText, 5);
+	}
+
+	private static boolean hasMinOccurrencesCount(String text, String substring, int min) {
+		int occurrences = 0;
+		int index = 0;
+		while (index >= 0) {
+			index = text.indexOf(substring, index);
+			if (index >= 0) {
+				++occurrences;
+				if (occurrences >= min) {
+					return true;
+				}
+				index += substring.length();
+			}
+		}
+		return false;
 	}
 
 	protected static class LaunchesListener implements ILaunchesListener2 {
