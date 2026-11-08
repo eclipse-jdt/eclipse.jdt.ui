@@ -748,6 +748,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	 * @return the import edits, or {@code null} if parsing prevents organizing imports
 	 * @throws CoreException if calculating the edits fails
 	 * @throws OperationCanceledException if the operation is canceled
+	 * @since 1.26
 	 */
 	public TextEdit createTextEdit(IProgressMonitor m, Map<ICompilationUnit, Set<String>> requiredModules) throws CoreException, OperationCanceledException {
 		SubMonitor subMonitor= SubMonitor.convert(m, Messages.format(JavaManipulationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 10);
@@ -863,6 +864,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	 * @return the edits, or an empty map if parsing prevents organizing imports
 	 * @throws CoreException if creating the edits fails
 	 * @throws OperationCanceledException if the operation is canceled
+	 * @since 1.26
 	 */
 	public Map<ICompilationUnit, TextEdit> createTextEdits(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		SubMonitor subMonitor= SubMonitor.convert(monitor, 10);
