@@ -436,12 +436,14 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	 */
 	public static String getNextLTS(String version) {
 		if (version != null) {
-			if(isVersionLTS(version)) {
+			if (isVersionLTS(version)) {
 				return version; //is Already at latest LTS
 			}
 			try {
 				double numericVersion = Double.parseDouble(version);
-				if (numericVersion >= 2 && numericVersion < 8) return null;
+				if (numericVersion >= 2 && numericVersion < 8) {
+					return null;
+				}
 				else if (numericVersion<9) {
 					return JavaCore.VERSION_1_8;
 				}
@@ -500,9 +502,9 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, enablePreviews, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
 		} else {
 			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
-			if(!isVersionLTS(requiredVersion)) {
+			if (!isVersionLTS(requiredVersion)) {
 				String nextLTS = getNextLTS(requiredVersion);
-				if(nextLTS != null) {
+				if (nextLTS != null) {
 					String label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description_lts, nextLTS);
 					proposals.add(new ChangeToRequiredCompilerCompliance(label2, project, false, nextLTS, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
 				}
