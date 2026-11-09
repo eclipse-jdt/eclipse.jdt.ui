@@ -91,6 +91,11 @@ public class AbstractTestRunListenerTest {
 			fIsDone= false;
 		}
 
+		private synchronized void reset() {
+			fLog.clear();
+			fIsDone= false;
+		}
+
 		public synchronized int getMessageCount() {
 			return fLog.size();
 		}
@@ -148,14 +153,17 @@ public class AbstractTestRunListenerTest {
 	}
 
 	protected void launchJUnit(IJavaElement aTest, String testKindID) throws CoreException {
-		launchJUnit(aTest, testKindID, (String)null);
+		launchJUnitTest(aTest, testKindID, (String)null, null);
 	}
 
-	protected void launchJUnit(IJavaElement aTest, String testKindID, String testName) throws CoreException {
+	private void launchJUnitTest(IJavaElement aTest, String testKindID, String testName, TestRunLog log) throws CoreException {
 		buildTestCase(aTest);
 
 		boolean retryTest = true;
 		for (int retry = 1; retryTest && retry <= MAX_LAUNCH_ATTEMPTS; ++retry) {
+			if (log != null) {
+				log.reset();
+			}
 			LaunchesListener listener = new LaunchesListener();
 			ILaunchConfigurationWorkingCopy configuration= createLaunchConfiguration(aTest, testKindID, testName, listener);
 			ILaunch launch = null;
@@ -229,7 +237,7 @@ public class AbstractTestRunListenerTest {
 	}
 
 	protected String[] launchJUnit(IJavaElement aTest, String testKindID, String testName, final TestRunLog log) throws CoreException {
-		launchJUnit(aTest, testKindID, testName);
+		launchJUnitTest(aTest, testKindID, testName, log);
 
 		boolean success= waitForCondition(log::isDone, 15*1000, 100);
 		if (! success)
