@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +36,14 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -60,11 +68,13 @@ import org.eclipse.jdt.core.dom.ImplicitTypeDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ModuleDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -80,11 +90,13 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddImportCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCorrectionProposalCore;
 
 
 /**
@@ -142,7 +154,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private static Collection<ImportDeclaration> determineUnresolvableImports(CompilationUnit cu) {
 			Collection<ImportDeclaration> unresolvableImports= new ArrayList<>(cu.imports().size());
 			for (IProblem problem : cu.getProblems()) {
-				if (problem.getID() == IProblem.ImportNotFound) {
+				if (problem.getID() == IProblem.ImportNotFound || problem.getID() == IProblem.NotAccessibleType) {
 					ImportDeclaration problematicImport= getProblematicImport(problem, cu);
 					if (problematicImport != null) {
 						unresolvableImports.add(problematicImport);
@@ -237,6 +249,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private boolean fDoIgnoreLowerCaseNames;
 
 		private final UnresolvableImportMatcher fUnresolvableImportMatcher;
+		private final Set<String> fRequiredTypeNames;
 
 		private IPackageFragment fCurrPackage;
 
@@ -251,13 +264,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 
 		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, Map<String, Set<String>> oldModuleImports,
-				CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher) {
+				CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher, Set<String> requiredTypeNames) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fOldModuleImports= oldModuleImports;
 			fImpStructure= impStructure;
 			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
 			fUnresolvableImportMatcher= unresolvableImportMatcher;
+			fRequiredTypeNames= requiredTypeNames;
 			fRoot= root;
 
 			ICompilationUnit cu= impStructure.getCompilationUnit();
@@ -360,6 +374,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				typeBinding= typeBinding.getTypeDeclaration();
 				if (!typeBinding.isRecovered()) {
 					String qualifiedTypeName= typeBinding.getQualifiedName();
+					if (fRequiredTypeNames != null) {
+						fRequiredTypeNames.add(qualifiedTypeName);
+					}
 					if (qualifiedTypeName.indexOf('.') > 0) {
 						String qualifier= qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf('.'));
 						Entry<String, Set<String>> entry= getModuleImportsEntryForQualifier(qualifier);
@@ -506,6 +523,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return null;
 			} else if (nFound == 1) {
 				TypeNameMatch typeRef= typeRefsFound.get(0);
+				if (fRequiredTypeNames != null) {
+					fRequiredTypeNames.add(typeRef.getFullyQualifiedName());
+				}
 				if (getModuleImportsEntryForQualifier(typeRef.getTypeContainerName()) == null) {
 					fImpStructure.addImport(typeRef.getFullyQualifiedName());
 				}
@@ -522,6 +542,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					String containerName= typeRef.getTypeContainerName();
 					if (fOldSingleImports.contains(fullName)) {
 						// was single-imported
+						if (fRequiredTypeNames != null) {
+							fRequiredTypeNames.add(fullName);
+						}
 						fImpStructure.addImport(fullName);
 						return null;
 					} else if (fOldDemandImports.contains(containerName) || fImplicitImports.contains(containerName)) {
@@ -544,6 +567,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 
 				if (typeToImport != null && !ambiguousImports) {
+					if (fRequiredTypeNames != null) {
+						fRequiredTypeNames.add(typeToImport);
+					}
 					if (!foundInModule) { // we only add an import if not already covered by an import module
 						fImpStructure.addImport(typeToImport);
 					}
@@ -686,15 +712,46 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	@Override
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		SubMonitor subMonitor= SubMonitor.convert(monitor,Messages.format(JavaManipulationMessages.OrganizeImportsOperation_description,BasicElementLabels.getFileName(fCompilationUnit)), 10 );
-		TextEdit edit= createTextEdit(subMonitor.split(9));
-		if (edit == null)
+		Map<ICompilationUnit, TextEdit> edits= createTextEdits(subMonitor.split(9));
+		if (edits.isEmpty())
 			return;
-
-		JavaModelUtil.applyEdit(fCompilationUnit, edit, fDoSave, subMonitor.split(1));
+		if (edits.size() == 1) {
+			JavaModelUtil.applyEdit(fCompilationUnit, edits.get(fCompilationUnit), fDoSave, subMonitor.split(1));
+		} else {
+			String description= Messages.format(JavaManipulationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit));
+			CompositeChange change= new CompositeChange(description);
+			for (Entry<ICompilationUnit, TextEdit> entry : edits.entrySet()) {
+				CompilationUnitChange cuChange= new CompilationUnitChange(description, entry.getKey());
+				cuChange.setEdit(entry.getValue());
+				cuChange.setSaveMode(entry.getKey().equals(fCompilationUnit)
+						? (fDoSave ? TextFileChange.FORCE_SAVE : TextFileChange.LEAVE_DIRTY) : TextFileChange.KEEP_SAVE_STATE);
+				change.add(cuChange);
+			}
+			change.initializeValidationData(subMonitor.split(0));
+			PerformChangeOperation operation= new PerformChangeOperation(change);
+			operation.setSchedulingRule(getScheduleRule());
+			operation.setUndoManager(RefactoringCore.getUndoManager(), description);
+			operation.run(subMonitor.split(1));
+		}
 	}
 
 	public TextEdit createTextEdit(IProgressMonitor m) throws CoreException, OperationCanceledException {
-		SubMonitor subMonitor= SubMonitor.convert(m, Messages.format(JavaManipulationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 9);
+		return createTextEdit(m, null);
+	}
+
+	/**
+	 * Creates import edits. If supplied, {@code requiredModules} collects
+	 * missing dependencies by module descriptor so callers can combine them across source files.
+	 *
+	 * @param m the progress monitor, or {@code null}
+	 * @param requiredModules the dependency accumulator, or {@code null} to calculate only imports
+	 * @return the import edits, or {@code null} if parsing prevents organizing imports
+	 * @throws CoreException if calculating the edits fails
+	 * @throws OperationCanceledException if the operation is canceled
+	 * @since 1.26
+	 */
+	public TextEdit createTextEdit(IProgressMonitor m, Map<ICompilationUnit, Set<String>> requiredModules) throws CoreException, OperationCanceledException {
+		SubMonitor subMonitor= SubMonitor.convert(m, Messages.format(JavaManipulationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 10);
 		fNumberOfImportsAdded= 0;
 		fNumberOfImportsRemoved= 0;
 
@@ -702,7 +759,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		if (astRoot == null) {
 			astRoot= CoreASTProvider.getInstance().getAST(fCompilationUnit, CoreASTProvider.WAIT_YES, subMonitor.split(2));
 		}
-		subMonitor.setWorkRemaining(7);
+		subMonitor.setWorkRemaining(8);
 
 		ImportRewrite importsRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, fRestoreExistingImports);
 		if (astRoot.getAST().hasResolvedBindings()) {
@@ -714,6 +771,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		Map<String, Set<String>> oldModulePackages= new HashMap<>();
 		List<SimpleName> typeReferences= new ArrayList<>();
 		List<SimpleName> staticReferences= new ArrayList<>();
+		Set<String> typeNames= requiredModules == null ? null : new HashSet<>();
 
 		if (!collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports, oldModulePackages))
 			return null;
@@ -729,7 +787,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				astRoot,
 				importsRewrite,
 				fIgnoreLowerCaseNames,
-				unresolvableImportMatcher);
+				unresolvableImportMatcher,
+				typeNames);
 
 		Iterator<SimpleName> refIterator= typeReferences.iterator();
 		while (refIterator.hasNext()) {
@@ -765,11 +824,144 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 
+		if (typeNames != null) {
+			for (String name : importsRewrite.getAddedImports()) {
+				if (!name.endsWith(".*")) { //$NON-NLS-1$
+					typeNames.add(name);
+				}
+			}
+			for (String name : importsRewrite.getAddedStaticImports()) {
+				int separator= name.lastIndexOf('.');
+				if (separator != -1) {
+					typeNames.add(name.substring(0, separator));
+				}
+			}
+		}
 		TextEdit result= importsRewrite.rewriteImports(subMonitor.split(3));
+		if (requiredModules != null) {
+			IJavaProject project= fCompilationUnit.getJavaProject();
+			IModuleDescription module= JavaModelUtil.is9OrHigher(project) ? project.getModuleDescription() : null;
+			ICompilationUnit moduleCu= module == null ? null : module.getCompilationUnit();
+			if (moduleCu != null && moduleCu.exists()) {
+				Set<String> names= findRequiredModules(moduleCu, typeNames, importsRewrite.getCreatedModuleImports(), subMonitor.split(1));
+				if (!names.isEmpty()) {
+					requiredModules.computeIfAbsent(moduleCu, _ -> new HashSet<>()).addAll(names);
+				}
+			}
+		}
 
 		determineImportDifferences(importsRewrite, oldSingleImports, oldDemandImports);
 
 		return result;
+	}
+
+	/**
+	 * Creates edits for the source file and its existing module descriptor.
+	 * For several source files, use {@link #createTextEdit(IProgressMonitor, Map)} to collect their
+	 * dependencies before creating one change per descriptor.
+	 *
+	 * @param monitor the progress monitor, or {@code null}
+	 * @return the edits, or an empty map if parsing prevents organizing imports
+	 * @throws CoreException if creating the edits fails
+	 * @throws OperationCanceledException if the operation is canceled
+	 * @since 1.26
+	 */
+	public Map<ICompilationUnit, TextEdit> createTextEdits(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		SubMonitor subMonitor= SubMonitor.convert(monitor, 10);
+		Map<ICompilationUnit, Set<String>> requiredModules= new HashMap<>();
+		TextEdit importEdit= createTextEdit(subMonitor.split(9), requiredModules);
+		if (importEdit == null) {
+			return Collections.emptyMap();
+		}
+		Map<ICompilationUnit, TextEdit> edits= new LinkedHashMap<>();
+		edits.put(fCompilationUnit, importEdit);
+		for (Entry<ICompilationUnit, Set<String>> entry : requiredModules.entrySet()) {
+			String description= Messages.format(JavaManipulationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(entry.getKey()));
+			AddModuleRequiresCorrectionProposalCore proposal= new AddModuleRequiresCorrectionProposalCore(entry.getValue(), description, description, entry.getKey(), 0);
+			CompilationUnitChange change= (CompilationUnitChange) proposal.getChange();
+			if (change != null) {
+				edits.merge(entry.getKey(), change.getEdit(), TextEditUtil::merge);
+			}
+		}
+		subMonitor.worked(1);
+		return edits;
+	}
+
+	private Set<String> findRequiredModules(ICompilationUnit moduleCu, Set<String> typeNames, String[] moduleNames, IProgressMonitor monitor) throws CoreException {
+		IJavaProject project= moduleCu.getJavaProject();
+		CompilationUnit astRoot= CoreASTProvider.getInstance().getAST(moduleCu, CoreASTProvider.WAIT_YES, monitor);
+		ModuleDeclaration declaration= astRoot.getModule();
+		if (declaration == null) {
+			return Set.of();
+		}
+		Set<String> requiredModules= new HashSet<>(Arrays.asList(moduleNames));
+		IModuleDescription currentModule= project.getModuleDescription();
+		String currentModuleName= declaration.getName().getFullyQualifiedName();
+		for (String name : typeNames) {
+			IType type= project.findType(name, moduleCu.getOwner());
+			if (type == null) {
+				continue;
+			}
+			IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			IModuleDescription module= AddModuleRequiresCorrectionProposalCore.getModuleDescription(
+					root.isArchive() || root.isExternal() ? root : type.getJavaProject());
+			if (module == null) {
+				continue;
+			}
+			if (!module.isSystemModule() && !isOnModulePath(project, root, false, new HashSet<>())) {
+				continue;
+			}
+			if (!module.isAutoModule() && !Arrays.asList(module.getExportedPackageNames(currentModule)).contains(type.getPackageFragment().getElementName())) {
+				continue;
+			}
+			requiredModules.add(module.getElementName());
+		}
+		requiredModules.remove(currentModuleName);
+		requiredModules.remove(AddImportCorrectionProposalCore.JAVA_BASE);
+		IModuleBinding binding= declaration.resolveBinding();
+		if (binding != null) {
+			Set<String> readableModules= new HashSet<>();
+			for (IModuleBinding required : binding.getRequiredModules()) {
+				collectReadableModules(required, readableModules);
+			}
+			requiredModules.removeAll(readableModules);
+		}
+		return requiredModules;
+	}
+
+	private static boolean isOnModulePath(IJavaProject project, IPackageFragmentRoot root, boolean exportedOnly, Set<IJavaProject> visited) throws JavaModelException {
+		if (!visited.add(project)) {
+			return false;
+		}
+		for (IClasspathEntry entry : project.getResolvedClasspath(true)) {
+			if (exportedOnly && !entry.isExported()) {
+				continue;
+			}
+			boolean modular= Arrays.stream(entry.getExtraAttributes())
+					.anyMatch(attribute -> IClasspathAttribute.MODULE.equals(attribute.getName()) && Boolean.parseBoolean(attribute.getValue()));
+			if (!modular) {
+				continue;
+			}
+			if (entry.getPath().equals(root.getPath()) || entry.getEntryKind() == IClasspathEntry.CPE_PROJECT
+					&& root.getKind() == IPackageFragmentRoot.K_SOURCE && entry.getPath().equals(root.getJavaProject().getPath())) {
+				return true;
+			}
+			if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+				IJavaProject requiredProject= project.getJavaModel().getJavaProject(entry.getPath().lastSegment());
+				if (isOnModulePath(requiredProject, root, true, visited)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static void collectReadableModules(IModuleBinding module, Set<String> readableModules) {
+		if (module != null && readableModules.add(module.getName())) {
+			for (IModuleBinding transitive : module.getRequiredTransitiveModules()) {
+				collectReadableModules(transitive, readableModules);
+			}
+		}
 	}
 
 	private void determineImportDifferences(ImportRewrite importsStructure, Set<String> oldSingleImports, Set<String> oldDemandImports) {
@@ -926,7 +1118,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	 * @return Returns the scheduling rule for this operation
 	 */
 	public ISchedulingRule getScheduleRule() {
-		return fCompilationUnit.getResource();
+		return fCompilationUnit.getJavaProject().getProject();
 	}
 
 }
