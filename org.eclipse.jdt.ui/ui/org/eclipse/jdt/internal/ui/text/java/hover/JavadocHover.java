@@ -860,23 +860,33 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
 
 			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, JavadocHover.getStyleSheet(buffer));
-			String hlHeader= HighlightJsSupport.getHighlightJsHeader(isDarkTheme());
-			if (!hlHeader.isEmpty()) {
-				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-				if (endHeadIdx > 0) {
-					buffer.insert(endHeadIdx, "\n" + hlHeader); //$NON-NLS-1$
-				}
-			}
-			if (base != null) {
-				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
- 				buffer.insert(endHeadIdx, "\n<base href='" + base.replace("&", "&amp;").replace("'", "&#39;") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
- 						.replace("<", "&lt;").replace(">", "&gt;") + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			}
+			insertHeadElements(buffer, base);
 			HTMLPrinter.addPageEpilog(buffer);
 			return new JavadocHoverInformationControlInput(previousInput, element, buffer.toString(), leadingImageWidth, editorInputElement, hoverRegion);
 		}
 
 		return null;
+	}
+
+	/**
+	 * Inserts the highlight.js header, including its Content-Security-Policy, and an
+	 * optional <code>&lt;base&gt;</code> element into a page created with
+	 * {@link HTMLPrinter#insertPageProlog}. Every page shown in the JavaScript-enabled
+	 * Javadoc controls must go through this method.
+	 */
+	public static void insertHeadElements(StringBuilder buffer, String base) {
+		int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+		if (endHeadIdx < 0) {
+			throw new IllegalArgumentException("page has no </head>"); //$NON-NLS-1$
+		}
+		StringBuilder head= new StringBuilder();
+		head.append('\n').append(HighlightJsSupport.getHighlightJsHeader(isDarkTheme()));
+		if (base != null) {
+			head.append("\n<base href='" + base.replace("&", "&amp;").replace("'", "&#39;") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+ 						.replace("<", "&lt;").replace(">", "&gt;") + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		}
+		head.append('\n');
+		buffer.insert(endHeadIdx, head);
 	}
 
 	static boolean isDarkTheme() {
@@ -1129,7 +1139,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @return the updated style sheet
 	 * @since 3.4
 	 */
-	private static String getStyleSheet(StringBuilder content) {
+	static String getStyleSheet(StringBuilder content) {
 		if (fgStyleSheet == null) {
 			fgStyleSheet= loadStyleSheet("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
 		}

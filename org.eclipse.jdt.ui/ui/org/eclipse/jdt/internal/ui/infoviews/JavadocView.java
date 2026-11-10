@@ -130,7 +130,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
-import org.eclipse.jdt.core.manipulation.internal.javadoc.HighlightJsSupport;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -1111,18 +1110,7 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 
 		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, JavadocHover.substituteJavaSyntaxColors(JavaElementLinks.modifyCssStyleSheet(fgStyleSheet, buffer)));
-		String hlHeader= HighlightJsSupport.getHighlightJsHeader(isDarkTheme());
-		if (!hlHeader.isEmpty()) {
-			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-			if (endHeadIdx > 0) {
-				buffer.insert(endHeadIdx, "\n" + hlHeader); //$NON-NLS-1$
-			}
-		}
-		if (base != null) {
-			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-			buffer.insert(endHeadIdx, "\n<base href='" + base.replace("&", "&amp;").replace("'", "&#39;") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-					.replace("<", "&lt;").replace(">", "&gt;") + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		}
+		JavadocHover.insertHeadElements(buffer, base);
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
