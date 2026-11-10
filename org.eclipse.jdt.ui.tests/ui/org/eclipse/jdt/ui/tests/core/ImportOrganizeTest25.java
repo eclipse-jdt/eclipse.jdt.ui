@@ -516,7 +516,7 @@ public class ImportOrganizeTest25 extends CoreTests {
 	public void testCreateTextEditsSkipsUnchosenImport() throws Exception {
 		ModuleImportTest test= createModuleImportTest("module client {\n}\n", "", "One one;");
 		addAlternativeModule();
-		IChooseImportQuery query= (choices, ranges) -> new TypeNameMatch[choices.length];
+		IChooseImportQuery query= (choices, _) -> new TypeNameMatch[choices.length];
 		Map<ICompilationUnit, TextEdit> edits= createModuleImportOperation(test.source(), 99, query).createTextEdits(null);
 		assertFalse(edits.containsKey(test.module()));
 		applyEdits(edits);
@@ -630,7 +630,7 @@ public class ImportOrganizeTest25 extends CoreTests {
 		addAlternativeModule();
 		String originalSource= test.source().getSource();
 		String originalModule= test.module().getSource();
-		OrganizeImportsOperation operation= createModuleImportOperation(test.source(), 99, (choices, ranges) -> null);
+		OrganizeImportsOperation operation= createModuleImportOperation(test.source(), 99, (_, _) -> null);
 		assertThrows(OperationCanceledException.class, () -> operation.createTextEdits(null));
 		assertEquals(originalSource, test.source().getSource());
 		assertEquals(originalModule, test.module().getSource());

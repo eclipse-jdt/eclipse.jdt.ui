@@ -845,7 +845,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (moduleCu != null && moduleCu.exists()) {
 				Set<String> names= findRequiredModules(moduleCu, typeNames, importsRewrite.getCreatedModuleImports(), subMonitor.split(1));
 				if (!names.isEmpty()) {
-					requiredModules.computeIfAbsent(moduleCu, key -> new HashSet<>()).addAll(names);
+					requiredModules.computeIfAbsent(moduleCu, _ -> new HashSet<>()).addAll(names);
 				}
 			}
 		}

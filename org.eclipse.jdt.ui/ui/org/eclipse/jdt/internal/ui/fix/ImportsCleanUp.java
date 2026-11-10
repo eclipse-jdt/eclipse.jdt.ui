@@ -97,7 +97,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
     	}
     }
 
-	public List<CompilationUnitChange> createModuleChanges(IProgressMonitor monitor) throws CoreException {
+	public List<CompilationUnitChange> createModuleChanges() throws CoreException {
 		if (fRequiredModules == null) {
 			return List.of();
 		}

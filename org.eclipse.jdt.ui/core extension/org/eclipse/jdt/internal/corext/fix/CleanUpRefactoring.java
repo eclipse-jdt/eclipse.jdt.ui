@@ -665,7 +665,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				if (result.hasFatalError())
 					return result;
 				Change[] changes= cleanUpProject(project, targets, cleanUps, pm);
-				addModuleChanges(change, changes, cleanUps, pm);
+				addModuleChanges(change, changes, cleanUps);
 				result.merge(checkPostConditions(Progress.subMonitor(pm, cleanUps.length)));
 				if (result.hasFatalError())
 					return result;
@@ -685,10 +685,10 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		return result;
 	}
 
-	private void addModuleChanges(CompositeChange result, Change[] changes, ICleanUp[] cleanUps, IProgressMonitor monitor) throws CoreException {
+	private void addModuleChanges(CompositeChange result, Change[] changes, ICleanUp[] cleanUps) throws CoreException {
 		for (ICleanUp cleanUp : cleanUps) {
 			if (cleanUp instanceof ImportsCleanUp importsCleanUp) {
-				for (CompilationUnitChange moduleChange : importsCleanUp.createModuleChanges(monitor)) {
+				for (CompilationUnitChange moduleChange : importsCleanUp.createModuleChanges()) {
 					CleanUpChange combined= new CleanUpChange(moduleChange.getName(), moduleChange.getCompilationUnit());
 					TextEdit edit= moduleChange.getEdit();
 					int existingIndex= -1;
