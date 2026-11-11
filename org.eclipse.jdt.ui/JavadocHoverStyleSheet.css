@@ -65,22 +65,23 @@ input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent .typeParamsRefer
 
 
 /* Java syntax highlighting in fenced code blocks */
-code .jc-keyword       { color: jc_keyword_color; font-weight: bold; }
-code .jc-string        { color: jc_string_color; }
-code .jc-comment       { color: jc_comment_color; }
-code .jc-annotation    { color: jc_annotation_color; }
-code .jc-type          { color: jc_type_color; }
-code .jc-method-decl   { color: jc_method_decl_color; }
-code .jc-method        { color: jc_method_color; }
-code .jc-param         { color: jc_param_color; }
-code .jc-local-var-decl { color: jc_local_var_decl_color; }
-code .jc-local-var     { color: jc_local_var_color; }
-code .jc-number        { color: jc_number_color; }
-code .jc-type-arg      { color: jc_type_arg_color; }
-code .jc-field         { color: jc_field_color; }
-code .jc-static-field  { color: jc_static_field_color; }
-code .jc-static-final-field { color: jc_static_final_field_color; }
-code .jc-enum          { color: jc_enum_color; }
+code .jc-keyword       { color: jc_keyword_color; font-weight: jc_keyword_weight; font-style: jc_keyword_style; text-decoration: jc_keyword_decoration; }
+code .jc-keyword-return { color: jc_keyword_return_color; font-weight: jc_keyword_return_weight; font-style: jc_keyword_return_style; text-decoration: jc_keyword_return_decoration; }
+code .jc-string        { color: jc_string_color; font-weight: jc_string_weight; font-style: jc_string_style; text-decoration: jc_string_decoration; }
+code .jc-comment       { color: jc_comment_color; font-weight: jc_comment_weight; font-style: jc_comment_style; text-decoration: jc_comment_decoration; }
+code .jc-annotation    { color: jc_annotation_color; font-weight: jc_annotation_weight; font-style: jc_annotation_style; text-decoration: jc_annotation_decoration; }
+code .jc-type          { color: jc_type_color; font-weight: jc_type_weight; font-style: jc_type_style; text-decoration: jc_type_decoration; }
+code .jc-method-decl   { color: jc_method_decl_color; font-weight: jc_method_decl_weight; font-style: jc_method_decl_style; text-decoration: jc_method_decl_decoration; }
+code .jc-method        { color: jc_method_color; font-weight: jc_method_weight; font-style: jc_method_style; text-decoration: jc_method_decoration; }
+code .jc-param         { color: jc_param_color; font-weight: jc_param_weight; font-style: jc_param_style; text-decoration: jc_param_decoration; }
+code .jc-local-var-decl { color: jc_local_var_decl_color; font-weight: jc_local_var_decl_weight; font-style: jc_local_var_decl_style; text-decoration: jc_local_var_decl_decoration; }
+code .jc-local-var     { color: jc_local_var_color; font-weight: jc_local_var_weight; font-style: jc_local_var_style; text-decoration: jc_local_var_decoration; }
+code .jc-number        { color: jc_number_color; font-weight: jc_number_weight; font-style: jc_number_style; text-decoration: jc_number_decoration; }
+code .jc-type-arg      { color: jc_type_arg_color; font-weight: jc_type_arg_weight; font-style: jc_type_arg_style; text-decoration: jc_type_arg_decoration; }
+code .jc-field         { color: jc_field_color; font-weight: jc_field_weight; font-style: jc_field_style; text-decoration: jc_field_decoration; }
+code .jc-static-field  { color: jc_static_field_color; font-weight: jc_static_field_weight; font-style: jc_static_field_style; text-decoration: jc_static_field_decoration; }
+code .jc-static-final-field { color: jc_static_final_field_color; font-weight: jc_static_final_field_weight; font-style: jc_static_final_field_style; text-decoration: jc_static_final_field_decoration; }
+code .jc-enum          { color: jc_enum_color; font-weight: jc_enum_weight; font-style: jc_enum_style; text-decoration: jc_enum_decoration; }
 
 /* Workarounds for new Javadoc stylesheet (1.7) */ 
 ul.blockList li.blockList, ul.blockListLast li.blockList {

@@ -1100,22 +1100,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return css;
 	}
 
-	private static final String CSS_PLACEHOLDER_JC_KEYWORD= "jc_keyword_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_STRING= "jc_string_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_COMMENT= "jc_comment_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_ANNOTATION= "jc_annotation_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_TYPE= "jc_type_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_METHOD_DECL= "jc_method_decl_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_METHOD= "jc_method_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_PARAM= "jc_param_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_LOCAL_VAR_DECL= "jc_local_var_decl_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_LOCAL_VAR= "jc_local_var_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_NUMBER= "jc_number_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_TYPE_ARG= "jc_type_arg_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_FIELD= "jc_field_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_STATIC_FIELD= "jc_static_field_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_STATIC_FINAL_FIELD= "jc_static_final_field_color"; //$NON-NLS-1$
-	private static final String CSS_PLACEHOLDER_JC_ENUM= "jc_enum_color"; //$NON-NLS-1$
+	private static final String CSS_INHERIT= "inherit"; //$NON-NLS-1$
+	private static final String CSS_BOLD= "bold"; //$NON-NLS-1$
+	private static final String CSS_NORMAL= "normal"; //$NON-NLS-1$
+	private static final String CSS_ITALIC= "italic"; //$NON-NLS-1$
+	private static final String CSS_NONE= "none"; //$NON-NLS-1$
+	private static final String CSS_UNDERLINE= "underline"; //$NON-NLS-1$
+	private static final String CSS_LINE_THROUGH= "line-through"; //$NON-NLS-1$
 
 	private static String semanticColorKey(String highlightingKey) {
 		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX
@@ -1123,24 +1114,96 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_COLOR_SUFFIX;
 	}
 
+	private static String semanticBoldKey(String highlightingKey) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX
+				+ highlightingKey
+				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
+	}
+
+	private static String semanticItalicKey(String highlightingKey) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX
+				+ highlightingKey
+				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
+	}
+
+	private static String semanticStrikethroughKey(String highlightingKey) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX
+				+ highlightingKey
+				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
+	}
+
+	private static String semanticUnderlineKey(String highlightingKey) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX
+				+ highlightingKey
+				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
+	}
+
+	private static String semanticEnabledKey(String highlightingKey) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX
+				+ highlightingKey
+				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
+	}
+
+	private static String getCssTextDecoration(boolean strikethrough, boolean underline) {
+		if (strikethrough && underline) {
+			return CSS_LINE_THROUGH + ' ' + CSS_UNDERLINE;
+		}
+		if (strikethrough) {
+			return CSS_LINE_THROUGH;
+		}
+		if (underline) {
+			return CSS_UNDERLINE;
+		}
+		return CSS_NONE;
+	}
+
+	private static String substituteSyntacticStyle(String css, IPreferenceStore store, String cssPrefix, String colorKey) {
+		css= css.replace(cssPrefix + "color", getCssColor(PreferenceConverter.getColor(store, colorKey))); //$NON-NLS-1$
+		css= css.replace(cssPrefix + "weight", store.getBoolean(colorKey + PreferenceConstants.EDITOR_BOLD_SUFFIX) ? CSS_BOLD : CSS_NORMAL); //$NON-NLS-1$
+		css= css.replace(cssPrefix + "style", store.getBoolean(colorKey + PreferenceConstants.EDITOR_ITALIC_SUFFIX) ? CSS_ITALIC : CSS_NORMAL); //$NON-NLS-1$
+		css= css.replace(cssPrefix + "decoration", getCssTextDecoration( //$NON-NLS-1$
+				store.getBoolean(colorKey + PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX),
+				store.getBoolean(colorKey + PreferenceConstants.EDITOR_UNDERLINE_SUFFIX)));
+		return css;
+	}
+
+	private static String substituteSemanticStyle(String css, IPreferenceStore store, String cssPrefix, String highlightingKey) {
+		boolean enabled= store.getBoolean(semanticEnabledKey(highlightingKey));
+		if (enabled) {
+			css= css.replace(cssPrefix + "color", getCssColor(PreferenceConverter.getColor(store, semanticColorKey(highlightingKey)))); //$NON-NLS-1$
+			css= css.replace(cssPrefix + "weight", store.getBoolean(semanticBoldKey(highlightingKey)) ? CSS_BOLD : CSS_NORMAL); //$NON-NLS-1$
+			css= css.replace(cssPrefix + "style", store.getBoolean(semanticItalicKey(highlightingKey)) ? CSS_ITALIC : CSS_NORMAL); //$NON-NLS-1$
+			css= css.replace(cssPrefix + "decoration", getCssTextDecoration( //$NON-NLS-1$
+					store.getBoolean(semanticStrikethroughKey(highlightingKey)),
+					store.getBoolean(semanticUnderlineKey(highlightingKey))));
+		} else {
+			css= css.replace(cssPrefix + "color", CSS_INHERIT); //$NON-NLS-1$
+			css= css.replace(cssPrefix + "weight", CSS_INHERIT); //$NON-NLS-1$
+			css= css.replace(cssPrefix + "style", CSS_INHERIT); //$NON-NLS-1$
+			css= css.replace(cssPrefix + "decoration", CSS_INHERIT); //$NON-NLS-1$
+		}
+		return css;
+	}
+
 	public static String substituteJavaSyntaxColors(String css) {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		css= css.replace(CSS_PLACEHOLDER_JC_KEYWORD, getCssColor(PreferenceConverter.getColor(store, IJavaColorConstants.JAVA_KEYWORD)));
-		css= css.replace(CSS_PLACEHOLDER_JC_STRING, getCssColor(PreferenceConverter.getColor(store, IJavaColorConstants.JAVA_STRING)));
-		css= css.replace(CSS_PLACEHOLDER_JC_COMMENT, getCssColor(PreferenceConverter.getColor(store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT)));
-		css= css.replace(CSS_PLACEHOLDER_JC_ANNOTATION, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.ANNOTATION))));
-		css= css.replace(CSS_PLACEHOLDER_JC_TYPE, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.CLASS))));
-		css= css.replace(CSS_PLACEHOLDER_JC_METHOD_DECL, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.METHOD_DECLARATION))));
-		css= css.replace(CSS_PLACEHOLDER_JC_METHOD, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.METHOD))));
-		css= css.replace(CSS_PLACEHOLDER_JC_PARAM, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.PARAMETER_VARIABLE))));
-		css= css.replace(CSS_PLACEHOLDER_JC_LOCAL_VAR_DECL, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.LOCAL_VARIABLE_DECLARATION))));
-		css= css.replace(CSS_PLACEHOLDER_JC_LOCAL_VAR, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.LOCAL_VARIABLE))));
-		css= css.replace(CSS_PLACEHOLDER_JC_NUMBER, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.NUMBER))));
-		css= css.replace(CSS_PLACEHOLDER_JC_TYPE_ARG, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.TYPE_ARGUMENT))));
-		css= css.replace(CSS_PLACEHOLDER_JC_STATIC_FINAL_FIELD, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.STATIC_FINAL_FIELD))));
-		css= css.replace(CSS_PLACEHOLDER_JC_STATIC_FIELD, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.STATIC_FIELD))));
-		css= css.replace(CSS_PLACEHOLDER_JC_FIELD, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.FIELD))));
-		css= css.replace(CSS_PLACEHOLDER_JC_ENUM, getCssColor(PreferenceConverter.getColor(store, semanticColorKey(SemanticHighlightings.ENUM))));
+		css= substituteSyntacticStyle(css, store, "jc_keyword_return_", IJavaColorConstants.JAVA_KEYWORD_RETURN); //$NON-NLS-1$
+		css= substituteSyntacticStyle(css, store, "jc_keyword_", IJavaColorConstants.JAVA_KEYWORD); //$NON-NLS-1$
+		css= substituteSyntacticStyle(css, store, "jc_string_", IJavaColorConstants.JAVA_STRING); //$NON-NLS-1$
+		css= substituteSyntacticStyle(css, store, "jc_comment_", IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_annotation_", SemanticHighlightings.ANNOTATION); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_type_", SemanticHighlightings.CLASS); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_method_decl_", SemanticHighlightings.METHOD_DECLARATION); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_method_", SemanticHighlightings.METHOD); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_param_", SemanticHighlightings.PARAMETER_VARIABLE); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_local_var_decl_", SemanticHighlightings.LOCAL_VARIABLE_DECLARATION); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_local_var_", SemanticHighlightings.LOCAL_VARIABLE); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_number_", SemanticHighlightings.NUMBER); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_type_arg_", SemanticHighlightings.TYPE_ARGUMENT); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_static_final_field_", SemanticHighlightings.STATIC_FINAL_FIELD); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_static_field_", SemanticHighlightings.STATIC_FIELD); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_field_", SemanticHighlightings.FIELD); //$NON-NLS-1$
+		css= substituteSemanticStyle(css, store, "jc_enum_", SemanticHighlightings.ENUM); //$NON-NLS-1$
 		return css;
 	}
 
