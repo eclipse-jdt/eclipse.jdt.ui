@@ -70,6 +70,9 @@ public class JavaCodeTokenizerTest {
 	private static String enumType(String text) {
 		return "<span class=\"jc-enum\">" + text + "</span>"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
+	private static String kwreturn(String text) {
+		return "<span class=\"jc-keyword-return\">" + text + "</span>"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
 
 	@Test
 	public void testKeywords() {
@@ -464,7 +467,7 @@ public class JavaCodeTokenizerTest {
 		// f's param x should not leak into g — x in g() should be field, not param
 		assertTrue(result.contains(kw("int") + " " + field("x") + ";")); //$NON-NLS-1$
 		assertTrue(result.contains(kw("int") + " " + param("x") + ")")); //$NON-NLS-1$
-		assertTrue(result.contains(kw("return") + " " + field("x") + ";")); //$NON-NLS-1$
+		assertTrue(result.contains(kwreturn("return") + " " + field("x") + ";")); //$NON-NLS-1$
 	}
 
 	@Test
