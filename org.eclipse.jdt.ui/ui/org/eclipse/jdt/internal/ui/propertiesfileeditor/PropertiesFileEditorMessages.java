@@ -62,6 +62,7 @@ public final class PropertiesFileEditorMessages extends NLS {
 	public static String OpenAction_SelectionDialog_elementLabel;
 	public static String OpenAction_SelectionDialog_elementLabelWithMatchCount;
 	public static String OpenAction_SelectionDialog_preview_no_source;
+	public static String OpenAction_SelectionDialog_preview_source;
 	public static String OpenAction_SelectionDialog_preview_job_name;
 	public static String OpenAction_SelectionDialog_preview_accessible_name;
 
