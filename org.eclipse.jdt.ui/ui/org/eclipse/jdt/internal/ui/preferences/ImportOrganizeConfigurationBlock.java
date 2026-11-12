@@ -73,13 +73,16 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private static final Key PREF_ONDEMANDTHRESHOLD= getJDTUIKey(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
 	private static final Key PREF_IGNORELOWERCASE= getJDTUIKey(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
 	private static final Key PREF_STATICONDEMANDTHRESHOLD= getJDTUIKey(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD);
+	private static final Key PREF_KEEP_EXISTING_ONDEMAND= getJDTUIKey(PreferenceConstants.ORGIMPORTS_KEEP_EXISTING_ONDEMAND);
+	private static final Key PREF_COLLAPSE_TO_ONDEMAND= getJDTUIKey(PreferenceConstants.ORGIMPORTS_COLLAPSE_TO_ONDEMAND);
 
 	private static final String DIALOGSETTING_LASTLOADPATH= JavaUI.ID_PLUGIN + ".importorder.loadpath"; //$NON-NLS-1$
 	private static final String DIALOGSETTING_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".importorder.savepath"; //$NON-NLS-1$
 
 	private static Key[] getAllKeys() {
 		return new Key[] {
-			PREF_IMPORTORDER, PREF_ONDEMANDTHRESHOLD, PREF_STATICONDEMANDTHRESHOLD, PREF_IGNORELOWERCASE
+			PREF_IMPORTORDER, PREF_ONDEMANDTHRESHOLD, PREF_STATICONDEMANDTHRESHOLD, PREF_IGNORELOWERCASE,
+			PREF_KEEP_EXISTING_ONDEMAND, PREF_COLLAPSE_TO_ONDEMAND
 		};
 	}
 
@@ -177,6 +180,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private StringDialogField fThresholdField;
 	private StringDialogField fStaticThresholdField;
 	private SelectionButtonDialogField fIgnoreLowerCaseTypesField;
+	private SelectionButtonDialogField fKeepExistingOnDemandField;
+	private SelectionButtonDialogField fCollapseToOnDemandField;
 	private SelectionButtonDialogField fExportButton;
 	private SelectionButtonDialogField fImportButton;
 
@@ -226,6 +231,14 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fIgnoreLowerCaseTypesField.setDialogFieldListener(adapter);
 		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_ignoreLowerCase_label);
 
+		fKeepExistingOnDemandField= new SelectionButtonDialogField(SWT.CHECK);
+		fKeepExistingOnDemandField.setDialogFieldListener(adapter);
+		fKeepExistingOnDemandField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_keepExistingOnDemand_label);
+
+		fCollapseToOnDemandField= new SelectionButtonDialogField(SWT.CHECK);
+		fCollapseToOnDemandField.setDialogFieldListener(adapter);
+		fCollapseToOnDemandField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_collapseToOnDemand_label);
+
 		updateControls();
 	}
 
@@ -265,6 +278,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fThresholdField.doFillIntoGrid(composite, 2);
 		((GridData) fThresholdField.getTextControl(null).getLayoutData()).grabExcessHorizontalSpace= false;
 		fStaticThresholdField.doFillIntoGrid(composite, 2);
+		fCollapseToOnDemandField.doFillIntoGrid(composite, 2);
+		fKeepExistingOnDemandField.doFillIntoGrid(composite, 2);
 		fIgnoreLowerCaseTypesField.doFillIntoGrid(composite, 2);
 
 		Dialog.applyDialogFont(composite);
@@ -418,6 +433,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		int threshold= getImportNumberThreshold(PREF_ONDEMANDTHRESHOLD);
 		int staticThreshold= getImportNumberThreshold(PREF_STATICONDEMANDTHRESHOLD);
 		boolean ignoreLowerCase= Boolean.parseBoolean(getValue(PREF_IGNORELOWERCASE));
+		boolean keepExistingOnDemand= Boolean.parseBoolean(getValue(PREF_KEEP_EXISTING_ONDEMAND));
+		boolean collapseToOnDemand= Boolean.parseBoolean(getValue(PREF_COLLAPSE_TO_ONDEMAND));
 
 		fOrderListField.removeAllElements();
 		for (ImportOrderEntry i : importOrder) {
@@ -426,6 +443,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fThresholdField.setText(String.valueOf(threshold));
 		fStaticThresholdField.setText(String.valueOf(staticThreshold));
 		fIgnoreLowerCaseTypesField.setSelection(ignoreLowerCase);
+		fKeepExistingOnDemandField.setSelection(keepExistingOnDemand);
+		fCollapseToOnDemandField.setSelection(collapseToOnDemand);
 	}
 
 
@@ -443,6 +462,10 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	  		}
 		} else if (field == fIgnoreLowerCaseTypesField) {
 	  		setValue(PREF_IGNORELOWERCASE, fIgnoreLowerCaseTypesField.isSelected());
+		} else if (field == fKeepExistingOnDemandField) {
+	  		setValue(PREF_KEEP_EXISTING_ONDEMAND, fKeepExistingOnDemandField.isSelected());
+		} else if (field == fCollapseToOnDemandField) {
+	  		setValue(PREF_COLLAPSE_TO_ONDEMAND, fCollapseToOnDemandField.isSelected());
 		} else if (field == fImportButton) {
 			List<ImportOrderEntry> order= loadImportOrder();
 			if (order != null) {
