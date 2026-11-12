@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -64,15 +65,19 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.views.WorkbenchViewerSetup;
 
+import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
@@ -513,6 +518,36 @@ public class TestViewer {
 
 	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
 		String testName= testSuite.getTestName();
+		String suiteTypeName= testSuite.getSuiteTypeName();
+		if (testName.indexOf('(') < 0
+				&& JavaConventionsUtil.validateJavaTypeName(suiteTypeName, fTestRunnerPart.getLaunchedProject()).getSeverity() != IStatus.ERROR) {
+			return new OpenTestAction(fTestRunnerPart, suiteTypeName) {
+				private OpenTestAction fChildAction;
+
+				@Override
+				protected IJavaElement findElement(IJavaProject project, String className) throws JavaModelException {
+					fChildAction= null;
+					IJavaElement element= super.findElement(project, className);
+					if (element != null)
+						return element;
+
+					ITestElement[] children= testSuite.getChildren();
+					if (children.length > 0 && children[0] instanceof TestCaseElement tce) {
+						fChildAction= new OpenTestAction(fTestRunner, tce, tce.getParameterTypes());
+						return fChildAction.findElement(project, tce.getClassName());
+					}
+					return null;
+				}
+
+				@Override
+				protected void reveal(ITextEditor editor) {
+					if (fChildAction != null)
+						fChildAction.reveal(editor);
+					else
+						super.reveal(editor);
+				}
+			};
+		}
 		ITestElement[] children= testSuite.getChildren();
 
 		if (children.length > 0 && children[0] instanceof TestCaseElement tce) {
