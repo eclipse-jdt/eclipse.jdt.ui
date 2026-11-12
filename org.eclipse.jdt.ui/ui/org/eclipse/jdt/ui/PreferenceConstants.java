@@ -4018,6 +4018,36 @@ public class PreferenceConstants {
 	public static final String EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS = "java.codemining.implementations"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that stores the value for "Show JUnit test status" codemining.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.40
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_JUNIT_STATUS = "java.codemining.junit.status"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Show JUnit Run" codemining.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.40
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_JUNIT_RUN = "java.codemining.junit.run"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Show JUnit Debug" codemining.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.40
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_JUNIT_DEBUG = "java.codemining.junit.debug"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that stores the value for "Show parameter names"
 	 * codemining.
 	 * <p>
@@ -4495,6 +4525,9 @@ public class PreferenceConstants {
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_JUNIT_STATUS, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_JUNIT_RUN, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_JUNIT_DEBUG, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES, true);

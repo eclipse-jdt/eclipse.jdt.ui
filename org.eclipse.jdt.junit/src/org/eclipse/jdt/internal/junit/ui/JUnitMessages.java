@@ -397,4 +397,14 @@ public final class JUnitMessages extends NLS {
 
 	public static String TestSearchEngine_search_message_progress_monitor;
 
+	public static String JUnitCodeMining_run;
+	public static String JUnitCodeMining_debug;
+	public static String JUnitCodeMining_runAll;
+	public static String JUnitCodeMining_debugAll;
+	public static String JUnitCodeMining_status_ok;
+	public static String JUnitCodeMining_status_error;
+	public static String JUnitCodeMining_status_failure;
+	public static String JUnitCodeMining_status_ignored;
+	public static String JUnitCodeMining_status_notRun;
+
 }
