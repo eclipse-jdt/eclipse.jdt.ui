@@ -19,12 +19,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.ExpensiveTypeInferenceCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
@@ -57,6 +59,7 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 				new StringConcatToTextBlockCleanUpCore(values),
 				new MultiCatchCleanUpCore(values),
 				new TypeParametersCleanUpCore(values),
+				new ExpensiveTypeInferenceCleanUpCore(values),
 				new HashCleanUp(values),
 				new ObjectsEqualsCleanUp(values),
 				new ConvertLoopCleanUpCore(values),
@@ -119,6 +122,9 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference join= createCheckboxPref(java1d8Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_Join, CleanUpConstants.JOIN, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(join);
+
+		CheckboxPreference expensiveInference= createCheckboxPref(java1d8Group, numColumns, FixMessages.ExpensiveTypeInferenceFix_description, CleanUpConstants.EXPLICIT_TYPE_ARGUMENTS_FOR_EXPENSIVE_INFERENCE, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(expensiveInference);
 
 		Group java1d7Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java1d7);
 

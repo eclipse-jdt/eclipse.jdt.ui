@@ -13,29 +13,41 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java10ProjectTestSetup;
@@ -157,6 +169,188 @@ public class LocalCorrectionsQuickFixTest10 extends QuickFixTest {
     		assertProposalExists(proposals, "Configure problem severity");
     		assertProposalExists(proposals, "Add @SuppressWarnings 'rawtypes' to 'f()'");
     }
+
+	@Test
+	public void testExpensiveTypeInferenceWithDeprecatedTypeArgument() throws Exception {
+		IPackageFragment api= fSourceFolder.createPackageFragment("api", false, null);
+		api.createCompilationUnit("Legacy.java", "package api; @Deprecated public class Legacy {}", false, null);
+		api.createCompilationUnit("Factory.java", "package api; public class Factory { public static Legacy value() { return null; } }", false, null);
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String source= """
+			package test1;
+			import api.Factory;
+			import java.util.Arrays;
+			import java.util.Collections;
+			class A {
+			    void collect() { Arrays.asList(%s); }
+			}
+			""".formatted(String.join(", ", Collections.nCopies(50, "Collections.singletonList(Factory.value())")));
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		cu.setOptions(Map.of(JavaCore.COMPILER_PB_DEPRECATION, JavaCore.ERROR));
+		assertNoInferenceFix(cu, 1);
+	}
+
+	@Test
+	public void testExpensiveTypeInference() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(",\n        ", Collections.nCopies(50, "Map.entry(\"k\", \"v\")"));
+		String source= """
+			package test1;
+			import java.util.Map;
+			class A {
+			    Map<String, String> data = Map.ofEntries(/* keep */ %s);
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, getInferenceAST(cu));
+		assertExpectedExistInProposals(proposals, new String[] { source.replace("Map.ofEntries", "Map.<String, String>ofEntries") });
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceInVarInitializer() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(",\n        ", Collections.nCopies(50, "Map.entry(\"k\", \"v\")"));
+		String source= """
+			package test1;
+			import java.util.List;
+			import java.util.Map;
+			import java.util.Map.Entry;
+			class A {
+			    Entry<String, String> first() {
+			        var entries = List.of(%s);
+			        return entries.get(0);
+			    }
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, getInferenceAST(cu));
+		assertExpectedExistInProposals(proposals, new String[] { source.replace("List.of", "List.<Entry<String, String>>of") });
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceWithInaccessibleTypeArgument() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "Collections.singletonList(Factory.item())"));
+		String source= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.Collections;
+			class Factory {
+			    private static class Hidden { }
+			    static Hidden item() { return new Hidden(); }
+			}
+			class A {
+			    void consume() { Arrays.asList(%s); }
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		assertNoInferenceFix(cu, 1);
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceWithInheritedMemberType() throws Exception {
+		IPackageFragment api= fSourceFolder.createPackageFragment("api", false, null);
+		api.createCompilationUnit("Alias.java", "package api; class Hidden { public static class Token {} } public class Alias extends Hidden {}", false, null);
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "id(new Alias.Token())"));
+		String source= """
+			package test1;
+			import api.Alias;
+			import java.util.Arrays;
+			import java.util.List;
+			class A {
+			    static <T> T id(T value) { return value; }
+			    List<Alias.Token> values = Arrays.asList(%s);
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		assertNoInferenceFix(cu, 1);
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceWithShadowedPackageName() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "id(\"x\")"));
+		String source= """
+			package test1;
+			import java.util.Arrays;
+			class A {
+			    static class String {}
+			    static class java {}
+			    static <T> T id(T value) { return value; }
+			    void consume() { Arrays.asList(%s); }
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		assertNoInferenceFix(cu, 1);
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceWithShadowedQualifiedType() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "any()"));
+		String source= """
+			package test1;
+			class A {
+			    static class Object {}
+			    static class java {
+			        static class lang {
+			            static class Object {}
+			        }
+			    }
+			    static <T> T any() { return null; }
+			    @SafeVarargs static <T> Class<?> component(T... values) {
+			        return values.getClass().getComponentType();
+			    }
+			    Class<?> result() { return A.component(%s); }
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		assertNoInferenceFix(cu, 1);
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceWithRestrictedBinaryTypes() throws Exception {
+		var jar= fJProject1.getProject().getLocation().append("legacy.jar");
+		String rtStubs= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_18)[0].toOSString();
+		JarUtil.createJar(new String[] {
+				"api/var.java", "package api; public class var {}",
+				"api/Blocked.java", "package api; public class Blocked {}",
+				"api/Factory.java", "package api; public class Factory { public static var item() { return null; } public static Blocked restricted() { return null; } }"
+		}, null, jar.toOSString(), new String[] { rtStubs }, JavaCore.VERSION_1_8, null, null);
+		IAccessRule[] rules= { JavaCore.newAccessRule(IPath.fromPortableString("api/Blocked"), IAccessRule.K_NON_ACCESSIBLE) };
+		JavaProjectHelper.addToClasspath(fJProject1, JavaCore.newLibraryEntry(jar, null, null, rules, new IClasspathAttribute[0], false));
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "id(Factory.item())"));
+		String source= """
+			package test1;
+			import api.Factory;
+			import java.util.Arrays;
+			class A {
+			    static <T> T id(T value) { return value; }
+			    void first() { Arrays.asList(%s); }
+			    void second() { Arrays.asList(%s); }
+			}
+			""".formatted(arguments, arguments.replace("item", "restricted"));
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		assertNoInferenceFix(cu, 2);
+	}
+
+	private static CompilationUnit getInferenceAST(ICompilationUnit cu) {
+		Map<String, String> options= new HashMap<>(cu.getCustomOptions());
+		options.put(JavaCore.COMPILER_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE, JavaCore.WARNING);
+		cu.setOptions(options);
+		return getASTRoot(cu);
+	}
+
+	private static void assertNoInferenceFix(ICompilationUnit cu, int count) throws CoreException {
+		CompilationUnit root= getInferenceAST(cu);
+		assertNumberOfProblems(count, root.getProblems());
+		for (int i= 0; i < count; i++) {
+			assertEquals(IProblem.PotentiallyExpensiveTypeInference, root.getProblems()[i].getID());
+			assertProposalDoesNotExist(collectCorrections(cu, root, count, i), FixMessages.ExpensiveTypeInferenceFix_description);
+		}
+	}
 
 	@Test
 	public void testMapOfToOfEntries() throws Exception {

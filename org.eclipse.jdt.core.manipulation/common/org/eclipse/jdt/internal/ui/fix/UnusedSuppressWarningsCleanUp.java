@@ -98,6 +98,7 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 			result.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.ENABLED);
 			result.put(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
 			result.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.ERROR); // do not change to WARNING
+			result.put(JavaCore.COMPILER_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE, JavaCore.WARNING);
 			// API LEAK
 			result.put(JavaCore.COMPILER_PB_API_LEAKS, JavaCore.WARNING);
 			// BOXING
