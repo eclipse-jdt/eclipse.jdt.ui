@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
@@ -24,6 +23,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ResourceManager;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
@@ -39,7 +39,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	private int fId;
 	private IWorkingSet fWorkingSet;
 	private WorkingSetFilterActionGroup fActionGroup;
-	private Image fImage;
+	private final ResourceManager fResourceManager;
 
 	/**
 	 * Constructor for WorkingSetMenuContributionItem.
@@ -47,14 +47,17 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	 * @param id the id
 	 * @param actionGroup the action group
 	 * @param workingSet the working set
+	 * @param resourceManager caches the working set image beyond this item
 	 */
-	public WorkingSetMenuContributionItem(int id, WorkingSetFilterActionGroup actionGroup, IWorkingSet workingSet) {
+	public WorkingSetMenuContributionItem(int id, WorkingSetFilterActionGroup actionGroup, IWorkingSet workingSet, ResourceManager resourceManager) {
 		super(getId(id));
 		Assert.isNotNull(actionGroup);
 		Assert.isNotNull(workingSet);
+		Assert.isNotNull(resourceManager);
 		fId= id;
 		fActionGroup= actionGroup;
 		fWorkingSet= workingSet;
+		fResourceManager= resourceManager;
 	}
 
 	/*
@@ -67,12 +70,9 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 		String name= fWorkingSet.getLabel();
 
 		mi.setText("&" + fId + " " + name);  //$NON-NLS-1$  //$NON-NLS-2$
-		if (fImage == null) {
-			ImageDescriptor imageDescriptor= fWorkingSet.getImageDescriptor();
-			if (imageDescriptor != null)
-				fImage= imageDescriptor.createImage();
-		}
-		mi.setImage(fImage);
+		ImageDescriptor imageDescriptor= fWorkingSet.getImageDescriptor();
+		if (imageDescriptor != null)
+			mi.setImage(fResourceManager.createImageWithDefault(imageDescriptor));
 		mi.setSelection(fWorkingSet.equals(fActionGroup.getWorkingSet()));
 		mi.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -82,19 +82,6 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 				manager.addRecentWorkingSet(fWorkingSet);
 			}
 		});
-	}
-
-	/*
-	 * @see org.eclipse.jface.action.ContributionItem#dispose()
-	 * @since 3.0
-	 */
-	@Override
-	public void dispose() {
-		if (fImage != null && !fImage.isDisposed())
-			fImage.dispose();
-		fImage= null;
-
-		super.dispose();
 	}
 
 	/*

@@ -29,6 +29,7 @@ import org.junit.platform.suite.api.Suite;
 	JavaNavigatorSorterTest.class,
 	PackageExplorerShowInTests.class,
 	WorkingSetDropAdapterTest.class,
+	WorkingSetFilterActionGroupTest.class,
 	HierarchicalContentProviderTests.class,
 	PackageCacheTest.class
 })

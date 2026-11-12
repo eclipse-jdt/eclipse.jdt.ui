@@ -28,6 +28,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -69,6 +71,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	private List<IContributionItem> fContributions= new ArrayList<>();
 	private final IWorkbenchPage fWorkbenchPage;
 	private boolean fAllowWindowWorkingSetByDefault;
+	private LocalResourceManager fImageManager;
 
 	public WorkingSetFilterActionGroup(IWorkbenchPartSite site, IPropertyChangeListener changeListener) {
 		Assert.isNotNull(site);
@@ -268,7 +271,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	}
 
 	private void addLRUWorkingSetAction(IMenuManager mm, int id, IWorkingSet workingSet) {
-		IContributionItem item= new WorkingSetMenuContributionItem(id, this, workingSet);
+		if (fImageManager == null)
+			fImageManager= new LocalResourceManager(JFaceResources.getResources());
+		IContributionItem item= new WorkingSetMenuContributionItem(id, this, workingSet, fImageManager);
 		mm.insertBefore(LRU_GROUP, item);
 		fContributions.add(item);
 	}
@@ -298,6 +303,10 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		}
 		fChangeListener= null; // clear the reference to the viewer
 
+		if (fImageManager != null) {
+			fImageManager.dispose();
+			fImageManager= null;
+		}
 		super.dispose();
 	}
 
