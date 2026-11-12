@@ -166,6 +166,7 @@ public final class FixMessages extends NLS {
 	public static String SwitchFix_convert_if_to_switch;
 
 	public static String TypeParametersFix_insert_inferred_type_arguments_description;
+	public static String ExpensiveTypeInferenceFix_description;
 	public static String TypeParametersFix_insert_inferred_type_arguments_name;
 	public static String TypeParametersFix_remove_redundant_type_arguments_description;
 	public static String TypeParametersFix_remove_redundant_type_arguments_name;

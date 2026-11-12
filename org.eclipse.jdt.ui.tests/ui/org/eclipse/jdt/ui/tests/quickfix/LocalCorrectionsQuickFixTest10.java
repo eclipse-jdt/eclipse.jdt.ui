@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 
 import org.junit.After;
@@ -31,11 +34,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java10ProjectTestSetup;
@@ -157,6 +162,101 @@ public class LocalCorrectionsQuickFixTest10 extends QuickFixTest {
     		assertProposalExists(proposals, "Configure problem severity");
     		assertProposalExists(proposals, "Add @SuppressWarnings 'rawtypes' to 'f()'");
     }
+
+	@Test
+	public void testExpensiveTypeInference() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(",\n        ", Collections.nCopies(50, "Map.entry(\"k\", \"v\")"));
+		String source= """
+			package test1;
+			import java.util.Map;
+			class A {
+			    Map<String, String> data = Map.ofEntries(/* keep */ %s);
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, getASTRoot(cu));
+		assertExpectedExistInProposals(proposals, new String[] { source.replace("Map.ofEntries", "Map.<String, String>ofEntries") });
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceInVarInitializer() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(",\n        ", Collections.nCopies(50, "Map.entry(\"k\", \"v\")"));
+		String source= """
+			package test1;
+			import java.util.List;
+			import java.util.Map;
+			import java.util.Map.Entry;
+			class A {
+			    Entry<String, String> first() {
+			        var entries = List.of(%s);
+			        return entries.get(0);
+			    }
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, getASTRoot(cu));
+		assertExpectedExistInProposals(proposals, new String[] { source.replace("List.of", "List.<Entry<String, String>>of") });
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceWithInaccessibleTypeArgument() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "Collections.singletonList(Factory.item())"));
+		String source= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.Collections;
+			class Factory {
+			    private static class Hidden { }
+			    static Hidden item() { return new Hidden(); }
+			}
+			class A {
+			    void consume() { Arrays.asList(%s); }
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		CompilationUnit root= getASTRoot(cu);
+		assertNumberOfProblems(1, root.getProblems());
+		assertEquals(IProblem.PotentiallyExpensiveTypeInference, root.getProblems()[0].getID());
+		assertProposalDoesNotExist(collectCorrections(cu, root), FixMessages.ExpensiveTypeInferenceFix_description);
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceWithInheritedMemberType() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment api= fSourceFolder.createPackageFragment("api", false, null);
+		api.createCompilationUnit("Alias.java", "package api; class Hidden { public static class Token {} } public class Alias extends Hidden {}", false, null);
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "id(new Alias.Token())"));
+		String source= """
+			package test1;
+			import api.Alias;
+			import java.util.Arrays;
+			import java.util.List;
+			class A {
+			    static <T> T id(T value) { return value; }
+			    List<Alias.Token> values = Arrays.asList(%s);
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		CompilationUnit root= getASTRoot(cu);
+		assertNumberOfProblems(1, root.getProblems());
+		assertEquals(IProblem.PotentiallyExpensiveTypeInference, root.getProblems()[0].getID());
+		assertProposalDoesNotExist(collectCorrections(cu, root), FixMessages.ExpensiveTypeInferenceFix_description);
+	}
 
 	@Test
 	public void testMapOfToOfEntries() throws Exception {
