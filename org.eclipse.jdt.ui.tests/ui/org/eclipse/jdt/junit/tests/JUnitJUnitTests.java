@@ -33,6 +33,7 @@ TestExecutionTimingProtocol.class,
 JUnit4SuiteSourceTest.class,
 JUnitSuiteSourceNavigationTest.class,
 
+RemoteTestRunnerClientTest.class,
 TestRunListenerTest3.class,
 TestRunListenerTest4.class,
 TestRunListenerTest5.class,
