@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.jdt.ui.tm4e.feature"
+      label="%featureName"
+      version="1.0.0.qualifier"
+      provider-name="%providerName"
+      license-feature="org.eclipse.license"
+      license-feature-version="0.0.0">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.core.runtime" version="3.35.100" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jdt.core.manipulation" version="1.25.100" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jface.text" version="3.32.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.jdt.ui.tm4e"
+         version="0.0.0"/>
+
+</feature>
