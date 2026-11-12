@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 IBM Corporation and others.
+ * Copyright (c) 2019, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,12 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.ui.text.IJavaPartitionerManager;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -51,6 +55,30 @@ public class JavaPartitionerManager implements IJavaPartitionerManager {
 	@Override
 	public IDocumentPartitioner createDocumentPartitioner() {
 		return new FastJavaPartitioner(getPartitionScanner(), LEGAL_CONTENT_TYPES);
+	}
+
+	/**
+	 * Creates a Java document partitioner bound to the given project, independent of the active
+	 * editor and of any other workbench state. The project determines, for example, whether text
+	 * blocks are recognized. In contrast to {@link #createDocumentPartitioner()}, this method
+	 * never looks at the active editor or the selection.
+	 * <p>
+	 * May be called from any thread.
+	 * </p>
+	 *
+	 * @param javaProject the project of the document, or <code>null</code> to use the workspace
+	 *            settings
+	 * @return a newly created Java document partitioner, not yet connected to a document
+	 */
+	public static IDocumentPartitioner createDocumentPartitioner(IJavaProject javaProject) {
+		FastJavaPartitionScanner scanner= new FastJavaPartitionScanner(javaProject) {
+			@Override
+			public boolean isTextBlockSupported() {
+				// Skips the workbench lookup of the super class; null means workspace settings.
+				return JavaModelUtil.is15OrHigher(getJavaProject());
+			}
+		};
+		return new FastJavaPartitioner(scanner, LEGAL_CONTENT_TYPES);
 	}
 
 	public void clearEditorInfo(ITextEditor editor) {
