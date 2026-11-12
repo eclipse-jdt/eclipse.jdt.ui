@@ -39,11 +39,11 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 
 /**
- * Find all nodes connected to a given binding or node. e.g. Declaration of a field and all references.
- * For types this includes also the constructor declaration, for methods also overridden methods
- * or methods overriding (if existing in the same AST), for constructors also the type and all other constructors.
-  */
-
+ * Finds all AST nodes connected to a given binding or node. For example, finds a field declaration
+ * and all its references. For types, includes constructor declarations. For methods, includes
+ * overridden methods or methods that override (if in the same AST). For constructors, includes
+ * the type and all other constructors.
+ */
 public class LinkedNodeFinder  {
 
 	private LinkedNodeFinder() {
