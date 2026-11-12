@@ -50,7 +50,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 
 	@Deprecated
 	public Templates() {
-		super("template", JavaPlugin.getDefault().getTemplateContextRegistry()); //$NON-NLS-1$
+		super("template", JavaPlugin.getDefault().getTemplateContextRegistryCore()); //$NON-NLS-1$
 		create();
 	}
 
