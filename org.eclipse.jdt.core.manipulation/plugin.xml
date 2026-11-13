@@ -16,6 +16,7 @@
 <plugin>
 
    <extension-point id="changeMethodSignatureParticipants" name="%ChangeMethodSignatureParticipantsExtensionPoint" schema="schema/changeMethodSignatureParticipants.exsd"/>
+   <extension-point id="fencedCodeTokenizers" name="%FencedCodeTokenizersExtensionPoint" schema="schema/fencedCodeTokenizers.exsd"/>
 
 
    <extension point="org.eclipse.core.expressions.propertyTesters">
