@@ -13,10 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.manipulation;
 
+import java.util.List;
+
 /**
- * Interface for tokenizing fenced code blocks in Javadoc markdown comments.
+ * Interface for tokenizing fenced code blocks in Javadoc markdown comments
+ * and text blocks annotated with {@code // language=xxx} comments.
  * Implementations provide syntax highlighting for non-Java languages by
- * converting source code into HTML with appropriate styling spans.
+ * converting source code into HTML with appropriate styling spans, or by
+ * returning structured token data for editor-level syntax coloring.
  * <p>
  * Implementations are contributed via the
  * <code>org.eclipse.jdt.core.manipulation.fencedCodeTokenizers</code>
@@ -26,6 +30,46 @@ package org.eclipse.jdt.core.manipulation;
  * @since 1.26
  */
 public interface IFencedCodeTokenizer {
+
+	/**
+	 * Token type categories for structured code tokenization.
+	 *
+	 * @since 1.27
+	 */
+	enum CodeTokenType {
+		/** Language keyword */
+		KEYWORD,
+		/** String literal */
+		STRING,
+		/** Single-line comment */
+		SINGLE_LINE_COMMENT,
+		/** Multi-line or block comment */
+		MULTI_LINE_COMMENT,
+		/** Numeric literal */
+		NUMBER,
+		/** Operator symbol */
+		OPERATOR,
+		/** Type or class name */
+		TYPE,
+		/** Method or function name */
+		METHOD,
+		/** Variable reference */
+		VARIABLE,
+		/** Bracket, parenthesis, or brace */
+		BRACKET,
+		/** Default token with no specific category */
+		DEFAULT
+	}
+
+	/**
+	 * A structured code token with position, length, and type information.
+	 *
+	 * @param offset the offset relative to the start of the code string
+	 * @param length the length of the token
+	 * @param type the token type category
+	 * @since 1.27
+	 */
+	record CodeToken(int offset, int length, CodeTokenType type) {}
 
 	/**
 	 * Tokenizes the given source code for the specified language and returns
@@ -38,4 +82,19 @@ public interface IFencedCodeTokenizer {
 	 *         language is not supported
 	 */
 	String tokenize(String language, String code);
+
+	/**
+	 * Tokenizes the given source code for the specified language and returns
+	 * structured token data suitable for editor-level syntax coloring.
+	 *
+	 * @param language the language identifier (e.g., "python", "sql"),
+	 *            already lowercased
+	 * @param code the source code to tokenize
+	 * @return list of code tokens with offsets relative to the start of
+	 *         {@code code}, or {@code null} if the language is not supported
+	 * @since 1.27
+	 */
+	default List<CodeToken> tokenizeCode(String language, String code) {
+		return null;
+	}
 }
