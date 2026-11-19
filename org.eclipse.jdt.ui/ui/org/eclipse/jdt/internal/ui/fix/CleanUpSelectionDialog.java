@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -44,8 +45,10 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public abstract class CleanUpSelectionDialog extends StatusDialog implements IModifyDialogTabPage.IModificationListener {
 
@@ -178,9 +181,26 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 			addTabPage(pages[i].getName(), fPages[i]);
 		}
 
-		fCountLabel= new Label(composite, SWT.NONE);
-		fCountLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		Composite footer= new Composite(composite, SWT.NONE);
+		footer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		footer.setLayout(layout);
+
+		fCountLabel= new Label(footer, SWT.NONE);
+		fCountLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		updateCountLabel();
+
+		Button deselectAll= new Button(footer, SWT.PUSH);
+		deselectAll.setText(CleanUpMessages.CleanUpDialog_DeselectAllTabs_Button);
+		deselectAll.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		SWTUtil.setButtonDimensionHint(deselectAll);
+		deselectAll.addSelectionListener(widgetSelectedAdapter(_ -> {
+			for (CleanUpTabPage page : fPages) {
+				page.doSetAll(false);
+			}
+		}));
 
 		applyDialogFont(composite);
 

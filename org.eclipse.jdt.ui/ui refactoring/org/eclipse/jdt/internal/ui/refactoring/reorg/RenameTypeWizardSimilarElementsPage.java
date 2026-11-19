@@ -352,16 +352,14 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			 */
 
 			ISourceRange sourceRange= null;
-			if (element instanceof IMember) {
-				IMember member= (IMember) element;
+			if (element instanceof IMember member) {
 				try {
 					sourceRange= member.getNameRange();
 				} catch (JavaModelException e) {
 					// fall through
 				}
 			}
-			if (element instanceof ILocalVariable) {
-				ILocalVariable var= (ILocalVariable) element;
+			if (element instanceof ILocalVariable var) {
 				sourceRange= var.getNameRange();
 			}
 
@@ -683,9 +681,8 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 	private IJavaElement getFirstSelectedSourceReference(SelectionChangedEvent event) {
 		ISelection s= event.getSelection();
-		if (! (s instanceof IStructuredSelection))
+		if (! (s instanceof IStructuredSelection strSel))
 			return null;
-		IStructuredSelection strSel= (IStructuredSelection) s;
 		if (strSel.size() != 1)
 			return null;
 		Object first= strSel.getFirstElement();
@@ -743,8 +740,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		RefactoringProcessor proc= ((RenameRefactoring) getRefactoring()).getProcessor();
 		if (proc instanceof RenameTypeProcessor)
 			return (RenameTypeProcessor) proc;
-		else if (proc instanceof RenameCompilationUnitProcessor) {
-			RenameCompilationUnitProcessor rcu= (RenameCompilationUnitProcessor) proc;
+		else if (proc instanceof RenameCompilationUnitProcessor rcu) {
 			return rcu.getRenameTypeProcessor();
 		}
 		Assert.isTrue(false); // Should never get here

@@ -37,7 +37,7 @@
        style="display:inline;fill:none;fill-opacity:0.7;stroke:#c9c9c9;stroke-width:14.9167;stroke-linecap:round;stroke-linejoin:round"
        d="m 103.06264,1231.2521 c -5.63203,20.2303 -23.945321,34.8268 -46.125128,34.8268 -26.774306,0 -48.4791558,-21.7049 -48.4791618,-48.4792 -5.6e-6,-24.327 17.9183148,-44.4689 41.2769808,-47.9479" />
     <path
-       style="font-style:normal;font-weight:normal;font-size:13.5892px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#e3e3e3;fill-opacity:0.7;stroke:#c9c9c9;stroke-width:15.1787;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:#e3e3e3;fill-opacity:0.7;stroke:#c9c9c9;stroke-width:15.1787;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        d="m 46.489957,1044.4963 h 41.640248 c 2.312331,0 4.173868,1.4039 4.173868,3.1479 v 21.8787 c 0,1.7439 -1.861537,3.1428 -4.173868,3.1478 l -41.640248,0.091 c -2.312306,0.01 -4.173867,-1.404 -4.173867,-3.1479 0,-8.8477 0,-14.8208 0,-21.9699 0,-1.744 1.861544,-3.1479 4.173867,-3.1479 z"
        id="rect13693-38-7" />
     <rect
@@ -68,7 +68,7 @@
     <g
        transform="matrix(3.4757607,0,0,3.571353,-1757.8857,-265.77567)"
        id="g13813-0"
-       style="font-style:normal;font-weight:normal;font-size:13.5892px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#e3e3e3;fill-opacity:0.7;stroke:#c9c9c9;stroke-opacity:1">
+       style="fill:#e3e3e3;fill-opacity:0.7;stroke:#c9c9c9;stroke-opacity:1">
       <path
          style="fill:#e3e3e3;fill-opacity:0.7;stroke:#c9c9c9;stroke-width:4.49058;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          d="m 516.38009,375.19128 h 26.18809 c 1.45425,0 2.625,1.17075 2.625,2.625 v 18.24441 c 0,1.45425 -1.17075,2.62077 -2.625,2.625 l -26.18809,0.0761 c -1.45424,0.004 -2.625,-1.17075 -2.625,-2.625 0,-7.37798 0,-12.35897 0,-18.3205 0,-1.45425 1.17075,-2.62501 2.625,-2.62501 z"
@@ -80,7 +80,7 @@
       <g
          mask="none"
          id="layer1-9-4"
-         style="font-style:normal;font-weight:normal;font-size:13.5892px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
          transform="matrix(1.2394243,0,0,1.2394243,-20.169412,-242.04903)" />
     </g>
     <path
@@ -101,7 +101,7 @@
       <g
          mask="none"
          id="layer1-9-4-1"
-         style="font-style:normal;font-weight:normal;font-size:13.5892px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.34375"
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.34375"
          transform="matrix(1.2394243,0,0,1.2394243,-20.169412,-242.04903)" />
     </g>
   </g>

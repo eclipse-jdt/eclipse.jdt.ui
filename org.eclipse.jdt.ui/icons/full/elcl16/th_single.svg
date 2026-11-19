@@ -19,7 +19,7 @@
       <stop
          id="stop4812"
          offset="0"
-         style="stop-color:#bfb688;stop-opacity:1;" />
+         style="stop-color:#bfb688;stop-opacity:1" />
       <stop
          id="stop4814"
          offset="1"
@@ -58,7 +58,7 @@
     <linearGradient
        id="linearGradient5057">
       <stop
-         style="stop-color:#677da9;stop-opacity:1;"
+         style="stop-color:#677da9;stop-opacity:1"
          offset="0"
          id="stop5059" />
       <stop
@@ -125,7 +125,7 @@
       <stop
          id="stop4998-5"
          offset="1"
-         style="stop-color:#ffffff;stop-opacity:0;" />
+         style="stop-color:#ffffff;stop-opacity:0" />
     </linearGradient>
     <linearGradient
        y2="1050.8623"
@@ -139,7 +139,7 @@
     <linearGradient
        id="linearGradient5057-7">
       <stop
-         style="stop-color:#677da9;stop-opacity:1;"
+         style="stop-color:#677da9;stop-opacity:1"
          offset="0"
          id="stop5059-1" />
       <stop
@@ -180,7 +180,7 @@
     <linearGradient
        id="linearGradient5057-4">
       <stop
-         style="stop-color:#677da9;stop-opacity:1;"
+         style="stop-color:#677da9;stop-opacity:1"
          offset="0"
          id="stop5059-0" />
       <stop

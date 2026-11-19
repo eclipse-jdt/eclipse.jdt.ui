@@ -195,7 +195,7 @@
        y2="359.8707"
        gradientUnits="userSpaceOnUse" />
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4182"
        x="-0.16666675"
        y="-0.33103381"
@@ -246,7 +246,7 @@
          id="feComposite4196" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4198"
        x="-0.099999989"
        y="-0.091065558"
@@ -297,7 +297,7 @@
          id="feComposite4212" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4214"
        x="-0.041598519"
        y="-0.062048806"
@@ -348,7 +348,7 @@
          id="feComposite4228" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4230"
        x="-0.041666618"
        y="-0.062413671"
@@ -399,7 +399,7 @@
          id="feComposite4244" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4246"
        x="-0.43598996"
        y="-0.44575942"
@@ -450,7 +450,7 @@
          id="feComposite4260" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4262"
        x="0"
        y="0"
@@ -501,7 +501,7 @@
          id="feComposite4276" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4278"
        x="-0.038461535"
        y="-0.10000003"
@@ -552,7 +552,7 @@
          id="feComposite4292" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4294"
        x="0"
        y="-inf"
@@ -603,7 +603,7 @@
          id="feComposite4308" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4310"
        x="0"
        y="-0.33103381"

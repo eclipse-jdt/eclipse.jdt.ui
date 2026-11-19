@@ -19,7 +19,7 @@
       <stop
          id="stop4970"
          offset="0"
-         style="stop-color:#7792b2;stop-opacity:1;" />
+         style="stop-color:#7792b2;stop-opacity:1" />
       <stop
          style="stop-color:#a1b3cb;stop-opacity:1"
          offset="0.15948199"
@@ -42,7 +42,7 @@
       <stop
          id="stop4962"
          offset="0"
-         style="stop-color:#fdfcfa;stop-opacity:1;" />
+         style="stop-color:#fdfcfa;stop-opacity:1" />
       <stop
          style="stop-color:#ffffff;stop-opacity:0.251"
          offset="0.67397189"
@@ -81,7 +81,7 @@
     <linearGradient
        id="linearGradient4817">
       <stop
-         style="stop-color:#fefdef;stop-opacity:1;"
+         style="stop-color:#fefdef;stop-opacity:1"
          offset="0"
          id="stop4819" />
       <stop
@@ -198,15 +198,15 @@
          style="display:inline;fill:url(#radialGradient4091);fill-opacity:1;stroke:none" />
       <path
          id="path21763"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:Gautami;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#10305a;fill-opacity:1;stroke:#17325d;stroke-width:0.47795194;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#10305a;fill-opacity:1;stroke:#17325d;stroke-width:0.47795194;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 6.1631147,1046.9332 c -4.5e-6,0.5608 -0.1078273,1.0207 -0.3235128,1.3791 -0.2484618,0.4158 -0.6082079,0.6238 -1.0792395,0.6238 -0.4710349,0 -0.8316451,-0.208 -1.0818271,-0.6238 -0.2174002,-0.3584 -0.3261014,-0.8183 -0.3261014,-1.3791 0,-0.561 0.1087034,-1.0206 0.3261014,-1.3792 0.250182,-0.4159 0.6107922,-0.6238 1.0818271,-0.6239 0.4710316,10e-5 0.8307777,0.208 1.0792395,0.6239 0.2156711,0.3586 0.3235083,0.8182 0.3235128,1.3792 z m -0.4555063,0 c -4.5e-6,-0.4044 -0.078514,-0.7508 -0.2355186,-1.0387 -0.1777186,-0.3243 -0.4149607,-0.4863 -0.7117274,-0.4863 -0.2984947,0 -0.5366008,0.162 -0.7143161,0.4863 -0.1587385,0.2879 -0.2381061,0.6343 -0.2381061,1.0387 0,0.4045 0.079379,0.7505 0.2381061,1.0388 0.1777153,0.324 0.4158214,0.4863 0.7143161,0.4863 0.2967667,0 0.5340088,-0.1623 0.7117274,-0.4863 0.1570105,-0.2883 0.2355141,-0.6343 0.2355186,-1.0388 z" />
       <path
          id="path21765"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:Gautami;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#10305a;fill-opacity:1;stroke:#17325d;stroke-width:0.29312479;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#10305a;fill-opacity:1;stroke:#17325d;stroke-width:0.29312479;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 8.4842801,1044.8307 0.00613,4.1595 -0.8135853,-0.01 9.978e-4,-4.1473 z" />
       <path
          id="path21763-3"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:Gautami;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#10305a;fill-opacity:1;stroke:#17325d;stroke-width:0.48051888;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#10305a;fill-opacity:1;stroke:#17325d;stroke-width:0.48051888;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 12.752379,1046.9332 c -3e-6,0.5604 -0.10907,1.02 -0.327207,1.3783 -0.251297,0.4155 -0.615151,0.6233 -1.091562,0.6233 -0.476415,0 -0.84114,-0.2078 -1.094178,-0.6233 -0.219884,-0.3583 -0.3298243,-0.8179 -0.3298243,-1.3783 0,-0.5606 0.1099343,-1.02 0.3298243,-1.3783 0.253038,-0.4157 0.617763,-0.6233 1.094178,-0.6234 0.476411,10e-5 0.840265,0.2077 1.091562,0.6234 0.218135,0.3583 0.327204,0.8177 0.327207,1.3783 z m -0.460707,0 c -4e-6,-0.4042 -0.07939,-0.7503 -0.238208,-1.038 -0.179746,-0.3241 -0.419698,-0.4862 -0.719854,-0.4862 -0.301904,0 -0.542727,0.1621 -0.722472,0.4862 -0.160551,0.2877 -0.240823,0.6338 -0.240823,1.038 0,0.4042 0.08028,0.7501 0.240823,1.0381 0.179745,0.3239 0.420568,0.4861 0.722472,0.4861 0.300156,0 0.540108,-0.1622 0.719855,-0.4861 0.158803,-0.288 0.238203,-0.6339 0.238207,-1.0381 z" />
     </g>
     <g

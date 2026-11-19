@@ -248,7 +248,7 @@
      style="display:inline"
      transform="translate(0,-986.3622)">
     <path
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#linearGradient4462);fill-opacity:1;stroke:none;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4606)"
+       style="display:inline;fill:url(#linearGradient4462);fill-opacity:1;stroke:none;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4606)"
        d="m 47.000294,1007.3622 -12.319149,16.9335 -12.416197,17.0669 16.933329,0 17.066666,0 12.416197,-17.0669 0.09676,-0.133 12.2221,-16.8001 -17.066666,0 -16.933329,0 z"
        id="rect10961-8-3-6-1"
        transform="matrix(1.033618,0,0,0.47061212,-16.288096,551.70688)" />
@@ -261,7 +261,7 @@
        d="m 26.727575,1005.7224 c 4.038478,-2.1195 5.973556,-4.1661 5.432411,-5.81901 -0.51947,-1.58664 -6.484539,-1.21995 -7.417773,5.20571"
        id="path5034-5" />
     <rect
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#radialGradient10505);fill-opacity:1;stroke:none;stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:url(#radialGradient10505);fill-opacity:1;stroke:none;stroke-width:0.99999994;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect10961-8-3"
        width="34.760296"
        height="34.734295"
@@ -270,7 +270,7 @@
     <path
        id="path11108-6-7-5"
        d="m 24,1004.3622 0,35"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient4895);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       style="display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient4895);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <ellipse
        style="opacity:0.81300001;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter5309-8)"
        id="path5111-7"
@@ -291,9 +291,9 @@
     <path
        id="path11108-6-7-5-8"
        d="m 42,1022.3622 -36,0"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient4895-6);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       style="display:inline;fill:#915323;fill-opacity:1;stroke:url(#linearGradient4895-6);stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <path
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:none;fill-opacity:1;stroke:url(#linearGradient10579);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:none;fill-opacity:1;stroke:url(#linearGradient10579);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        d="m 6.7500014,1005.1118 0,17.1826 0,17.3178 17.1823486,0 17.317647,0 0,-17.3178 0,-0.135 0,-17.0472 -17.317647,0 -17.1823486,0 z"
        id="rect10961-8-3-6" />
   </g>

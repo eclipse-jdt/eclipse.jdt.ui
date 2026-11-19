@@ -285,9 +285,8 @@ public class MoveMembersWizard extends RefactoringWizard {
 				if (selection.length == 0)
 					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null);
 				Object element= selection[0];
-				if (! (element instanceof IType))
+				if (! (element instanceof IType type))
 					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null);
-				IType type= (IType)element;
 				return validateDestinationType(type, type.getElementName());
 			});
 			dialog.setInitialPattern(createInitialFilter());

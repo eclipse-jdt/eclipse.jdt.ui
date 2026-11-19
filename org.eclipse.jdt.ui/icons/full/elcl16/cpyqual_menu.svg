@@ -17,7 +17,7 @@
     <linearGradient
        id="linearGradient4994-9">
       <stop
-         style="stop-color:#f9fafc;stop-opacity:1;"
+         style="stop-color:#f9fafc;stop-opacity:1"
          offset="0"
          id="stop4996-9" />
       <stop
@@ -57,7 +57,7 @@
     <linearGradient
        id="linearGradient4902-2">
       <stop
-         style="stop-color:#c7b571;stop-opacity:1;"
+         style="stop-color:#c7b571;stop-opacity:1"
          offset="0"
          id="stop4904-4" />
       <stop
@@ -77,7 +77,7 @@
     <linearGradient
        id="linearGradient4872-2">
       <stop
-         style="stop-color:#8693a7;stop-opacity:1;"
+         style="stop-color:#8693a7;stop-opacity:1"
          offset="0"
          id="stop4874-7" />
       <stop
@@ -97,7 +97,7 @@
     <linearGradient
        id="linearGradient4994">
       <stop
-         style="stop-color:#f9fafc;stop-opacity:1;"
+         style="stop-color:#f9fafc;stop-opacity:1"
          offset="0"
          id="stop4996" />
       <stop
@@ -157,7 +157,7 @@
     <linearGradient
        id="linearGradient4902">
       <stop
-         style="stop-color:#c7b571;stop-opacity:1;"
+         style="stop-color:#c7b571;stop-opacity:1"
          offset="0"
          id="stop4904" />
       <stop
@@ -177,7 +177,7 @@
     <linearGradient
        id="linearGradient4872">
       <stop
-         style="stop-color:#8693a7;stop-opacity:1;"
+         style="stop-color:#8693a7;stop-opacity:1"
          offset="0"
          id="stop4874" />
       <stop
@@ -219,7 +219,7 @@
       <stop
          id="stop4879-4"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop4881-9"
          offset="1"
@@ -239,7 +239,7 @@
       <stop
          id="stop4879"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop4881"
          offset="1"
@@ -259,7 +259,7 @@
       <stop
          id="stop4879-4-2"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop4881-9-4"
          offset="1"
@@ -279,7 +279,7 @@
       <stop
          id="stop4879-9"
          offset="0"
-         style="stop-color:#91a5c7;stop-opacity:1;" />
+         style="stop-color:#91a5c7;stop-opacity:1" />
       <stop
          id="stop4881-4"
          offset="1"
@@ -323,7 +323,7 @@
          d="m 6.4696699,1038.1581 0,3.9112 3.9774761,0 z"
          id="path4884-6" />
       <path
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:url(#linearGradient4890);fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+         style="color:#000000;fill:url(#linearGradient4890);fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
          d="m 0.46966991,1038.1133 0,0.5 0,11.956 0,0.5 0.5,0 8.99999999,-0.013 0.5000001,0 0,-0.5 0,-8.956 0,-0.2187 -0.15625,-0.125 -3.0625001,-3 -0.125,-0.1563 -0.21875,0 -5.93749999,0.013 z m 0.99999999,1 5.25,-0.013 2.75,2.7188 0,8.2372 -8,0.013 z"
          id="rect4001-8" />
       <path
@@ -343,7 +343,7 @@
          d="m 1.4696699,1044.0693 8,0 0,3 -8,0 0,-3 z"
          id="rect4053-7-2" />
       <path
-         style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:url(#linearGradient4884);fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+         style="color:#000000;fill:url(#linearGradient4884);fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
          d="m 5.4696699,1040.0693 0,0.5 0,12 0,0.5 0.5,0 9.0625001,0.013 0.5,0 0,-0.5 0,-9 0,-0.2187 -0.15625,-0.125 -3.0625,-3 -0.125,-0.1563 -0.21875,0 -6.0000001,-0.013 z m 1,1 5.3125001,0.013 2.75,2.7188 0,8.2812 -8.0625001,-0.013 z"
          id="rect4001" />
       <path

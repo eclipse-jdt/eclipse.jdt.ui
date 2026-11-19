@@ -52,8 +52,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 		IEditorPart editor= fEditorOpener.openMatch(match);
 		if (editor != null && activate)
 			editor.getEditorSite().getPage().activate(editor);
-		if (editor instanceof ITextEditor) {
-			ITextEditor textEditor= (ITextEditor) editor;
+		if (editor instanceof ITextEditor textEditor) {
 			textEditor.selectAndReveal(currentOffset, currentLength);
 		}
 	}

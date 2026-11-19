@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ public class CleanUpMessages extends NLS {
 	public static String CleanUpConfigurationBlock_SelectedCleanUps_label;
 	public static String CleanUpConfigurationBlock_ShowCleanUpWizard_checkBoxLabel;
 
+	public static String CleanUpDialog_DeselectAllTabs_Button;
 	public static String CleanUpModifyDialog_SelectOne_Error;
 	public static String CleanUpModifyDialog_XofYSelected_Label;
 

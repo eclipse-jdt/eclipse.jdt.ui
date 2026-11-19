@@ -17,7 +17,7 @@
     <linearGradient
        id="linearGradient5591">
       <stop
-         style="stop-color:#000000;stop-opacity:1;"
+         style="stop-color:#000000;stop-opacity:1"
          offset="0"
          id="stop5593" />
     </linearGradient>
@@ -64,24 +64,24 @@
     <ellipse
        cy="1047.8766"
        cx="3.5797284"
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#linearGradient4199);fill-opacity:1;stroke:#8d7d3c;stroke-width:0.64790225;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:url(#linearGradient4199);fill-opacity:1;stroke:#8d7d3c;stroke-width:0.64790225;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path10796-2-6-2"
        rx="3.1668477"
        ry="3.1889446" />
     <ellipse
        cy="1047.8986"
        cx="3.5783973"
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:0.20710059;stroke:#8d7d3c;stroke-width:0.64790225;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:#000000;fill-opacity:0.20710059;stroke:#8d7d3c;stroke-width:0.64790225;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path10796-2-6-2-9"
        rx="3.1668477"
        ry="3.1889446" />
     <g
        transform="scale(0.9928742,1.0071769)"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.370543px;line-height:125%;font-family:KaiTi;-inkscape-font-specification:KaiTi;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        id="text4152">
       <path
          d="m 5.2308209,1042.8315 -0.6909884,0 -1.0364826,-2.1305 -0.7485708,0 0,2.1305 -0.6621972,0 0,-4.9233 1.4395592,0 q 0.6909884,0 1.1228562,0.3455 0.4318677,0.3167 0.4318677,1.0653 0,0.5758 -0.2879118,0.8925 -0.2879119,0.3167 -0.6621972,0.4031 l 1.0940649,2.2169 z m -0.8061531,-3.5125 q 0,-0.4031 -0.2591207,-0.6334 -0.2303294,-0.2304 -0.7773619,-0.2304 l -0.6334061,0 0,1.6987 0.8061532,0 q 0.3454942,0 0.6046148,-0.1727 0.2591207,-0.2016 0.2591207,-0.6622 z"
-         style=""
+         
          id="path4159" />
     </g>
   </g>

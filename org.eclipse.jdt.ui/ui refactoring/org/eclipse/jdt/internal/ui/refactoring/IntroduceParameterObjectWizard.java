@@ -111,8 +111,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			@Override
 			public Object[] getElements(Object inputElement) {
-				if (inputElement instanceof IntroduceParameterObjectProcessor) {
-					IntroduceParameterObjectProcessor refactoring= (IntroduceParameterObjectProcessor) inputElement;
+				if (inputElement instanceof IntroduceParameterObjectProcessor refactoring) {
 					List<ParameterInfo> parameterInfos= refactoring.getParameterInfos();
 					List<ParameterInfo> result= new ArrayList<>(parameterInfos.size());
 					for (ParameterInfo pi : parameterInfos) {
@@ -145,8 +144,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			@Override
 			protected void setValue(Object element, Object value) {
-				if (element instanceof ParameterInfo) {
-					ParameterInfo pi= (ParameterInfo) element;
+				if (element instanceof ParameterInfo pi) {
 					doSetValue(pi, value.toString());
 					getViewer().update(element, null);
 				}
@@ -158,8 +156,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			@Override
 			protected Object getValue(Object element) {
-				if (element instanceof ParameterInfo) {
-					ParameterInfo pi= (ParameterInfo) element;
+				if (element instanceof ParameterInfo pi) {
 					return doGetValue(pi);
 				}
 				return null;
@@ -174,8 +171,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			@Override
 			protected boolean canEdit(Object element) {
-				if (element instanceof ParameterInfo) {
-					ParameterInfo pi= (ParameterInfo) element;
+				if (element instanceof ParameterInfo pi) {
 					return fTextEditor!=null && pi.isCreateField();
 				}
 				return false;
@@ -469,8 +465,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					ISelection selection= tv.getSelection();
-					if (selection instanceof IStructuredSelection) {
-						IStructuredSelection ss= (IStructuredSelection) selection;
+					if (selection instanceof IStructuredSelection ss) {
 						ParameterInfo selected= (ParameterInfo) ss.getFirstElement();
 						String message= RefactoringMessages.IntroduceParameterObjectWizard_fieldname_message;
 						String title= RefactoringMessages.IntroduceParameterObjectWizard_fieldname_title;

@@ -77,11 +77,9 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		//TODO: copied from JavaSearchResult:
 		IEditorInput editorInput= editor.getEditorInput();
-		if (editorInput instanceof IFileEditorInput)  {
-			IFileEditorInput fileEditorInput= (IFileEditorInput) editorInput;
+		if (editorInput instanceof IFileEditorInput fileEditorInput)  {
 			return computeContainedMatches(result, fileEditorInput.getFile());
-		} else if (editorInput instanceof IClassFileEditorInput) {
-			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
+		} else if (editorInput instanceof IClassFileEditorInput classFileEditorInput) {
 			Set<Match> matches= new HashSet<>();
 			collectMatches(matches, classFileEditorInput.getClassFile());
 			return matches.toArray(new Match[matches.size()]);
@@ -127,8 +125,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 		if (m.length != 0) {
 			matches.addAll(Arrays.asList(m));
 		}
-		if (element instanceof IParent) {
-			IParent parent= (IParent) element;
+		if (element instanceof IParent parent) {
 			try {
 				for (IJavaElement child : parent.getChildren()) {
 					collectMatches(matches, child);

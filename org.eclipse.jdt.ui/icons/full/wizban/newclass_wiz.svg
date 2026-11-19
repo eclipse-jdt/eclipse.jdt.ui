@@ -234,7 +234,7 @@
     <ellipse
        cy="1020.8622"
        cx="24.422024"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:url(#linearGradient5379);fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:url(#linearGradient5379);fill-opacity:1;stroke:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path10796-2-6-2"
        rx="19.925179"
        ry="19.996828" />
@@ -262,7 +262,7 @@
        transform="matrix(-0.80422057,-0.59433095,0.59433095,-0.80422057,-563.11679,1885.7049)" />
     <path
        d="m 30.67974,1012.7392 c -0.11961,0.017 -12.217473,-2.9899 -12.283095,7.3393 -0.283283,9.7804 11.192807,6.5748 12.483804,5.9307 l 1.54575,4.9984 c 1.000513,0.667 -12.10068,4.8524 -18.020109,-1.3328 -2.252777,-2.4765 -3.508681,-5.2042 -3.508681,-9.5856 0,-4.4317 0.914741,-6.8511 3.183841,-9.3106 5.733445,-6.6115 18.091725,-3.9174 17.83087,-3.0749 z"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15.56941891px;line-height:125%;font-family:Arial;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:url(#linearGradient4941);stroke-opacity:1"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:url(#linearGradient4941);stroke-opacity:1"
        id="path3817-0" />
     <path
        style="fill:#d7f1c6;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;filter:url(#filter5187)"
@@ -271,7 +271,7 @@
     <ellipse
        cy="1020.8622"
        cx="24.422024"
-       style="font-style:normal;font-weight:normal;font-size:medium;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:none;fill-opacity:1;stroke:#657a32;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:none;fill-opacity:1;stroke:#657a32;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path10796-2-6-2-2"
        rx="19.925179"
        ry="19.996828" />

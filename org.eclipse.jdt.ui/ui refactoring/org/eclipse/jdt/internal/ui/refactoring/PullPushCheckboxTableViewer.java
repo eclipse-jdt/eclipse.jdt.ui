@@ -31,9 +31,8 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 	@Override
 	protected void doUpdateItem(Widget widget, Object element, boolean fullMap) {
 		super.doUpdateItem(widget, element, fullMap);
-		if (! (widget instanceof TableItem))
+		if (! (widget instanceof TableItem item))
 			return;
-		TableItem item= (TableItem)widget;
 		IMemberActionInfo info= (IMemberActionInfo)element;
 		item.setChecked(PullPushCheckboxTableViewer.getCheckState(info));
 		Assert.isTrue(item.getChecked() == PullPushCheckboxTableViewer.getCheckState(info));

@@ -65,7 +65,7 @@
       <path
          id="path4719-2-8-0"
          d="m 310.47921,918.84674 c -0.0937,-0.4062 -0.17724,-0.9957 -0.55224,-1.4333 -0.375,-0.4374 -0.61432,-0.6074 -1.02255,-0.8388 -0.40824,-0.2315 -1.69214,-0.7906 -2.89063,-0.8594 -0.39949,-0.023 -0.8169,0.026 -1.1875,0.125 -1.80982,0.485 -2.63658,1.3182 -3.59375,2.8125 -0.99182,1.5427 -1.18884,3.5663 -0.65625,5.3437 0.52723,1.7597 1.55582,2.9532 3.09375,3.5938 1.41089,0.5774 2.68109,0.706 4.5,0.2187 1.67339,-0.4485 2.01697,-0.7866 3.21875,-1.8437 l -0.4375,-0.3438 c -1.5538,1.2177 -1.62276,1.2332 -2.96875,1.5938 -1.50059,0.4027 -3.1036,0.1736 -4.25,-0.4063 -1.14639,-0.5798 -1.93881,-1.5073 -2.4375,-3.0937 -0.49869,-1.5864 -0.0229,-3.521 0.5625,-4.5313 0.58536,-1.0103 1.29651,-2.1937 2.90625,-2.625 1.28232,-0.3436 2.81575,0.1597 3.78818,0.7279 0.97243,0.5683 1.29224,1.6526 1.25804,2.5824 -0.0342,0.9299 -0.66467,1.9657 -1.13304,2.3681 -0.46837,0.4027 -1.47568,0.4154 -1.47568,0.4154 0,0 0.12407,-0.6579 0.125,-1.4688 0.0303,-0.6627 -0.12954,-1.6952 -0.59375,-2.125 -0.46421,-0.431 -1.21722,-0.4322 -1.6875,-0.4062 -0.55235,0.031 -0.93275,0.349 -1.34375,1.125 -0.45943,0.8674 -0.59538,2.7604 -0.4375,3.4687 0.15789,0.7083 0.24574,0.8708 0.65625,1.2813 0.41052,0.4103 1.42337,0.419 1.96875,0.094 0.82267,-0.5067 0.59681,-1.091 1.21875,-1.125 0,0 1.27309,-0.2595 2.06786,-0.8125 0.81538,-0.5226 1.09363,-1.2093 1.26586,-1.9428 0.17222,-0.7336 0.1317,-1.4881 0.038,-1.8944 z m -5.30917,0.5872 c 0.12141,0 0.2649,0.01 0.40625,0.031 0.56541,0.1018 0.65625,1.125 0.65625,1.125 0,0 0.0754,0.6861 0.0312,1.5937 -0.0441,0.9079 -0.003,1.2629 -0.34375,1.5313 -0.3404,0.2684 -1.2509,0.4277 -1.6875,-0.2813 -0.4366,-0.7089 -0.31694,-2.8026 0.0625,-3.4375 0.23814,-0.3999 0.51078,-0.5487 0.875,-0.5625 z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:11.05178356px;line-height:125%;font-family:AustralianFlyingCorpsStencil;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#236298;fill-opacity:1;stroke:#236298;stroke-width:0.28257138;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="display:inline;fill:#236298;fill-opacity:1;stroke:#236298;stroke-width:0.28257138;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <g
          transform="translate(302.03145,-118.87009)"
          id="layer1-6-4"
@@ -84,11 +84,11 @@
            id="g6124-3-2-2">
           <g
              transform="scale(-1,1)"
-             style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+             style="fill:#ffffff;fill-opacity:1;stroke:none"
              id="text6430-0-0" />
           <g
              transform="scale(-1,1)"
-             style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+             style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
              id="g6438-4-9">
             <path
                style="fill:url(#linearGradient4841);fill-opacity:1;stroke:#2268a5;stroke-width:1.09095323;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"

@@ -147,10 +147,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (property == null)
 				return false;
 
-			if (!(element instanceof NLSSubstitution))
+			if (!(element instanceof NLSSubstitution subst))
 				return false;
 
-			NLSSubstitution subst= (NLSSubstitution) element;
 			if (PROPERTIES[KEY_PROP].equals(property) && subst.getState() != NLSSubstitution.EXTERNALIZED) {
 				return false;
 			}
@@ -160,8 +159,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		@Override
 		public Object getValue(Object element, String property) {
-			if (element instanceof NLSSubstitution) {
-				NLSSubstitution substitution= (NLSSubstitution) element;
+			if (element instanceof NLSSubstitution substitution) {
 				String res= null;
 				if (PROPERTIES[KEY_PROP].equals(property)) {
 					res= substitution.getKeyWithoutPrefix();
@@ -182,8 +180,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		public void modify(Object element, String property, Object value) {
 			if (element instanceof TableItem) {
 				Object data= ((TableItem) element).getData();
-				if (data instanceof NLSSubstitution) {
-					NLSSubstitution substitution= (NLSSubstitution) data;
+				if (data instanceof NLSSubstitution substitution) {
 					if (PROPERTIES[KEY_PROP].equals(property)) {
 						String string = (String)value;
 						try {
@@ -228,8 +225,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			String columnText= ""; //$NON-NLS-1$
-			if (element instanceof NLSSubstitution) {
-				NLSSubstitution substitution= (NLSSubstitution) element;
+			if (element instanceof NLSSubstitution substitution) {
 				if (columnIndex == KEY_PROP) {
 					if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
 						columnText=  BasicElementLabels.getJavaElementName(substitution.getKey());
@@ -253,8 +249,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		@Override
 		public Font getFont(Object element) {
-			if (element instanceof NLSSubstitution) {
-				NLSSubstitution substitution= (NLSSubstitution) element;
+			if (element instanceof NLSSubstitution substitution) {
 				if (substitution.hasPropertyFileChange() || substitution.hasSourceChange()) {
 					return fFontRegistry.getBold(JFaceResources.DIALOG_FONT);
 				}

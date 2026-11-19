@@ -110,9 +110,8 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 
 	private void viewerSelectionChanged(SelectionChangedEvent event) {
 		ISelection selection= event.getSelection();
-		if (!(selection instanceof IStructuredSelection))
+		if (!(selection instanceof IStructuredSelection ss))
 			return;
-		IStructuredSelection ss= (IStructuredSelection)selection;
 		verifyDestination(ss.getFirstElement(), false);
 	}
 

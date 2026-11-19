@@ -153,8 +153,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 			viewer.addSelectionChangedListener(event -> {
 				final Object element= ((IStructuredSelection) event.getSelection()).getFirstElement();
-				if (element instanceof IVariableBinding) {
-					final IVariableBinding target= (IVariableBinding) element;
+				if (element instanceof final IVariableBinding target) {
 					boolean success= false;
 					for (IVariableBinding v : fProcessor.getPossibleTargets()) {
 						if (Bindings.equals(target, v)) {

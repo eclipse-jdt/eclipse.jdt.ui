@@ -134,8 +134,7 @@ class SourceFirstPackageSelectionDialogField {
 			@Override
 			public boolean isSelectedValid(Object element) {
 				try {
-					if (element instanceof IJavaProject) {
-						IJavaProject jproject= (IJavaProject)element;
+					if (element instanceof IJavaProject jproject) {
 						IPath path= jproject.getProject().getFullPath();
 						return (jproject.findPackageFragmentRoot(path) != null);
 					} else if (element instanceof IPackageFragmentRoot) {
@@ -178,8 +177,7 @@ class SourceFirstPackageSelectionDialogField {
 
 		if (dialog.open() == Window.OK) {
 			Object element= dialog.getFirstResult();
-			if (element instanceof IJavaProject) {
-				IJavaProject jproject= (IJavaProject)element;
+			if (element instanceof IJavaProject jproject) {
 				return jproject.getPackageFragmentRoot(jproject.getProject());
 			} else if (element instanceof IPackageFragmentRoot) {
 				return (IPackageFragmentRoot)element;

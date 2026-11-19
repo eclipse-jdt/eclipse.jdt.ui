@@ -17,11 +17,11 @@
       <stop
          id="stop3798"
          offset="0"
-         style="stop-color:#14733c;stop-opacity:0;" />
+         style="stop-color:#14733c;stop-opacity:0" />
       <stop
          id="stop3800"
          offset="1"
-         style="stop-color:#14733c;stop-opacity:1;" />
+         style="stop-color:#14733c;stop-opacity:1" />
     </linearGradient>
     <linearGradient
        id="linearGradient10798-1-9-3-7-6-8-9-0-9-1">
@@ -76,12 +76,12 @@
        transform="matrix(0.29823167,0,0,0.29823167,-112.25117,908.23284)"
        d="m 398.75,468.23718 a 10.625,10.625 0 0 1 -10.625,10.625 10.625,10.625 0 0 1 -10.625,-10.625 10.625,10.625 0 0 1 10.625,-10.625 10.625,10.625 0 0 1 10.625,10.625 z"
        id="path10796-2-6-2"
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient3020);fill-opacity:1;stroke:#14733c;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans" />
+       style="fill:url(#linearGradient3020);fill-opacity:1;stroke:#14733c;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline" />
     <path
        transform="matrix(0.27149234,0,0,0.27149234,-101.87297,920.75319)"
        d="m 398.75,468.23718 a 10.625,10.625 0 0 1 -10.625,10.625 10.625,10.625 0 0 1 -10.625,-10.625 10.625,10.625 0 0 1 10.625,-10.625 10.625,10.625 0 0 1 10.625,10.625 z"
        id="path10796-2-6-2-4"
-       style="font-size:13.58917427000000100px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#radialGradient3802);fill-opacity:1;stroke:none;display:inline;font-family:Sans" />
+       style="fill:url(#radialGradient3802);fill-opacity:1;stroke:none;display:inline" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 5.5549829,1048.3622 0,0.7221 c 0,0.548 -0.3245924,0.809 -1.0247056,0.809 l -0.9947434,0 c -0.5355339,0 -1.0187132,-0.083 -1.0187132,-1.0187 l 0,-2.0374 c 0,-0.5976 0.2874276,-0.9588 0.9587889,-0.9588 l 0.9947434,0 c 0.8557489,0 0.9947435,0.5258 0.9947435,0.9947 l 0,0.4891"

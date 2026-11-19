@@ -19,7 +19,7 @@
       <stop
          id="stop4812"
          offset="0"
-         style="stop-color:#bfb688;stop-opacity:1;" />
+         style="stop-color:#bfb688;stop-opacity:1" />
       <stop
          id="stop4814"
          offset="1"
@@ -37,7 +37,7 @@
     <linearGradient
        id="linearGradient5057">
       <stop
-         style="stop-color:#677da9;stop-opacity:1;"
+         style="stop-color:#677da9;stop-opacity:1"
          offset="0"
          id="stop5059" />
       <stop
@@ -86,12 +86,12 @@
       <stop
          id="stop4998-5"
          offset="1"
-         style="stop-color:#ffffff;stop-opacity:0;" />
+         style="stop-color:#ffffff;stop-opacity:0" />
     </linearGradient>
     <linearGradient
        id="linearGradient4818">
       <stop
-         style="stop-color:#eb9186;stop-opacity:1;"
+         style="stop-color:#eb9186;stop-opacity:1"
          offset="0"
          id="stop4820" />
       <stop
@@ -138,7 +138,7 @@
     <linearGradient
        id="linearGradient5057-4">
       <stop
-         style="stop-color:#677da9;stop-opacity:1;"
+         style="stop-color:#677da9;stop-opacity:1"
          offset="0"
          id="stop5059-0" />
       <stop
@@ -184,7 +184,7 @@
       <stop
          id="stop4998-5-7"
          offset="1"
-         style="stop-color:#ffffff;stop-opacity:0;" />
+         style="stop-color:#ffffff;stop-opacity:0" />
     </linearGradient>
     <linearGradient
        y2="1047.3622"
@@ -248,7 +248,7 @@
        x="3.9837477"
        y="1047.368" />
     <path
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#a5a699;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       style="color:#000000;fill:#a5a699;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        d="m 3,1044.3622 0,1 11,0 0,-1 z"
        id="path4246" />
     <path

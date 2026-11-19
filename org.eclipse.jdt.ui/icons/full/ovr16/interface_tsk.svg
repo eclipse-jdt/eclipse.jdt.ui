@@ -17,11 +17,11 @@
     <linearGradient
        id="linearGradient3798">
       <stop
-         style="stop-color:#55429f;stop-opacity:0;"
+         style="stop-color:#55429f;stop-opacity:0"
          offset="0"
          id="stop3800" />
       <stop
-         style="stop-color:#55429f;stop-opacity:1;"
+         style="stop-color:#55429f;stop-opacity:1"
          offset="1"
          id="stop3802" />
     </linearGradient>
@@ -75,17 +75,17 @@
      id="layer1"
      transform="translate(0,-1044.3622)">
     <path
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient3102);fill-opacity:1;stroke:#55429f;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
+       style="fill:url(#linearGradient3102);fill-opacity:1;stroke:#55429f;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
        id="path10796-2-6-2"
        d="m 398.75,468.23718 a 10.625,10.625 0 0 1 -10.625,10.625 10.625,10.625 0 0 1 -10.625,-10.625 10.625,10.625 0 0 1 10.625,-10.625 10.625,10.625 0 0 1 10.625,10.625 z"
        transform="matrix(0.29869153,0,0,0.29869153,-112.42903,908.01433)" />
     <path
-       style="font-size:13.58917427000000100px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#radialGradient3804);fill-opacity:1;stroke:#55429f;stroke-width:2.16621374999999980;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
+       style="fill:url(#radialGradient3804);fill-opacity:1;stroke:#55429f;stroke-width:2.16621374999999980;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
        id="path10796-2-6-2-4"
        d="m 398.75,468.23718 a 10.625,10.625 0 0 1 -10.625,10.625 10.625,10.625 0 0 1 -10.625,-10.625 10.625,10.625 0 0 1 10.625,-10.625 10.625,10.625 0 0 1 10.625,10.625 z"
        transform="matrix(0.29869153,0,0,0.29869153,-112.42903,908.01433)" />
     <path
-       style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
        d="m 2.0016375,1045.3643 0,0.9929 1.0020368,0 0,3.0147 -1.0020368,0 0,0.9929 2.997988,0 0,-0.9929 -1.0020354,0 0,-3.0147 1.0059813,0 0,-0.9929 z"
        id="rect7222" />
   </g>

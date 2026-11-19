@@ -32,6 +32,7 @@ import java.util.Set;
  * <p>Token categories and their CSS classes:</p>
  * <ul>
  * <li>{@code jc-keyword} &mdash; Java keywords and primitive types</li>
+ * <li>{@code jc-keyword-return} &mdash; The {@code return} keyword</li>
  * <li>{@code jc-string} &mdash; String and character literals</li>
  * <li>{@code jc-comment} &mdash; Single-line and multi-line comments</li>
  * <li>{@code jc-annotation} &mdash; Annotations (@ followed by identifier)</li>
@@ -52,6 +53,7 @@ import java.util.Set;
 public class JavaCodeTokenizer {
 
 	private static final String CSS_CLASS_KEYWORD= "jc-keyword"; //$NON-NLS-1$
+	private static final String CSS_CLASS_KEYWORD_RETURN= "jc-keyword-return"; //$NON-NLS-1$
 	private static final String CSS_CLASS_STRING= "jc-string"; //$NON-NLS-1$
 	private static final String CSS_CLASS_COMMENT= "jc-comment"; //$NON-NLS-1$
 	private static final String CSS_CLASS_ANNOTATION= "jc-annotation"; //$NON-NLS-1$
@@ -431,7 +433,7 @@ public class JavaCodeTokenizer {
 		String word= code.substring(start, pos);
 
 		if (KEYWORDS.contains(word)) {
-			appendSpan(CSS_CLASS_KEYWORD, word);
+			appendSpan("return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
 			if (TYPE_DECLARING_KEYWORDS.contains(word)) {
 				if (!isPrecededByDot(start)) {
 					expectTypeBody= true;
@@ -624,7 +626,7 @@ public class JavaCodeTokenizer {
 				}
 				String word= code.substring(wordStart, pos);
 				if (KEYWORDS.contains(word)) {
-					appendSpan(CSS_CLASS_KEYWORD, word);
+					appendSpan("return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
 				} else if (Character.isUpperCase(word.charAt(0))) {
 					appendSpan(CSS_CLASS_TYPE_ARG, word);
 					consumeOptionalGenerics();
@@ -766,7 +768,7 @@ public class JavaCodeTokenizer {
 				String word= code.substring(start, pos);
 
 				if (KEYWORDS.contains(word)) {
-					appendSpan(CSS_CLASS_KEYWORD, word);
+					appendSpan("return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
 					if (TYPE_KEYWORDS.contains(word)) {
 						consumeOptionalArrayBrackets();
 						consumeOptionalVarargs();

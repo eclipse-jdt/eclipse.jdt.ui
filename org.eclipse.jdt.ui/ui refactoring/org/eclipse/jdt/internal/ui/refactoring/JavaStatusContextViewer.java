@@ -87,8 +87,7 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 
 	@Override
 	public void setInput(RefactoringStatusContext context) {
-		if (context instanceof JavaStatusContext) {
-			JavaStatusContext jsc= (JavaStatusContext)context;
+		if (context instanceof JavaStatusContext jsc) {
 			IDocument document= null;
 			if (jsc.isBinary()) {
 				IClassFile file= jsc.getClassFile();
@@ -114,9 +113,8 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 				updateTitle(cunit);
 			}
 			setInput(document, createRegion(jsc.getSourceRange()));
-		} else if (context instanceof JavaStringStatusContext) {
+		} else if (context instanceof JavaStringStatusContext sc) {
 			updateTitle(null);
-			JavaStringStatusContext sc= (JavaStringStatusContext)context;
 			setInput(newJavaDocument(sc.getSource()), createRegion(sc.getSourceRange()));
 		}
 	}

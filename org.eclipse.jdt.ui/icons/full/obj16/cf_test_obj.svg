@@ -30,7 +30,7 @@
       <stop
          id="stop3969"
          offset="0"
-         style="stop-color:#c48a4e;stop-opacity:1;" />
+         style="stop-color:#c48a4e;stop-opacity:1" />
       <stop
          id="stop3971"
          offset="1"
@@ -172,7 +172,7 @@
       </g>
     </mask>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4192"
        x="-0.045429609"
        y="-0.049925321"
@@ -223,7 +223,7 @@
          id="feComposite4206" />
     </filter>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        id="filter4224"
        x="-0.041450447"
        y="-0.012805105"
@@ -351,15 +351,15 @@
            transform="translate(-24.622598,-39.063336)">
           <path
              d="m 507.20223,407.58531 c -10e-6,1.93122 -0.28935,3.51482 -0.86803,4.74901 -0.66666,1.43221 -1.63191,2.14831 -2.89577,2.14831 -1.26386,0 -2.23142,-0.7161 -2.9027,-2.14831 -0.58332,-1.23419 -0.87498,-2.81779 -0.87498,-4.74901 0,-1.93151 0.29165,-3.51482 0.87498,-4.74931 0.67128,-1.43221 1.63884,-2.14801 2.9027,-2.14831 1.26386,3e-4 2.22911,0.7161 2.89577,2.14831 0.57868,1.23449 0.86802,2.8178 0.86803,4.74931 z m -1.22219,0 c -10e-6,-1.39254 -0.21062,-2.58524 -0.63193,-3.57689 -0.47685,-1.1167 -1.1134,-1.67475 -1.90968,-1.67475 -0.80091,0 -1.43978,0.55805 -1.91662,1.67475 -0.42591,0.99165 -0.63887,2.18435 -0.63887,3.57689 0,1.39255 0.21296,2.58464 0.63887,3.5769 0.47684,1.11639 1.11571,1.67505 1.91662,1.67505 0.79628,0 1.43283,-0.55866 1.90968,-1.67505 0.42128,-0.99226 0.63192,-2.18435 0.63193,-3.5769 z"
-             style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#17325d;fill-opacity:1;stroke:#17325d;stroke-width:1.45282829;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Gautami;-inkscape-font-specification:Gautami"
+             style="fill:#17325d;fill-opacity:1;stroke:#17325d;stroke-width:1.45282829;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
              id="path21763" />
           <path
              d="m 516.57685,400.3201 0,14.31302 -2.11103,0 0,-11.67812 -1.35625,1.236 -1.23831,-1.236 2.86581,-2.6349 z"
-             style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#17325d;fill-opacity:1;stroke:#17325d;stroke-width:0.89791954;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Gautami;-inkscape-font-specification:Gautami"
+             style="fill:#17325d;fill-opacity:1;stroke:#17325d;stroke-width:0.89791954;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
              id="path21765" />
           <path
              d="m 528.37837,407.58531 c -10e-6,1.93122 -0.28935,3.51482 -0.86803,4.74901 -0.66666,1.43221 -1.63191,2.14831 -2.89577,2.14831 -1.26386,0 -2.23143,-0.7161 -2.9027,-2.14831 -0.58332,-1.23419 -0.87498,-2.81779 -0.87498,-4.74901 0,-1.93151 0.29165,-3.51482 0.87498,-4.74931 0.67127,-1.43221 1.63884,-2.14801 2.9027,-2.14831 1.26386,3e-4 2.22911,0.7161 2.89577,2.14831 0.57868,1.23449 0.86802,2.8178 0.86803,4.74931 z m -1.22219,0 c -10e-6,-1.39254 -0.21062,-2.58524 -0.63193,-3.57689 -0.47685,-1.1167 -1.11341,-1.67475 -1.90968,-1.67475 -0.80091,0 -1.43978,0.55805 -1.91662,1.67475 -0.42591,0.99165 -0.63887,2.18435 -0.63887,3.57689 0,1.39255 0.21296,2.58464 0.63887,3.5769 0.47684,1.11639 1.11571,1.67505 1.91662,1.67505 0.79627,0 1.43283,-0.55866 1.90968,-1.67505 0.42128,-0.99226 0.63192,-2.18435 0.63193,-3.5769 z"
-             style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#17325d;fill-opacity:1;stroke:#17325d;stroke-width:1.45282829;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Gautami;-inkscape-font-specification:Gautami"
+             style="fill:#17325d;fill-opacity:1;stroke:#17325d;stroke-width:1.45282829;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
              id="path21763-3" />
         </g>
       </g>

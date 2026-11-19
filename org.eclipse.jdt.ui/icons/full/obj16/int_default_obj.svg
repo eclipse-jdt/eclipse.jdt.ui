@@ -78,16 +78,16 @@
      id="layer1"
      transform="translate(0,-1036.3622)">
     <path
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient3016);fill-opacity:1;stroke:#55429f;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;font-family:Sans"
+       style="fill:url(#linearGradient3016);fill-opacity:1;stroke:#55429f;stroke-width:2.16621375;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
        id="path10796-2-6-2"
        d="m 398.75,468.23718 a 10.625,10.625 0 1 1 -21.25,0 10.625,10.625 0 1 1 21.25,0 z"
        transform="matrix(0.55482947,0,0,0.55482947,-207.83019,783.15705)" />
     <path
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        d="m 5.0513836,1039.3735 0,1.0313 0.8880662,0 0,4.9687 -0.9322604,0 0,1.0313 4.789695,0 0,-1.0313 -1.2858115,0 0,-4.9687 1.2858115,0 0,-1.0313 z"
        id="rect7222" />
     <path
-       style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
        d="m 11.673065,1049.3306 -4.362952,0.094 4.891817,-7.2262 1.608666,2.6989"
        id="path6736-0" />
     <g
@@ -108,11 +108,11 @@
          id="g6124-3-2">
         <g
            transform="scale(-1,1)"
-           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+           style="fill:#ffffff;fill-opacity:1;stroke:none"
            id="text6430-0" />
         <g
            transform="scale(-1,1)"
-           style="font-size:13.58917427px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+           style="fill:#ffffff;fill-opacity:1;stroke:none;display:inline"
            id="g6438-4">
           <path
              style="fill:url(#linearGradient27709-0);fill-opacity:1;stroke:#2268a5;stroke-width:1.09095323;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"

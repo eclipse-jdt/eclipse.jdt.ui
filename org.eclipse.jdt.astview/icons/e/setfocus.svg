@@ -33,7 +33,7 @@
          offset="0.5"
          style="stop-color:#418a4d;stop-opacity:1" />
       <stop
-         style="stop-color:#91c168;stop-opacity:1;"
+         style="stop-color:#91c168;stop-opacity:1"
          offset="1"
          id="stop10802-1-5-3-0-4-8-4-2-9-2" />
     </linearGradient>
@@ -64,11 +64,11 @@
        id="g6124-3">
       <g
          transform="scale(-1,1)"
-         style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
          id="text6430" />
       <g
          transform="scale(-1,1)"
-         style="font-style:normal;font-weight:normal;font-size:13.58917427px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
          id="g6438">
         <circle
            r="8.9586821"
@@ -79,7 +79,7 @@
            transform="matrix(0.66884336,0,0,0.67139756,-267.18268,722.47026)" />
         <g
            transform="scale(0.94400511,1.0593163)"
-           style="font-size:15.56941891px;font-family:Sans;fill:#ffffff"
+           style="fill:#ffffff"
            id="text3782" />
       </g>
     </g>
@@ -102,7 +102,7 @@
        width="16" />
     <path
        d="m 9.547904,1047.2515 c -0.04659,-0.2691 -0.153032,-0.4719 -0.319362,-0.6082 -0.163011,-0.1363 -0.375917,-0.2042 -0.638722,-0.2042 -0.349303,0 -0.628744,0.1181 -0.838323,0.3552 -0.206256,0.2334 -0.309383,0.3859 -0.309382,0.9373 -1e-6,0.6129 0.104787,0.8858 0.314372,1.1389 0.212904,0.253 0.497335,0.3794 0.853294,0.3794 0.26613,0 0.484029,-0.073 0.653691,-0.2189 0.169658,-0.1493 0.289418,-0.4038 0.359283,-0.7639 L 11,1048.2542 c -0.143054,0.6162 -0.417503,1.3215 -0.823354,1.6361 -0.40586,0.3147 -0.94977,0.4719 -1.631735,0.4719 -0.775119,0 -1.393881,-0.2383 -1.856287,-0.7151 C 6.22954,1049.1704 6,1048.6704 6,1047.8271 c 0,-0.853 0.231205,-1.2763 0.693614,-1.7497 0.462406,-0.4769 1.087821,-0.7152 1.876246,-0.7152 0.645373,0 1.156212,0.1381 1.536928,0.4087 0.381103,0.2709 0.699367,0.9009 0.865705,1.4554 z"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:15.56941891px;line-height:125%;font-family:Arial;letter-spacing:0px;word-spacing:0px;display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none"
        id="path3817" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"

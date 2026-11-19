@@ -304,7 +304,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 								return null;
 							}
 							Object obj= field.getConstant();
-							return obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : NO_KEY;
+							return obj instanceof String s ? s.substring(1, s.length() - 1) : NO_KEY;
 						}
 					}
 				}

@@ -47,7 +47,7 @@
     <linearGradient
        id="linearGradient5933">
       <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
+         style="stop-color:#ffffff;stop-opacity:1"
          offset="0"
          id="stop5935" />
       <stop
@@ -58,7 +58,7 @@
     <linearGradient
        id="linearGradient5925">
       <stop
-         style="stop-color:#9eacbc;stop-opacity:1;"
+         style="stop-color:#9eacbc;stop-opacity:1"
          offset="0"
          id="stop5927" />
       <stop
@@ -181,11 +181,11 @@
          style="fill:url(#linearGradient6266);fill-opacity:1;stroke:url(#linearGradient6268);stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
     </g>
     <path
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:125%;font-family:AppleMyungjo;-inkscape-font-specification:AppleMyungjo;letter-spacing:0px;word-spacing:0px;fill:#044d92;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#044d92;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 10.511433,1043.3622 q 0.213872,0 0.371951,0.1505 0.158079,0.1504 0.158079,0.3629 0,0.2035 -0.14878,0.3451 -0.148781,0.1415 -0.371952,0.1415 -0.22317,0 -0.371951,-0.1415 Q 10,1044.0791 10,1043.8756 q 0,-0.2036 0.14878,-0.354 0.15808,-0.1594 0.362653,-0.1594 z"
        id="path4233" />
     <path
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:125%;font-family:AppleMyungjo;-inkscape-font-specification:AppleMyungjo;letter-spacing:0px;word-spacing:0px;fill:#044d92;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#044d92;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 9,1045.3622 2,0 0,3.728 c 0,0.2376 0.193749,0.272 0.464481,0.272 l 0.535519,0 0,1 -3,0 1.8e-6,-1 0.5628327,0 C 9.884784,1049.3622 10,1049.2998 10,1049.0062 l 0,-2.144 c 0,-0.3913 -0.1036578,-0.5 -0.5719506,-0.5 l -0.4280488,0 c -10e-7,-0.3333 -6e-7,-0.6667 -6e-7,-1 z"
        id="path4228" />
   </g>

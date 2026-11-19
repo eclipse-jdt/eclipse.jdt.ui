@@ -46,7 +46,7 @@
     <linearGradient
        id="linearGradient4994-6">
       <stop
-         style="stop-color:#f9fafc;stop-opacity:1;"
+         style="stop-color:#f9fafc;stop-opacity:1"
          offset="0"
          id="stop4996-1" />
       <stop
@@ -145,7 +145,7 @@
        y="-1050.8622"
        transform="scale(1,-1)" />
     <path
-       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.68999243px;line-height:125%;font-family:Sans;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.27519909;marker:none;enable-background:accumulate"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.27519909;marker:none;enable-background:accumulate"
        d="m 2.2263573,1049.8355 0,-0.1402 0,-0.5607 0,-0.1402 0.1215217,0 0.3645649,0 1.1544552,-1.5773 -1.1848357,-1.7173 -0.3341844,0 -0.1215217,0 0,-0.1402 0,-0.5608 0,-0.1402 0.1215217,0 1.4582597,0 0.1215217,0 0,0.1402 0,0.5608 0,0.1402 -0.1215217,0 0.6076078,0.9462 0.6076087,-0.9462 -0.1215217,0 0,-0.1402 0,-0.5608 0,-0.1402 0.1215217,0 1.4582591,0 0.1215217,0 0,0.1402 0,0.5608 0,0.1402 -0.1215217,0 -0.3038039,0 -1.2152165,1.7524 1.124075,1.5422 0.3949454,0 0.1215217,0 0,0.1402 0,0.5607 0,0.1402 -0.1215217,0 -1.4582591,0 -0.1215217,0 0,-0.1402 0,-0.5607 0,-0.1402 0.060757,0 -0.5468474,-0.8062 -0.5468474,0.8062 0.060757,0 0,0.1402 0,0.5607 0,0.1402 -0.1215217,0 -1.4582596,0 -0.1215216,0 z"
        id="path4187-8-9" />
   </g>

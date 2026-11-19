@@ -49,8 +49,7 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 		@Override
 		public boolean isSelectedValid(Object element) {
 			try {
-				if (element instanceof IJavaProject) {
-					IJavaProject jproject= (IJavaProject) element;
+				if (element instanceof IJavaProject jproject) {
 					IPath path= jproject.getProject().getFullPath();
 					return (jproject.findPackageFragmentRoot(path) != null);
 				} else
@@ -77,8 +76,7 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 
 		@Override
 		public boolean select(Viewer viewer, Object parent, Object element) {
-			if (element instanceof IPackageFragmentRoot) {
-				IPackageFragmentRoot fragmentRoot= (IPackageFragmentRoot)element;
+			if (element instanceof IPackageFragmentRoot fragmentRoot) {
 				try {
 					return (fragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE);
 				} catch (JavaModelException e) {
@@ -105,8 +103,7 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 
 		if (dialog.open() == Window.OK) {
 			Object element= dialog.getFirstResult();
-			if (element instanceof IJavaProject) {
-				IJavaProject jproject= (IJavaProject) element;
+			if (element instanceof IJavaProject jproject) {
 				return jproject.getPackageFragmentRoot(jproject.getProject());
 			} else
 				if (element instanceof IPackageFragmentRoot) {

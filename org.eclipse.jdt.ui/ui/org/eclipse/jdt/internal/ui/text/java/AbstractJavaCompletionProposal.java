@@ -355,9 +355,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return POSITION_UNSPECIFIED;
 	}
 
-	private boolean shouldAddSpace(IDocument document, int replOffset) throws BadLocationException {
+	private boolean shouldAddSpace(IDocument document, int replOffset, int referenceOffset) throws BadLocationException {
 		if(fInvocationContext != null) {
-			if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@') {
+			if ((replOffset-1) > 0 && document.getChar(replOffset-1) == '@'
+					&& document.getChar(referenceOffset) != ' ' && document.getChar(referenceOffset) != '\t') {
 				if (getPosition() == POSITION_PARAMETER_LEVEL)
 					return true;
 			}
@@ -406,7 +407,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				if (trigger == ';' && replacement.charAt(replacement.length() - 1) != ';' && (referenceOffset >= document.getLength() || document.getChar(referenceOffset) != ';')) {
 					replacement= replacement + ";"; //$NON-NLS-1$
 					setReplacementString(replacement);
-				} else if (shouldAddSpace(document, replOffset)) {
+				} else if (shouldAddSpace(document, replOffset, referenceOffset)) {
 					if (getPosition() == POSITION_PARAMETER_LEVEL) {
 						replacement = replacement + " "; //$NON-NLS-1$
 						setCursorPosition(getCursorPosition() + 1);

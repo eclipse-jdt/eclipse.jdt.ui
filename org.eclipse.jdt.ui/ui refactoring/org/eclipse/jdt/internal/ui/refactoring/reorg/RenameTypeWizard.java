@@ -55,8 +55,7 @@ public class RenameTypeWizard extends RenameRefactoringWizard {
 		RefactoringProcessor proc= ((RenameRefactoring) getRefactoring()).getProcessor();
 		if (proc instanceof RenameTypeProcessor)
 			return (RenameTypeProcessor) proc;
-		else if (proc instanceof RenameCompilationUnitProcessor) {
-			RenameCompilationUnitProcessor rcu= (RenameCompilationUnitProcessor) proc;
+		else if (proc instanceof RenameCompilationUnitProcessor rcu) {
 			return rcu.getRenameTypeProcessor();
 		}
 		Assert.isTrue(false); // Should never get here

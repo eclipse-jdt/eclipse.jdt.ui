@@ -1137,6 +1137,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceParameterObjectRefactoring_error_cannot_resolve_type;
 
+	public static String IntroduceParameterObjectRefactoring_error_canonical_constructor;
+
 	public static String IntroduceParameterObjectRefactoring_parameter_object_creation_error;
 
 	public static String IntroduceParameterObjectRefactoring_refactoring_name;

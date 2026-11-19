@@ -427,8 +427,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			}
 			if (visible && ! fPopup.isVisible()) {
 				ISourceViewer viewer= fEditor.getViewer();
-				if (viewer instanceof IWidgetTokenOwnerExtension) {
-					IWidgetTokenOwnerExtension widgetTokenOwnerExtension= (IWidgetTokenOwnerExtension) viewer;
+				if (viewer instanceof IWidgetTokenOwnerExtension widgetTokenOwnerExtension) {
 					visible= widgetTokenOwnerExtension.requestWidgetToken(this, WIDGET_PRIORITY);
 				}
 			} else if (! visible && fPopup.isVisible()) {
@@ -440,8 +439,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 
 	private void releaseWidgetToken() {
 		ISourceViewer viewer= fEditor.getViewer();
-		if (viewer instanceof IWidgetTokenOwner) {
-			IWidgetTokenOwner widgetTokenOwner= (IWidgetTokenOwner) viewer;
+		if (viewer instanceof IWidgetTokenOwner widgetTokenOwner) {
 			widgetTokenOwner.releaseWidgetToken(this);
 		}
 	}

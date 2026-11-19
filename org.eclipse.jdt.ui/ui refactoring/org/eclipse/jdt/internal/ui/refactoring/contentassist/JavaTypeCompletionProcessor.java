@@ -89,13 +89,11 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	}
 
 	public void setExtendsCompletionContext(IJavaElement javaElement) {
-		if (javaElement instanceof IPackageFragment) {
-			IPackageFragment packageFragment= (IPackageFragment) javaElement;
+		if (javaElement instanceof IPackageFragment packageFragment) {
 			ICompilationUnit cu= packageFragment.getCompilationUnit(DUMMY_CU_NAME);
 			setCompletionContext(cu, "public class " + DUMMY_CLASS_NAME + " extends ", " {}"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-		} else if (javaElement instanceof IType) {
+		} else if (javaElement instanceof IType type) {
 			// pattern: public class OuterType { public class Type extends /*caret*/  {} }
-			IType type= (IType) javaElement;
 			StringBuilder before= new StringBuilder("public class ").append(type.getElementName()).append(" extends "); //$NON-NLS-1$ //$NON-NLS-2$
 			StringBuilder after= new StringBuilder(" {}"); //$NON-NLS-1$
 			IJavaElement parent= type.getParent();

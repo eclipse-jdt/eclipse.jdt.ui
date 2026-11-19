@@ -281,8 +281,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					ISelection selection= tv.getSelection();
-					if (selection instanceof IStructuredSelection) {
-						IStructuredSelection ss= (IStructuredSelection) selection;
+					if (selection instanceof IStructuredSelection ss) {
 						Field selected= (Field) ss.getFirstElement();
 						String message= RefactoringMessages.ExtractClassWizard_dialog_message;
 						String title= RefactoringMessages.ExtractClassWizard_dialog_title;
@@ -337,8 +336,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 			@Override
 			protected void setValue(Object element, Object value) {
-				if (element instanceof Field) {
-					Field pi= (Field) element;
+				if (element instanceof Field pi) {
 					doSetValue(pi, value.toString());
 					getViewer().update(element, null);
 				}
@@ -349,8 +347,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 			@Override
 			protected Object getValue(Object element) {
-				if (element instanceof Field) {
-					Field pi= (Field) element;
+				if (element instanceof Field pi) {
 					return doGetValue(pi);
 				}
 				return null;
@@ -413,8 +410,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 				@Override
 				protected boolean canEdit(Object element) {
-					if (element instanceof Field) {
-						Field field= (Field) element;
+					if (element instanceof Field field) {
 						return field.isCreateField();
 					}
 					return super.canEdit(element);

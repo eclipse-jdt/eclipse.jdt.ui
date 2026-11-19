@@ -77,7 +77,7 @@
                x="15.590192"
                y="1043.4797" />
             <path
-               style="font-size:7.68999243px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:125%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.27519909;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+               style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.27519909;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
                d="m 1.25,1.78125 0,0.125 0,0.5 0,0.125 0.125,0 0.375,0 1.1875,1.40625 -1.21875,1.53125 -0.34375,0 -0.125,0 0,0.125 0,0.5 0,0.125 0.125,0 1.5,0 0.125,0 0,-0.125 0,-0.5 0,-0.125 -0.125,0 L 3.5,4.625 l 0.625,0.84375 -0.125,0 0,0.125 0,0.5 0,0.125 0.125,0 1.5,0 0.125,0 0,-0.125 0,-0.5 0,-0.125 -0.125,0 -0.3125,0 -1.25,-1.5625 1.15625,-1.375 0.40625,0 0.125,0 0,-0.125 0,-0.5 0,-0.125 -0.125,0 -1.5,0 -0.125,0 0,0.125 0,0.5 0,0.125 0.0625,0 L 3.5,3.25 2.9375,2.53125 l 0.0625,0 0,-0.125 0,-0.5 0,-0.125 -0.125,0 -1.5,0 -0.125,0 z"
                transform="matrix(1.0698871,0,0,1.0698871,15.590192,1043.4798)"
                id="path25154" />
@@ -155,7 +155,7 @@
            id="path4187"
            transform="matrix(1.0698871,0,0,1.0698871,15.590192,1043.4798)"
            d="m 1.25,1.78125 0,0.125 0,0.5 0,0.125 0.125,0 0.375,0 1.1875,1.40625 -1.21875,1.53125 -0.34375,0 -0.125,0 0,0.125 0,0.5 0,0.125 0.125,0 1.5,0 0.125,0 0,-0.125 0,-0.5 0,-0.125 -0.125,0 L 3.5,4.625 l 0.625,0.84375 -0.125,0 0,0.125 0,0.5 0,0.125 0.125,0 1.5,0 0.125,0 0,-0.125 0,-0.5 0,-0.125 -0.125,0 -0.3125,0 -1.25,-1.5625 1.15625,-1.375 0.40625,0 0.125,0 0,-0.125 0,-0.5 0,-0.125 -0.125,0 -1.5,0 -0.125,0 0,0.125 0,0.5 0,0.125 0.0625,0 L 3.5,3.25 2.9375,2.53125 l 0.0625,0 0,-0.125 0,-0.5 0,-0.125 -0.125,0 -1.5,0 -0.125,0 z"
-           style="font-size:7.68999243px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:125%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.27519909;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans" />
+           style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.27519909;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
       </g>
     </g>
     <g
