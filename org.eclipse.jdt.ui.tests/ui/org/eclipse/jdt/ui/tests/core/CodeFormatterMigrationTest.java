@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileVersionerCore;
@@ -56,5 +58,61 @@ public class CodeFormatterMigrationTest {
 
 		assertTrue(newSettings.containsKey("org.eclipse.jdt.core.formatter.keep_anonymous_type_declaration_on_one_line"));
 		assertEquals("one_line_if_empty", newSettings.get("org.eclipse.jdt.core.formatter.keep_anonymous_type_declaration_on_one_line"));
+	}
+
+	/**
+	 * Ensure that updating formatter preferences doesn't change compiler compliance
+	 */
+	@Test
+	public void testUpdateMaintainsNeededNonFormattingPrefernces() {
+		// XXX: Loop over all AbstractCompilerTest.getPossibleComplianceLevels()?
+		String[] complianceLevels= new String[] {
+				CompilerOptions.VERSION_1_3,
+				CompilerOptions.VERSION_1_4,
+				CompilerOptions.VERSION_1_5,
+				CompilerOptions.VERSION_1_6,
+				CompilerOptions.VERSION_1_7,
+				CompilerOptions.VERSION_1_8,
+				CompilerOptions.VERSION_9,
+				CompilerOptions.VERSION_10,
+				CompilerOptions.VERSION_11,
+				CompilerOptions.VERSION_12,
+				CompilerOptions.VERSION_13,
+				CompilerOptions.VERSION_14,
+				CompilerOptions.VERSION_15,
+				CompilerOptions.VERSION_16,
+				CompilerOptions.VERSION_17,
+				CompilerOptions.VERSION_18,
+				CompilerOptions.VERSION_19,
+				CompilerOptions.VERSION_20,
+				CompilerOptions.VERSION_21,
+				CompilerOptions.VERSION_22,
+				CompilerOptions.VERSION_23,
+				CompilerOptions.VERSION_24,
+				CompilerOptions.VERSION_25
+		};
+		for (int profileVersion= ProfileVersionerCore.getFirstVersion(); profileVersion <= ProfileVersionerCore.getCurrentVersion(); profileVersion++) {
+			for (String comlianceLevel : complianceLevels) {
+				Map<String, String> options= new HashMap<>();
+
+				// these items match what FormatterRegressionTests.setComplianceLevel(String)
+				// indicates that the formatter depends on
+				options.put(CompilerOptions.OPTION_Compliance, comlianceLevel);
+				options.put(CompilerOptions.OPTION_TargetPlatform, comlianceLevel);
+				options.put(CompilerOptions.OPTION_Source, comlianceLevel);
+
+				Map<String, String> newSettings= ProfileVersionerCore.updateAndComplete(options, profileVersion);
+
+				assertTrue(newSettings.containsKey(CompilerOptions.OPTION_Compliance));
+				assertEquals(comlianceLevel, newSettings.get(CompilerOptions.OPTION_Compliance));
+				assertTrue(newSettings.containsKey(CompilerOptions.OPTION_TargetPlatform));
+				assertEquals(comlianceLevel, newSettings.get(CompilerOptions.OPTION_TargetPlatform));
+				assertTrue(newSettings.containsKey(CompilerOptions.OPTION_Source));
+				assertEquals(comlianceLevel, newSettings.get(CompilerOptions.OPTION_Source));
+			}
+		}
+
+
+
 	}
 }
