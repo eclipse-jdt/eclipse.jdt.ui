@@ -6,7 +6,7 @@
          <meta.schema plugin="org.eclipse.jdt.core.manipulation" id="fencedCodeTokenizers" name="%FencedCodeTokenizersExtensionPoint"/>
       </appinfo>
       <documentation>
-         This extension point allows plug-ins to contribute syntax highlighting tokenizers for non-Java fenced code blocks in Javadoc markdown comments and for text blocks annotated with language comments.
+         This extension point allows plug-ins to contribute syntax highlighting tokenizers for non-Java fenced code blocks in Javadoc markdown comments.
       </documentation>
    </annotation>
 

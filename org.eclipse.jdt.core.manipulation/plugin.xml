@@ -17,6 +17,7 @@
 
    <extension-point id="changeMethodSignatureParticipants" name="%ChangeMethodSignatureParticipantsExtensionPoint" schema="schema/changeMethodSignatureParticipants.exsd"/>
    <extension-point id="fencedCodeTokenizers" name="%FencedCodeTokenizersExtensionPoint" schema="schema/fencedCodeTokenizers.exsd"/>
+   <extension-point id="textBlockCodeTokenizers" name="%TextBlockCodeTokenizersExtensionPoint" schema="schema/textBlockCodeTokenizers.exsd"/>
 
 
    <extension point="org.eclipse.core.expressions.propertyTesters">
