@@ -664,6 +664,48 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testMultiCatchRemoveImports() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample = """
+			package test;
+			import java.io.IOException;
+
+			public class Test {
+				public void m() {
+					try {
+						m1();
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				private void m1() throws Exception {
+				}
+			}
+			""";
+		String expected = """
+				package test;
+
+				public class Test {
+					public void m() {
+						try {
+							m1();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					private void m1() throws Exception {
+					}
+				}
+				""";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.MULTI_CATCH);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.MultiCatchCleanUp_description)));
+	}
+
+	@Test
 	public void testMultiCatch() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);

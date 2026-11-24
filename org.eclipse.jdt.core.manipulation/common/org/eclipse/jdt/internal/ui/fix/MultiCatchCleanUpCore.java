@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -451,6 +452,7 @@ public class MultiCatchCleanUpCore extends AbstractMultiFix {
 
 			List<Type> typesByClause= new ArrayList<>();
 
+
 			for (CatchClause mergeableCatchClause : mergeableCatchClauses) {
 				typesByClause.add(mergeableCatchClause.getException().getType());
 			}
@@ -458,6 +460,8 @@ public class MultiCatchCleanUpCore extends AbstractMultiFix {
 			List<Type> allTypes= new ArrayList<>();
 			collectAllUnionedTypes(typesByClause, allTypes);
 			removeSupersededAlternatives(allTypes);
+
+			ImportRemover iRemover = cuRewrite.getImportRemover();
 
 			UnionType newUnionType= ast.newUnionType();
 			newUnionType.types().addAll(ASTNodes.createMoveTarget(rewrite, allTypes));
@@ -468,6 +472,12 @@ public class MultiCatchCleanUpCore extends AbstractMultiFix {
 				mergedClause= removedClauses.remove(0);
 			} else {
 				mergedClause= removedClauses.remove(removedClauses.size() - 1);
+			}
+
+			if (iRemover != null) {
+				for(CatchClause clause : removedClauses) {
+					iRemover.registerRemovedNode(clause);
+				}
 			}
 
 			rewrite.set(mergedClause.getException(), SingleVariableDeclaration.TYPE_PROPERTY, newUnionType, group);
