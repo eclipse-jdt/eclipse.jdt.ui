@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -36,5 +38,21 @@ public interface ISelectionListenerWithAST {
 	 * not be modified.
 	 */
 	void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot);
+
+	/**
+	 * Called when a selection has changed. Listeners doing expensive work should override this method
+	 * and stop as soon as the given monitor is canceled (i.e. a newer selection change occurred).
+	 * The default implementation delegates to
+	 * {@link #selectionChanged(IEditorPart, ITextSelection, CompilationUnit)}.
+	 *
+	 * @param part The editor part in which the selection change has occurred.
+	 * @param selection The new text selection
+	 * @param astRoot The AST tree corresponding to the editor's input. This AST is shared and must
+	 * not be modified.
+	 * @param monitor The progress monitor of the calling job, never <code>null</code>
+	 */
+	default void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot, IProgressMonitor monitor) {
+		selectionChanged(part, selection, astRoot);
+	}
 
 }
