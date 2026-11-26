@@ -46,9 +46,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -97,6 +100,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocInlineTagCompletionProposal;
 
 //predictable order for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -2765,6 +2769,45 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		}
 		assertNull(exception.get());
 		assertEquals(Collections.emptyList(), errors);
+	}
+
+	@Test
+	public void testGetStyledDisplayString() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test", false, null);
+		String content=
+			"""
+			package test;
+			public class JavaDoc {
+				/**
+				 * Refactors {@code catch} clauses with the same body to use Java 7's multi-catch.
+				 * <p>
+				 * Possible values: {TRUE, FALSE}
+				 * {@link @
+				 * @since 4.19
+				 */
+				Bar foo() {
+					return null;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Javadoc.java", content, true, new NullProgressMonitor());
+		BoldStylerProvider boldStylerProvider= new BoldStylerProvider(JFaceResources.getDefaultFont());
+		try {
+			String textEntered= "{@link @";
+			int textStart= content.indexOf(textEntered);
+			int offset= textStart + textEntered.length();
+			CompletionProposal core= CompletionProposal.create(CompletionProposal.JAVADOC_INLINE_TAG, offset);
+			core.setCompletion("{@code}".toCharArray()); // becomes the display string
+			core.setReplaceRange(textStart, offset); // start of "{@co" .. cursor
+			core.setRelevance(1);
+			JavadocInlineTagCompletionProposal proposal= new JavadocInlineTagCompletionProposal(core, createContext(offset, cu));
+			StyledString styledString= proposal.getStyledDisplayString(new Document(content), offset, boldStylerProvider);
+			assertEquals("{@code}", styledString.getString());
+			assertEquals(0, styledString.getStyleRanges().length);
+		} finally {
+			boldStylerProvider.dispose();
+		}
 	}
 
 	@Test
