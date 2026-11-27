@@ -956,7 +956,9 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	protected int getPatternMatchRule(String pattern, String string) {
 		String start;
 		try {
-			start= string.substring(0, pattern.length());
+			int length = pattern.length();
+			if(string.length() < pattern.length()) length = string.length();
+			start= string.substring(0, length);
 		} catch (StringIndexOutOfBoundsException e) {
 			String message= "Error retrieving proposal text.\nDisplay string:\n" + string + "\nPattern:\n" + pattern; //$NON-NLS-1$//$NON-NLS-2$
 			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, message, e));
