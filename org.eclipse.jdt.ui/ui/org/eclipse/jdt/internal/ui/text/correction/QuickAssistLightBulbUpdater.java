@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
@@ -23,10 +24,15 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.util.IPropertyChangeListener;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
@@ -34,6 +40,8 @@ import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
+
+import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -44,6 +52,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
+
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -118,7 +128,17 @@ public class QuickAssistLightBulbUpdater {
 	}
 
 	private void installSelectionListener() {
-		fListener= (_, selection, astRoot) -> doSelectionChanged(selection.getOffset(), selection.getLength(), astRoot);
+		fListener= new ISelectionListenerWithAST() {
+			@Override
+			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
+				doSelectionChanged(selection.getOffset(), selection.getLength(), astRoot, null);
+			}
+
+			@Override
+			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot, IProgressMonitor monitor) {
+				doSelectionChanged(selection.getOffset(), selection.getLength(), astRoot, monitor);
+			}
+		};
 		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fListener);
 	}
 
@@ -160,7 +180,7 @@ public class QuickAssistLightBulbUpdater {
 					Point point= fViewer.getSelectedRange();
 					CompilationUnit astRoot= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 					if (astRoot != null) {
-						doSelectionChanged(point.x, point.y, astRoot);
+						doSelectionChanged(point.x, point.y, astRoot, null);
 					}
 				}
 			} else {
@@ -186,7 +206,7 @@ public class QuickAssistLightBulbUpdater {
 	}
 
 
-	private void doSelectionChanged(int offset, int length, CompilationUnit astRoot) {
+	private void doSelectionChanged(int offset, int length, CompilationUnit astRoot, IProgressMonitor monitor) {
 
 		final IAnnotationModel model= getAnnotationModel();
 		final ICompilationUnit cu= getCompilationUnit();
@@ -203,14 +223,17 @@ public class QuickAssistLightBulbUpdater {
 			return; // there is already a quick fix light bulb at the new location
 		}
 
-		calculateLightBulb(model, context);
+		calculateLightBulb(model, context, monitor);
 	}
 
 	/*
 	 * Needs to be called synchronized
 	 */
-	private void calculateLightBulb(IAnnotationModel model, IInvocationContext context) {
-		boolean needsAnnotation= JavaCorrectionProcessor.hasAssists(context);
+	private void calculateLightBulb(IAnnotationModel model, IInvocationContext context, IProgressMonitor monitor) {
+		boolean needsAnnotation= hasAssists(model, context, monitor);
+		if (monitor != null && monitor.isCanceled()) {
+			return; // a newer selection change will update the light bulb
+		}
 		if (fIsAnnotationShown) {
 			model.removeAnnotation(fAnnotation);
 		}
@@ -218,6 +241,37 @@ public class QuickAssistLightBulbUpdater {
 			model.addAnnotation(fAnnotation, new Position(context.getSelectionOffset(), context.getSelectionLength()));
 		}
 		fIsAnnotationShown= needsAnnotation;
+	}
+
+	private boolean hasAssists(IAnnotationModel model, IInvocationContext context, IProgressMonitor monitor) {
+		IResource resource= context.getCompilationUnit().getResource();
+		if (resource != null && Resources.isReadOnly(resource)) {
+			return JavaCorrectionProcessor.hasAssists(context);
+		}
+		Annotation[] annotations= getQuickFixableAnnotations(model, context.getSelectionOffset());
+		return JavaCorrectionProcessor.hasAssists(context, model, annotations, monitor);
+	}
+
+	/*
+	 * Collects the annotations at the offset, as done when the quick assist popup is opened
+	 */
+	private Annotation[] getQuickFixableAnnotations(IAnnotationModel model, int offset) {
+		ArrayList<Annotation> result= new ArrayList<>();
+		try {
+			Iterator<Annotation> iter= model.getAnnotationIterator();
+			while (iter.hasNext()) {
+				Annotation annot= iter.next();
+				if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
+					Position pos= model.getPosition(annot);
+					if (pos != null && offset >= pos.getOffset() && offset <= pos.getOffset() + pos.getLength()) {
+						result.add(annot);
+					}
+				}
+			}
+		} catch (IndexOutOfBoundsException | ConcurrentModificationException e) {
+			// concurrent modification - too bad, ignore
+		}
+		return result.toArray(new Annotation[result.size()]);
 	}
 
 	private void removeLightBulb(IAnnotationModel model) {

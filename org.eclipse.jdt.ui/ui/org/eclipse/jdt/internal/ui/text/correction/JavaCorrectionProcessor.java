@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -154,6 +155,45 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		for (ContributedProcessorDescriptor processor :  getAssistProcessors()) {
 			collector.process(processor);
 			if (collector.hasAssists()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Tests whether at least one quick assist is actually offered for the given context, using the same
+	 * problem locations as {@link #collectProposals(IInvocationContext, IAnnotationModel, Annotation[], boolean, boolean, Collection)}.
+	 * In contrast to {@link #hasAssists(IInvocationContext)} this is an exact check. It stops at the first
+	 * processor that returns a proposal and checks for cancellation between the processors.
+	 *
+	 * @param context the invocation context
+	 * @param model the annotation model, used to compute the problem locations
+	 * @param annotations the annotations at the invocation location
+	 * @param monitor the progress monitor to check for cancellation, or <code>null</code>
+	 * @return <code>true</code> if at least one quick assist is available, <code>false</code> if there is
+	 *         none or the operation has been canceled
+	 */
+	public static boolean hasAssists(IInvocationContext context, IAnnotationModel model, Annotation[] annotations, IProgressMonitor monitor) {
+		ArrayList<IProblemLocation> problems= new ArrayList<>();
+		for (Annotation curr : annotations) {
+			if (curr instanceof IJavaAnnotation javaAnnot) {
+				ProblemLocation problemLocation= getProblemLocation(javaAnnot, model);
+				if (problemLocation != null) {
+					problems.add(problemLocation);
+				}
+			}
+		}
+		IProblemLocation[] locations= problems.toArray(new IProblemLocation[problems.size()]);
+
+		ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>(1);
+		SafeAssistCollector collector= new SafeAssistCollector(context, locations, proposals);
+		for (ContributedProcessorDescriptor processor : getAssistProcessors()) {
+			if (monitor != null && monitor.isCanceled()) {
+				return false;
+			}
+			collector.process(processor);
+			if (!proposals.isEmpty()) {
 				return true;
 			}
 		}
