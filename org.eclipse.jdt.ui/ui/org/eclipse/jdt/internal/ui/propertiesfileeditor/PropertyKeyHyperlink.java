@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -52,7 +52,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -341,7 +340,8 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			}
 		};
 
-		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
+		KeyReferenceSelectionDialog dialog= new KeyReferenceSelectionDialog(fShell, labelProvider, new WorkbenchLabelProvider(),
+				element -> element instanceof KeyReference keyRef ? new KeyReferenceSelectionDialog.KeyLocation(keyRef.resource, keyRef.offset, keyRef.length) : null);
 		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details);
 		dialog.setLowerListComparator((_, _) -> 0);
 		dialog.setTitle(PropertiesFileEditorMessages.OpenAction_SelectionDialog_title);
