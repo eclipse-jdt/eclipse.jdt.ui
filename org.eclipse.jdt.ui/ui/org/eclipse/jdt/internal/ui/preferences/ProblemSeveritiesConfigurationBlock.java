@@ -997,6 +997,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT);
 	private static final Key PREF_15_PB_SWITCH_MISSING_DEFAULT_CASE= getJDTCoreKey(JavaCore.COMPILER_PB_SWITCH_MISSING_DEFAULT_CASE);
 	private static final Key PREF_15_PB_RAW_TYPE_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE);
+	private static final Key PREF_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE);
 	private static final Key PREF_17_PB_REDUNDANT_TYPE_ARGUMENTS= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_TYPE_ARGUMENTS);
 	private static final Key PREF_15_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS= getJDTCoreKey(JavaCore.COMPILER_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS);
 
@@ -1086,7 +1087,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_15_PB_TYPE_PARAMETER_HIDING,
 				PREF_15_PB_INCOMPLETE_ENUM_SWITCH, PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT, PREF_15_PB_SWITCH_MISSING_DEFAULT_CASE,
 				PREF_PB_MISSING_DEPRECATED_ANNOTATION,
-				PREF_15_PB_RAW_TYPE_REFERENCE, PREF_15_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS, PREF_17_PB_REDUNDANT_TYPE_ARGUMENTS,
+				PREF_15_PB_RAW_TYPE_REFERENCE, PREF_15_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS, PREF_17_PB_REDUNDANT_TYPE_ARGUMENTS, PREF_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE,
 				PREF_PB_FATAL_OPTIONAL_ERROR,
 				PREF_PB_FORBIDDEN_REFERENCE, PREF_PB_DISCOURRAGED_REFERENCE,
 				PREF_PB_SUPPRESS_WARNINGS, PREF_PB_SUPPRESS_OPTIONAL_ERRORS,
@@ -1468,6 +1469,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_type_arguments_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_17_PB_REDUNDANT_TYPE_ARGUMENTS, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potentially_expensive_type_inference_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unavoidable_generic_type_problems;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_15_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS, disabledEnabled, defaultIndent, section);

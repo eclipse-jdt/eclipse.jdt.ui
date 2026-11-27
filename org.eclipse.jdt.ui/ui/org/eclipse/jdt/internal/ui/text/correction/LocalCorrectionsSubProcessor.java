@@ -81,6 +81,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.ExpensiveTypeInferenceFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -101,6 +102,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.ExpensiveTypeInferenceCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUpCore;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -461,6 +463,15 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 			}
 		}
 		return false;
+	}
+
+	public static void addExpensiveTypeInferenceProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		IProposableFix fix= ExpensiveTypeInferenceFixCore.createFix(context.getASTRoot(), new IProblemLocation[] { problem });
+		if (fix != null) {
+			Map<String, String> options= Map.of(CleanUpConstants.EXPLICIT_TYPE_ARGUMENTS_FOR_EXPENSIVE_INFERENCE, CleanUpOptions.TRUE);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			proposals.add(new FixCorrectionProposal(fix, new ExpensiveTypeInferenceCleanUpCore(options), IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS, image, context));
+		}
 	}
 
 	public static void addRemoveRedundantTypeArgumentsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {

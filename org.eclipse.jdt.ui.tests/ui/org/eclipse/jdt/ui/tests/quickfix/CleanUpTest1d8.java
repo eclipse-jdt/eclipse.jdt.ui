@@ -16,7 +16,9 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import static org.junit.Assert.assertNotEquals;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -28,6 +30,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
@@ -57,6 +60,54 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		return projectSetup.getDefaultClasspath();
+	}
+
+	@Test
+	public void testExpensiveTypeInference() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(",\n        ", Collections.nCopies(50, "Arrays.asList(\"x\")"));
+		String source= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			class A {
+			    List<List<String>> first = Arrays.asList(%1$s);
+			    List<List<String>> second = Arrays.asList(/* keep */ %1$s);
+			    List<List<String>> small = Arrays.asList(Arrays.asList("x"));
+			    @SafeVarargs final <T> List<T> gather(T... xs) { return Arrays.asList(xs); }
+			    void collect() {
+			        this.gather(%1$s);
+			        first = (Arrays.asList(%1$s));
+			    }
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		enable(CleanUpConstants.EXPLICIT_TYPE_ARGUMENTS_FOR_EXPENSIVE_INFERENCE);
+		String expected= source.replace("first = Arrays.asList", "first = Arrays.<List<String>>asList")
+				.replace("second = Arrays.asList", "second = Arrays.<List<String>>asList")
+				.replace("this.gather", "this.<List<String>>gather")
+				.replace("first = (Arrays.asList", "first = (Arrays.<List<String>>asList");
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, null);
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceWithCompetingOverload() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "Arrays.asList(\"x\")"));
+		String source= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			class A {
+			    @SafeVarargs static <T> List<T> of(T... xs) { return Arrays.asList(xs); }
+			    static List<String> of(String... xs) { return Arrays.asList(xs); }
+			    List<List<String>> value = A.of(%s);
+			}
+			""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		enable(CleanUpConstants.EXPLICIT_TYPE_ARGUMENTS_FOR_EXPENSIVE_INFERENCE);
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 
 	@Test
@@ -7412,6 +7463,57 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 
+	}
+
+	@Test
+	public void testExpensiveTypeInferenceRespectsSuppression() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "Arrays.asList(\"x\")"));
+		String source= """
+				package test1;
+				import java.util.ArrayList;
+				import java.util.Arrays;
+				import java.util.List;
+				class A {
+				    static final String TOKEN = "expensive-type-inference";
+				    List<String> names = new ArrayList<String>();
+				    @SuppressWarnings(value = {TOKEN})
+				    List<List<String>> suppressed = Arrays.asList(%1$s);
+				    @SuppressWarnings("all")
+				    List<List<String>> all() { return Arrays.asList(%1$s); }
+				    List<List<String>> visible = Arrays.asList(%1$s);
+				}
+				""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		cu.setOptions(Map.of(JavaCore.COMPILER_PB_POTENTIALLY_EXPENSIVE_TYPE_INFERENCE, JavaCore.WARNING,
+				JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.ERROR, JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.ENABLED));
+		assertNoCompilationError(cu);
+		enable(CleanUpConstants.EXPLICIT_TYPE_ARGUMENTS_FOR_EXPENSIVE_INFERENCE);
+		enable(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS);
+		String expected= source.replace("new ArrayList<String>()", "new ArrayList<>()")
+				.replace("visible = Arrays.asList", "visible = Arrays.<List<String>>asList");
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+		assertNoCompilationError(cu);
+	}
+
+	@Test
+	public void testRemoveUnusedExpensiveTypeInferenceSuppression() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String arguments= String.join(", ", Collections.nCopies(50, "Arrays.asList(\"x\")"));
+		String source= """
+				package test1;
+				import java.util.Arrays;
+				class A {
+				    @SuppressWarnings("expensive-type-inference")
+				    void large() { Arrays.asList(%s); }
+				    @SuppressWarnings("expensive-type-inference")
+				    void small() { Arrays.asList(Arrays.asList("x")); }
+				}
+				""".formatted(arguments);
+		ICompilationUnit cu= pack.createCompilationUnit("A.java", source, false, null);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS);
+		String expected= source.replace("    @SuppressWarnings(\"expensive-type-inference\")\n    void small", "    void small");
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test

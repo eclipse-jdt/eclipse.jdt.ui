@@ -1522,6 +1522,9 @@ public class CleanUpConstants {
 	 */
 	public static final String INSERT_INFERRED_TYPE_ARGUMENTS= "cleanup.insert_inferred_type_arguments"; //$NON-NLS-1$
 
+	/** Insert explicit method type arguments at compiler-reported expensive inference sites. */
+	public static final String EXPLICIT_TYPE_ARGUMENTS_FOR_EXPENSIVE_INFERENCE= "cleanup.explicit_type_arguments_for_expensive_inference"; //$NON-NLS-1$
+
 	/**
 	 * Removes redundant type arguments from class instance creations and creates a diamond operator.<br>
 	 * <br>

@@ -197,6 +197,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STRINGCONCAT_TO_TEXTBLOCK, CleanUpOptions.FALSE);
 		options.setOption(STRINGCONCAT_STRINGBUFFER_STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);
+		options.setOption(EXPLICIT_TYPE_ARGUMENTS_FOR_EXPENSIVE_INFERENCE, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);
@@ -389,6 +390,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STRINGCONCAT_TO_TEXTBLOCK, CleanUpOptions.FALSE);
 		options.setOption(STRINGCONCAT_STRINGBUFFER_STRINGBUILDER, CleanUpOptions.FALSE);
 		options.setOption(MULTI_CATCH, CleanUpOptions.FALSE);
+		options.setOption(EXPLICIT_TYPE_ARGUMENTS_FOR_EXPENSIVE_INFERENCE, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(USE_AUTOBOXING, CleanUpOptions.FALSE);
 		options.setOption(USE_UNBOXING, CleanUpOptions.FALSE);

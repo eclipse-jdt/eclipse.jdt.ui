@@ -260,6 +260,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnsafeElementTypeConversion:
 			case IProblem.RawTypeReference:
 			case IProblem.UnsafeRawMethodInvocation:
+			case IProblem.PotentiallyExpensiveTypeInference:
 			case IProblem.RedundantSpecificationOfTypeArguments:
 			case IProblem.UndefinedAnnotationMember:
 			case IProblem.MissingValueForAnnotationMember:
@@ -802,6 +803,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				//$FALL-THROUGH$
 			case IProblem.UnsafeElementTypeConversion:
 				LocalCorrectionsSubProcessor.addTypePrametersToRawTypeReference(context, problem, proposals);
+				break;
+			case IProblem.PotentiallyExpensiveTypeInference:
+				LocalCorrectionsSubProcessor.addExpensiveTypeInferenceProposal(context, problem, proposals);
 				break;
 			case IProblem.RedundantSpecificationOfTypeArguments:
 				LocalCorrectionsSubProcessor.addRemoveRedundantTypeArgumentsProposals(context, problem, proposals);

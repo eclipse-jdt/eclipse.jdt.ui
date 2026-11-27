@@ -7634,6 +7634,11 @@
             runAfter="org.eclipse.jdt.ui.cleanup.multi_catch">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ExpensiveTypeInferenceCleanUpCore"
+            id="org.eclipse.jdt.ui.cleanup.expensive_type_inference"
+            runAfter="org.eclipse.jdt.ui.cleanup.join">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.type_parameters"
             runAfter="org.eclipse.jdt.ui.cleanup.systemproperty">
