@@ -25,8 +25,8 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
  */
 public class SelectFieldModeAction extends Action {
 
-    private CallHierarchyViewPart fView;
-    private int fMode;
+    private final CallHierarchyViewPart fView;
+    private final int fMode;
 
     public SelectFieldModeAction(CallHierarchyViewPart v, int mode) {
 		super(null, AS_RADIO_BUTTON);
