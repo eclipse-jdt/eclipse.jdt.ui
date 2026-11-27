@@ -137,6 +137,14 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		}
 	}
 
+	/**
+	 * Recomputes the status of the children after one of them has been interrupted: the children that
+	 * have not started stay not run, but are not expected to run any more.
+	 */
+	void interruptedChildren() {
+		internalSetChildrenStatus(getCumulatedStatus());
+	}
+
 	void childChangedTiming(TestElement child) {
 		if (child.fExecutionStartTimeNanos == NO_TIME || child.fExecutionEndTimeNanos == NO_TIME)
 			return;

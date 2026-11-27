@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -64,7 +64,12 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationDelegate_verifying_attriburtes_description;
 
+	public static String SeparateVMsLaunch_starting_vm;
+
 	public static String TestRunSession_unrootedTests;
+
+	public static String TestRunSession_vmExitedDuringTest;
+	public static String TestRunSession_vmExited;
 
 	public static String TestSearchEngine_message_searching;
 
