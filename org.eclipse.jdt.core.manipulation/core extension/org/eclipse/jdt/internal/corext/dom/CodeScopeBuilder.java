@@ -30,7 +30,11 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 
-
+/**
+ * Builds a scope tree for code blocks, tracking variable declarations and their visibility.
+ * Used to analyze variable scoping and name conflicts in Java code.
+ *
+ */
 public class CodeScopeBuilder extends ASTVisitor {
 
 	public static class Scope {
