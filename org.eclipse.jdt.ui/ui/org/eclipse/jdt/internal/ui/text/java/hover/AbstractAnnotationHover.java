@@ -57,6 +57,7 @@ import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.ColorRegistry;
@@ -466,7 +467,15 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			IInformationControlCreator presenterCreator= new JavadocHover.PresenterControlCreator(null);
 			IInformationControl javaDocControl= presenterCreator.createInformationControl(shell);
 			if (javaDocControl instanceof BrowserInformationControl browserControl) {
-				JavadocBrowserInformationControlInput infoInput= new JavadocBrowserInformationControlInput(null, elementForProposal, javadocHtmlForProposal, 0);
+				StringBuilder buffer= new StringBuilder(javadocHtmlForProposal);
+				ColorRegistry registry= JFaceResources.getColorRegistry();
+				HTMLPrinter.insertPageProlog(buffer, 0,
+						registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"), //$NON-NLS-1$
+						registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"), //$NON-NLS-1$
+						JavadocHover.getStyleSheet(buffer)); // make getStyleSheet package-private
+				JavadocHover.insertHeadElements(buffer, JavadocContentAccess2.extractBaseURL(javadocHtmlForProposal));
+				HTMLPrinter.addPageEpilog(buffer);
+				JavadocBrowserInformationControlInput infoInput= new JavadocBrowserInformationControlInput(null, elementForProposal, buffer.toString(), 0);
 				browserControl.setInput(infoInput);
 			} else {
 				return;

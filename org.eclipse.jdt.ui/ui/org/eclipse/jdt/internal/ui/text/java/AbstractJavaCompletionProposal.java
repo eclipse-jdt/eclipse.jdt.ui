@@ -626,10 +626,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 						RGB fgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$
 						RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
 						HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, getCSSStyles());
-						if (base != null) {
-							int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-							buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
-						}
+						JavadocHover.insertHeadElements(buffer, base);
 						HTMLPrinter.addPageEpilog(buffer);
 						return new JavadocBrowserInformationControlInput(null, element, buffer.toString(), 0);
 					}

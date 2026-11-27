@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2012, 2026 Eclipse Foundation and others.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Distribution License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/org/documents/edl-v10.php
+
+  Contributors:
+     Igor Fedorenko - initial implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>eclipse.jdt.ui</artifactId>
+    <groupId>eclipse.jdt.ui</groupId>
+    <version>4.42.0-SNAPSHOT</version>
+  </parent>
+  <groupId>org.eclipse.jdt</groupId>
+  <artifactId>org.eclipse.jdt.core.manipulation</artifactId>
+  <version>1.26.0-SNAPSHOT</version>
+  <packaging>eclipse-plugin</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.googlecode.maven-download-plugin</groupId>
+        <artifactId>download-maven-plugin</artifactId>
+        <version>1.13.0</version>
+        <configuration>
+          <alwaysVerifyChecksum>true</alwaysVerifyChecksum>
+          <overwrite>true</overwrite>
+          <skipCache>false</skipCache>
+          <readTimeOut>10000</readTimeOut>
+        </configuration>
+        <executions>
+          <execution>
+            <id>fetch-highlight.min.js</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>https://unpkg.com/@highlightjs/cdn-assets@11.12.0/highlight.min.js</url>
+              <sha256>8ab71eb09c51f501e5e25157d9cff100e46cc29bcbfc744d0b746d451fca7f53</sha256>
+              <outputDirectory>resources/highlight.min.js</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fetch-highlight.styles.intellij-light.min.css</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>https://unpkg.com/@highlightjs/cdn-assets@11.12.0/styles/intellij-light.min.css</url>
+              <sha256>c6355ce31828b0a9e533cec46886910e0b5a490efc726fe0e2f00e0b786709dd</sha256>
+              <outputDirectory>resources/highlight.min.js/styles</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fetch-highlight.styles.vs2015.min.css</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>https://unpkg.com/@highlightjs/cdn-assets@11.12.0/styles/vs2015.min.css</url>
+              <sha256>3e2efbd7efa306bc2078755818e6b5b2337c89d5e5aeb612290548efe240e789</sha256>
+              <outputDirectory>resources/highlight.min.js/styles</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>resources/highlight.min.js</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -27,6 +27,7 @@ import java.net.URL;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Drawable;
@@ -34,12 +35,15 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IFile;
 
@@ -74,6 +78,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -112,6 +117,7 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
+import org.eclipse.jdt.core.manipulation.internal.javadoc.HighlightJsSupport;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -341,7 +347,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tbm);
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tbm) {
+					// Enable JavaScript for highlight.js syntax highlighting of fenced code blocks.
+					// Same pattern as lsp4e's FocusableBrowserInformationControl.
+					@Override
+					protected void createContent(Composite parent1) {
+						super.createContent(parent1);
+						((Browser) parent1.getChildren()[0]).setJavascriptEnabled(true);
+					}
+				};
 				iControl.setDisposeTimeout(getDisposeHoverTimeout());
 				final BackAction backAction= new BackAction(iControl);
 				backAction.setEnabled(false);
@@ -461,6 +475,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
 				iControl= new BrowserInformationControl(parent, font, tooltipAffordanceString) {
+					// Enable JavaScript for highlight.js syntax highlighting of fenced code blocks.
+					// Same pattern as lsp4e's FocusableBrowserInformationControl.
+					@Override
+					protected void createContent(Composite parent1) {
+						super.createContent(parent1);
+						((Browser) parent1.getChildren()[0]).setJavascriptEnabled(true);
+					}
 
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
@@ -839,15 +860,48 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
 
 			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, JavadocHover.getStyleSheet(buffer));
-			if (base != null) {
-				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			}
+			insertHeadElements(buffer, base);
 			HTMLPrinter.addPageEpilog(buffer);
 			return new JavadocHoverInformationControlInput(previousInput, element, buffer.toString(), leadingImageWidth, editorInputElement, hoverRegion);
 		}
 
 		return null;
+	}
+
+	/**
+	 * Inserts the highlight.js header, including its Content-Security-Policy, and an
+	 * optional <code>&lt;base&gt;</code> element into a page created with
+	 * {@link HTMLPrinter#insertPageProlog}. Every page shown in the JavaScript-enabled
+	 * Javadoc controls must go through this method.
+	 */
+	public static void insertHeadElements(StringBuilder buffer, String base) {
+		int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+		if (endHeadIdx < 0) {
+			throw new IllegalArgumentException("page has no </head>"); //$NON-NLS-1$
+		}
+		StringBuilder head= new StringBuilder();
+		head.append('\n').append(HighlightJsSupport.getHighlightJsHeader(isDarkTheme()));
+		if (base != null) {
+			head.append("\n<base href='" + base.replace("&", "&amp;").replace("'", "&#39;") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+ 						.replace("<", "&lt;").replace(">", "&gt;") + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		}
+		head.append('\n');
+		buffer.insert(endHeadIdx, head);
+	}
+
+	static boolean isDarkTheme() {
+		boolean isDark= false;
+		if (!PlatformUI.isWorkbenchRunning()) {
+			return false;
+		}
+		IEclipsePreferences themePreferences= InstanceScope.INSTANCE.getNode("org.eclipse.e4.ui.css.swt.theme"); //$NON-NLS-1$
+		if (themePreferences != null) {
+			String themeId= themePreferences.get("themeid", null); //$NON-NLS-1$
+			if (themeId != null) {
+				isDark= themePreferences.getBoolean("themeIsDark." + themeId, false); //$NON-NLS-1$
+			}
+		}
+		return isDark;
 	}
 
 	private static String getInfoText(IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion, boolean allowImage) {
@@ -1085,7 +1139,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @return the updated style sheet
 	 * @since 3.4
 	 */
-	private static String getStyleSheet(StringBuilder content) {
+	static String getStyleSheet(StringBuilder content) {
 		if (fgStyleSheet == null) {
 			fgStyleSheet= loadStyleSheet("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
 		}
