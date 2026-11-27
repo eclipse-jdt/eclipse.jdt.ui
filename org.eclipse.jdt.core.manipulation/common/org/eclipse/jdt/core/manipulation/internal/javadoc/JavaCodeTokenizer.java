@@ -14,9 +14,12 @@
 package org.eclipse.jdt.core.manipulation.internal.javadoc;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +54,15 @@ import java.util.Set;
  * </ul>
  */
 public class JavaCodeTokenizer {
+
+	/**
+	 * A structured code token with position, length, and CSS class information.
+	 *
+	 * @param offset the offset relative to the start of the code string
+	 * @param length the length of the token
+	 * @param cssClass the CSS class identifying the token category
+	 */
+	public record JavaCodeToken(int offset, int length, String cssClass) {}
 
 	private static final String CSS_CLASS_KEYWORD= "jc-keyword"; //$NON-NLS-1$
 	private static final String CSS_CLASS_KEYWORD_RETURN= "jc-keyword-return"; //$NON-NLS-1$
@@ -111,6 +123,7 @@ public class JavaCodeTokenizer {
 	private final String code;
 	private final int len;
 	private final StringBuilder result;
+	private final List<JavaCodeToken> tokens;
 	private int pos;
 	private int braceDepth;
 	private final Map<String, Deque<Integer>> parameterNames= new HashMap<>();
@@ -128,13 +141,43 @@ public class JavaCodeTokenizer {
 	private boolean seenFinal;
 
 	public static String tokenize(String code) {
-		return new JavaCodeTokenizer(code).doTokenize();
+		return new JavaCodeTokenizer(code, false).doTokenize();
 	}
 
-	private JavaCodeTokenizer(String code) {
+	/**
+	 * Tokenizes the given Java source code and returns structured token data.
+	 *
+	 * @param code the Java source code to tokenize
+	 * @return list of tokens with offsets relative to the start of {@code code}
+	 */
+	public static List<JavaCodeToken> tokenizeToTokens(String code) {
+		JavaCodeTokenizer tokenizer= new JavaCodeTokenizer(code, true);
+		tokenizer.doTokenize();
+		return tokenizer.fillGapsWithDefaults();
+	}
+
+	private List<JavaCodeToken> fillGapsWithDefaults() {
+		tokens.sort(Comparator.comparingInt(JavaCodeToken::offset));
+		List<JavaCodeToken> filled= new ArrayList<>(tokens.size() * 2);
+		int lastEnd= 0;
+		for (JavaCodeToken t : tokens) {
+			if (t.offset() > lastEnd) {
+				filled.add(new JavaCodeToken(lastEnd, t.offset() - lastEnd, null));
+			}
+			filled.add(t);
+			lastEnd= t.offset() + t.length();
+		}
+		if (lastEnd < len) {
+			filled.add(new JavaCodeToken(lastEnd, len - lastEnd, null));
+		}
+		return filled;
+	}
+
+	private JavaCodeTokenizer(String code, boolean collectTokens) {
 		this.code= code;
 		this.len= code.length();
-		this.result= new StringBuilder(len * 2);
+		this.result= new StringBuilder(collectTokens ? 0 : len * 2);
+		this.tokens= collectTokens ? new ArrayList<>() : null;
 	}
 
 	private String doTokenize() {
@@ -271,7 +314,7 @@ public class JavaCodeTokenizer {
 		while (pos < len && code.charAt(pos) != '\n' && code.charAt(pos) != '\r') {
 			pos++;
 		}
-		appendSpan(CSS_CLASS_COMMENT, code.substring(start, pos));
+		appendSpan(start, CSS_CLASS_COMMENT, code.substring(start, pos));
 	}
 
 	private void consumeMultiLineComment() {
@@ -289,7 +332,7 @@ public class JavaCodeTokenizer {
 		if (!terminated) {
 			pos= len;
 		}
-		appendSpan(CSS_CLASS_COMMENT, code.substring(start, pos));
+		appendSpan(start, CSS_CLASS_COMMENT, code.substring(start, pos));
 	}
 
 	private void consumeStringLiteral() {
@@ -314,7 +357,7 @@ public class JavaCodeTokenizer {
 			}
 			pos++;
 		}
-		appendSpan(CSS_CLASS_STRING, code.substring(start, pos));
+		appendSpan(start, CSS_CLASS_STRING, code.substring(start, pos));
 	}
 
 	private void consumeTextBlock() {
@@ -323,7 +366,7 @@ public class JavaCodeTokenizer {
 		while (pos + 2 < len) {
 			if (code.charAt(pos) == '"' && code.charAt(pos + 1) == '"' && code.charAt(pos + 2) == '"') {
 				pos += 3;
-				appendSpan(CSS_CLASS_STRING, code.substring(start, pos));
+				appendSpan(start, CSS_CLASS_STRING, code.substring(start, pos));
 				return;
 			}
 			if (code.charAt(pos) == '\\' && pos + 1 < len) {
@@ -333,7 +376,7 @@ public class JavaCodeTokenizer {
 			}
 		}
 		pos= len;
-		appendSpan(CSS_CLASS_STRING, code.substring(start, pos));
+		appendSpan(start, CSS_CLASS_STRING, code.substring(start, pos));
 	}
 
 	private void consumeCharLiteral() {
@@ -354,7 +397,7 @@ public class JavaCodeTokenizer {
 			}
 			pos++;
 		}
-		appendSpan(CSS_CLASS_STRING, code.substring(start, pos));
+		appendSpan(start, CSS_CLASS_STRING, code.substring(start, pos));
 	}
 
 	private void consumeAnnotation() {
@@ -363,7 +406,7 @@ public class JavaCodeTokenizer {
 		while (pos < len && Character.isJavaIdentifierPart(code.charAt(pos))) {
 			pos++;
 		}
-		appendSpan(CSS_CLASS_ANNOTATION, code.substring(start, pos));
+		appendSpan(start, CSS_CLASS_ANNOTATION, code.substring(start, pos));
 	}
 
 	private void consumeNumber() {
@@ -405,7 +448,7 @@ public class JavaCodeTokenizer {
 				pos++;
 			}
 		}
-		appendSpan(CSS_CLASS_NUMBER, code.substring(start, pos));
+		appendSpan(start, CSS_CLASS_NUMBER, code.substring(start, pos));
 	}
 
 	private void consumeDecimalDigits() {
@@ -433,7 +476,7 @@ public class JavaCodeTokenizer {
 		String word= code.substring(start, pos);
 
 		if (KEYWORDS.contains(word)) {
-			appendSpan("return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
+			appendSpan(start, "return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
 			if (TYPE_DECLARING_KEYWORDS.contains(word)) {
 				if (!isPrecededByDot(start)) {
 					expectTypeBody= true;
@@ -453,31 +496,31 @@ public class JavaCodeTokenizer {
 			}
 		} else if (Character.isUpperCase(word.charAt(0))) {
 			if (expectEnumName) {
-				appendSpan(CSS_CLASS_ENUM, word);
+				appendSpan(start, CSS_CLASS_ENUM, word);
 				enumTypes.add(word);
 				expectEnumName= false;
 			} else if (currentContext() == Context.ENUM_CONSTANTS && looksLikeEnumConstant()) {
-				appendSpan(CSS_CLASS_STATIC_FINAL_FIELD, word);
+				appendSpan(start, CSS_CLASS_STATIC_FINAL_FIELD, word);
 				addBinding(staticFinalFields, word, braceDepth);
 			} else {
 				String fieldCssClass= getFieldCssClass(word);
 				if (fieldCssClass != null && !looksLikeTypeUsage()) {
-					appendSpan(fieldCssClass, word);
+					appendSpan(start, fieldCssClass, word);
 				} else if (enumTypes.contains(word)) {
-					appendSpan(CSS_CLASS_ENUM, word);
+					appendSpan(start, CSS_CLASS_ENUM, word);
 					consumeOptionalGenerics();
 					consumeOptionalArrayBrackets();
 					tryConsumeEnumConstantAccess();
 					tryConsumeDeclarationAfterType();
 				} else {
-					appendSpan(CSS_CLASS_TYPE, word);
+					appendSpan(start, CSS_CLASS_TYPE, word);
 					consumeOptionalGenerics();
 					consumeOptionalArrayBrackets();
 					tryConsumeDeclarationAfterType();
 				}
 			}
 		} else {
-			classifyLowercaseIdentifier(word, qualified);
+			classifyLowercaseIdentifier(word, start, qualified);
 		}
 	}
 
@@ -574,27 +617,27 @@ public class JavaCodeTokenizer {
 			return;
 		}
 		appendEscapedRange(pos, nameStart);
-		appendSpan(CSS_CLASS_STATIC_FINAL_FIELD, name);
+		appendSpan(nameStart, CSS_CLASS_STATIC_FINAL_FIELD, name);
 		pos= nameEnd;
 	}
 
-	private void classifyLowercaseIdentifier(String word, boolean qualified) {
+	private void classifyLowercaseIdentifier(String word, int wordStart, boolean qualified) {
 		int probe= pos;
 		while (probe < len && (code.charAt(probe) == ' ' || code.charAt(probe) == '\t')) {
 			probe++;
 		}
 		if (probe < len && code.charAt(probe) == '(') {
-			appendSpan(CSS_CLASS_METHOD, word);
+			appendSpan(wordStart, CSS_CLASS_METHOD, word);
 		} else if (!qualified && hasBinding(parameterNames, word)) {
-			appendSpan(CSS_CLASS_PARAM, word);
+			appendSpan(wordStart, CSS_CLASS_PARAM, word);
 		} else if (!qualified && hasBinding(localVariables, word)) {
-			appendSpan(CSS_CLASS_LOCAL_VAR, word);
+			appendSpan(wordStart, CSS_CLASS_LOCAL_VAR, word);
 		} else if (hasBinding(staticFinalFields, word)) {
-			appendSpan(CSS_CLASS_STATIC_FINAL_FIELD, word);
+			appendSpan(wordStart, CSS_CLASS_STATIC_FINAL_FIELD, word);
 		} else if (hasBinding(staticFields, word)) {
-			appendSpan(CSS_CLASS_STATIC_FIELD, word);
+			appendSpan(wordStart, CSS_CLASS_STATIC_FIELD, word);
 		} else if (hasBinding(fields, word)) {
-			appendSpan(CSS_CLASS_FIELD, word);
+			appendSpan(wordStart, CSS_CLASS_FIELD, word);
 		} else {
 			appendEscapedText(word);
 		}
@@ -626,9 +669,9 @@ public class JavaCodeTokenizer {
 				}
 				String word= code.substring(wordStart, pos);
 				if (KEYWORDS.contains(word)) {
-					appendSpan("return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
+					appendSpan(wordStart, "return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
 				} else if (Character.isUpperCase(word.charAt(0))) {
-					appendSpan(CSS_CLASS_TYPE_ARG, word);
+					appendSpan(wordStart, CSS_CLASS_TYPE_ARG, word);
 					consumeOptionalGenerics();
 				} else {
 					appendEscapedText(word);
@@ -699,7 +742,7 @@ public class JavaCodeTokenizer {
 		char nextChar= code.charAt(afterName);
 		if (nextChar == '(') {
 			appendEscapedRange(pos, nameStart);
-			appendSpan(CSS_CLASS_METHOD_DECL, name);
+			appendSpan(nameStart, CSS_CLASS_METHOD_DECL, name);
 			appendEscapedRange(nameEnd, afterName);
 			pos= afterName;
 			consumeMethodParameters();
@@ -710,17 +753,17 @@ public class JavaCodeTokenizer {
 			appendEscapedRange(pos, nameStart);
 			if (inTypeBody) {
 				if (seenStatic && seenFinal) {
-					appendSpan(CSS_CLASS_STATIC_FINAL_FIELD, name);
+					appendSpan(nameStart, CSS_CLASS_STATIC_FINAL_FIELD, name);
 					addBinding(staticFinalFields, name, braceDepth);
 				} else if (seenStatic) {
-					appendSpan(CSS_CLASS_STATIC_FIELD, name);
+					appendSpan(nameStart, CSS_CLASS_STATIC_FIELD, name);
 					addBinding(staticFields, name, braceDepth);
 				} else {
-					appendSpan(CSS_CLASS_FIELD, name);
+					appendSpan(nameStart, CSS_CLASS_FIELD, name);
 					addBinding(fields, name, braceDepth);
 				}
 			} else {
-				appendSpan(CSS_CLASS_LOCAL_VAR_DECL, name);
+				appendSpan(nameStart, CSS_CLASS_LOCAL_VAR_DECL, name);
 				addBinding(localVariables, name, braceDepth);
 			}
 			clearModifiers();
@@ -768,14 +811,14 @@ public class JavaCodeTokenizer {
 				String word= code.substring(start, pos);
 
 				if (KEYWORDS.contains(word)) {
-					appendSpan("return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
+					appendSpan(start, "return".equals(word) ? CSS_CLASS_KEYWORD_RETURN : CSS_CLASS_KEYWORD, word); //$NON-NLS-1$
 					if (TYPE_KEYWORDS.contains(word)) {
 						consumeOptionalArrayBrackets();
 						consumeOptionalVarargs();
 						tryConsumeParamName();
 					}
 				} else if (Character.isUpperCase(word.charAt(0))) {
-					appendSpan(enumTypes.contains(word) ? CSS_CLASS_ENUM : CSS_CLASS_TYPE, word);
+					appendSpan(start, enumTypes.contains(word) ? CSS_CLASS_ENUM : CSS_CLASS_TYPE, word);
 					consumeOptionalGenerics();
 					consumeOptionalArrayBrackets();
 					consumeOptionalVarargs();
@@ -823,14 +866,18 @@ public class JavaCodeTokenizer {
 			return;
 		}
 		appendEscapedRange(pos, nameStart);
-		appendSpan(CSS_CLASS_PARAM, name);
+		appendSpan(nameStart, CSS_CLASS_PARAM, name);
 		pendingParameters.put(name, braceDepth + 1);
 		pos= nameEnd;
 	}
 
 	// ---- HTML output helpers ----
 
-	private void appendSpan(String cssClass, String text) {
+	private void appendSpan(int srcOffset, String cssClass, String text) {
+		if (tokens != null) {
+			tokens.add(new JavaCodeToken(srcOffset, text.length(), cssClass));
+			return;
+		}
 		result.append("<span class=\""); //$NON-NLS-1$
 		result.append(cssClass);
 		result.append("\">"); //$NON-NLS-1$
