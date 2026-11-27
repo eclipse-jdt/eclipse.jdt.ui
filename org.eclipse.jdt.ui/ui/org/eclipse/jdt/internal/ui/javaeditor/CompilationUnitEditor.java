@@ -1271,6 +1271,18 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#editorSaved()
+	 */
+	@Override
+	protected void editorSaved() {
+		if (getSite().getPage() == null) {
+			// The editor was closed while saving, e.g. by an event dispatched by a save participant
+			return;
+		}
+		super.editorSaved();
+	}
+
+	/*
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
 	@Override

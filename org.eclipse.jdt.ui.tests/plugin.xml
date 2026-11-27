@@ -177,6 +177,18 @@
    </extension>
 
    <extension
+         point="org.eclipse.jdt.ui.cleanUps">
+      <cleanUp
+            class="org.eclipse.jdt.ui.tests.quickfix.PausingCleanUp"
+            id="org.eclipse.jdt.ui.tests.cleanup.pausing">
+      </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.ui.tests.quickfix.PausingCleanUp"
+            id="org.eclipse.jdt.ui.tests.cleanup.pausing2">
+      </cleanUp>
+   </extension>
+
+   <extension
       point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
             class="org.eclipse.jdt.ui.examples.MyClasspathContainerInitializer"

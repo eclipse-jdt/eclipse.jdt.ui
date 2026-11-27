@@ -14,9 +14,19 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -26,17 +36,52 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.operations.IAdvancedUndoableOperation;
+import org.eclipse.core.commands.operations.IUndoableOperation;
+import org.eclipse.core.commands.operations.OperationHistoryFactory;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.ILogListener;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.ProgressIndicator;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.internal.text.reconciler.ReconcilerJobFamilies;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.CopyOnWriteTextStore;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.quickdiff.LastSaveReferenceProvider;
 import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
+import org.eclipse.ui.part.FileEditorInput;
+
+import org.eclipse.ui.texteditor.IDocumentProvider;
+
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -49,16 +94,20 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.util.TestUtils;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 @RunWith(Parameterized.class)
+@SuppressWarnings("restriction")
 public class SaveParticipantTest extends CleanUpTestCase {
 	@Parameters(name= "{0}")
 	public static Object[][] retry() {
@@ -88,9 +137,18 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		return projectSetup.getDefaultClasspath();
 	}
 
+	// Same as the ID of the slow clean ups warning dialog of CleanUpPostSaveListener
+	private static final String SLOW_WARNING_DIALOG_ID= "SaveActions.slowWarningDialog"; //$NON-NLS-1$
+
+	private boolean slowWarningDialogWasEnabled;
+
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+
+		// A slow clean up (e.g. while waiting for the progress dialog to open) must not block the tests with a modal dialog
+		slowWarningDialogWasEnabled= OptionalMessageDialog.isDialogEnabled(SLOW_WARNING_DIALOG_ID);
+		OptionalMessageDialog.setDialogEnabled(SLOW_WARNING_DIALOG_ID, false);
 
 		IEclipsePreferences node= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
 		node.putBoolean("editor_save_participant_" + CleanUpPostSaveListener.POSTSAVELISTENER_ID, true);
@@ -100,11 +158,11 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 	@Override
 	public void tearDown() throws Exception {
+		OptionalMessageDialog.setDialogEnabled(SLOW_WARNING_DIALOG_ID, slowWarningDialogWasEnabled);
 		super.tearDown();
 		TestUtils.waitForEditorJobs(60_000L, true);
 	}
 
-	@SuppressWarnings("restriction")
 	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws Exception {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
 		Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
@@ -114,6 +172,49 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		cu.getBuffer().setContents(newContent);
 		editor.doSave(null);
+	}
+
+	/**
+	 * Sets the given content and saves the compilation unit through the Java document provider from a
+	 * thread other than the UI thread, without opening an editor.
+	 */
+	private static void saveCUInBackgroundThread(ICompilationUnit cu, String newContent) throws Exception {
+		IDocumentProvider provider= JavaUI.getDocumentProvider();
+		IEditorInput input= new FileEditorInput((IFile) cu.getResource());
+		provider.connect(input);
+		try {
+			IDocument document= provider.getDocument(input);
+			document.set(newContent);
+
+			CompletableFuture<Void> save= CompletableFuture.runAsync(() -> {
+				try {
+					provider.saveDocument(new NullProgressMonitor(), input, document, true);
+				} catch (CoreException e) {
+					throw new CompletionException(e);
+				}
+			});
+
+			// Keep the UI thread responsive in case the save needs it
+			Display display= Display.getCurrent();
+			while (!save.isDone()) {
+				if (!display.readAndDispatch()) {
+					Thread.sleep(10);
+				}
+			}
+			save.join();
+		} finally {
+			provider.disconnect(input);
+		}
+	}
+
+	/**
+	 * Returns whether the last save actions can be undone, without undoing them.
+	 */
+	private static IStatus computeUndoableStatusOfSaveActions() throws ExecutionException {
+		IUndoableOperation operation= OperationHistoryFactory.getOperationHistory().getUndoOperation(PlatformUI.getWorkbench().getOperationSupport().getUndoContext());
+		assertNotNull(operation);
+		assertEquals(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName, operation.getLabel());
+		return ((IAdvancedUndoableOperation) operation).computeUndoableStatus(new NullProgressMonitor());
 	}
 
 	@Test
@@ -1277,6 +1378,828 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		editCUInEditor(cu1, fileOnEditor);
 
 		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
+	}
+
+	@Test
+	public void testSaveInBackgroundThread() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				import java.util.ArrayList;
+				import java.util.List;
+
+				public class E1 {
+				    private void m1() {
+				    }
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				import java.util.ArrayList;
+				import java.util.List;
+
+				public class E1 {
+				    private void m1() {
+				        List<String> myList = new ArrayList<String>();
+				    }
+				}
+				"""; //
+
+		String expected1= """
+				package test1;
+				import java.util.ArrayList;
+				import java.util.List;
+
+				public class E1 {
+				    private void m1() {
+				        List<String> myList = new ArrayList<>();
+				    }
+				}
+				"""; //
+
+		// This clean up requires an AST
+		enable(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS);
+
+		// When
+		saveCUInBackgroundThread(cu1, fileOnEditor);
+
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
+	}
+
+	@Test
+	public void testEditDocumentWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int toReplace;
+				}
+				"""; //
+
+		String edit= "// edited while saving\n";
+
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+
+			// The document is edited (e.g. by a syncExec() of another thread) after the clean up calculated its offsets
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.arm("toReplace", "replaced", () -> {
+				try {
+					document.replace(0, 0, edit);
+				} catch (BadLocationException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+
+			// When
+			editor.doSave(null);
+
+			// Then: the outdated clean up is not applied
+			assertEquals(edit + fileOnEditor, document.get());
+		} finally {
+			PausingCleanUp.disarm();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testShortenDocumentWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int toReplace;
+				}
+				"""; //
+
+		String afterEdit= """
+				package test1;
+				"""; //
+
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+
+			// The text at the offsets of the clean up is deleted, so reading it fails
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.arm("toReplace", "replaced", () -> document.set(afterEdit));
+
+			// When
+			editor.doSave(null);
+
+			// Then: the edit is not reverted
+			assertEquals(afterEdit, document.get());
+		} finally {
+			PausingCleanUp.disarm();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testRestoreModificationStampWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int toReplace;
+				}
+				"""; //
+
+		String edit= "// edited while saving\n";
+
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+
+			// Like an undo followed by a redo, the edits restore both the text and the modification stamp
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			IDocumentExtension4 documentExtension= (IDocumentExtension4) document;
+			PausingCleanUp.arm("toReplace", "replaced", () -> {
+				try {
+					long stamp= documentExtension.getModificationStamp();
+					document.replace(0, 0, edit);
+					documentExtension.replace(0, edit.length(), "", stamp);
+				} catch (BadLocationException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+
+			// When
+			editor.doSave(null);
+
+			// Then: the clean up is not applied although the document looks unchanged
+			assertEquals(fileOnEditor, document.get());
+		} finally {
+			PausingCleanUp.disarm();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testUserInputIsBlockedWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int toReplace;
+				}
+				"""; //
+
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+
+			// While the calculation is paused, check whether the user could still interact with the workbench window.
+			// Either the window is disabled, or (after 800 ms) it is enabled again right before the modal progress dialog opens.
+			Shell windowShell= editor.getSite().getShell();
+			AtomicBoolean inputBlocked= new AtomicBoolean();
+			PausingCleanUp.arm("toReplace", "replaced", () -> {
+				boolean progressDialogOpen= Arrays.stream(windowShell.getDisplay().getShells())
+						.anyMatch(shell -> shell.getData() instanceof ProgressMonitorDialog && shell.isVisible());
+				inputBlocked.set(!windowShell.isEnabled() || progressDialogOpen);
+			});
+
+			// When
+			editor.doSave(null);
+
+			// Then: the user input was blocked during the calculation and the window is enabled again afterwards
+			assertTrue(inputBlocked.get());
+			assertTrue(windowShell.isEnabled());
+		} finally {
+			PausingCleanUp.disarm();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testCloseEditorWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int toReplace;
+				}
+				"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		AtomicBoolean closed= new AtomicBoolean();
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			// The editor is closed (programmatically) while the clean ups are calculated
+			PausingCleanUp.arm("toReplace", "replaced", () -> closed.set(editor.getSite().getPage().closeEditor(editor, false)));
+
+			// When
+			editor.doSave(null);
+
+			// Then: the file is saved, the clean up is not applied to the closed document and nothing is registered for undo
+			assertTrue(closed.get());
+			assertEquals(fileOnEditor, cu1.getSource());
+			assertFalse(undoManager.anythingToUndo());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			if (!closed.get()) {
+				editor.close(false);
+			}
+		}
+	}
+
+	@Test
+	public void testCloseEditorWhileCalculatingChangesOfSecondPass() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int first;
+				    int second;
+				}
+				"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		AtomicBoolean closed= new AtomicBoolean();
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			// The editor is closed (programmatically) while the clean ups of the second pass are calculated
+			PausingCleanUp.armInSeparatePasses(
+					new PausingCleanUp.Replacement("first", "replacedInFirstPass", null),
+					new PausingCleanUp.Replacement("second", "replacedInSecondPass", () -> closed.set(editor.getSite().getPage().closeEditor(editor, false))));
+
+			// When
+			editor.doSave(null);
+
+			// Then: the changes of the first pass were not saved, so nothing is registered for undo
+			assertTrue(closed.get());
+			assertEquals(fileOnEditor, cu1.getSource());
+			assertFalse(undoManager.anythingToUndo());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			if (!closed.get()) {
+				editor.close(false);
+			}
+		}
+	}
+
+	@Test
+	public void testProgressStaysIndeterminateWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int toReplace;
+				}
+				"""; //
+
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+
+			// The AST is parsed, and the progress bar is checked while the changes are calculated
+			AtomicReference<Boolean> indeterminate= new AtomicReference<>();
+			PausingCleanUp.armInSeparatePasses(new PausingCleanUp.Replacement("toReplace", "replaced", () -> {
+				for (Shell shell : Display.getCurrent().getShells()) {
+					ProgressIndicator indicator= shell.getData() instanceof ProgressMonitorDialog ? findProgressIndicator(shell) : null;
+					if (indicator != null) {
+						Control shown= ((StackLayout) indicator.getLayout()).topControl;
+						indeterminate.set(shown instanceof ProgressBar bar && (bar.getStyle() & SWT.INDETERMINATE) != 0);
+					}
+				}
+			}));
+			PausingCleanUp.forceParsingAst();
+
+			// When
+			editor.doSave(null);
+
+			// Then: the progress of unknown duration was not replaced by a determinate one when parsing the AST
+			assertEquals("No progress dialog found, or its progress is not indeterminate", Boolean.TRUE, indeterminate.get());
+		} finally {
+			PausingCleanUp.disarm();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testCancelWhileCalculatingChanges() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int toReplace;
+				}
+				"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			AtomicBoolean cancelPressed= new AtomicBoolean();
+			PausingCleanUp.arm("toReplace", "replaced", () -> pressCancelInProgressDialog(cancelPressed));
+
+			// When
+			List<IStatus> errors= saveAndCollectErrors(editor);
+
+			// Then: the calculation is finished but its result is dropped, and the file is saved as it was
+			assertTrue("Save action reported as failed: " + errors, errors.isEmpty());
+			assertTrue("Cancel was not pressed", cancelPressed.get());
+			assertEquals(fileOnEditor, document.get());
+			assertFalse(editor.isDirty());
+			assertEquals(fileOnEditor, ((IFile) cu1.getResource()).readString());
+			assertFalse(undoManager.anythingToUndo());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testCancelWhileCalculatingChangesOfSecondPass() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int first;
+				    int second;
+				}
+				"""; //
+
+		String expected= """
+				package test1;
+				public class E1 {
+				    int replacedInFirstPass;
+				    int second;
+				}
+				"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			AtomicBoolean cancelPressed= new AtomicBoolean();
+			PausingCleanUp.armInSeparatePasses(
+					new PausingCleanUp.Replacement("first", "replacedInFirstPass", null),
+					new PausingCleanUp.Replacement("second", "replacedInSecondPass", () -> pressCancelInProgressDialog(cancelPressed)));
+
+			// When
+			List<IStatus> errors= saveAndCollectErrors(editor);
+
+			// Then: the first pass is kept, the canceled second pass is not applied, and the file is saved
+			assertTrue("Save action reported as failed: " + errors, errors.isEmpty());
+			assertTrue("Cancel was not pressed", cancelPressed.get());
+			assertEquals(expected, document.get());
+			assertFalse(editor.isDirty());
+
+			// Then: the first pass can be undone
+			assertTrue(computeUndoableStatusOfSaveActions().isOK());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testCancelBeforeCreatingAst() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int toReplace;
+				}
+				"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			// The cancellation is requested before the AST is parsed, so the monitor is canceled while parsing
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			AtomicBoolean cancelPressed= new AtomicBoolean();
+			PausingCleanUp.armInSeparatePasses(new PausingCleanUp.Replacement("toReplace", "replaced", null));
+			PausingCleanUp.forceParsingAst();
+			PausingCleanUp.armOnRequirementsInBackground(() -> pressCancelInProgressDialog(cancelPressed));
+
+			// When
+			List<IStatus> errors= saveAndCollectErrors(editor);
+
+			// Then: nothing is applied and the save is not reported as failed
+			assertTrue("Save action reported as failed: " + errors, errors.isEmpty());
+			assertTrue("Cancel was not pressed", cancelPressed.get());
+			assertEquals("The calculation was not canceled before calculating the changes", 1, PausingCleanUp.pendingReplacements());
+			assertEquals(fileOnEditor, document.get());
+			assertFalse(editor.isDirty());
+			assertFalse(undoManager.anythingToUndo());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			editor.close(false);
+		}
+	}
+
+	/**
+	 * Saves the editor and returns the errors that were logged by the Java UI plug-in meanwhile, e.g.
+	 * when a save participant failed.
+	 */
+	private static List<IStatus> saveAndCollectErrors(JavaEditor editor) {
+		List<IStatus> errors= new CopyOnWriteArrayList<>();
+		ILog log= JavaPlugin.getDefault().getLog();
+		ILogListener listener= (status, _) -> {
+			if (status.matches(IStatus.ERROR) && JavaUI.ID_PLUGIN.equals(status.getPlugin())) {
+				errors.add(status);
+			}
+		};
+		log.addLogListener(listener);
+		try {
+			editor.doSave(null);
+		} finally {
+			log.removeLogListener(listener);
+		}
+		return errors;
+	}
+
+	/**
+	 * Waits in the UI thread until the modal progress dialog is open and presses its enabled Cancel
+	 * button. Doesn't assert anything, since failures in the UI thread would be swallowed: tests check
+	 * the given flag afterwards.
+	 *
+	 * @param cancelPressed set when the Cancel button was pressed
+	 */
+	private static void pressCancelInProgressDialog(AtomicBoolean cancelPressed) {
+		Display display= Display.getCurrent();
+		long deadline= System.currentTimeMillis() + 10_000;
+		while (System.currentTimeMillis() < deadline) {
+			for (Shell shell : display.getShells()) {
+				if (shell.getData() instanceof ProgressMonitorDialog && shell.isVisible()) {
+					Button cancel= findButton(shell, IDialogConstants.CANCEL_LABEL);
+					if (cancel != null && cancel.isEnabled()) {
+						cancelPressed.set(true);
+						cancel.notifyListeners(SWT.Selection, new Event());
+					}
+					return;
+				}
+			}
+			if (!display.readAndDispatch()) {
+				// Wake up regularly to check the deadline
+				display.timerExec(50, () -> {
+				});
+				display.sleep();
+			}
+		}
+	}
+
+	private static Button findButton(Control control, String text) {
+		if (control instanceof Button button && text.equals(button.getText())) {
+			return button;
+		}
+		if (control instanceof Composite composite) {
+			for (Control child : composite.getChildren()) {
+				Button found= findButton(child, text);
+				if (found != null) {
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
+	private static ProgressIndicator findProgressIndicator(Control control) {
+		if (control instanceof ProgressIndicator indicator) {
+			return indicator;
+		}
+		if (control instanceof Composite composite) {
+			for (Control child : composite.getChildren()) {
+				ProgressIndicator found= findProgressIndicator(child);
+				if (found != null) {
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
+	@Test
+	public void testEditDocumentWhileCalculatingNoChangeOfFirstPass() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int second;
+				}
+				"""; //
+
+		String edit= "// edited while saving\n";
+
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+
+			// The first pass finds nothing to change and defers the second clean up to the next pass, the document is
+			// edited while the first pass is calculated
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.armInSeparatePasses(
+					new PausingCleanUp.Replacement("notThere", "unused", () -> {
+						try {
+							document.replace(0, 0, edit);
+						} catch (BadLocationException e) {
+							throw new IllegalStateException(e);
+						}
+					}),
+					new PausingCleanUp.Replacement("second", "replacedInSecondPass", null));
+
+			// When
+			editor.doSave(null);
+
+			// Then: the clean ups deferred while the document was outdated are not run
+			assertEquals(edit + fileOnEditor, document.get());
+		} finally {
+			PausingCleanUp.disarm();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testEditDocumentWhileCalculatingChangesOfSecondPass() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int first;
+				    int second;
+				}
+				"""; //
+
+		String edit= "// edited while saving\n";
+
+		String expected= edit + """
+				package test1;
+				public class E1 {
+				    int replacedInFirstPass;
+				    int second;
+				}
+				"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			// The document is edited after the second pass calculated its offsets
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.armInSeparatePasses(
+					new PausingCleanUp.Replacement("first", "replacedInFirstPass", null),
+					new PausingCleanUp.Replacement("second", "replacedInSecondPass", () -> {
+						try {
+							document.replace(0, 0, edit);
+						} catch (BadLocationException e) {
+							throw new IllegalStateException(e);
+						}
+					}));
+
+			// When
+			editor.doSave(null);
+
+			// Then: the first pass is kept, the outdated second pass is not applied
+			assertEquals(expected, document.get());
+
+			// Then: the first pass is registered for undo, but undoing it is rejected since its undo edits are outdated
+			assertEquals(IStatus.ERROR, computeUndoableStatusOfSaveActions().getSeverity());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			editor.close(false);
+		}
+	}
+
+	@Test
+	public void testUndoSeveralPasses() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+				package test1;
+				public class E1 {
+				}
+				"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+				package test1;
+				public class E1 {
+				    int first;
+				    int second;
+				}
+				"""; //
+
+		String expected= """
+				package test1;
+				public class E1 {
+				    int replacedInFirstPass;
+				    int replacedInSecondPass;
+				}
+				"""; //
+
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		try {
+			Job.getJobManager().join(ReconcilerJobFamilies.FAMILY_RECONCILER, null);
+			Job.getJobManager().join(DocumentLineDiffer.QUICKDIFF_INITIALIZE_FAMILY, null);
+			Job.getJobManager().join(LastSaveReferenceProvider.JOB_FAMILY, null);
+			TestUtils.cancelDecorationJob();
+			cu1.getBuffer().setContents(fileOnEditor);
+			undoManager.flush();
+
+			IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+			PausingCleanUp.armInSeparatePasses(
+					new PausingCleanUp.Replacement("first", "replacedInFirstPass", null),
+					new PausingCleanUp.Replacement("second", "replacedInSecondPass", null));
+
+			// When
+			editor.doSave(null);
+
+			// Then
+			assertEquals(expected, document.get());
+			assertTrue(computeUndoableStatusOfSaveActions().isOK());
+		} finally {
+			PausingCleanUp.disarm();
+			undoManager.flush();
+			editor.close(false);
+		}
 	}
 
 	@Test
