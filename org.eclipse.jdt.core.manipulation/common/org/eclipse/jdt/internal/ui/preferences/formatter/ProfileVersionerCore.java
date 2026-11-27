@@ -115,6 +115,16 @@ public class ProfileVersionerCore {
 		    if (oldSettings.containsKey(JavaCore.JAVA_FORMATTER)) {
 		    	newSettings.put(JavaCore.JAVA_FORMATTER, oldSettings.get(JavaCore.JAVA_FORMATTER));
 		    }
+		    // copy over compliance level
+			if (oldSettings.containsKey(JavaCore.COMPILER_COMPLIANCE)) {
+				newSettings.put(JavaCore.COMPILER_COMPLIANCE, oldSettings.get(JavaCore.COMPILER_COMPLIANCE));
+			}
+			if (oldSettings.containsKey(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM)) {
+				newSettings.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, oldSettings.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM));
+			}
+			if (oldSettings.containsKey(JavaCore.COMPILER_SOURCE)) {
+				newSettings.put(JavaCore.COMPILER_SOURCE, oldSettings.get(JavaCore.COMPILER_SOURCE));
+			}
 		}
 		return newSettings;
 	}
