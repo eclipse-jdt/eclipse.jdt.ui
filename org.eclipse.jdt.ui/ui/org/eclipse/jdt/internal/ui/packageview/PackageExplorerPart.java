@@ -250,12 +250,20 @@ public class PackageExplorerPart extends ViewPart
 
 
 	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
+		/**
+		 * Number of levels to automatically expand when an element only has a single
+		 * child.
+		 *
+		 * @see AbstractTreeViewer#setAutoExpandOnSingleChildLevels(int)
+		 */
+		private static final int AUTO_EXPAND_ON_SINGLE_CHILD_LEVELS= 10;
 		// fix for 64372  Projects showing up in Package Explorer twice [package explorer]
 		private final List<Object> fPendingRefreshes;
 
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
 			fPendingRefreshes= Collections.synchronizedList(new ArrayList<>());
+			setAutoExpandOnSingleChildLevels(AUTO_EXPAND_ON_SINGLE_CHILD_LEVELS);
 		}
 		@Override
 		public void add(Object parentElement, Object... childElements) {
