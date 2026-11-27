@@ -16,12 +16,18 @@ package org.eclipse.jdt.internal.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.UIJob;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -45,7 +51,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 
 	}
 
-	private ListenerList<ILabelProviderListener> fListeners;
+	private volatile ListenerList<ILabelProviderListener> fListeners;
 	private IElementChangedListener fChangeListener;
 
 	@Override
@@ -94,10 +100,39 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 		}
 	}
 
-	private void fireChange(IJavaElement[] elements) {
-		if (fListeners != null && !fListeners.isEmpty()) {
-			LabelProviderChangedEvent event= new LabelProviderChangedEvent(this, elements);
-			for (ILabelProviderListener listener : fListeners) {
+	protected void fireChange(IJavaElement[] elements) {
+		fireChange(new LabelProviderChangedEvent(this, elements));
+	}
+
+	/**
+	 * Requests an update of all labels, notifying the listeners on the UI thread.
+	 */
+	protected void fireChange() {
+		if (!PlatformUI.isWorkbenchRunning()) {
+			return;
+		}
+		LabelProviderChangedEvent event= new LabelProviderChangedEvent(this);
+		// DecoratorManager hands element-less events straight to the viewers on the calling thread
+		if (PlatformUI.getWorkbench().getDisplay().getThread() == Thread.currentThread()) {
+			fireChange(event);
+			return;
+		}
+		UIJob job= new UIJob("Java label decoration update") { //$NON-NLS-1$
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				fireChange(event);
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		job.schedule();
+	}
+
+	private void fireChange(LabelProviderChangedEvent event) {
+		// snapshot: a background job may fire while dispose() clears the field
+		ListenerList<ILabelProviderListener> listeners= fListeners;
+		if (listeners != null) {
+			for (ILabelProviderListener listener : listeners) {
 				listener.labelProviderChanged(event);
 			}
 		}

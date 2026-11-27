@@ -68,7 +68,8 @@ JDTFlagsTest18.class,
 JavaTokenComparatorTest.class,
 JavaIgnoreWhitespaceContributorTest.class,
 FiltersDialogTest.class,
-CallHierarchyViewPartContentDescriptionTest.class
+CallHierarchyViewPartContentDescriptionTest.class,
+InterfaceIndicatorLabelDecoratorTest.class
 })
 public class CoreTestSuite {
 }
