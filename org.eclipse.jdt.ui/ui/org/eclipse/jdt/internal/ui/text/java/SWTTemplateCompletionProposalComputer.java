@@ -134,7 +134,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 	private boolean fIsSWTOnClasspath;
 
 	public SWTTemplateCompletionProposalComputer() {
-		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
+		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistryCore();
 		fSWTTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_ALL);
 		fSWTMembersTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_MEMBERS);
 		fSWTStatementsTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_STATEMENTS);

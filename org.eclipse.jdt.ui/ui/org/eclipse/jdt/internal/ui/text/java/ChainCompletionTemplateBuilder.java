@@ -63,7 +63,7 @@ public final class ChainCompletionTemplateBuilder {
 	}
 
 	private static JavaContext createJavaContext(final JavaContentAssistInvocationContext contentAssistContext) {
-		final ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
+		final ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistryCore();
 		final TemplateContextType templateContextType= templateContextRegistry.getContextType(JavaContextType.ID_ALL);
 		final CompletionContext ctx= contentAssistContext.getCoreContext();
 		final JavaContext javaTemplateContext= new JavaContext(templateContextType, contentAssistContext.getDocument(),

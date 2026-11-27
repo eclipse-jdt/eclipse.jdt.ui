@@ -70,7 +70,7 @@ public class TemplateEngine {
 	/**
 	 * Creates the template engine for the given <code>contextType</code>.
 	 * <p>
-	 * The <code>JavaPlugin.getDefault().getTemplateContextRegistry()</code>
+	 * The <code>JavaPlugin.getDefault().getTemplateContextRegistryCore()</code>
 	 * defines the supported context types.</p>
 	 *
 	 * @param contextType the context type

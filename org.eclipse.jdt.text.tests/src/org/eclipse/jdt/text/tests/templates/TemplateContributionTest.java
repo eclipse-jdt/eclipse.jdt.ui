@@ -13,8 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.templates;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +33,8 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
+
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
@@ -42,7 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class TemplateContributionTest {
 
 	private void checkContribution(String resolverContextTypeId, String contextTypeId) throws TemplateException {
-		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
+		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistryCore();
 		TemplateContextType context= registry.getContextType(resolverContextTypeId);
 
 		for (Template template : JavaPlugin.getDefault().getTemplateStore().getTemplates(contextTypeId)) {
@@ -85,6 +93,41 @@ public class TemplateContributionTest {
 				return true;
 		}
 		return false;
+	}
+
+
+	@Test
+	public void testLegacyTemplateRegistryBinaryCompatibility() throws Throwable {
+		JavaPlugin plugin= JavaPlugin.getDefault();
+		Object legacy= invokeRegistryGetter(plugin, "getTemplateContextRegistry",
+				Class.forName("org.eclipse.jface.text.templates.ContextTypeRegistry"));
+		assertSame(plugin.getContributionTemplateContextRegistry(), legacy);
+		assertSame(invokeRegistryGetter(plugin, "getTemplateContextRegistryCore", ContextTypeRegistry.class), legacy);
+	}
+
+	@Test
+	public void testLegacyCodeTemplateRegistryBinaryCompatibility() throws Throwable {
+		JavaPlugin plugin= JavaPlugin.getDefault();
+		Object legacy= invokeRegistryGetter(plugin, "getCodeTemplateContextRegistry",
+				Class.forName("org.eclipse.jface.text.templates.ContextTypeRegistry"));
+		assertSame(JavaManipulation.getCodeTemplateContextRegistry(), legacy);
+		assertSame(invokeRegistryGetter(plugin, "getCodeTemplateContextRegistryCore", ContextTypeRegistry.class), legacy);
+	}
+
+	@Test
+	public void testLegacyRegistryGettersAreDeprecatedButNotForRemoval() throws Exception {
+		for (String name : new String[] { "getTemplateContextRegistry", "getCodeTemplateContextRegistry" }) {
+			Deprecated deprecated= JavaPlugin.class.getMethod(name).getAnnotation(Deprecated.class);
+			assertNotNull(deprecated, name);
+			assertFalse(deprecated.forRemoval(), name);
+		}
+	}
+
+	private static Object invokeRegistryGetter(JavaPlugin plugin, String name, Class<?> returnType) throws Throwable {
+		// Resolve the exact JVM descriptor, including the old return type. Merely
+		// recompiling a direct call against the current JDT would miss this regression.
+		MethodHandle getter= MethodHandles.publicLookup().findVirtual(JavaPlugin.class, name, MethodType.methodType(returnType));
+		return getter.invoke(plugin);
 	}
 
 }
