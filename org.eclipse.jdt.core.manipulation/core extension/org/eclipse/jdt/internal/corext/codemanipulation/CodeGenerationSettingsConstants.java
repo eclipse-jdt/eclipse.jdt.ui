@@ -59,6 +59,27 @@ public class CodeGenerationSettingsConstants {
 	 */
 	public static final String ORGIMPORTS_IGNORELOWERCASE= "org.eclipse.jdt.ui.ignorelowercasenames"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that controls whether existing on-demand (".*") imports are preserved as
+	 * on-demand imports by the "Organize Imports" operation, instead of being expanded into single
+	 * imports.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String ORGIMPORTS_KEEP_EXISTING_ONDEMAND= "org.eclipse.jdt.ui.organizeimports.keepexistingondemand"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the "Organize Imports" operation may collapse single
+	 * imports into a new on-demand (".*") import once the on-demand threshold is reached. When
+	 * disabled, the thresholds are ignored and no new on-demand import is created from single
+	 * imports.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String ORGIMPORTS_COLLAPSE_TO_ONDEMAND= "org.eclipse.jdt.ui.organizeimports.collapsetoondemand"; //$NON-NLS-1$
+
 	private CodeGenerationSettingsConstants() {
 	}
 

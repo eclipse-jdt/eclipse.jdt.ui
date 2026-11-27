@@ -3256,6 +3256,123 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	@Test
+	public void testKeepExistingOnDemandImport() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		String str= """
+			package pack1;
+
+			import java.util.*;
+
+			public class C {
+			    Map<String, String> m;
+			    Set<String> s;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
+
+		String[] order= new String[] { "", "#" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		setKeepExistingAndCollapse(cu.getJavaProject(), true, true);
+		op.run(null);
+
+		// The existing on-demand import is preserved instead of being expanded into single imports.
+		String expected= """
+			package pack1;
+
+			import java.util.*;
+
+			public class C {
+			    Map<String, String> m;
+			    Set<String> s;
+			}
+			""";
+		assertEqualString(cu.getSource(), expected);
+	}
+
+	@Test
+	public void testExistingOnDemandImportExpandedByDefault() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		String str= """
+			package pack1;
+
+			import java.util.*;
+
+			public class C {
+			    Map<String, String> m;
+			    Set<String> s;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
+
+		String[] order= new String[] { "", "#" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		setKeepExistingAndCollapse(cu.getJavaProject(), false, true);
+		op.run(null);
+
+		// With the default settings the on-demand import is expanded into single imports.
+		String expected= """
+			package pack1;
+
+			import java.util.Map;
+			import java.util.Set;
+
+			public class C {
+			    Map<String, String> m;
+			    Set<String> s;
+			}
+			""";
+		assertEqualString(cu.getSource(), expected);
+	}
+
+	@Test
+	public void testDoNotCollapseSingleImportsToOnDemand() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		String str= """
+			package pack1;
+
+			public class C {
+			    Collection<String> c;
+			    Map<String, String> m;
+			    Set<String> s;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
+
+		String[] order= new String[] { "", "#" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		// A threshold of 2 would normally collapse the three java.util types into an on-demand import.
+		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
+		setKeepExistingAndCollapse(cu.getJavaProject(), false, false);
+		op.run(null);
+
+		String expected= """
+			package pack1;
+
+			import java.util.Collection;
+			import java.util.Map;
+			import java.util.Set;
+
+			public class C {
+			    Collection<String> c;
+			    Map<String, String> m;
+			    Set<String> s;
+			}
+			""";
+		assertEqualString(cu.getSource(), expected);
+	}
+
+	@Test
 	public void test_PackageInfoBug157541a() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -4083,6 +4200,12 @@ public class ImportOrganizeTest extends CoreTests {
 			scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
 			scope.put(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, String.valueOf(staticThreshold));
 		}
+	}
+
+	protected void setKeepExistingAndCollapse(IJavaProject project, boolean keepExistingOnDemand, boolean collapseToOnDemand) {
+		IEclipsePreferences scope= new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN);
+		scope.put(PreferenceConstants.ORGIMPORTS_KEEP_EXISTING_ONDEMAND, String.valueOf(keepExistingOnDemand));
+		scope.put(PreferenceConstants.ORGIMPORTS_COLLAPSE_TO_ONDEMAND, String.valueOf(collapseToOnDemand));
 	}
 
 }
