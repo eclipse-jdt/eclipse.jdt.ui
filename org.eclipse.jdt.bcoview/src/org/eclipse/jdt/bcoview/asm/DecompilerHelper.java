@@ -17,16 +17,98 @@ package org.eclipse.jdt.bcoview.asm;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.bcoview.preferences.BCOConstants;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.LookupSwitchInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.TraceClassVisitor;
 
-import org.eclipse.jdt.bcoview.preferences.BCOConstants;
-
 public class DecompilerHelper {
 
+	private static boolean isLabelUsed(MethodNode node, LabelNode labelNode, boolean skipLocals) {
+		for (AbstractInsnNode insn : node.instructions) {
+			if (insn instanceof LookupSwitchInsnNode) {
+				LookupSwitchInsnNode n = (LookupSwitchInsnNode) insn;
+				if (n.dflt == labelNode) {
+					return true;
+				}
+				if (n.labels.contains(labelNode)) {
+					return true;
+				}
+			} else if (insn instanceof TableSwitchInsnNode) {
+				TableSwitchInsnNode n = (TableSwitchInsnNode) insn;
+				if (n.dflt == labelNode) {
+					return true;
+				}
+				if (n.labels.contains(labelNode)) {
+					return true;
+				}
+			} else if (insn instanceof LineNumberNode) {
+				LineNumberNode n = (LineNumberNode) insn;
+				if (n.start == labelNode) {
+					return true;
+				}
+			} else if (insn instanceof JumpInsnNode) {
+				JumpInsnNode n = (JumpInsnNode) insn;
+				if (n.label == labelNode) {
+					return true;
+				}
+			}
+		}
+		if (!skipLocals && node.localVariables != null) {
+			for (LocalVariableNode lvn : node.localVariables) {
+				if (lvn.start == labelNode || lvn.end == labelNode) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static byte[] patchClass(byte[] bytes, DecompilerOptions options) {
+		if (!options.modes.get(BCOConstants.F_SHOW_LINE_INFO)) {
+			ClassWriter writer = new ClassWriter(0);
+			ClassReader cr = new ClassReader(bytes);
+			ClassNode cn = new ClassNode(DecompilerOptions.LATEST_ASM_VERSION);
+			cr.accept(cn, 0);
+			for (MethodNode mn : cn.methods) {
+				// remove all "visitLineNumber"
+				for (int i = mn.instructions.size() - 1; i >= 0; i--) {
+					AbstractInsnNode insn = mn.instructions.get(i);
+					if (insn instanceof LineNumberNode) {
+						mn.instructions.remove(insn);
+					}
+				}
+				// remove all unused visitLabel
+				for (int i = mn.instructions.size() - 1; i >= 0; i--) {
+					AbstractInsnNode insn = mn.instructions.get(i);
+					if (insn instanceof LabelNode) {
+						if (!isLabelUsed(mn, (LabelNode) insn, !options.modes.get(BCOConstants.F_SHOW_VARIABLES))) {
+							mn.instructions.remove(insn);
+						}
+					}
+				}
+				if (!options.modes.get(BCOConstants.F_SHOW_VARIABLES) && mn.localVariables != null) {
+					mn.localVariables.clear();
+				}
+			}
+			cn.accept(writer);
+			bytes = writer.toByteArray();
+		}
+		return bytes;
+	}
+	
 	public static DecompiledClass getDecompiledClass(byte[] bytes, DecompilerOptions options) throws UnsupportedClassVersionError {
+		bytes = patchClass(bytes, options);
 		ClassReader cr = new ClassReader(bytes);
 		ClassNode cn = new ClassNode(DecompilerOptions.LATEST_ASM_VERSION);
 		int crFlags = 0;
